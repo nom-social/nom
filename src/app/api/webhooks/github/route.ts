@@ -30,6 +30,9 @@ function extractEventData(
 
   // Extract specific metadata based on event type
   switch (eventType) {
+    case "ping": {
+      break;
+    }
     case "pull_request": {
       const prPayload = payload as z.infer<
         typeof schemas.pullRequestWebhookSchema
@@ -110,11 +113,11 @@ function extractEventData(
       > & {
         event_type: "push";
       };
-      baseData.resource_id = pushPayload.commits[0]?.sha || "unknown";
+      baseData.resource_id = pushPayload.commits[0]?.id || "unknown";
       baseData.metadata = {
         ref: pushPayload.ref,
         commits: pushPayload.commits.map((c) => ({
-          sha: c.sha,
+          id: c.id,
           message: c.message,
           author: c.author,
         })),
@@ -177,6 +180,14 @@ export async function POST(request: Request) {
       payload.repository?.owner?.login ||
       "unknown";
     const repo = payload.repository?.name || "unknown";
+
+    // Skip database operations for ping events
+    if (eventType === "ping") {
+      return NextResponse.json({
+        message: "Ping received successfully",
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     // Check if org/repo combination exists in database
     const cookieStore = cookies();
