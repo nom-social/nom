@@ -16,6 +16,7 @@ export type Database = {
           created_at: string;
           event_type: string;
           id: string;
+          last_processed: string | null;
           metadata: Json;
           org: string;
           raw_payload: Json;
@@ -29,6 +30,7 @@ export type Database = {
           created_at?: string;
           event_type: string;
           id?: string;
+          last_processed?: string | null;
           metadata: Json;
           org: string;
           raw_payload: Json;
@@ -42,6 +44,7 @@ export type Database = {
           created_at?: string;
           event_type?: string;
           id?: string;
+          last_processed?: string | null;
           metadata?: Json;
           org?: string;
           raw_payload?: Json;
@@ -51,44 +54,102 @@ export type Database = {
         };
         Relationships: [];
       };
+      repositories: {
+        Row: {
+          created_at: string;
+          id: string;
+          org: string;
+          repo: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          org: string;
+          repo: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          org?: string;
+          repo?: string;
+        };
+        Relationships: [];
+      };
+      subscriptions: {
+        Row: {
+          created_at: string;
+          id: string;
+          repo_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          repo_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          repo_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_repo_id_fkey";
+            columns: ["repo_id"];
+            isOneToOne: false;
+            referencedRelation: "repositories";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       user_timeline: {
         Row: {
           created_at: string;
+          data: Json;
           event_bucket_ids: string[] | null;
           expires_at: string | null;
           id: string;
           is_read: boolean;
-          org: string | null;
-          repo: string | null;
+          repo_id: string | null;
           score: number;
           user_id: string;
           visible_at: string | null;
         };
         Insert: {
           created_at?: string;
+          data: Json;
           event_bucket_ids?: string[] | null;
           expires_at?: string | null;
           id?: string;
           is_read?: boolean;
-          org?: string | null;
-          repo?: string | null;
+          repo_id?: string | null;
           score?: number;
           user_id: string;
           visible_at?: string | null;
         };
         Update: {
           created_at?: string;
+          data?: Json;
           event_bucket_ids?: string[] | null;
           expires_at?: string | null;
           id?: string;
           is_read?: boolean;
-          org?: string | null;
-          repo?: string | null;
+          repo_id?: string | null;
           score?: number;
           user_id?: string;
           visible_at?: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "user_timeline_repo_id_fkey";
+            columns: ["repo_id"];
+            isOneToOne: false;
+            referencedRelation: "repositories";
+            referencedColumns: ["id"];
+          }
+        ];
       };
     };
     Views: {
