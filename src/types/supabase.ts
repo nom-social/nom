@@ -51,6 +51,45 @@ export type Database = {
         };
         Relationships: [];
       };
+      user_timeline: {
+        Row: {
+          created_at: string;
+          event_bucket_ids: string[] | null;
+          expires_at: string | null;
+          id: string;
+          is_read: boolean;
+          org: string | null;
+          repo: string | null;
+          score: number;
+          user_id: string;
+          visible_at: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          event_bucket_ids?: string[] | null;
+          expires_at?: string | null;
+          id?: string;
+          is_read?: boolean;
+          org?: string | null;
+          repo?: string | null;
+          score?: number;
+          user_id: string;
+          visible_at?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          event_bucket_ids?: string[] | null;
+          expires_at?: string | null;
+          id?: string;
+          is_read?: boolean;
+          org?: string | null;
+          repo?: string | null;
+          score?: number;
+          user_id?: string;
+          visible_at?: string | null;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
