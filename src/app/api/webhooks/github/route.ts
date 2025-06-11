@@ -130,6 +130,22 @@ function extractEventData(
       } as Json;
       break;
     }
+    case "create":
+    case "delete": {
+      const branchPayload = payload as z.infer<
+        typeof schemas.githubBranchSchema
+      > & {
+        event_type: "create" | "delete";
+      };
+      baseData.metadata = {
+        ref: branchPayload.ref,
+        ref_type: branchPayload.ref_type,
+        master_branch: branchPayload.master_branch,
+        description: branchPayload.description,
+        pusher_type: branchPayload.pusher_type,
+      } as Json;
+      break;
+    }
   }
 
   return baseData;
