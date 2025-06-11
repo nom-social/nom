@@ -60,11 +60,21 @@ export const processGithubEvents = schedules.task({
           .eq("repo_id", repo.id)
           .throwOnError();
 
+        if (!subscribers || subscribers.length === 0) {
+          logger.info("No subscribers found for repository", {
+            repoId: repo.id,
+          });
+          continue;
+        }
+
         // Check for existing entries to avoid duplicates
         const { data: existingEntries } = await supabase
           .from("user_timeline")
           .select("user_id, event_bucket_ids")
-          .in("user_id", subscribers.map((s) => s.user_id) || [])
+          .in(
+            "user_id",
+            subscribers.map((s) => s.user_id)
+          )
           .filter("event_bucket_ids", "cs", `{${event.id}}`)
           .throwOnError();
 
