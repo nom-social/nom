@@ -167,14 +167,14 @@ export async function POST(request: Request) {
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);
 
-    const { data: repoData, error: repoError } = await supabase
+    const { data: repoData } = await supabase
       .from("repositories")
       .select("id")
       .eq("org", org)
       .eq("repo", repo)
       .single();
 
-    if (repoError || !repoData) {
+    if (!repoData) {
       console.log(`Ignoring webhook for unknown repository: ${org}/${repo}`);
       return NextResponse.json({
         message: "Repository not tracked, ignoring webhook",
