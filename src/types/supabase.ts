@@ -114,6 +114,7 @@ export type Database = {
           is_read: boolean;
           repo_id: string | null;
           score: number;
+          type: string;
           user_id: string;
           visible_at: string | null;
         };
@@ -126,6 +127,7 @@ export type Database = {
           is_read?: boolean;
           repo_id?: string | null;
           score?: number;
+          type: string;
           user_id: string;
           visible_at?: string | null;
         };
@@ -138,6 +140,7 @@ export type Database = {
           is_read?: boolean;
           repo_id?: string | null;
           score?: number;
+          type?: string;
           user_id?: string;
           visible_at?: string | null;
         };

@@ -172,14 +172,35 @@ export async function POST(request: Request) {
     }
 
     const payload = validationResult.data;
+    const org =
+      payload.organization?.login ||
+      payload.repository?.owner?.login ||
+      "unknown";
+    const repo = payload.repository?.name || "unknown";
+
+    // Check if org/repo combination exists in database
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
+
+    const { data: repoData, error: repoError } = await supabase
+      .from("repositories")
+      .select("id")
+      .eq("org", org)
+      .eq("repo", repo)
+      .single();
+
+    if (repoError || !repoData) {
+      console.log(`Ignoring webhook for unknown repository: ${org}/${repo}`);
+      return NextResponse.json({
+        message: "Repository not tracked, ignoring webhook",
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     // Extract event data
     const eventData = extractEventData(eventType, payload, rawBody);
 
     // Store in Supabase
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
-
     const { error } = await supabase.from("github_event_log").insert(eventData);
 
     if (error) {
