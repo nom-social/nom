@@ -112,8 +112,17 @@ export const statusWebhookSchema = githubWebhookBaseSchema.extend({
   target_url: z.string(),
 });
 
+export const pingWebhookSchema = githubWebhookBaseSchema.extend({
+  zen: z.string(),
+  hook_id: z.number(),
+});
+
 // Union type for all possible webhook payloads
 export const githubWebhookPayloadSchema = z.discriminatedUnion("event_type", [
+  z.object({
+    event_type: z.literal("ping"),
+    ...githubWebhookBaseSchema.shape,
+  }),
   z.object({
     event_type: z.literal("pull_request"),
     ...pullRequestWebhookSchema.shape,

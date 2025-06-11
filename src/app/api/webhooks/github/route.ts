@@ -30,6 +30,9 @@ function extractEventData(
 
   // Extract specific metadata based on event type
   switch (eventType) {
+    case "ping": {
+      break;
+    }
     case "pull_request": {
       const prPayload = payload as z.infer<
         typeof schemas.pullRequestWebhookSchema
@@ -177,6 +180,14 @@ export async function POST(request: Request) {
       payload.repository?.owner?.login ||
       "unknown";
     const repo = payload.repository?.name || "unknown";
+
+    // Skip database operations for ping events
+    if (eventType === "ping") {
+      return NextResponse.json({
+        message: "Ping received successfully",
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     // Check if org/repo combination exists in database
     const cookieStore = cookies();
