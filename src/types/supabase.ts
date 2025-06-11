@@ -21,8 +21,6 @@ export type Database = {
           org: string;
           raw_payload: Json;
           repo: string;
-          resource_id: string;
-          resource_type: string;
         };
         Insert: {
           action?: string | null;
@@ -35,8 +33,6 @@ export type Database = {
           org: string;
           raw_payload: Json;
           repo: string;
-          resource_id: string;
-          resource_type: string;
         };
         Update: {
           action?: string | null;
@@ -49,8 +45,6 @@ export type Database = {
           org?: string;
           raw_payload?: Json;
           repo?: string;
-          resource_id?: string;
-          resource_type?: string;
         };
         Relationships: [];
       };
