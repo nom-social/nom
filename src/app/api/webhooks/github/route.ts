@@ -113,11 +113,11 @@ function extractEventData(
       > & {
         event_type: "push";
       };
-      baseData.resource_id = pushPayload.commits[0]?.sha || "unknown";
+      baseData.resource_id = pushPayload.commits[0]?.id || "unknown";
       baseData.metadata = {
         ref: pushPayload.ref,
         commits: pushPayload.commits.map((c) => ({
-          sha: c.sha,
+          id: c.id,
           message: c.message,
           author: c.author,
         })),

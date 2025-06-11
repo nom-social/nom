@@ -65,7 +65,7 @@ export const githubReleaseSchema = z.object({
 });
 
 export const githubCommitSchema = z.object({
-  sha: z.string(),
+  id: z.string(),
   message: z.string(),
   author: z.object({
     name: z.string(),
