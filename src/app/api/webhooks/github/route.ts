@@ -4,7 +4,7 @@ import { z } from "zod";
 import httpStatus from "http-status";
 
 import { createClient } from "@/utils/supabase/server";
-import { Json } from "@/types/supabase";
+import { Json, TablesInsert } from "@/types/supabase";
 
 import * as schemas from "./schemas";
 
@@ -13,7 +13,7 @@ function extractEventData(
   payload: schemas.GitHubWebhookPayload,
   rawBody: unknown
 ) {
-  const baseData = {
+  const baseData: TablesInsert<"github_event_log"> = {
     event_type: eventType,
     action: payload.action || null,
     actor_login: payload.sender?.login || payload.actor?.login || "unknown",
@@ -22,8 +22,6 @@ function extractEventData(
       payload.repository?.owner?.login ||
       "unknown",
     repo: payload.repository?.name || "unknown",
-    resource_id: "unknown", // Will be set based on event type
-    resource_type: eventType.split("_")[0],
     metadata: {} as Json,
     raw_payload: rawBody as unknown as Json,
   };
@@ -39,7 +37,6 @@ function extractEventData(
       > & {
         event_type: "pull_request";
       };
-      baseData.resource_id = prPayload.pull_request.id.toString();
       baseData.metadata = {
         title: prPayload.pull_request.title,
         state: prPayload.pull_request.state,
@@ -55,7 +52,6 @@ function extractEventData(
       const reviewPayload = payload as z.infer<
         typeof schemas.pullRequestWebhookSchema
       > & { event_type: "pull_request_review" };
-      baseData.resource_id = reviewPayload.review?.id.toString() || "unknown";
       baseData.metadata = {
         state: reviewPayload.review?.state,
         body: reviewPayload.review?.body,
@@ -69,7 +65,6 @@ function extractEventData(
       > & {
         event_type: "issues";
       };
-      baseData.resource_id = issuePayload.issue.id.toString();
       baseData.metadata = {
         title: issuePayload.issue.title,
         state: issuePayload.issue.state,
@@ -84,7 +79,6 @@ function extractEventData(
       > & {
         event_type: "release";
       };
-      baseData.resource_id = releasePayload.release.id.toString();
       baseData.metadata = {
         tag_name: releasePayload.release.tag_name,
         name: releasePayload.release.name,
@@ -100,7 +94,6 @@ function extractEventData(
       > & {
         event_type: "issue_comment" | "pull_request_review_comment";
       };
-      baseData.resource_id = commentPayload.comment.id.toString();
       baseData.metadata = {
         body: commentPayload.comment.body,
         in_reply_to_id: commentPayload.comment.in_reply_to_id,
@@ -113,7 +106,6 @@ function extractEventData(
       > & {
         event_type: "push";
       };
-      baseData.resource_id = pushPayload.commits[0]?.id || "unknown";
       baseData.metadata = {
         ref: pushPayload.ref,
         commits: pushPayload.commits.map((c) => ({
