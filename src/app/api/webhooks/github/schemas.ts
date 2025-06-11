@@ -73,6 +73,14 @@ export const githubCommitSchema = z.object({
   }),
 });
 
+export const githubBranchSchema = z.object({
+  ref: z.string(),
+  ref_type: z.string(),
+  master_branch: z.string().optional(),
+  description: z.string().nullable(),
+  pusher_type: z.string(),
+});
+
 // Base schema for all webhook payloads
 export const githubWebhookBaseSchema = z.object({
   action: z.string().optional(),
@@ -143,6 +151,16 @@ export const githubWebhookPayloadSchema = z.discriminatedUnion("event_type", [
   }),
   z.object({ event_type: z.literal("push"), ...pushWebhookSchema.shape }),
   z.object({ event_type: z.literal("status"), ...statusWebhookSchema.shape }),
+  z.object({
+    event_type: z.literal("create"),
+    ...githubWebhookBaseSchema.shape,
+    ...githubBranchSchema.shape,
+  }),
+  z.object({
+    event_type: z.literal("delete"),
+    ...githubWebhookBaseSchema.shape,
+    ...githubBranchSchema.shape,
+  }),
 ]);
 
 // Infer types from Zod schemas
