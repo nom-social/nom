@@ -77,7 +77,7 @@ export const githubBranchSchema = z.object({
   ref: z.string(),
   ref_type: z.string(),
   master_branch: z.string().optional(),
-  description: z.string().nullable(),
+  description: z.string().nullable().optional(),
   pusher_type: z.string(),
 });
 
