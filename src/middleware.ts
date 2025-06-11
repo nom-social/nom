@@ -35,6 +35,10 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
+  if (request.nextUrl.pathname.startsWith("/api/webhooks/github")) {
+    return response;
+  }
+
   // If there's no session, redirect to login
   if (!session) {
     const redirectUrl = new URL("/auth/login", request.url);

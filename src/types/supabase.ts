@@ -9,33 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      gh_events: {
+      github_event_log: {
         Row: {
-          content: string;
+          action: string | null;
+          actor_login: string;
           created_at: string;
+          event_type: string;
           id: string;
+          metadata: Json;
           org: string;
+          raw_payload: Json;
           repo: string;
-          sender_id: string;
-          type: string;
+          resource_id: string;
+          resource_type: string;
         };
         Insert: {
-          content: string;
+          action?: string | null;
+          actor_login: string;
           created_at?: string;
+          event_type: string;
           id?: string;
+          metadata: Json;
           org: string;
+          raw_payload: Json;
           repo: string;
-          sender_id: string;
-          type: string;
+          resource_id: string;
+          resource_type: string;
         };
         Update: {
-          content?: string;
+          action?: string | null;
+          actor_login?: string;
           created_at?: string;
+          event_type?: string;
           id?: string;
+          metadata?: Json;
           org?: string;
+          raw_payload?: Json;
           repo?: string;
-          sender_id?: string;
-          type?: string;
+          resource_id?: string;
+          resource_type?: string;
         };
         Relationships: [];
       };
