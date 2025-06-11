@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { z } from "zod";
+import httpStatus from "http-status";
 
 import { createClient } from "@/utils/supabase/server";
 import { Json } from "@/types/supabase";
@@ -149,7 +150,7 @@ export async function POST(request: Request) {
     if (!eventType) {
       return NextResponse.json(
         { error: "Missing GitHub event type" },
-        { status: 400 }
+        { status: httpStatus.BAD_REQUEST }
       );
     }
 
@@ -166,7 +167,7 @@ export async function POST(request: Request) {
           error: "Invalid webhook payload",
           details: validationResult.error.format(),
         },
-        { status: 400 }
+        { status: httpStatus.BAD_REQUEST }
       );
     }
 
@@ -185,7 +186,7 @@ export async function POST(request: Request) {
       console.error("Error storing GitHub event:", error);
       return NextResponse.json(
         { error: "Failed to store event" },
-        { status: 500 }
+        { status: httpStatus.INTERNAL_SERVER_ERROR }
       );
     }
 
@@ -198,7 +199,7 @@ export async function POST(request: Request) {
     console.error("Error processing GitHub webhook:", error);
     return NextResponse.json(
       { error: "Failed to process webhook" },
-      { status: 500 }
+      { status: httpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }
