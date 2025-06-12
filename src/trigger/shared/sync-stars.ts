@@ -76,14 +76,8 @@ export async function syncUserStars(userId: string) {
       starredRepos.map((repo) => `${repo.owner.login}/${repo.name}`)
     );
 
-    // Track which repos we've processed to avoid duplicates
-    const processedRepos = new Set<string>();
-
     // For each starred repo, check if it exists in our repositories table
     for (const starredRepo of starredRepos) {
-      const repoIdentifier = `${starredRepo.owner.login}/${starredRepo.name}`;
-      processedRepos.add(repoIdentifier);
-
       const { data: repo } = await supabase
         .from("repositories")
         .select("id")
