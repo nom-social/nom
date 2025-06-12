@@ -1,4 +1,4 @@
-import { logger, schedules } from "@trigger.dev/sdk/v3";
+import { logger, schedules, wait } from "@trigger.dev/sdk/v3";
 
 import { createClient } from "@/utils/supabase/background";
 
@@ -30,6 +30,7 @@ export const syncUserStars = schedules.task({
 
     for (const user of users) {
       await syncUserStarsUtil(user.id);
+      await wait.for({ seconds: 1 });
     }
   },
 });
