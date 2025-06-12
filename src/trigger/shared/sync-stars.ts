@@ -1,6 +1,8 @@
 import { logger } from "@trigger.dev/sdk/v3";
 import { Octokit } from "@octokit/rest";
+
 import { createClient } from "@/utils/supabase/background";
+
 import { starredRepoSchema } from "./schema";
 
 // Initialize Supabase client
