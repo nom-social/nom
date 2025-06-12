@@ -186,14 +186,54 @@ export async function POST(request: Request) {
     const eventData = extractEventData(payload, rawBody);
 
     // Store in Supabase
-    const { error } = await supabase.from("github_event_log").insert(eventData);
+    await supabase.from("github_event_log").insert(eventData).throwOnError();
 
-    if (error) {
-      console.error("Error storing GitHub event:", error);
-      return NextResponse.json(
-        { error: "Failed to store event" },
-        { status: httpStatus.INTERNAL_SERVER_ERROR }
-      );
+    // Handle star events
+    if (eventType === "star") {
+      const actorLogin = payload.sender?.login || payload.actor?.login;
+      if (!actorLogin) {
+        console.error("Missing actor login for star event");
+        return NextResponse.json(
+          { error: "Missing actor login" },
+          { status: httpStatus.BAD_REQUEST }
+        );
+      }
+
+      // Check if user exists in Supabase auth
+      const { data: user } = await supabase
+        .from("users")
+        .select("id")
+        .eq("github_user_name", actorLogin)
+        .single();
+
+      if (!user) {
+        console.log(`Ignoring star event for unknown user: ${actorLogin}`);
+        return NextResponse.json({
+          message: "User not found, ignoring event",
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      const isAdd = payload.action === "created";
+
+      if (isAdd) {
+        // Add subscription
+        await supabase
+          .from("subscriptions")
+          .upsert(
+            { user_id: user.id, repo_id: repoData.id },
+            { onConflict: "user_id,repo_id" }
+          )
+          .throwOnError();
+      } else {
+        // Remove subscription
+        await supabase
+          .from("subscriptions")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("repo_id", repoData.id)
+          .throwOnError();
+      }
     }
 
     // Return a success response
