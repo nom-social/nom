@@ -4,15 +4,10 @@ import { z } from "zod";
 
 import { createClient } from "@/utils/supabase/background";
 
+import { starredRepoSchema } from "./shared/schema";
+
 // Initialize Supabase client
 const supabase = createClient();
-
-const starredRepoSchema = z.array(
-  z.object({
-    owner: z.object({ login: z.string() }),
-    name: z.string(),
-  })
-);
 
 async function getAllStarredRepos(octokit: Octokit, username: string) {
   let page = 1;
