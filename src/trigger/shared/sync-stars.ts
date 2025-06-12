@@ -1,4 +1,4 @@
-import { logger } from "@trigger.dev/sdk/v3";
+import { logger, wait } from "@trigger.dev/sdk/v3";
 import { Octokit } from "@octokit/rest";
 
 import { createClient } from "@/utils/supabase/background";
@@ -29,7 +29,7 @@ async function getAllStarredRepos(octokit: Octokit, username: string) {
     page++;
 
     // Add a small delay between pages to avoid rate limiting
-    if (hasMore) await new Promise((resolve) => setTimeout(resolve, 1000));
+    if (hasMore) await wait.for({ seconds: 1 });
   }
 
   return starredRepoSchema.parse(allRepos);
