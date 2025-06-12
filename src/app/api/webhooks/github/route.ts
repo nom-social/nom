@@ -175,7 +175,6 @@ export async function POST(request: Request) {
       .single();
 
     if (!repoData) {
-      console.log(`Ignoring webhook for unknown repository: ${org}/${repo}`);
       return NextResponse.json({
         message: "Repository not tracked, ignoring webhook",
         timestamp: new Date().toISOString(),
@@ -207,7 +206,6 @@ export async function POST(request: Request) {
         .single();
 
       if (!user) {
-        console.log(`Ignoring star event for unknown user: ${actorLogin}`);
         return NextResponse.json({
           message: "User not found, ignoring event",
           timestamp: new Date().toISOString(),
