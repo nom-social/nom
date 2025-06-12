@@ -2,13 +2,13 @@ import { logger, schedules, wait } from "@trigger.dev/sdk/v3";
 
 import { createClient } from "@/utils/supabase/background";
 
-import { syncUserStars as syncUserStarsUtil } from "./shared/sync-stars";
+import { syncUserStars as syncUserStarsUtil } from "./shared/sync-subscriptions";
 
 // Initialize Supabase client
 const supabase = createClient();
 
-export const syncUserStars = schedules.task({
-  id: "sync-user-stars",
+export const syncUserSubscriptions = schedules.task({
+  id: "sync-user-subscriptions",
   // Run every hour
   cron: "0 * * * *",
   maxDuration: 300, // 5 minutes max runtime
