@@ -103,25 +103,18 @@ export async function syncUserStars(userId: string) {
       const repoIdInDb = repoLookup.get(repoId);
 
       if (repoIdInDb) {
-        // Check if subscription already exists
-        const { data: existingSub } = await supabase
+        // Upsert subscription
+        await supabase
           .from("subscriptions")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("repo_id", repoIdInDb)
-          .single();
+          .upsert(
+            { user_id: user.id, repo_id: repoIdInDb },
+            { onConflict: "user_id,repo_id" }
+          )
+          .throwOnError();
 
-        if (!existingSub) {
-          // Create new subscription
-          await supabase
-            .from("subscriptions")
-            .insert({ user_id: user.id, repo_id: repoIdInDb })
-            .throwOnError();
-
-          logger.info(
-            `Created subscription for user ${user.id} to repo ${repoIdInDb}`
-          );
-        }
+        logger.info(
+          `Upserted subscription for user ${user.id} to repo ${repoIdInDb}`
+        );
       }
     }
 
