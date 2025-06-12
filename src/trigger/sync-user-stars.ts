@@ -78,8 +78,25 @@ export const syncUserStars = schedules.task({
           `Found ${starredRepos.length} starred repos for user ${user.id}`
         );
 
+        // Get all current subscriptions for this user
+        const { data: currentSubscriptions } = await supabase
+          .from("subscriptions")
+          .select("id, repo_id, repositories!inner(org, repo)")
+          .eq("user_id", user.id);
+
+        // Create a set of currently starred repo identifiers for quick lookup
+        const starredRepoIds = new Set(
+          starredRepos.map((repo) => `${repo.owner.login}/${repo.name}`)
+        );
+
+        // Track which repos we've processed to avoid duplicates
+        const processedRepos = new Set<string>();
+
         // For each starred repo, check if it exists in our repositories table
         for (const starredRepo of starredRepos) {
+          const repoIdentifier = `${starredRepo.owner.login}/${starredRepo.name}`;
+          processedRepos.add(repoIdentifier);
+
           const { data: repo } = await supabase
             .from("repositories")
             .select("id")
@@ -105,6 +122,27 @@ export const syncUserStars = schedules.task({
 
               logger.info(
                 `Created subscription for user ${user.id} to repo ${repo.id}`
+              );
+            }
+          }
+        }
+
+        // Remove subscriptions for repos that are no longer starred
+        if (currentSubscriptions) {
+          for (const subscription of currentSubscriptions) {
+            const repoIdentifier =
+              `${subscription.repositories.org}/` +
+              `${subscription.repositories.repo}`;
+            if (!starredRepoIds.has(repoIdentifier)) {
+              await supabase
+                .from("subscriptions")
+                .delete()
+                .eq("id", subscription.id)
+                .throwOnError();
+
+              logger.info(
+                `Removed subscription for user ${user.id} to repo ` +
+                  `${subscription.repo_id} (no longer starred)`
               );
             }
           }
