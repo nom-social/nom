@@ -175,7 +175,6 @@ export async function POST(request: Request) {
       .single();
 
     if (!repoData) {
-      console.log(`Ignoring webhook for unknown repository: ${org}/${repo}`);
       return NextResponse.json({
         message: "Repository not tracked, ignoring webhook",
         timestamp: new Date().toISOString(),
@@ -186,14 +185,48 @@ export async function POST(request: Request) {
     const eventData = extractEventData(payload, rawBody);
 
     // Store in Supabase
-    const { error } = await supabase.from("github_event_log").insert(eventData);
+    await supabase.from("github_event_log").insert(eventData).throwOnError();
 
-    if (error) {
-      console.error("Error storing GitHub event:", error);
-      return NextResponse.json(
-        { error: "Failed to store event" },
-        { status: httpStatus.INTERNAL_SERVER_ERROR }
-      );
+    // Handle star events
+    if (eventType === "star") {
+      const actorLogin = payload.sender?.login || payload.actor?.login;
+      if (!actorLogin) {
+        console.error("Missing actor login for star event");
+        return NextResponse.json(
+          { error: "Missing actor login" },
+          { status: httpStatus.BAD_REQUEST }
+        );
+      }
+
+      // Check if user exists in Supabase auth
+      const { data: user } = await supabase
+        .from("users")
+        .select("id")
+        .eq("github_user_name", actorLogin)
+        .single();
+
+      if (!user) {
+        return NextResponse.json({
+          message: "User not found, ignoring event",
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      if (payload.action === "created")
+        await supabase
+          .from("subscriptions")
+          .upsert(
+            { user_id: user.id, repo_id: repoData.id },
+            { onConflict: "user_id,repo_id" }
+          )
+          .throwOnError();
+      if (payload.action === "deleted")
+        await supabase
+          .from("subscriptions")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("repo_id", repoData.id)
+          .throwOnError();
     }
 
     // Return a success response

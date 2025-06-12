@@ -29,6 +29,21 @@ export async function GET(request: Request) {
         });
       }
 
+      // Upsert user information
+      if (session?.user) {
+        await supabase
+          .from("users")
+          .upsert(
+            {
+              id: session.user.id,
+              email: session.user.email!,
+              github_user_name: session.user.user_metadata.user_name,
+            },
+            { onConflict: "id" }
+          )
+          .throwOnError();
+      }
+
       const forwardedHost = request.headers.get("x-forwarded-host");
       const isLocalEnv = process.env.NODE_ENV === "development";
       if (isLocalEnv) {
