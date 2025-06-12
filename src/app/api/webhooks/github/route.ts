@@ -212,10 +212,7 @@ export async function POST(request: Request) {
         });
       }
 
-      const isAdd = payload.action === "created";
-
-      if (isAdd) {
-        // Add subscription
+      if (payload.action === "created")
         await supabase
           .from("subscriptions")
           .upsert(
@@ -223,15 +220,13 @@ export async function POST(request: Request) {
             { onConflict: "user_id,repo_id" }
           )
           .throwOnError();
-      } else {
-        // Remove subscription
+      if (payload.action === "deleted")
         await supabase
           .from("subscriptions")
           .delete()
           .eq("user_id", user.id)
           .eq("repo_id", repoData.id)
           .throwOnError();
-      }
     }
 
     // Return a success response
