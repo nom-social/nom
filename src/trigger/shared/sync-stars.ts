@@ -76,33 +76,52 @@ export async function syncUserStars(userId: string) {
       starredRepos.map((repo) => `${repo.owner.login}/${repo.name}`)
     );
 
+    // Build array of { org, repo } pairs for batch query
+    const repoPairs = starredRepos.map((repo) => ({
+      org: repo.owner.login,
+      repo: repo.name,
+    }));
+
+    // Batch fetch all matching repositories using OR conditions for exact pairs
+    const { data: matchingRepos } = await supabase
+      .from("repositories")
+      .select("id, org, repo")
+      .or(
+        repoPairs
+          .map((pair) => `and(org.eq.${pair.org},repo.eq.${pair.repo})`)
+          .join(",")
+      )
+      .throwOnError();
+
+    // Create a lookup map for constant-time access
+    const repoLookup = new Map(
+      matchingRepos.map((repo) => [`${repo.org}/${repo.repo}`, repo.id])
+    );
+
     // For each starred repo, check if it exists in our repositories table
     for (const starredRepo of starredRepos) {
-      const { data: repo } = await supabase
-        .from("repositories")
-        .select("id")
-        .eq("org", starredRepo.owner.login)
-        .eq("repo", starredRepo.name)
-        .single();
+      const repoId = repoLookup.get(
+        `${starredRepo.owner.login}/${starredRepo.name}`
+      );
 
-      if (repo) {
+      if (repoId) {
         // Check if subscription already exists
         const { data: existingSub } = await supabase
           .from("subscriptions")
           .select("id")
           .eq("user_id", user.id)
-          .eq("repo_id", repo.id)
+          .eq("repo_id", repoId)
           .single();
 
         if (!existingSub) {
           // Create new subscription
           await supabase
             .from("subscriptions")
-            .insert({ user_id: user.id, repo_id: repo.id })
+            .insert({ user_id: user.id, repo_id: repoId })
             .throwOnError();
 
           logger.info(
-            `Created subscription for user ${user.id} to repo ${repo.id}`
+            `Created subscription for user ${user.id} to repo ${repoId}`
           );
         }
       }

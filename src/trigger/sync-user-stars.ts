@@ -18,19 +18,40 @@ export const syncUserStars = schedules.task({
       timezone: payload.timezone,
     });
 
-    // Get all users with GitHub provider tokens using auth API
-    const {
-      data: { users },
-      error,
-    } = await supabase.auth.admin.listUsers();
-    if (error) {
-      logger.error("Error fetching users", { error });
-      return;
-    }
+    let page = 0;
+    const pageSize = 100;
+    let hasMore = true;
 
-    for (const user of users) {
-      await syncUserStarsUtil(user.id);
-      await wait.for({ seconds: 1 });
+    while (hasMore) {
+      const {
+        data: { users },
+        error,
+      } = await supabase.auth.admin.listUsers({
+        page: page,
+        perPage: pageSize,
+      });
+
+      if (error) {
+        logger.error("Error fetching users", { error, page });
+        return;
+      }
+
+      if (users.length === 0) {
+        hasMore = false;
+        continue;
+      }
+
+      logger.info("Processing users batch", {
+        page,
+        batchSize: users.length,
+      });
+
+      for (const user of users) {
+        await syncUserStarsUtil(user.id);
+        await wait.for({ seconds: 1 });
+      }
+
+      page++;
     }
   },
 });
