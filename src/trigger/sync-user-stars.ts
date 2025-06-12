@@ -102,10 +102,7 @@ export const syncUserStars = schedules.task({
               // Create new subscription
               await supabase
                 .from("subscriptions")
-                .insert({
-                  user_id: user.id,
-                  repo_id: repo.id,
-                })
+                .insert({ user_id: user.id, repo_id: repo.id })
                 .throwOnError();
 
               logger.info(
