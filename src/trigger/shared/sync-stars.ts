@@ -91,7 +91,8 @@ export async function syncUserStars(userId: string) {
     ]);
 
     logger.info(
-      `Found ${starredRepos.length} starred repos and ${watchedRepos.length} watched repos for user ${user.id}`
+      `Found ${starredRepos.length} starred repos and ${watchedRepos.length} ` +
+        `watched repos for user ${user.id}`
     );
 
     // Get all current subscriptions for this user
