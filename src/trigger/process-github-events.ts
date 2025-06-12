@@ -60,7 +60,7 @@ export const processGithubEvents = schedules.task({
           .eq("repo_id", repo.id)
           .throwOnError();
 
-        if (!subscribers || subscribers.length === 0) {
+        if (subscribers.length === 0) {
           logger.info("No subscribers found for repository", {
             repoId: repo.id,
           });

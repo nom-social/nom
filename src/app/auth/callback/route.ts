@@ -15,9 +15,20 @@ export async function GET(request: Request) {
   if (code) {
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
 
+    // Exchange code for session
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      // Store provider token in user metadata if it exists
+      if (session?.provider_token) {
+        await supabase.auth.updateUser({
+          data: { provider_token: session.provider_token },
+        });
+      }
+
       const forwardedHost = request.headers.get("x-forwarded-host");
       const isLocalEnv = process.env.NODE_ENV === "development";
       if (isLocalEnv) {
