@@ -35,9 +35,7 @@ async function getAllStarredRepos(octokit: Octokit, username: string) {
     page++;
 
     // Add a small delay between pages to avoid rate limiting
-    if (hasMore) {
-      await wait.for({ seconds: 1 });
-    }
+    if (hasMore) await wait.for({ seconds: 1 });
   }
 
   return starredRepoSchema.parse(allRepos);
