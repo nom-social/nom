@@ -31,7 +31,7 @@ export async function processPullRequestReviewEvent({
   org,
 }: {
   event: Json;
-  githubToken: string;
+  githubToken?: string;
   repo: string;
   org: string;
 }) {

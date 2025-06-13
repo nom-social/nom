@@ -41,18 +41,21 @@ export type Database = {
       };
       repositories: {
         Row: {
+          access_token: string | null;
           created_at: string;
           id: string;
           org: string;
           repo: string;
         };
         Insert: {
+          access_token?: string | null;
           created_at?: string;
           id?: string;
           org: string;
           repo: string;
         };
         Update: {
+          access_token?: string | null;
           created_at?: string;
           id?: string;
           org?: string;

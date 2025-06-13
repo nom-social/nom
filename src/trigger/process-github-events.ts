@@ -60,22 +60,16 @@ export const processGithubEvents = schedules.task({
           continue;
         }
 
-        // Get the first subscriber's GitHub token for processing the event
-        const {
-          data: { user },
-        } = await supabase.auth.admin.getUserById(subscribers[0].user_id);
-        const githubToken = user?.user_metadata?.provider_token;
-
-        if (!githubToken) {
-          logger.error("No GitHub token found for processing event", {
-            eventId: event.id,
-          });
-          continue;
-        }
+        const { data: repoData } = await supabase
+          .from("repositories")
+          .select("access_token")
+          .eq("repo", event.repo)
+          .eq("org", event.org)
+          .single();
 
         const processedEvent = await processEvent({
           event: event.raw_payload,
-          githubToken,
+          githubToken: repoData?.access_token || undefined,
           repo: event.repo,
           org: event.org,
         });
