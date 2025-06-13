@@ -1,6 +1,5 @@
 import { Octokit } from "@octokit/rest";
 import { Json } from "@trigger.dev/sdk";
-import { logger } from "@trigger.dev/sdk/v3";
 import z from "zod";
 
 import { createClient } from "@/utils/supabase/background";
@@ -18,6 +17,8 @@ const pullRequestReviewSchema = z.object({
     html_url: z.string(),
     head: z.object({ ref: z.string(), sha: z.string() }),
     base: z.object({ ref: z.string() }),
+    body: z.string().nullable(),
+    created_at: z.coerce.date(),
   }),
   review: z.object({
     id: z.number(),
@@ -54,12 +55,8 @@ export async function processPullRequestReviewEvent({
       .from("users")
       .select("*")
       .eq("id", subscriber.user_id)
-      .single();
-
-    if (!user) {
-      logger.error("User not found", { userId: subscriber.user_id });
-      continue;
-    }
+      .single()
+      .throwOnError();
 
     const isMyReview =
       user.github_username === pull_request.user.login ||
@@ -99,6 +96,10 @@ export async function processPullRequestReviewEvent({
         base: { ref: pull_request.base.ref },
         user: { login: pull_request.user.login },
         html_url: pull_request.html_url,
+        number: pull_request.number,
+        title: pull_request.title,
+        body: pull_request.body,
+        created_at: pull_request.created_at.toISOString(),
       },
       action,
       review: {

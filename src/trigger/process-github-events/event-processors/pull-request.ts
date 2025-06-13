@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { Octokit } from "@octokit/rest";
-import { logger } from "@trigger.dev/sdk/v3";
 
 import { Json, TablesInsert } from "@/types/supabase";
 import * as openai from "@/utils/openai/client";
+import { createClient } from "@/utils/supabase/background";
 import { zodResponseFormat } from "openai/helpers/zod";
 
 import { getProcessedPullRequestDiff } from "./pull-request/utils";
@@ -57,6 +57,7 @@ export async function processPullRequestEvent({
 }): Promise<TablesInsert<"user_timeline">[]> {
   const octokit = new Octokit({ auth: repo.access_token || undefined });
   const openaiClient = openai.createClient();
+  const supabase = createClient();
 
   const validationResult = pullRequestSchema.parse(event.raw_payload);
   const { action, pull_request } = validationResult;
@@ -75,11 +76,44 @@ export async function processPullRequestEvent({
       }),
     ]);
 
-    logger.info("Processed file changes for PR", {
-      prNumber: pull_request.number,
-      combinedDiffLength: combinedDiff.length,
-      checksCount: checks.data.total_count,
-    });
+    const checksStatus = {
+      total: checks.data.total_count,
+      passed: checks.data.check_runs.filter((c) => c.conclusion === "success")
+        .length,
+      failed: checks.data.check_runs.filter((c) => c.conclusion === "failure")
+        .length,
+      pending: checks.data.check_runs.filter(
+        (c) => c.status === "in_progress" || c.status === "queued"
+      ).length,
+    };
+
+    const checksStatusText =
+      "Total Checks: " +
+      checksStatus.total +
+      "\n" +
+      "Passed: " +
+      checksStatus.passed +
+      "\n" +
+      "Failed: " +
+      checksStatus.failed +
+      "\n" +
+      "Pending: " +
+      checksStatus.pending +
+      "\n\n" +
+      "Failed Checks:\n" +
+      checks.data.check_runs
+        .filter((c) => c.conclusion === "failure")
+        .map(
+          (c) =>
+            "- " + c.name + ": " + (c.output?.summary || "No details available")
+        )
+        .join("\n") +
+      "\n\n" +
+      "Pending Checks:\n" +
+      checks.data.check_runs
+        .filter((c) => c.status === "in_progress" || c.status === "queued")
+        .map((c) => "- " + c.name)
+        .join("\n");
 
     const prompt = PR_ANALYSIS_PROMPT.replace("{title}", pull_request.title)
       .replace("{author}", pull_request.user.login)
@@ -89,6 +123,7 @@ export async function processPullRequestEvent({
       .replace("{additions}", pull_request.additions.toString())
       .replace("{deletions}", pull_request.deletions.toString())
       .replace("{labels}", pull_request.labels.map((l) => l.name).join(", "))
+      .replace("{checks_status}", checksStatusText)
       .replace("{pr_diff}", combinedDiff);
 
     const completion = await openaiClient.chat.completions.parse({
@@ -108,12 +143,63 @@ export async function processPullRequestEvent({
       ),
     });
 
-    logger.info("Generated PR analysis", {
-      prNumber: pull_request.number,
-      analysis: completion.choices[0].message.parsed,
-    });
+    const prData = {
+      action,
+      pull_request: {
+        stats: {
+          comments_count: pull_request.comments,
+          additions: pull_request.additions,
+          deletions: pull_request.deletions,
+          changed_files: pull_request.changed_files,
+        },
+        head_checks: {
+          total: checks.data.total_count,
+          passing: checks.data.check_runs.filter(
+            (check) => check.conclusion === "success"
+          ).length,
+          failing: checks.data.check_runs.filter(
+            (check) => check.conclusion === "failure"
+          ).length,
+        },
+        head: { ref: pull_request.head.ref },
+        base: { ref: pull_request.base.ref },
+        user: { login: pull_request.user.login },
+        number: pull_request.number,
+        title: pull_request.title,
+        body: pull_request.body,
+        html_url: pull_request.html_url,
+        created_at: pull_request.created_at.toISOString(),
+        ai_analysis: completion.choices[0].message.parsed,
+      },
+    };
 
-    // TODO: Store the analysis in the database or use it to create timeline entries
+    const timelineEntries: TablesInsert<"user_timeline">[] = [];
+    for (const subscriber of subscribers) {
+      const { data: user } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", subscriber.user_id)
+        .single()
+        .throwOnError();
+
+      const isMyReview =
+        user.github_username === pull_request.user.login ||
+        !!pull_request.requested_reviewers?.some(
+          (r) => r.login === user.github_username
+        );
+
+      timelineEntries.push({
+        user_id: subscriber.user_id,
+        type: "pr update",
+        data: prData,
+        score: 100,
+        visible_at: new Date().toISOString(),
+        event_bucket_ids: [event.id],
+        repo_id: repo.id,
+        categories: isMyReview ? ["pull_requests"] : undefined,
+      });
+    }
   }
+
   return [];
 }
