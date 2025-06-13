@@ -65,7 +65,7 @@ export const processGithubEvents = schedules.task({
         const {
           data: { user },
         } = await supabase.auth.admin.getUserById(subscribers[0].user_id);
-        const githubToken = user?.app_metadata?.provider_token;
+        const githubToken = user?.user_metadata?.provider_token;
 
         if (!githubToken) {
           logger.error("No GitHub token found for processing event", {
@@ -127,6 +127,7 @@ export const processGithubEvents = schedules.task({
             .throwOnError();
         }
 
+        // TODO: Rethink mechanism for last processed. Maybe we need a new table to track this.
         // Mark event as processed
         await supabase
           .from("github_event_log")

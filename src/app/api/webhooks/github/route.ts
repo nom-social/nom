@@ -70,7 +70,10 @@ export async function POST(request: Request) {
         payload.repository.owner.login ||
         "unknown",
       repo: payload.repository.name,
-      raw_payload: rawBody as Json,
+      raw_payload: {
+        event_type: request.headers.get("x-github-event"),
+        ...rawBody,
+      } as Json,
     };
 
     // Store in Supabase
