@@ -13,11 +13,17 @@ import {
 } from "./pull-request/prompts";
 
 const pullRequestSchema = z.object({
-  action: z.enum(["opened", "closed", "review_requested", "reopened"]),
+  action: z.enum([
+    "opened",
+    "closed",
+    "review_requested",
+    "reopened",
+    "ready_for_review",
+  ]),
   pull_request: z.object({
     number: z.number(),
     title: z.string(),
-    body: z.string(),
+    body: z.string().nullable(),
     html_url: z.string(),
     created_at: z.coerce.date(),
     updated_at: z.coerce.date(),
@@ -62,7 +68,13 @@ export async function processPullRequestEvent({
   const validationResult = pullRequestSchema.parse(event.raw_payload);
   const { action, pull_request } = validationResult;
 
-  if ((action === "opened" || action === "reopened") && !pull_request.draft) {
+  if (
+    action === "opened" ||
+    action === "reopened" ||
+    action === "ready_for_review"
+  ) {
+    if (pull_request.draft) return [];
+
     const [combinedDiff, checks] = await Promise.all([
       getProcessedPullRequestDiff(
         octokit,
@@ -118,7 +130,7 @@ export async function processPullRequestEvent({
     const prompt = PR_ANALYSIS_PROMPT.replace("{title}", pull_request.title)
       .replace("{author}", pull_request.user.login)
       .replace("{author_association}", pull_request.author_association)
-      .replace("{description}", pull_request.body)
+      .replace("{description}", pull_request.body || "No description provided")
       .replace("{changed_files}", pull_request.changed_files.toString())
       .replace("{additions}", pull_request.additions.toString())
       .replace("{deletions}", pull_request.deletions.toString())
@@ -170,6 +182,7 @@ export async function processPullRequestEvent({
         html_url: pull_request.html_url,
         created_at: pull_request.created_at.toISOString(),
         ai_analysis: completion.choices[0].message.parsed,
+        requested_reviewers: pull_request.requested_reviewers,
       },
     };
 
@@ -199,6 +212,8 @@ export async function processPullRequestEvent({
         categories: isMyReview ? ["pull_requests"] : undefined,
       });
     }
+
+    return timelineEntries;
   }
 
   return [];
