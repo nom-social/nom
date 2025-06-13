@@ -74,11 +74,6 @@ export const processGithubEvents = schedules.task({
           org: event.org,
         });
 
-        // TODO: Also include which category this belongs to (e.g. pull requests, issues, releases)
-        // this depends on whether this PR involves me or not
-        // TODO: Maybe pass the user id / login down to the event processor
-        // so we can handle it there instead of here
-
         if (!processedEvent) {
           logger.info("Event was not processed (likely filtered out)", {
             eventId: event.id,
