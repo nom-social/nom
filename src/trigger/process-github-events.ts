@@ -55,8 +55,7 @@ export const processGithubEvents = schedules.task({
         const processedEventsPerSubscriber = await processEvent({
           event: event.raw_payload,
           eventId: event.id,
-          repo: event.repo,
-          org: event.org,
+          repo,
           subscribers,
         });
 

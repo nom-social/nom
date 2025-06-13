@@ -9,13 +9,11 @@ export async function processEvent({
   event,
   eventId,
   repo,
-  org,
   subscribers,
 }: {
   event: Json;
   eventId: string;
-  repo: string;
-  org: string;
+  repo: { repo: string; org: string; id: string; access_token: string | null };
   subscribers: { user_id: string }[];
 }) {
   const eventSchema = z.object({ event_type: z.string() });
@@ -31,7 +29,6 @@ export async function processEvent({
         event,
         eventId,
         repo,
-        org,
         subscribers,
       });
     case "issues":

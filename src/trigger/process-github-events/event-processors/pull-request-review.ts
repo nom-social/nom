@@ -32,25 +32,16 @@ export async function processPullRequestReviewEvent({
   event,
   eventId,
   repo,
-  org,
   subscribers,
 }: {
   event: Json;
-  repo: string;
-  org: string;
+  repo: { repo: string; org: string; id: string; access_token: string | null };
   subscribers: { user_id: string }[];
   eventId: string;
 }): Promise<TablesInsert<"user_timeline">[]> {
   const supabase = createClient();
-  const { data: repoData } = await supabase
-    .from("repositories")
-    .select("*")
-    .eq("repo", repo)
-    .eq("org", org)
-    .single()
-    .throwOnError();
 
-  const octokit = new Octokit({ auth: repoData?.access_token });
+  const octokit = new Octokit({ auth: repo.access_token || undefined });
 
   const validationResult = pullRequestReviewSchema.parse(event);
   const { action, pull_request, review } = validationResult;
@@ -75,13 +66,13 @@ export async function processPullRequestReviewEvent({
 
     const [prDetails, headCheckRuns] = await Promise.all([
       octokit.pulls.get({
-        owner: org,
-        repo: repo,
+        owner: repo.org,
+        repo: repo.repo,
         pull_number: pull_request.number,
       }),
       octokit.checks.listForRef({
-        owner: org,
-        repo: repo,
+        owner: repo.org,
+        repo: repo.repo,
         ref: pull_request.head.sha,
       }),
     ]);
@@ -120,7 +111,7 @@ export async function processPullRequestReviewEvent({
       user_id: subscriber.user_id,
       type: "pr update",
       data: prStats,
-      repo_id: repoData.id,
+      repo_id: repo.id,
       score: 100,
       visible_at: new Date().toISOString(),
       event_bucket_ids: [eventId],
