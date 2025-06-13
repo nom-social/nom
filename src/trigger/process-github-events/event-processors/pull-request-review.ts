@@ -25,6 +25,7 @@ const pullRequestReviewSchema = z.object({
     user: z.object({ login: z.string(), id: z.number() }),
     body: z.string(),
     html_url: z.string(),
+    submitted_at: z.coerce.date(),
   }),
 });
 
@@ -62,7 +63,9 @@ export async function processPullRequestReviewEvent({
       continue;
     }
 
-    // const isMyReview = user.github_username === pull_request.user.login;
+    const isMyReview =
+      user.github_username === pull_request.user.login ||
+      user.github_username === review.user.login;
 
     const [prDetails, headCheckRuns] = await Promise.all([
       octokit.pulls.get({
@@ -104,6 +107,7 @@ export async function processPullRequestReviewEvent({
         user: { login: review.user.login },
         body: review.body,
         html_url: review.html_url,
+        submitted_at: review.submitted_at.toISOString(),
       },
     };
 
@@ -112,9 +116,10 @@ export async function processPullRequestReviewEvent({
       type: "pr update",
       data: prStats,
       repo_id: repo.id,
-      score: 100,
+      score: 100, // TODO: calculate score based on review and pr stats
       visible_at: new Date().toISOString(),
       event_bucket_ids: [eventId],
+      categories: isMyReview ? ["pull_requests"] : undefined,
     });
   }
 

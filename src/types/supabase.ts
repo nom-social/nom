@@ -97,6 +97,7 @@ export type Database = {
       };
       user_timeline: {
         Row: {
+          categories: string[] | null;
           created_at: string;
           data: Json;
           event_bucket_ids: string[] | null;
@@ -110,6 +111,7 @@ export type Database = {
           visible_at: string | null;
         };
         Insert: {
+          categories?: string[] | null;
           created_at?: string;
           data: Json;
           event_bucket_ids?: string[] | null;
@@ -123,6 +125,7 @@ export type Database = {
           visible_at?: string | null;
         };
         Update: {
+          categories?: string[] | null;
           created_at?: string;
           data?: Json;
           event_bucket_ids?: string[] | null;
