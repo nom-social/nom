@@ -16,8 +16,10 @@ export async function POST(request: Request) {
     const rawBody = await request.json();
 
     // Validate the request body with Zod
-    const validationResult =
-      schemas.githubWebhookPayloadSchema.safeParse(rawBody);
+    const validationResult = schemas.githubWebhookPayloadSchema.safeParse({
+      event_type: request.headers.get("x-github-event"),
+      ...rawBody,
+    });
 
     if (!validationResult.success) {
       console.error("Validation error:", validationResult.error);
