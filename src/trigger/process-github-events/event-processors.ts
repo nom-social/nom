@@ -4,46 +4,6 @@ import { Json } from "@/types/supabase";
 
 import { processPullRequestReviewEvent } from "./event-processors/pull-request-review";
 
-export async function processStarEvent() {
-  throw new Error("Not implemented");
-}
-
-export async function processPullRequestEvent() {
-  throw new Error("Not implemented");
-}
-
-export async function processIssuesEvent() {
-  throw new Error("Not implemented");
-}
-
-export async function processReleaseEvent() {
-  throw new Error("Not implemented");
-}
-
-export async function processIssueCommentEvent() {
-  throw new Error("Not implemented");
-}
-
-export async function processPullRequestReviewCommentEvent() {
-  throw new Error("Not implemented");
-}
-
-export async function processPushEvent() {
-  throw new Error("Not implemented");
-}
-
-export async function processStatusEvent() {
-  throw new Error("Not implemented");
-}
-
-export async function processCreateEvent() {
-  throw new Error("Not implemented");
-}
-
-export async function processDeleteEvent() {
-  throw new Error("Not implemented");
-}
-
 // Helper function to process any event type
 export async function processEvent({
   event,
@@ -61,9 +21,9 @@ export async function processEvent({
 
   switch (eventSchemaResult.event_type) {
     case "star":
-      return processStarEvent();
+      throw new Error("Not implemented");
     case "pull_request":
-      return processPullRequestEvent();
+      throw new Error("Not implemented");
     case "pull_request_review":
       return processPullRequestReviewEvent({
         event,
@@ -72,21 +32,21 @@ export async function processEvent({
         org,
       });
     case "issues":
-      return processIssuesEvent();
+      throw new Error("Not implemented");
     case "release":
-      return processReleaseEvent();
+      throw new Error("Not implemented");
     case "issue_comment":
-      return processIssueCommentEvent();
+      throw new Error("Not implemented");
     case "pull_request_review_comment":
-      return processPullRequestReviewCommentEvent();
+      throw new Error("Not implemented");
     case "push":
-      return processPushEvent();
+      throw new Error("Not implemented");
     case "status":
-      return processStatusEvent();
+      throw new Error("Not implemented");
     case "create":
-      return processCreateEvent();
+      throw new Error("Not implemented");
     case "delete":
-      return processDeleteEvent();
+      throw new Error("Not implemented");
     default:
       const unknownEvent = event as { event_type: string };
       throw new Error(`Unknown event type: ${unknownEvent.event_type}`);
