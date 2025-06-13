@@ -3,7 +3,7 @@ import { Octokit } from "@octokit/rest";
 
 import { createClient } from "@/utils/supabase/background";
 
-import { starredRepoSchema } from "./schema";
+import { starredRepoSchema } from "./sync-subscriptions/schema";
 
 async function getAllStarredRepos(octokit: Octokit, username: string) {
   let page = 1;
