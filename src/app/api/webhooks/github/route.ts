@@ -74,9 +74,6 @@ export async function POST(request: Request) {
       raw_payload: { event_type: eventType, ...rawBody } as Json,
     };
 
-    // Store in Supabase
-    await supabase.from("github_event_log").insert(eventData).throwOnError();
-
     // Handle star events
     if (payload.event_type === "star") {
       const actorLogin = payload.sender.login;
@@ -117,7 +114,15 @@ export async function POST(request: Request) {
           .eq("user_id", user.id)
           .eq("repo_id", repoData.id)
           .throwOnError();
+
+      return NextResponse.json({
+        message: "Star event processed successfully",
+        timestamp: new Date().toISOString(),
+      });
     }
+
+    // Store in Supabase
+    await supabase.from("github_event_log").insert(eventData).throwOnError();
 
     // Return a success response
     return NextResponse.json({

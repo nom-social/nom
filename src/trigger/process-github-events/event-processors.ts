@@ -34,8 +34,6 @@ export async function processEvent({
       throw new Error("Not implemented");
     case "issue_comment":
       throw new Error("Not implemented");
-    case "star":
-      throw new Error("Not implemented");
     default:
       const unknownEvent = event as { event_type: string };
       throw new Error(`Unknown event type: ${unknownEvent.event_type}`);
