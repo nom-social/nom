@@ -68,13 +68,7 @@ export async function processPullRequestEvent({
   const validationResult = pullRequestSchema.parse(event.raw_payload);
   const { action, pull_request } = validationResult;
 
-  if (
-    action === "opened" ||
-    action === "reopened" ||
-    action === "ready_for_review"
-  ) {
-    if (pull_request.draft) return [];
-
+  const constructPRData = async () => {
     const [combinedDiff, checks] = await Promise.all([
       getProcessedPullRequestDiff(
         octokit,
@@ -183,8 +177,22 @@ export async function processPullRequestEvent({
         created_at: pull_request.created_at.toISOString(),
         ai_analysis: completion.choices[0].message.parsed,
         requested_reviewers: pull_request.requested_reviewers,
+        merged: pull_request.merged,
       },
     };
+
+    return prData;
+  };
+
+  if (
+    action === "opened" ||
+    action === "reopened" ||
+    action === "ready_for_review" ||
+    action === "review_requested"
+  ) {
+    if (pull_request.draft) return [];
+
+    const prData = await constructPRData();
 
     const timelineEntries: TablesInsert<"user_timeline">[] = [];
     for (const subscriber of subscribers) {
@@ -214,6 +222,39 @@ export async function processPullRequestEvent({
     }
 
     return timelineEntries;
+  }
+
+  if (action === "closed") {
+    if (!pull_request.merged) return [];
+
+    const prData = await constructPRData();
+
+    const timelineEntries: TablesInsert<"user_timeline">[] = [];
+    for (const subscriber of subscribers) {
+      const { data: user } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", subscriber.user_id)
+        .single()
+        .throwOnError();
+
+      const isMyReview =
+        user.github_username === pull_request.user.login ||
+        !!pull_request.requested_reviewers?.some(
+          (r) => r.login === user.github_username
+        );
+
+      timelineEntries.push({
+        user_id: subscriber.user_id,
+        type: "pr update",
+        data: prData,
+        score: 100,
+        visible_at: new Date().toISOString(),
+        event_bucket_ids: [event.id],
+        repo_id: repo.id,
+        categories: isMyReview ? ["pull_requests"] : undefined,
+      });
+    }
   }
 
   return [];
