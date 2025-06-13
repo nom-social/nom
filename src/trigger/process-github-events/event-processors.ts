@@ -48,8 +48,9 @@ export async function processPullRequestReviewEvent(
   });
 
   const validationResult = pullRequestReviewSchema.parse(event);
-
   const { action, pull_request, head, base, review } = validationResult;
+
+  if (action !== "submitted") return null;
 
   const octokit = new Octokit({ auth: githubToken });
 
