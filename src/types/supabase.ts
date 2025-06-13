@@ -149,19 +149,19 @@ export type Database = {
         Row: {
           created_at: string;
           email: string;
-          github_user_name: string;
+          github_username: string;
           id: string;
         };
         Insert: {
           created_at?: string;
           email: string;
-          github_user_name: string;
+          github_username: string;
           id: string;
         };
         Update: {
           created_at?: string;
           email?: string;
-          github_user_name?: string;
+          github_username?: string;
           id?: string;
         };
         Relationships: [];

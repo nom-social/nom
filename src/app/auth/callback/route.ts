@@ -37,7 +37,7 @@ export async function GET(request: Request) {
             {
               id: session.user.id,
               email: session.user.email!,
-              github_user_name: session.user.user_metadata.user_name,
+              github_username: session.user.user_metadata.user_name,
             },
             { onConflict: "id" }
           )

@@ -94,7 +94,7 @@ export async function POST(request: Request) {
       const { data: user } = await supabase
         .from("users")
         .select("id")
-        .eq("github_user_name", actorLogin)
+        .eq("github_username", actorLogin)
         .single();
 
       if (!user) {

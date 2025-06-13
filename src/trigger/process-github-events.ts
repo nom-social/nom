@@ -1,18 +1,11 @@
 import { logger, schedules, wait } from "@trigger.dev/sdk/v3";
 
 import { createClient } from "@/utils/supabase/background";
-import { TablesInsert } from "@/types/supabase";
 
 import { processEvent } from "./process-github-events/event-processors";
 
 // Initialize Supabase client
 const supabase = createClient();
-
-// Helper function to calculate event score for timeline ordering
-function calculateEventScore() {
-  const score = 100;
-  return score;
-}
 
 export const processGithubEvents = schedules.task({
   id: "process-github-events",
@@ -59,46 +52,21 @@ export const processGithubEvents = schedules.task({
           continue;
         }
 
-        const { data: repoData } = await supabase
-          .from("repositories")
-          .select("access_token")
-          .eq("repo", event.repo)
-          .eq("org", event.org)
-          .single();
-
-        const processedEvent = await processEvent({
+        const processedEventsPerSubscriber = await processEvent({
           event: event.raw_payload,
-          githubToken: repoData?.access_token || undefined,
+          eventId: event.id,
           repo: event.repo,
           org: event.org,
+          subscribers,
         });
 
-        if (!processedEvent) {
-          logger.info("Event was not processed (likely filtered out)", {
-            eventId: event.id,
-          });
-          continue;
-        }
-
         // Create timeline entries for each subscriber
-        const timelineEntries = (subscribers || []).map<
-          TablesInsert<"user_timeline">
-        >((subscriber) => ({
-          user_id: subscriber.user_id,
-          type: processedEvent.type,
-          data: processedEvent.data,
-          repo_id: repo.id,
-          score: calculateEventScore(),
-          visible_at: new Date().toISOString(),
-          event_bucket_ids: [event.id],
-        }));
-
-        if (timelineEntries.length > 0) {
-          await supabase
-            .from("user_timeline")
-            .upsert(timelineEntries, { onConflict: "user_id,event_bucket_ids" })
-            .throwOnError();
-        }
+        await supabase
+          .from("user_timeline")
+          .upsert(processedEventsPerSubscriber, {
+            onConflict: "user_id,event_bucket_ids",
+          })
+          .throwOnError();
 
         // Mark event as processed
         await supabase

@@ -7,14 +7,16 @@ import { processPullRequestReviewEvent } from "./event-processors/pull-request-r
 // Helper function to process any event type
 export async function processEvent({
   event,
-  githubToken,
+  eventId,
   repo,
   org,
+  subscribers,
 }: {
   event: Json;
-  githubToken?: string;
+  eventId: string;
   repo: string;
   org: string;
+  subscribers: { user_id: string }[];
 }) {
   const eventSchema = z.object({ event_type: z.string() });
   const eventSchemaResult = eventSchema.parse(event);
@@ -27,9 +29,10 @@ export async function processEvent({
     case "pull_request_review":
       return processPullRequestReviewEvent({
         event,
-        githubToken,
+        eventId,
         repo,
         org,
+        subscribers,
       });
     case "issues":
       throw new Error("Not implemented");
