@@ -2,6 +2,7 @@ import { logger, schedules, wait } from "@trigger.dev/sdk/v3";
 
 import { createClient } from "@/utils/supabase/background";
 import { TablesInsert } from "@/types/supabase";
+
 import { processEvent } from "./process-github-events/event-processors";
 
 // Initialize Supabase client
@@ -29,7 +30,6 @@ export const processGithubEvents = schedules.task({
     const { data: events } = await supabase
       .from("github_event_log")
       .select("*")
-      .is("last_processed", null)
       .order("created_at", { ascending: true })
       .limit(100)
       .throwOnError();
@@ -124,12 +124,6 @@ export const processGithubEvents = schedules.task({
         }
 
         // TODO: Rethink mechanism for last processed. Maybe we need a new table to track this.
-        // Mark event as processed
-        await supabase
-          .from("github_event_log")
-          .update({ last_processed: new Date().toISOString() })
-          .eq("id", event.id)
-          .throwOnError();
 
         // Add a small delay between processing each event to avoid overwhelming the database
         await wait.for({ seconds: 1 });
