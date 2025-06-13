@@ -32,12 +32,6 @@ export const githubWebhookPayloadSchema = z.discriminatedUnion("event_type", [
     sender: githubUserSchema,
   }),
   z.object({
-    event_type: z.literal("watch"),
-    ...githubWebhookBaseSchema.shape,
-    action: z.enum(["started", "deleted"]),
-    sender: githubUserSchema,
-  }),
-  z.object({
     event_type: z.literal("pull_request"),
     ...githubWebhookBaseSchema.shape,
   }),

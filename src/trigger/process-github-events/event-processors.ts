@@ -23,6 +23,8 @@ export async function processEvent({
         subscribers,
       });
     case "pull_request_review":
+      // TODO: Would it be worth checking all existing comments and then including that in AI summary
+      // when a request for change is submitted?
       return processPullRequestReviewEvent({
         event,
         repo,
