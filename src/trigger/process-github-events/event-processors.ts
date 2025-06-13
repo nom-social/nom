@@ -14,8 +14,6 @@ export async function processEvent({
   subscribers: { user_id: string }[];
 }) {
   switch (event.event_type) {
-    case "star":
-      throw new Error("Not implemented");
     case "pull_request":
       return processPullRequestEvent({
         event,
@@ -35,14 +33,6 @@ export async function processEvent({
     case "release":
       throw new Error("Not implemented");
     case "issue_comment":
-      throw new Error("Not implemented");
-    case "push":
-      throw new Error("Not implemented");
-    case "status":
-      throw new Error("Not implemented");
-    case "create":
-      throw new Error("Not implemented");
-    case "delete":
       throw new Error("Not implemented");
     default:
       const unknownEvent = event as { event_type: string };

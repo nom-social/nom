@@ -3,6 +3,7 @@ import { Json } from "@trigger.dev/sdk";
 import z from "zod";
 
 import { createClient } from "@/utils/supabase/background";
+import * as openai from "@/utils/openai/client";
 import { TablesInsert } from "@/types/supabase";
 
 const pullRequestReviewSchema = z.object({
@@ -24,7 +25,7 @@ const pullRequestReviewSchema = z.object({
     id: z.number(),
     state: z.string(),
     user: z.object({ login: z.string(), id: z.number() }),
-    body: z.string(),
+    body: z.string().nullable(),
     html_url: z.string(),
     submitted_at: z.coerce.date(),
   }),
@@ -42,6 +43,7 @@ export async function processPullRequestReviewEvent({
   const supabase = createClient();
 
   const octokit = new Octokit({ auth: repo.access_token || undefined });
+  const openaiClient = openai.createClient();
 
   const validationResult = pullRequestReviewSchema.parse(event.raw_payload);
   const { action, pull_request, review } = validationResult;
@@ -58,7 +60,7 @@ export async function processPullRequestReviewEvent({
       .single()
       .throwOnError();
 
-    const [prDetails, headCheckRuns] = await Promise.all([
+    const [prDetails, headCheckRuns, reviewComments] = await Promise.all([
       octokit.pulls.get({
         owner: repo.org,
         repo: repo.repo,
@@ -69,7 +71,46 @@ export async function processPullRequestReviewEvent({
         repo: repo.repo,
         ref: pull_request.head.sha,
       }),
+      octokit.pulls.listReviewComments({
+        owner: repo.org,
+        repo: repo.repo,
+        pull_number: pull_request.number,
+        review_id: review.id,
+      }),
     ]);
+
+    let aiSummary = null;
+    if (!review.body && reviewComments.data.length > 0) {
+      const commentsText = reviewComments.data
+        .map((comment) => {
+          const context = comment.path ? `File: ${comment.path}\n` : "";
+          const diffContext = comment.diff_hunk
+            ? `\nDiff Context:\n${comment.diff_hunk}\n`
+            : "";
+          return `${context}${diffContext}Comment: ${comment.body}`;
+        })
+        .join("\n\n");
+
+      const completion = await openaiClient.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a helpful assistant that summarizes code review comments into a concise " +
+              "2-3 sentence analysis. Focus on the key points and suggestions made in the review.",
+          },
+          {
+            role: "user",
+            content:
+              "Please analyze these code review comments and provide a 2-3 sentence summary:\n\n" +
+              commentsText,
+          },
+        ],
+      });
+
+      aiSummary = completion.choices[0].message.content;
+    }
 
     const isMyReview =
       user.github_username === pull_request.user.login ||
@@ -111,6 +152,7 @@ export async function processPullRequestReviewEvent({
         body: review.body,
         html_url: review.html_url,
         submitted_at: review.submitted_at.toISOString(),
+        ai_summary: aiSummary,
       },
     };
 

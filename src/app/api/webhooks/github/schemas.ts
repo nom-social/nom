@@ -32,12 +32,6 @@ export const githubWebhookPayloadSchema = z.discriminatedUnion("event_type", [
     sender: githubUserSchema,
   }),
   z.object({
-    event_type: z.literal("watch"),
-    ...githubWebhookBaseSchema.shape,
-    action: z.enum(["started", "deleted"]),
-    sender: githubUserSchema,
-  }),
-  z.object({
     event_type: z.literal("pull_request"),
     ...githubWebhookBaseSchema.shape,
   }),
@@ -59,22 +53,6 @@ export const githubWebhookPayloadSchema = z.discriminatedUnion("event_type", [
   }),
   z.object({
     event_type: z.literal("pull_request_review_comment"),
-    ...githubWebhookBaseSchema.shape,
-  }),
-  z.object({
-    event_type: z.literal("push"),
-    ...githubWebhookBaseSchema.shape,
-  }),
-  z.object({
-    event_type: z.literal("status"),
-    ...githubWebhookBaseSchema.shape,
-  }),
-  z.object({
-    event_type: z.literal("create"),
-    ...githubWebhookBaseSchema.shape,
-  }),
-  z.object({
-    event_type: z.literal("delete"),
     ...githubWebhookBaseSchema.shape,
   }),
 ]);
