@@ -5,7 +5,6 @@ import { createClient } from "@/utils/supabase/background";
 
 import { starredRepoSchema } from "./sync-subscriptions/schema";
 
-// TODO: no need to delete unfound repos from here
 async function getAllStarredRepos(octokit: Octokit, username: string) {
   let page = 1;
   let hasMore = true;
@@ -65,77 +64,30 @@ export async function syncUserStars(userId: string) {
       `Found ${starredRepos.length} starred repos for user ${user.id}`
     );
 
-    // Get all current subscriptions for this user
-    const { data: currentSubscriptions } = await supabase
-      .from("subscriptions")
-      .select("id, repo_id, repositories!inner(org, repo)")
-      .eq("user_id", user.id)
-      .throwOnError();
-
-    // Create set of currently starred repo identifiers for quick lookup
-    const starredRepoIds = new Set(
-      starredRepos.map((repo) => `${repo.owner.login}/${repo.name}`)
-    );
-
-    // Build array of { org, repo } pairs for batch query
-    const repoPairs = Array.from(starredRepoIds).map((repoId) => {
-      const [org, repo] = repoId.split("/");
-      return { org, repo };
-    });
-
     // Batch fetch all matching repositories using OR conditions for exact pairs
     const { data: matchingRepos } = await supabase
       .from("repositories")
       .select("id, org, repo")
       .or(
-        repoPairs
-          .map((pair) => `and(org.eq.${pair.org},repo.eq.${pair.repo})`)
+        starredRepos
+          .map((repo) => `and(org.eq.${repo.owner.login},repo.eq.${repo.name})`)
           .join(",")
       )
       .throwOnError();
 
-    // Create a lookup map for constant-time access
-    const repoLookup = new Map(
-      matchingRepos.map((repo) => [`${repo.org}/${repo.repo}`, repo.id])
-    );
+    // Create subscriptions for all matching repositories
+    for (const repo of matchingRepos) {
+      await supabase
+        .from("subscriptions")
+        .upsert(
+          { user_id: user.id, repo_id: repo.id },
+          { onConflict: "user_id,repo_id" }
+        )
+        .throwOnError();
 
-    // For each starred repo, check if it exists in our repositories table
-    for (const repoId of starredRepoIds) {
-      const repoIdInDb = repoLookup.get(repoId);
-
-      if (repoIdInDb) {
-        // Upsert subscription
-        await supabase
-          .from("subscriptions")
-          .upsert(
-            { user_id: user.id, repo_id: repoIdInDb },
-            { onConflict: "user_id,repo_id" }
-          )
-          .throwOnError();
-
-        logger.info(
-          `Upserted subscription for user ${user.id} to repo ${repoIdInDb}`
-        );
-      }
-    }
-
-    // Remove subscriptions for repos that are no longer starred
-    for (const subscription of currentSubscriptions) {
-      const repoIdentifier =
-        `${subscription.repositories.org}/` +
-        `${subscription.repositories.repo}`;
-      if (!starredRepoIds.has(repoIdentifier)) {
-        await supabase
-          .from("subscriptions")
-          .delete()
-          .eq("id", subscription.id)
-          .throwOnError();
-
-        logger.info(
-          `Removed subscription for user ${user.id} to repo ` +
-            `${subscription.repo_id} (no longer starred)`
-        );
-      }
+      logger.info(
+        `Upserted subscription for user ${user.id} to repo ${repo.id}`
+      );
     }
   } catch (error) {
     logger.error("Error syncing stars for user", {
