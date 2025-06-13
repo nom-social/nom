@@ -42,7 +42,7 @@ export async function processPullRequestReviewEvent({
 
   const octokit = new Octokit({ auth: repo.access_token || undefined });
 
-  const validationResult = pullRequestReviewSchema.parse(event);
+  const validationResult = pullRequestReviewSchema.parse(event.raw_payload);
   const { action, pull_request, review } = validationResult;
 
   if (action !== "submitted") return [];
@@ -98,6 +98,7 @@ export async function processPullRequestReviewEvent({
         head: { ref: pull_request.head.ref },
         base: { ref: pull_request.base.ref },
         user: { login: pull_request.user.login },
+        html_url: pull_request.html_url,
       },
       action,
       review: {
