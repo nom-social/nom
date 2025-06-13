@@ -31,14 +31,12 @@ const pullRequestReviewSchema = z.object({
 
 export async function processPullRequestReviewEvent({
   event,
-  eventId,
   repo,
   subscribers,
 }: {
-  event: Json;
+  event: { event_type: string; raw_payload: Json; id: string };
   repo: { repo: string; org: string; id: string; access_token: string | null };
   subscribers: { user_id: string }[];
-  eventId: string;
 }): Promise<TablesInsert<"user_timeline">[]> {
   const supabase = createClient();
 
@@ -118,7 +116,7 @@ export async function processPullRequestReviewEvent({
       repo_id: repo.id,
       score: 100, // TODO: calculate score based on review and pr stats
       visible_at: new Date().toISOString(),
-      event_bucket_ids: [eventId],
+      event_bucket_ids: [event.id],
       categories: isMyReview ? ["pull_requests"] : undefined,
     });
   }

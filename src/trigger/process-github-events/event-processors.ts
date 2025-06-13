@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 import { Json } from "@/types/supabase";
 
 import { processPullRequestReviewEvent } from "./event-processors/pull-request-review";
@@ -7,19 +5,14 @@ import { processPullRequestReviewEvent } from "./event-processors/pull-request-r
 // Helper function to process any event type
 export async function processEvent({
   event,
-  eventId,
   repo,
   subscribers,
 }: {
-  event: Json;
-  eventId: string;
+  event: { event_type: string; raw_payload: Json; id: string };
   repo: { repo: string; org: string; id: string; access_token: string | null };
   subscribers: { user_id: string }[];
 }) {
-  const eventSchema = z.object({ event_type: z.string() });
-  const eventSchemaResult = eventSchema.parse(event);
-
-  switch (eventSchemaResult.event_type) {
+  switch (event.event_type) {
     case "star":
       throw new Error("Not implemented");
     case "pull_request":
@@ -27,7 +20,6 @@ export async function processEvent({
     case "pull_request_review":
       return processPullRequestReviewEvent({
         event,
-        eventId,
         repo,
         subscribers,
       });
