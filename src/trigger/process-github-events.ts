@@ -13,6 +13,8 @@ export const processGithubEvents = schedules.task({
   cron: "*/5 * * * *",
   maxDuration: 300, // 5 minutes max runtime
   run: async (payload) => {
+    const currentTimestamp = new Date().toISOString();
+
     logger.info("Starting GitHub event processing", {
       timestamp: payload.timestamp,
       timezone: payload.timezone,
@@ -27,6 +29,34 @@ export const processGithubEvents = schedules.task({
       .throwOnError();
 
     logger.info(`Processing ${events.length} events`);
+
+    // First, handle any snoozed timeline entries that have reached their time
+    const { data: snoozedEntries } = await supabase
+      .from("user_timeline")
+      .select("*")
+      .not("snooze_to", "is", null)
+      .lt("snooze_to", currentTimestamp)
+      .throwOnError();
+
+    if (snoozedEntries && snoozedEntries.length > 0) {
+      logger.info(
+        `Processing ${snoozedEntries.length} snoozed timeline entries`
+      );
+
+      // Update snoozed entries to be visible again
+      await supabase
+        .from("user_timeline")
+        .update({
+          snooze_to: null,
+          created_at: currentTimestamp,
+          visible_at: currentTimestamp,
+        })
+        .in(
+          "id",
+          snoozedEntries.map((entry) => entry.id)
+        )
+        .throwOnError();
+    }
 
     for (const event of events || []) {
       try {
@@ -69,7 +99,7 @@ export const processGithubEvents = schedules.task({
         // Mark event as processed
         await supabase
           .from("github_event_log")
-          .update({ last_processed: new Date().toISOString() })
+          .update({ last_processed: currentTimestamp })
           .eq("id", event.id)
           .throwOnError();
 
