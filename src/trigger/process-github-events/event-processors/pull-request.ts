@@ -1,10 +1,10 @@
 import { z } from "zod";
 import { Octokit } from "@octokit/rest";
+import { zodResponseFormat } from "openai/helpers/zod";
 
 import { Json, TablesInsert } from "@/types/supabase";
 import * as openai from "@/utils/openai/client";
 import { createClient } from "@/utils/supabase/background";
-import { zodResponseFormat } from "openai/helpers/zod";
 
 import { getProcessedPullRequestDiff } from "./pull-request/utils";
 import {
