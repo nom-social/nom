@@ -30,8 +30,8 @@ export const processGithubEvents = schedules.task({
     const { data: events } = await supabase
       .from("github_event_log")
       .select("*")
+      .is("last_processed", null)
       .order("created_at", { ascending: true })
-      .limit(100)
       .throwOnError();
 
     logger.info(`Processing ${events.length} events`);
@@ -117,7 +117,12 @@ export const processGithubEvents = schedules.task({
             .throwOnError();
         }
 
-        // TODO: Rethink mechanism for last processed. Maybe we need a new table to track this.
+        // Mark event as processed
+        await supabase
+          .from("github_event_log")
+          .update({ last_processed: new Date().toISOString() })
+          .eq("id", event.id)
+          .throwOnError();
 
         // Add a small delay between processing each event to avoid overwhelming the database
         await wait.for({ seconds: 1 });

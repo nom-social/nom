@@ -15,6 +15,7 @@ export type Database = {
           created_at: string;
           event_type: string;
           id: string;
+          last_processed: string | null;
           org: string;
           raw_payload: Json;
           repo: string;
@@ -24,6 +25,7 @@ export type Database = {
           created_at?: string;
           event_type: string;
           id?: string;
+          last_processed?: string | null;
           org: string;
           raw_payload: Json;
           repo: string;
@@ -33,6 +35,7 @@ export type Database = {
           created_at?: string;
           event_type?: string;
           id?: string;
+          last_processed?: string | null;
           org?: string;
           raw_payload?: Json;
           repo?: string;
