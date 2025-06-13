@@ -1,6 +1,7 @@
 import { Json } from "@/types/supabase";
 
 import { processPullRequestReviewEvent } from "./event-processors/pull-request-review";
+import { processPullRequestEvent } from "./event-processors/pull-request";
 
 // Helper function to process any event type
 export async function processEvent({
@@ -16,7 +17,11 @@ export async function processEvent({
     case "star":
       throw new Error("Not implemented");
     case "pull_request":
-      throw new Error("Not implemented");
+      return processPullRequestEvent({
+        event,
+        repo,
+        subscribers,
+      });
     case "pull_request_review":
       return processPullRequestReviewEvent({
         event,
