@@ -1,22 +1,16 @@
 import { logger, schedules, wait } from "@trigger.dev/sdk/v3";
 
 import { createClient } from "@/utils/supabase/background";
-import { Database, TablesInsert } from "@/types/supabase";
+import { TablesInsert } from "@/types/supabase";
+import { processEvent } from "./process-github-events/event-processors";
+import { githubWebhookPayloadSchema } from "@/app/api/webhooks/github/schemas";
 
 // Initialize Supabase client
 const supabase = createClient();
 
 // Helper function to calculate event score for timeline ordering
-function calculateEventScore(
-  event: Database["public"]["Tables"]["github_event_log"]["Row"]
-) {
-  // base score
-  let score = 100;
-  const eventTime = new Date(event.created_at).getTime();
-  const now = Date.now();
-  const timeScore = Math.floor((now - eventTime) / 1000); // Convert to seconds
-  score += timeScore;
-
+function calculateEventScore() {
+  const score = 100;
   return score;
 }
 
@@ -67,6 +61,36 @@ export const processGithubEvents = schedules.task({
           continue;
         }
 
+        // Get the first subscriber's GitHub token for processing the event
+        const {
+          data: { user },
+        } = await supabase.auth.admin.getUserById(subscribers[0].user_id);
+        const githubToken = user?.app_metadata?.provider_token;
+
+        if (!githubToken) {
+          logger.error("No GitHub token found for processing event", {
+            eventId: event.id,
+          });
+          continue;
+        }
+
+        // Process the event using the event processor
+        const validationResult = githubWebhookPayloadSchema.parse(
+          event.raw_payload
+        );
+
+        const processedEvent = await processEvent(
+          validationResult,
+          githubToken
+        );
+
+        if (!processedEvent) {
+          logger.info("Event was not processed (likely filtered out)", {
+            eventId: event.id,
+          });
+          continue;
+        }
+
         // Check for existing entries to avoid duplicates
         const { data: existingEntries } = await supabase
           .from("user_timeline")
@@ -88,14 +112,10 @@ export const processGithubEvents = schedules.task({
           .filter((subscriber) => !existingUserIds.has(subscriber.user_id))
           .map<TablesInsert<"user_timeline">>((subscriber) => ({
             user_id: subscriber.user_id,
-            type: "github_event",
-            data: {
-              event_type: event.event_type,
-              action: event.action,
-              content: "HELLO WORLD", // TODO: We need to decide on the type of data
-            },
+            type: processedEvent.type,
+            data: processedEvent.data,
             repo_id: repo.id,
-            score: calculateEventScore(event),
+            score: calculateEventScore(),
             visible_at: new Date().toISOString(),
             event_bucket_ids: [event.id],
           }));

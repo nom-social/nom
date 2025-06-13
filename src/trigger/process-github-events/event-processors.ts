@@ -97,7 +97,7 @@ export async function processPullRequestReviewEvent(
     },
   };
 
-  return prStats;
+  return { data: prStats, type: "pr update" };
 }
 
 export async function processIssuesEvent(
