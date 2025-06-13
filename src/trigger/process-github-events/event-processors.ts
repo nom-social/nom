@@ -26,13 +26,9 @@ export async function processEvent({
         repo,
         subscribers,
       });
-    case "pull_request_review_comment":
-      throw new Error("Not implemented");
     case "issues":
       throw new Error("Not implemented");
     case "release":
-      throw new Error("Not implemented");
-    case "issue_comment":
       throw new Error("Not implemented");
     default:
       const unknownEvent = event as { event_type: string };
