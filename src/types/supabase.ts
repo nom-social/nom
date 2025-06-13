@@ -12,36 +12,30 @@ export type Database = {
       github_event_log: {
         Row: {
           action: string | null;
-          actor_login: string;
           created_at: string;
           event_type: string;
           id: string;
           last_processed: string | null;
-          metadata: Json;
           org: string;
           raw_payload: Json;
           repo: string;
         };
         Insert: {
           action?: string | null;
-          actor_login: string;
           created_at?: string;
           event_type: string;
           id?: string;
           last_processed?: string | null;
-          metadata: Json;
           org: string;
           raw_payload: Json;
           repo: string;
         };
         Update: {
           action?: string | null;
-          actor_login?: string;
           created_at?: string;
           event_type?: string;
           id?: string;
           last_processed?: string | null;
-          metadata?: Json;
           org?: string;
           raw_payload?: Json;
           repo?: string;
