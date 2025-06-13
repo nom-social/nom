@@ -74,6 +74,11 @@ export const processGithubEvents = schedules.task({
           org: event.org,
         });
 
+        // TODO: Also include which category this belongs to (e.g. pull requests, issues, releases)
+        // this depends on whether this PR involves me or not
+        // TODO: Maybe pass the user id / login down to the event processor
+        // so we can handle it there instead of here
+
         if (!processedEvent) {
           logger.info("Event was not processed (likely filtered out)", {
             eventId: event.id,
@@ -81,39 +86,23 @@ export const processGithubEvents = schedules.task({
           continue;
         }
 
-        // Check for existing entries to avoid duplicates
-        const { data: existingEntries } = await supabase
-          .from("user_timeline")
-          .select("user_id, event_bucket_ids")
-          .in(
-            "user_id",
-            subscribers.map((s) => s.user_id)
-          )
-          .filter("event_bucket_ids", "cs", `{${event.id}}`)
-          .throwOnError();
-
-        // Create a set of user_ids that already have this event
-        const existingUserIds = new Set(
-          existingEntries.map((entry) => entry.user_id)
-        );
-
-        // Create timeline entries for each subscriber, excluding those that already have the event
-        const timelineEntries = (subscribers || [])
-          .filter((subscriber) => !existingUserIds.has(subscriber.user_id))
-          .map<TablesInsert<"user_timeline">>((subscriber) => ({
-            user_id: subscriber.user_id,
-            type: processedEvent.type,
-            data: processedEvent.data,
-            repo_id: repo.id,
-            score: calculateEventScore(),
-            visible_at: new Date().toISOString(),
-            event_bucket_ids: [event.id],
-          }));
+        // Create timeline entries for each subscriber
+        const timelineEntries = (subscribers || []).map<
+          TablesInsert<"user_timeline">
+        >((subscriber) => ({
+          user_id: subscriber.user_id,
+          type: processedEvent.type,
+          data: processedEvent.data,
+          repo_id: repo.id,
+          score: calculateEventScore(),
+          visible_at: new Date().toISOString(),
+          event_bucket_ids: [event.id],
+        }));
 
         if (timelineEntries.length > 0) {
           await supabase
             .from("user_timeline")
-            .insert(timelineEntries)
+            .upsert(timelineEntries, { onConflict: "user_id,event_bucket_ids" })
             .throwOnError();
         }
 
