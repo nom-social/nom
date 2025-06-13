@@ -255,6 +255,8 @@ export async function processPullRequestEvent({
         categories: isMyReview ? ["pull_requests"] : undefined,
       });
     }
+
+    return timelineEntries;
   }
 
   return [];
