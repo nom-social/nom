@@ -1,43 +1,50 @@
 import { z } from "zod";
 import { Octokit } from "@octokit/rest";
 
-import { GitHubWebhookPayload } from "@/app/api/webhooks/github/schemas";
+import { Json } from "@/types/supabase";
 
-export async function processStarEvent(
-  event: Extract<GitHubWebhookPayload, { event_type: "star" }>
-) {
-  throw new Error(
-    `Star event processing not implemented for repository: ${event.repository.full_name}`
-  );
+export async function processStarEvent(event: Json) {
+  const eventSchema = z.object({
+    event_type: z.literal("star"),
+  });
+  const eventSchemaResult = eventSchema.parse(event);
+
+  return { data: eventSchemaResult, type: "star" };
 }
 
-export async function processPullRequestEvent(
-  event: Extract<GitHubWebhookPayload, { event_type: "pull_request" }>
-) {
-  throw new Error(
-    `Pull request event processing not implemented for repository: ${event.repository.full_name}`
-  );
+export async function processPullRequestEvent(event: Json) {
+  const eventSchema = z.object({
+    event_type: z.literal("pull_request"),
+  });
+  const eventSchemaResult = eventSchema.parse(event);
+
+  return { data: eventSchemaResult, type: "pull_request" };
 }
 
-export async function processPullRequestReviewEvent(
-  event: Extract<GitHubWebhookPayload, { event_type: "pull_request_review" }>,
-  githubToken: string
-) {
+export async function processPullRequestReviewEvent({
+  event,
+  githubToken,
+  repo,
+  org,
+}: {
+  event: Json;
+  githubToken: string;
+  repo: string;
+  org: string;
+}) {
   const pullRequestReviewSchema = z.object({
     action: z.enum(["submitted", "edited", "dismissed"]),
     pull_request: z.object({
-      id: z.number(),
       number: z.number(),
       title: z.string(),
       user: z.object({
         login: z.string(),
-        id: z.number(),
       }),
       state: z.string(),
       html_url: z.string(),
+      head: z.object({ ref: z.string(), sha: z.string() }),
+      base: z.object({ ref: z.string() }),
     }),
-    head: z.object({ ref: z.string(), sha: z.string() }),
-    base: z.object({ ref: z.string() }),
     review: z.object({
       id: z.number(),
       state: z.string(),
@@ -48,7 +55,7 @@ export async function processPullRequestReviewEvent(
   });
 
   const validationResult = pullRequestReviewSchema.parse(event);
-  const { action, pull_request, head, base, review } = validationResult;
+  const { action, pull_request, review } = validationResult;
 
   if (action !== "submitted") return null;
 
@@ -56,14 +63,14 @@ export async function processPullRequestReviewEvent(
 
   const [prDetails, headCheckRuns] = await Promise.all([
     octokit.pulls.get({
-      owner: event.repository.owner.login,
-      repo: event.repository.name,
+      owner: org,
+      repo: repo,
       pull_number: pull_request.number,
     }),
     octokit.checks.listForRef({
-      owner: event.repository.owner.login,
-      repo: event.repository.name,
-      ref: head.sha,
+      owner: org,
+      repo: repo,
+      ref: pull_request.head.sha,
     }),
   ]);
 
@@ -84,8 +91,8 @@ export async function processPullRequestReviewEvent(
           (check) => check.conclusion === "failure"
         ).length,
       },
-      head: { ref: head.ref },
-      base: { ref: base.ref },
+      head: { ref: pull_request.head.ref },
+      base: { ref: pull_request.base.ref },
       user: { login: pull_request.user.login },
     },
     action,
@@ -100,89 +107,111 @@ export async function processPullRequestReviewEvent(
   return { data: prStats, type: "pr update" };
 }
 
-export async function processIssuesEvent(
-  event: Extract<GitHubWebhookPayload, { event_type: "issues" }>
-) {
-  throw new Error(
-    `Issues event processing not implemented for repository: ${event.repository.full_name}`
-  );
+export async function processIssuesEvent(event: Json) {
+  const eventSchema = z.object({
+    event_type: z.literal("issues"),
+  });
+  const eventSchemaResult = eventSchema.parse(event);
+
+  return { data: eventSchemaResult, type: "issues" };
 }
 
-export async function processReleaseEvent(
-  event: Extract<GitHubWebhookPayload, { event_type: "release" }>
-) {
-  throw new Error(
-    `Release event processing not implemented for repository: ${event.repository.full_name}`
-  );
+export async function processReleaseEvent(event: Json) {
+  const eventSchema = z.object({
+    event_type: z.literal("release"),
+  });
+  const eventSchemaResult = eventSchema.parse(event);
+
+  return { data: eventSchemaResult, type: "release" };
 }
 
-export async function processIssueCommentEvent(
-  event: Extract<GitHubWebhookPayload, { event_type: "issue_comment" }>
-) {
-  throw new Error(
-    `Issue comment event processing not implemented for repository: ${event.repository.full_name}`
-  );
+export async function processIssueCommentEvent(event: Json) {
+  const eventSchema = z.object({
+    event_type: z.literal("issue_comment"),
+  });
+  const eventSchemaResult = eventSchema.parse(event);
+
+  return { data: eventSchemaResult, type: "issue_comment" };
 }
 
-export async function processPullRequestReviewCommentEvent(
-  event: Extract<
-    GitHubWebhookPayload,
-    { event_type: "pull_request_review_comment" }
-  >
-) {
-  throw new Error(
-    `Pull request review comment event processing not implemented for repository: ${event.repository.full_name}`
-  );
+export async function processPullRequestReviewCommentEvent(event: Json) {
+  const eventSchema = z.object({
+    event_type: z.literal("pull_request_review_comment"),
+  });
+  const eventSchemaResult = eventSchema.parse(event);
+
+  return { data: eventSchemaResult, type: "pull_request_review_comment" };
 }
 
-export async function processPushEvent(
-  event: Extract<GitHubWebhookPayload, { event_type: "push" }>
-) {
-  throw new Error(
-    `Push event processing not implemented for repository: ${event.repository.full_name}`
-  );
+export async function processPushEvent(event: Json) {
+  const eventSchema = z.object({
+    event_type: z.literal("push"),
+  });
+  const eventSchemaResult = eventSchema.parse(event);
+
+  return { data: eventSchemaResult, type: "push" };
 }
 
-export async function processStatusEvent(
-  event: Extract<GitHubWebhookPayload, { event_type: "status" }>
-) {
-  throw new Error(
-    `Status event processing not implemented for repository: ${event.repository.full_name}`
-  );
+export async function processStatusEvent(event: Json) {
+  const eventSchema = z.object({
+    event_type: z.literal("status"),
+  });
+  const eventSchemaResult = eventSchema.parse(event);
+
+  return { data: eventSchemaResult, type: "status" };
 }
 
-export async function processCreateEvent(
-  event: Extract<GitHubWebhookPayload, { event_type: "create" }>
-) {
-  throw new Error(
-    `Create event processing not implemented for repository: ${event.repository.full_name}`
-  );
+export async function processCreateEvent(event: Json) {
+  const eventSchema = z.object({
+    event_type: z.literal("create"),
+  });
+  const eventSchemaResult = eventSchema.parse(event);
+
+  return { data: eventSchemaResult, type: "create" };
 }
 
-export async function processDeleteEvent(
-  event: Extract<GitHubWebhookPayload, { event_type: "delete" }>
-) {
-  throw new Error(
-    `Delete event processing not implemented for repository: ${event.repository.full_name}`
-  );
+export async function processDeleteEvent(event: Json) {
+  const eventSchema = z.object({
+    event_type: z.literal("delete"),
+  });
+  const eventSchemaResult = eventSchema.parse(event);
+
+  return { data: eventSchemaResult, type: "delete" };
 }
 
 // Helper function to process any event type
-export async function processEvent(
-  event: GitHubWebhookPayload,
-  githubToken: string
-) {
+export async function processEvent({
+  event,
+  githubToken,
+  repo,
+  org,
+}: {
+  event: Json;
+  githubToken: string;
+  repo: string;
+  org: string;
+}) {
   if (!githubToken) {
     throw new Error("GitHub token is required to process events");
   }
 
-  switch (event.event_type) {
+  const eventSchema = z.object({
+    event_type: z.string(),
+  });
+  const eventSchemaResult = eventSchema.parse(event);
+
+  switch (eventSchemaResult.event_type) {
     case "star":
       return processStarEvent(event);
     case "pull_request":
       return processPullRequestEvent(event);
     case "pull_request_review":
-      return processPullRequestReviewEvent(event, githubToken);
+      return processPullRequestReviewEvent({
+        event,
+        githubToken,
+        repo,
+        org,
+      });
     case "issues":
       return processIssuesEvent(event);
     case "release":

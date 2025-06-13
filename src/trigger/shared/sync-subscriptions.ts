@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/background";
 
 import { starredRepoSchema } from "./sync-subscriptions/schema";
 
+// TODO: no need to delete unfound repos from here
 async function getAllStarredRepos(octokit: Octokit, username: string) {
   let page = 1;
   let hasMore = true;

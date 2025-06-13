@@ -3,7 +3,6 @@ import { logger, schedules, wait } from "@trigger.dev/sdk/v3";
 import { createClient } from "@/utils/supabase/background";
 import { TablesInsert } from "@/types/supabase";
 import { processEvent } from "./process-github-events/event-processors";
-import { githubWebhookPayloadSchema } from "@/app/api/webhooks/github/schemas";
 
 // Initialize Supabase client
 const supabase = createClient();
@@ -74,15 +73,12 @@ export const processGithubEvents = schedules.task({
           continue;
         }
 
-        // Process the event using the event processor
-        const validationResult = githubWebhookPayloadSchema.parse(
-          event.raw_payload
-        );
-
-        const processedEvent = await processEvent(
-          validationResult,
-          githubToken
-        );
+        const processedEvent = await processEvent({
+          event: event.raw_payload,
+          githubToken,
+          repo: event.repo,
+          org: event.org,
+        });
 
         if (!processedEvent) {
           logger.info("Event was not processed (likely filtered out)", {
