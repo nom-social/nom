@@ -58,10 +58,6 @@ export async function processPullRequestReviewEvent({
       .single()
       .throwOnError();
 
-    const isMyReview =
-      user.github_username === pull_request.user.login ||
-      user.github_username === review.user.login;
-
     const [prDetails, headCheckRuns] = await Promise.all([
       octokit.pulls.get({
         owner: repo.org,
@@ -74,6 +70,13 @@ export async function processPullRequestReviewEvent({
         ref: pull_request.head.sha,
       }),
     ]);
+
+    const isMyReview =
+      user.github_username === pull_request.user.login ||
+      user.github_username === review.user.login ||
+      prDetails.data.requested_reviewers?.some(
+        (reviewer) => reviewer.login === user.github_username
+      );
 
     const prStats = {
       pull_request: {
