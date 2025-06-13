@@ -14,7 +14,6 @@ function calculateEventScore() {
   return score;
 }
 
-// TODO: We also need to generate a unique slug for the event
 export const processGithubEvents = schedules.task({
   id: "process-github-events",
   // Run every 5 minutes
