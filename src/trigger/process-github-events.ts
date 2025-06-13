@@ -1,26 +1,19 @@
 import { logger, schedules, wait } from "@trigger.dev/sdk/v3";
 
 import { createClient } from "@/utils/supabase/background";
-import { Database, TablesInsert } from "@/types/supabase";
+import { TablesInsert } from "@/types/supabase";
+
+import { processEvent } from "./process-github-events/event-processors";
 
 // Initialize Supabase client
 const supabase = createClient();
 
 // Helper function to calculate event score for timeline ordering
-function calculateEventScore(
-  event: Database["public"]["Tables"]["github_event_log"]["Row"]
-) {
-  // base score
-  let score = 100;
-  const eventTime = new Date(event.created_at).getTime();
-  const now = Date.now();
-  const timeScore = Math.floor((now - eventTime) / 1000); // Convert to seconds
-  score += timeScore;
-
+function calculateEventScore() {
+  const score = 100;
   return score;
 }
 
-// TODO: We also need to generate a unique slug for the event
 export const processGithubEvents = schedules.task({
   id: "process-github-events",
   // Run every 5 minutes
@@ -38,7 +31,6 @@ export const processGithubEvents = schedules.task({
       .select("*")
       .is("last_processed", null)
       .order("created_at", { ascending: true })
-      .limit(100)
       .throwOnError();
 
     logger.info(`Processing ${events.length} events`);
@@ -67,43 +59,44 @@ export const processGithubEvents = schedules.task({
           continue;
         }
 
-        // Check for existing entries to avoid duplicates
-        const { data: existingEntries } = await supabase
-          .from("user_timeline")
-          .select("user_id, event_bucket_ids")
-          .in(
-            "user_id",
-            subscribers.map((s) => s.user_id)
-          )
-          .filter("event_bucket_ids", "cs", `{${event.id}}`)
-          .throwOnError();
+        const { data: repoData } = await supabase
+          .from("repositories")
+          .select("access_token")
+          .eq("repo", event.repo)
+          .eq("org", event.org)
+          .single();
 
-        // Create a set of user_ids that already have this event
-        const existingUserIds = new Set(
-          existingEntries.map((entry) => entry.user_id)
-        );
+        const processedEvent = await processEvent({
+          event: event.raw_payload,
+          githubToken: repoData?.access_token || undefined,
+          repo: event.repo,
+          org: event.org,
+        });
 
-        // Create timeline entries for each subscriber, excluding those that already have the event
-        const timelineEntries = (subscribers || [])
-          .filter((subscriber) => !existingUserIds.has(subscriber.user_id))
-          .map<TablesInsert<"user_timeline">>((subscriber) => ({
-            user_id: subscriber.user_id,
-            type: "github_event",
-            data: {
-              event_type: event.event_type,
-              action: event.action,
-              content: "HELLO WORLD", // TODO: We need to decide on the type of data
-            },
-            repo_id: repo.id,
-            score: calculateEventScore(event),
-            visible_at: new Date().toISOString(),
-            event_bucket_ids: [event.id],
-          }));
+        if (!processedEvent) {
+          logger.info("Event was not processed (likely filtered out)", {
+            eventId: event.id,
+          });
+          continue;
+        }
+
+        // Create timeline entries for each subscriber
+        const timelineEntries = (subscribers || []).map<
+          TablesInsert<"user_timeline">
+        >((subscriber) => ({
+          user_id: subscriber.user_id,
+          type: processedEvent.type,
+          data: processedEvent.data,
+          repo_id: repo.id,
+          score: calculateEventScore(),
+          visible_at: new Date().toISOString(),
+          event_bucket_ids: [event.id],
+        }));
 
         if (timelineEntries.length > 0) {
           await supabase
             .from("user_timeline")
-            .insert(timelineEntries)
+            .upsert(timelineEntries, { onConflict: "user_id,event_bucket_ids" })
             .throwOnError();
         }
 

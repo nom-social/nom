@@ -12,36 +12,30 @@ export type Database = {
       github_event_log: {
         Row: {
           action: string | null;
-          actor_login: string;
           created_at: string;
           event_type: string;
           id: string;
           last_processed: string | null;
-          metadata: Json;
           org: string;
           raw_payload: Json;
           repo: string;
         };
         Insert: {
           action?: string | null;
-          actor_login: string;
           created_at?: string;
           event_type: string;
           id?: string;
           last_processed?: string | null;
-          metadata: Json;
           org: string;
           raw_payload: Json;
           repo: string;
         };
         Update: {
           action?: string | null;
-          actor_login?: string;
           created_at?: string;
           event_type?: string;
           id?: string;
           last_processed?: string | null;
-          metadata?: Json;
           org?: string;
           raw_payload?: Json;
           repo?: string;
@@ -50,18 +44,21 @@ export type Database = {
       };
       repositories: {
         Row: {
+          access_token: string | null;
           created_at: string;
           id: string;
           org: string;
           repo: string;
         };
         Insert: {
+          access_token?: string | null;
           created_at?: string;
           id?: string;
           org: string;
           repo: string;
         };
         Update: {
+          access_token?: string | null;
           created_at?: string;
           id?: string;
           org?: string;
