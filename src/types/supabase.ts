@@ -100,7 +100,7 @@ export type Database = {
           categories: string[] | null;
           created_at: string;
           data: Json;
-          event_bucket_ids: string[] | null;
+          dedupe_hash: string;
           id: string;
           is_read: boolean;
           repo_id: string | null;
@@ -113,7 +113,7 @@ export type Database = {
           categories?: string[] | null;
           created_at?: string;
           data: Json;
-          event_bucket_ids?: string[] | null;
+          dedupe_hash: string;
           id?: string;
           is_read?: boolean;
           repo_id?: string | null;
@@ -126,7 +126,7 @@ export type Database = {
           categories?: string[] | null;
           created_at?: string;
           data?: Json;
-          event_bucket_ids?: string[] | null;
+          dedupe_hash?: string;
           id?: string;
           is_read?: boolean;
           repo_id?: string | null;

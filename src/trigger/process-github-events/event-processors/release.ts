@@ -65,7 +65,6 @@ export async function processReleaseEvent({
       type: "release",
       data: releaseData,
       score: 100,
-      event_bucket_ids: [event.id],
       repo_id: repo.id,
       categories: ["releases"],
     });

@@ -213,7 +213,6 @@ export async function processPullRequestEvent({
         type: "pr update",
         data: prData,
         score: 100,
-        event_bucket_ids: [event.id],
         repo_id: repo.id,
         categories:
           isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
@@ -247,7 +246,6 @@ export async function processPullRequestEvent({
         type: "pr update",
         data: prData,
         score: 100,
-        event_bucket_ids: [event.id],
         repo_id: repo.id,
         categories:
           isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,

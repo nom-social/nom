@@ -159,7 +159,6 @@ export async function processPullRequestReviewEvent({
       data: prStats,
       repo_id: repo.id,
       score: 100, // TODO: calculate score based on review and pr stats
-      event_bucket_ids: [event.id],
       categories:
         isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
     });

@@ -78,7 +78,6 @@ export async function processIssueEvent({
       type: "issue",
       data: issueData,
       score: 100,
-      event_bucket_ids: [event.id],
       repo_id: repo.id,
       categories: isMyIssue || isAssignedToMe ? ["issues"] : undefined,
     });
