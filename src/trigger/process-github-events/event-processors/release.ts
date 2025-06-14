@@ -37,11 +37,6 @@ export async function processReleaseEvent({
   const validationResult = releaseSchema.parse(event.raw_payload);
   const { action, release } = validationResult;
 
-  // Only process published releases
-  if (action !== "published" && action !== "released") {
-    return [];
-  }
-
   const releaseData = {
     action,
     release: {
