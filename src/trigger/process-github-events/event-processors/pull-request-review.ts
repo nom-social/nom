@@ -7,7 +7,7 @@ import * as openai from "@/utils/openai/client";
 import { TablesInsert } from "@/types/supabase";
 
 const pullRequestReviewSchema = z.object({
-  action: z.enum(["submitted", "edited", "dismissed"]),
+  action: z.enum(["submitted"]),
   pull_request: z.object({
     number: z.number(),
     title: z.string(),
@@ -47,8 +47,6 @@ export async function processPullRequestReviewEvent({
 
   const validationResult = pullRequestReviewSchema.parse(event.raw_payload);
   const { action, pull_request, review } = validationResult;
-
-  if (action !== "submitted") return [];
 
   const timelineEntries: TablesInsert<"user_timeline">[] = [];
 
