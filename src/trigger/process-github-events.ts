@@ -88,7 +88,7 @@ export const processGithubEvents = schedules.task({
         await supabase
           .from("user_timeline")
           .upsert(processedEventsPerSubscriber, {
-            onConflict: "user_id,event_bucket_ids",
+            onConflict: "user_id,dedupe_hash",
           })
           .throwOnError();
 

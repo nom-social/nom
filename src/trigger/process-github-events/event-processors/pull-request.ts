@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { Octokit } from "@octokit/rest";
 import { zodResponseFormat } from "openai/helpers/zod";
+import crypto from "crypto";
 
 import { Json, TablesInsert } from "@/types/supabase";
 import * as openai from "@/utils/openai/client";
@@ -184,6 +185,19 @@ export async function processPullRequestEvent({
     return prData;
   };
 
+  const dedupeHash = crypto
+    .createHash("sha256")
+    .update(
+      JSON.stringify({
+        action,
+        number: pull_request.number,
+        org: repo.org,
+        repo: repo.repo,
+        type: "pull_request",
+      })
+    )
+    .digest("hex");
+
   if (
     action === "opened" ||
     action === "reopened" ||
@@ -213,10 +227,10 @@ export async function processPullRequestEvent({
         type: "pr update",
         data: prData,
         score: 100,
-        event_bucket_ids: [event.id],
         repo_id: repo.id,
         categories:
           isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
+        dedupe_hash: dedupeHash,
       });
     }
 
@@ -247,10 +261,10 @@ export async function processPullRequestEvent({
         type: "pr update",
         data: prData,
         score: 100,
-        event_bucket_ids: [event.id],
         repo_id: repo.id,
         categories:
           isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
+        dedupe_hash: dedupeHash,
       });
     }
 

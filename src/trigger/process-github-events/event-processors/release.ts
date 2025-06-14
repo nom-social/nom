@@ -1,4 +1,5 @@
 import { z } from "zod";
+import crypto from "crypto";
 
 import { Json, TablesInsert } from "@/types/supabase";
 
@@ -57,6 +58,19 @@ export async function processReleaseEvent({
     },
   };
 
+  const dedupeHash = crypto
+    .createHash("sha256")
+    .update(
+      JSON.stringify({
+        action,
+        tag_name: release.tag_name,
+        org: repo.org,
+        repo: repo.repo,
+        type: "release",
+      })
+    )
+    .digest("hex");
+
   const timelineEntries: TablesInsert<"user_timeline">[] = [];
 
   for (const subscriber of subscribers) {
@@ -65,9 +79,9 @@ export async function processReleaseEvent({
       type: "release",
       data: releaseData,
       score: 100,
-      event_bucket_ids: [event.id],
       repo_id: repo.id,
       categories: ["releases"],
+      dedupe_hash: dedupeHash,
     });
   }
 

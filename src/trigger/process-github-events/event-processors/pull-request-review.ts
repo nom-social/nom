@@ -1,5 +1,6 @@
 import { Octokit } from "@octokit/rest";
 import { Json } from "@trigger.dev/sdk";
+import crypto from "crypto";
 import z from "zod";
 
 import { createClient } from "@/utils/supabase/background";
@@ -47,6 +48,19 @@ export async function processPullRequestReviewEvent({
 
   const validationResult = pullRequestReviewSchema.parse(event.raw_payload);
   const { action, pull_request, review } = validationResult;
+
+  const dedupeHash = crypto
+    .createHash("sha256")
+    .update(
+      JSON.stringify({
+        action,
+        number: pull_request.number,
+        org: repo.org,
+        repo: repo.repo,
+        type: "pull_request_review",
+      })
+    )
+    .digest("hex");
 
   const timelineEntries: TablesInsert<"user_timeline">[] = [];
 
@@ -159,9 +173,9 @@ export async function processPullRequestReviewEvent({
       data: prStats,
       repo_id: repo.id,
       score: 100, // TODO: calculate score based on review and pr stats
-      event_bucket_ids: [event.id],
       categories:
         isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
+      dedupe_hash: dedupeHash,
     });
   }
 
