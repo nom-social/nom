@@ -1,4 +1,5 @@
 import { z } from "zod";
+import crypto from "crypto";
 
 import { Json, TablesInsert } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/background";
@@ -58,8 +59,21 @@ export async function processIssueEvent({
       state: issue.state,
     },
   };
-  const timelineEntries: TablesInsert<"user_timeline">[] = [];
 
+  const dedupe_hash = crypto
+    .createHash("sha256")
+    .update(
+      JSON.stringify({
+        action,
+        number: issue.number,
+        org: repo.org,
+        repo: repo.repo,
+        type: "issue",
+      })
+    )
+    .digest("hex");
+
+  const timelineEntries: TablesInsert<"user_timeline">[] = [];
   for (const subscriber of subscribers) {
     const { data: user } = await supabase
       .from("users")
@@ -80,6 +94,7 @@ export async function processIssueEvent({
       score: 100,
       repo_id: repo.id,
       categories: isMyIssue || isAssignedToMe ? ["issues"] : undefined,
+      dedupe_hash,
     });
   }
 
