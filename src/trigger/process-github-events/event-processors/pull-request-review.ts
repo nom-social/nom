@@ -110,12 +110,11 @@ export async function processPullRequestReviewEvent({
       aiSummary = completion.choices[0].message.content;
     }
 
-    const isMyReview =
-      user.github_username === pull_request.user.login ||
-      user.github_username === review.user.login ||
-      prDetails.data.requested_reviewers?.some(
+    const isMyReview = user.github_username === pull_request.user.login;
+    const isReviewAssignedToMe =
+      !!prDetails.data.requested_reviewers?.some(
         (reviewer) => reviewer.login === user.github_username
-      );
+      ) || user.github_username === review.user.login;
 
     const prStats = {
       pull_request: {
@@ -161,7 +160,8 @@ export async function processPullRequestReviewEvent({
       repo_id: repo.id,
       score: 100, // TODO: calculate score based on review and pr stats
       event_bucket_ids: [event.id],
-      categories: isMyReview ? ["pull_requests"] : undefined,
+      categories:
+        isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
     });
   }
 

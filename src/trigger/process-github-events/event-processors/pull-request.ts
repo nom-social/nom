@@ -203,11 +203,10 @@ export async function processPullRequestEvent({
         .single()
         .throwOnError();
 
-      const isMyReview =
-        user.github_username === pull_request.user.login ||
-        !!pull_request.requested_reviewers?.some(
-          (r) => r.login === user.github_username
-        );
+      const isMyReview = user.github_username === pull_request.user.login;
+      const isReviewAssignedToMe = !!pull_request.requested_reviewers?.some(
+        (reviewer) => reviewer.login === user.github_username
+      );
 
       timelineEntries.push({
         user_id: subscriber.user_id,
@@ -216,7 +215,8 @@ export async function processPullRequestEvent({
         score: 100,
         event_bucket_ids: [event.id],
         repo_id: repo.id,
-        categories: isMyReview ? ["pull_requests"] : undefined,
+        categories:
+          isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
       });
     }
 
@@ -237,11 +237,10 @@ export async function processPullRequestEvent({
         .single()
         .throwOnError();
 
-      const isMyReview =
-        user.github_username === pull_request.user.login ||
-        !!pull_request.requested_reviewers?.some(
-          (r) => r.login === user.github_username
-        );
+      const isMyReview = user.github_username === pull_request.user.login;
+      const isReviewAssignedToMe = !!pull_request.requested_reviewers?.some(
+        (reviewer) => reviewer.login === user.github_username
+      );
 
       timelineEntries.push({
         user_id: subscriber.user_id,
@@ -250,7 +249,8 @@ export async function processPullRequestEvent({
         score: 100,
         event_bucket_ids: [event.id],
         repo_id: repo.id,
-        categories: isMyReview ? ["pull_requests"] : undefined,
+        categories:
+          isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
       });
     }
 
