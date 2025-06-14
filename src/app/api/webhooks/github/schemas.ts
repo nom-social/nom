@@ -47,14 +47,6 @@ export const githubWebhookPayloadSchema = z.discriminatedUnion("event_type", [
     event_type: z.literal("release"),
     ...githubWebhookBaseSchema.shape,
   }),
-  z.object({
-    event_type: z.literal("issue_comment"),
-    ...githubWebhookBaseSchema.shape,
-  }),
-  z.object({
-    event_type: z.literal("pull_request_review_comment"),
-    ...githubWebhookBaseSchema.shape,
-  }),
 ]);
 
 // Infer types from Zod schemas

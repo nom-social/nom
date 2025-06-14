@@ -2,6 +2,7 @@ import { Json } from "@/types/supabase";
 
 import { processPullRequestReviewEvent } from "./event-processors/pull-request-review";
 import { processPullRequestEvent } from "./event-processors/pull-request";
+import { processIssueEvent } from "./event-processors/issue";
 
 // Helper function to process any event type
 export async function processEvent({
@@ -26,13 +27,13 @@ export async function processEvent({
         repo,
         subscribers,
       });
-    case "pull_request_review_comment":
-      throw new Error("Not implemented");
     case "issues":
-      throw new Error("Not implemented");
+      return processIssueEvent({
+        event,
+        repo,
+        subscribers,
+      });
     case "release":
-      throw new Error("Not implemented");
-    case "issue_comment":
       throw new Error("Not implemented");
     default:
       const unknownEvent = event as { event_type: string };

@@ -46,11 +46,7 @@ export const processGithubEvents = schedules.task({
       // Update snoozed entries to be visible again
       await supabase
         .from("user_timeline")
-        .update({
-          snooze_to: null,
-          created_at: currentTimestamp,
-          visible_at: currentTimestamp,
-        })
+        .update({ snooze_to: null, created_at: currentTimestamp })
         .in(
           "id",
           snoozedEntries.map((entry) => entry.id)
