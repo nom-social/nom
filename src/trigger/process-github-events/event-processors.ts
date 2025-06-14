@@ -3,6 +3,7 @@ import { Json } from "@/types/supabase";
 import { processPullRequestReviewEvent } from "./event-processors/pull-request-review";
 import { processPullRequestEvent } from "./event-processors/pull-request";
 import { processIssueEvent } from "./event-processors/issue";
+import { processReleaseEvent } from "./event-processors/release";
 
 // Helper function to process any event type
 export async function processEvent({
@@ -34,7 +35,11 @@ export async function processEvent({
         subscribers,
       });
     case "release":
-      throw new Error("Not implemented");
+      return processReleaseEvent({
+        event,
+        repo,
+        subscribers,
+      });
     default:
       const unknownEvent = event as { event_type: string };
       throw new Error(`Unknown event type: ${unknownEvent.event_type}`);
