@@ -101,7 +101,6 @@ export type Database = {
           created_at: string;
           data: Json;
           event_bucket_ids: string[] | null;
-          expires_at: string | null;
           id: string;
           is_read: boolean;
           repo_id: string | null;
@@ -109,14 +108,12 @@ export type Database = {
           snooze_to: string | null;
           type: string;
           user_id: string;
-          visible_at: string | null;
         };
         Insert: {
           categories?: string[] | null;
           created_at?: string;
           data: Json;
           event_bucket_ids?: string[] | null;
-          expires_at?: string | null;
           id?: string;
           is_read?: boolean;
           repo_id?: string | null;
@@ -124,14 +121,12 @@ export type Database = {
           snooze_to?: string | null;
           type: string;
           user_id: string;
-          visible_at?: string | null;
         };
         Update: {
           categories?: string[] | null;
           created_at?: string;
           data?: Json;
           event_bucket_ids?: string[] | null;
-          expires_at?: string | null;
           id?: string;
           is_read?: boolean;
           repo_id?: string | null;
@@ -139,7 +134,6 @@ export type Database = {
           snooze_to?: string | null;
           type?: string;
           user_id?: string;
-          visible_at?: string | null;
         };
         Relationships: [
           {
