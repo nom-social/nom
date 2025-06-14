@@ -49,7 +49,7 @@ export async function processPullRequestReviewEvent({
   const validationResult = pullRequestReviewSchema.parse(event.raw_payload);
   const { action, pull_request, review } = validationResult;
 
-  const dedupe_hash = crypto
+  const dedupeHash = crypto
     .createHash("sha256")
     .update(
       JSON.stringify({
@@ -175,7 +175,7 @@ export async function processPullRequestReviewEvent({
       score: 100, // TODO: calculate score based on review and pr stats
       categories:
         isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
-      dedupe_hash,
+      dedupe_hash: dedupeHash,
     });
   }
 

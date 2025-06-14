@@ -60,7 +60,7 @@ export async function processIssueEvent({
     },
   };
 
-  const dedupe_hash = crypto
+  const dedupeHash = crypto
     .createHash("sha256")
     .update(
       JSON.stringify({
@@ -94,7 +94,7 @@ export async function processIssueEvent({
       score: 100,
       repo_id: repo.id,
       categories: isMyIssue || isAssignedToMe ? ["issues"] : undefined,
-      dedupe_hash,
+      dedupe_hash: dedupeHash,
     });
   }
 

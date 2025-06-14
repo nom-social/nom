@@ -58,7 +58,7 @@ export async function processReleaseEvent({
     },
   };
 
-  const dedupe_hash = crypto
+  const dedupeHash = crypto
     .createHash("sha256")
     .update(
       JSON.stringify({
@@ -81,7 +81,7 @@ export async function processReleaseEvent({
       score: 100,
       repo_id: repo.id,
       categories: ["releases"],
-      dedupe_hash,
+      dedupe_hash: dedupeHash,
     });
   }
 

@@ -185,7 +185,7 @@ export async function processPullRequestEvent({
     return prData;
   };
 
-  const dedupe_hash = crypto
+  const dedupeHash = crypto
     .createHash("sha256")
     .update(
       JSON.stringify({
@@ -230,7 +230,7 @@ export async function processPullRequestEvent({
         repo_id: repo.id,
         categories:
           isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
-        dedupe_hash,
+        dedupe_hash: dedupeHash,
       });
     }
 
@@ -264,7 +264,7 @@ export async function processPullRequestEvent({
         repo_id: repo.id,
         categories:
           isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
-        dedupe_hash,
+        dedupe_hash: dedupeHash,
       });
     }
 
