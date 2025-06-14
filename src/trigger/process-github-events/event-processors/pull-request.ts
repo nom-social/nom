@@ -185,7 +185,6 @@ export async function processPullRequestEvent({
     return prData;
   };
 
-  // TODO: Need to think about this more.
   const dedupe_hash = crypto
     .createHash("sha256")
     .update(

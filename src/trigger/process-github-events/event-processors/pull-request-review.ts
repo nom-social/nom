@@ -49,7 +49,6 @@ export async function processPullRequestReviewEvent({
   const validationResult = pullRequestReviewSchema.parse(event.raw_payload);
   const { action, pull_request, review } = validationResult;
 
-  // TODO: Need to think about this more.
   const dedupe_hash = crypto
     .createHash("sha256")
     .update(

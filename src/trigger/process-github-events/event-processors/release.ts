@@ -58,7 +58,6 @@ export async function processReleaseEvent({
     },
   };
 
-  // TODO: Need to think about this more.
   const dedupe_hash = crypto
     .createHash("sha256")
     .update(
