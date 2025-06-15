@@ -66,6 +66,7 @@ export const processGithubEvents = schedules.task({
           event,
           repo,
           subscribers,
+          currentTimestamp,
         });
 
         // Create timeline entries for each subscriber
