@@ -96,6 +96,7 @@ export async function processIssueEvent({
       categories: isMyIssue || isAssignedToMe ? ["issues"] : undefined,
       dedupe_hash: dedupeHash,
       updated_at: new Date().toISOString(),
+      event_ids: [event.id],
     });
   }
 
