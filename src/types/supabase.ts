@@ -107,6 +107,7 @@ export type Database = {
           score: number;
           snooze_to: string | null;
           type: string;
+          updated_at: string;
           user_id: string;
         };
         Insert: {
@@ -120,6 +121,7 @@ export type Database = {
           score?: number;
           snooze_to?: string | null;
           type: string;
+          updated_at?: string;
           user_id: string;
         };
         Update: {
@@ -133,6 +135,7 @@ export type Database = {
           score?: number;
           snooze_to?: string | null;
           type?: string;
+          updated_at?: string;
           user_id?: string;
         };
         Relationships: [

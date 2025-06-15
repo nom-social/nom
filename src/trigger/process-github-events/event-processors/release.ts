@@ -82,6 +82,7 @@ export async function processReleaseEvent({
       repo_id: repo.id,
       categories: ["releases"],
       dedupe_hash: dedupeHash,
+      updated_at: new Date().toISOString(),
     });
   }
 

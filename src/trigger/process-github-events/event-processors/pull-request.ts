@@ -231,6 +231,7 @@ export async function processPullRequestEvent({
         categories:
           isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
         dedupe_hash: dedupeHash,
+        updated_at: new Date().toISOString(),
       });
     }
 
@@ -265,6 +266,7 @@ export async function processPullRequestEvent({
         categories:
           isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
         dedupe_hash: dedupeHash,
+        updated_at: new Date().toISOString(),
       });
     }
 
