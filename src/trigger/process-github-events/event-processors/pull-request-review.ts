@@ -177,6 +177,7 @@ export async function processPullRequestReviewEvent({
         isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
       dedupe_hash: dedupeHash,
       updated_at: new Date().toISOString(),
+      event_ids: [event.id],
     });
   }
 

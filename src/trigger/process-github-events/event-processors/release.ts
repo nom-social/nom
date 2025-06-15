@@ -83,6 +83,7 @@ export async function processReleaseEvent({
       categories: ["releases"],
       dedupe_hash: dedupeHash,
       updated_at: new Date().toISOString(),
+      event_ids: [event.id],
     });
   }
 
