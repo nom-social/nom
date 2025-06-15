@@ -57,10 +57,12 @@ export async function processPullRequestEvent({
   event,
   repo,
   subscribers,
+  currentTimestamp,
 }: {
   event: { event_type: string; raw_payload: Json; id: string };
   repo: { repo: string; org: string; id: string; access_token: string | null };
   subscribers: { user_id: string }[];
+  currentTimestamp: string;
 }): Promise<TablesInsert<"user_timeline">[]> {
   const octokit = new Octokit({ auth: repo.access_token || undefined });
   const openaiClient = openai.createClient();
@@ -231,7 +233,7 @@ export async function processPullRequestEvent({
         categories:
           isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
         dedupe_hash: dedupeHash,
-        updated_at: new Date().toISOString(),
+        updated_at: currentTimestamp,
         event_ids: [event.id],
       });
     }
@@ -267,7 +269,7 @@ export async function processPullRequestEvent({
         categories:
           isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
         dedupe_hash: dedupeHash,
-        updated_at: new Date().toISOString(),
+        updated_at: currentTimestamp,
         event_ids: [event.id],
       });
     }

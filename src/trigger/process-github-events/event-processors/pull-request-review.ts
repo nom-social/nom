@@ -36,10 +36,12 @@ export async function processPullRequestReviewEvent({
   event,
   repo,
   subscribers,
+  currentTimestamp,
 }: {
   event: { event_type: string; raw_payload: Json; id: string };
   repo: { repo: string; org: string; id: string; access_token: string | null };
   subscribers: { user_id: string }[];
+  currentTimestamp: string;
 }): Promise<TablesInsert<"user_timeline">[]> {
   const supabase = createClient();
 
@@ -176,7 +178,7 @@ export async function processPullRequestReviewEvent({
       categories:
         isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
       dedupe_hash: dedupeHash,
-      updated_at: new Date().toISOString(),
+      updated_at: currentTimestamp,
       event_ids: [event.id],
     });
   }

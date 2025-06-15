@@ -6,42 +6,22 @@ import { processIssueEvent } from "./event-processors/issue";
 import { processReleaseEvent } from "./event-processors/release";
 
 // Helper function to process any event type
-export async function processEvent({
-  event,
-  repo,
-  subscribers,
-}: {
+export async function processEvent(args: {
   event: { event_type: string; raw_payload: Json; id: string };
   repo: { repo: string; org: string; id: string; access_token: string | null };
   subscribers: { user_id: string }[];
+  currentTimestamp: string;
 }) {
-  switch (event.event_type) {
+  switch (args.event.event_type) {
     case "pull_request":
-      return processPullRequestEvent({
-        event,
-        repo,
-        subscribers,
-      });
+      return processPullRequestEvent(args);
     case "pull_request_review":
-      return processPullRequestReviewEvent({
-        event,
-        repo,
-        subscribers,
-      });
+      return processPullRequestReviewEvent(args);
     case "issues":
-      return processIssueEvent({
-        event,
-        repo,
-        subscribers,
-      });
+      return processIssueEvent(args);
     case "release":
-      return processReleaseEvent({
-        event,
-        repo,
-        subscribers,
-      });
+      return processReleaseEvent(args);
     default:
-      const unknownEvent = event as { event_type: string };
-      throw new Error(`Unknown event type: ${unknownEvent.event_type}`);
+      throw new Error(`Unknown event type: ${args.event.event_type}`);
   }
 }

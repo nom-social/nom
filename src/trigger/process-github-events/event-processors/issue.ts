@@ -36,10 +36,12 @@ export async function processIssueEvent({
   event,
   repo,
   subscribers,
+  currentTimestamp,
 }: {
   event: { event_type: string; raw_payload: Json; id: string };
   repo: { repo: string; org: string; id: string; access_token: string | null };
   subscribers: { user_id: string }[];
+  currentTimestamp: string;
 }): Promise<TablesInsert<"user_timeline">[]> {
   const supabase = createClient();
 
@@ -95,7 +97,7 @@ export async function processIssueEvent({
       repo_id: repo.id,
       categories: isMyIssue || isAssignedToMe ? ["issues"] : undefined,
       dedupe_hash: dedupeHash,
-      updated_at: new Date().toISOString(),
+      updated_at: currentTimestamp,
       event_ids: [event.id],
     });
   }
