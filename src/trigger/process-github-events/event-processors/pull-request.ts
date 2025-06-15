@@ -12,6 +12,7 @@ import {
   PR_ANALYSIS_PROMPT,
   prAnalysisResponseSchema,
 } from "./pull-request/prompts";
+import { BASELINE_SCORE, PULL_REQUEST_MULTIPLIER } from "./shared/constants";
 
 const pullRequestSchema = z.object({
   action: z.enum([
@@ -228,7 +229,7 @@ export async function processPullRequestEvent({
         user_id: subscriber.user_id,
         type: "pr update",
         data: prData,
-        score: 100,
+        score: BASELINE_SCORE * PULL_REQUEST_MULTIPLIER,
         repo_id: repo.id,
         categories:
           isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
@@ -264,7 +265,7 @@ export async function processPullRequestEvent({
         user_id: subscriber.user_id,
         type: "pr update",
         data: prData,
-        score: 100,
+        score: BASELINE_SCORE * PULL_REQUEST_MULTIPLIER,
         repo_id: repo.id,
         categories:
           isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,

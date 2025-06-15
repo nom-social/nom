@@ -3,6 +3,8 @@ import crypto from "crypto";
 
 import { Json, TablesInsert } from "@/types/supabase";
 
+import { BASELINE_SCORE, RELEASE_MULTIPLIER } from "./shared/constants";
+
 const releaseSchema = z.object({
   action: z.enum(["published"]),
   release: z.object({
@@ -80,7 +82,7 @@ export async function processReleaseEvent({
       user_id: subscriber.user_id,
       type: "release",
       data: releaseData,
-      score: 100,
+      score: BASELINE_SCORE * RELEASE_MULTIPLIER,
       repo_id: repo.id,
       categories: ["releases"],
       dedupe_hash: dedupeHash,

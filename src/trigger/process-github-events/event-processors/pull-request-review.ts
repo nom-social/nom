@@ -7,6 +7,11 @@ import { createClient } from "@/utils/supabase/background";
 import * as openai from "@/utils/openai/client";
 import { TablesInsert } from "@/types/supabase";
 
+import {
+  BASELINE_SCORE,
+  PULL_REQUEST_REVIEW_MULTIPLIER,
+} from "./shared/constants";
+
 const pullRequestReviewSchema = z.object({
   action: z.enum(["submitted"]),
   pull_request: z.object({
@@ -174,7 +179,7 @@ export async function processPullRequestReviewEvent({
       type: "pr update",
       data: prStats,
       repo_id: repo.id,
-      score: 100, // TODO: calculate score based on review and pr stats
+      score: BASELINE_SCORE * PULL_REQUEST_REVIEW_MULTIPLIER,
       categories:
         isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
       dedupe_hash: dedupeHash,
