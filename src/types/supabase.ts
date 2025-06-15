@@ -120,7 +120,7 @@ export type Database = {
           id?: string;
           is_read?: boolean;
           repo_id?: string | null;
-          score?: number;
+          score: number;
           snooze_to?: string | null;
           type: string;
           updated_at?: string;

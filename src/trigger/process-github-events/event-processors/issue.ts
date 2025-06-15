@@ -4,6 +4,8 @@ import crypto from "crypto";
 import { Json, TablesInsert } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/background";
 
+import { BASELINE_SCORE, ISSUE_MULTIPLIER } from "./shared/constants";
+
 const issueSchema = z.object({
   action: z.enum(["opened", "closed", "reopened", "assigned"]),
   issue: z.object({
@@ -93,7 +95,7 @@ export async function processIssueEvent({
       user_id: subscriber.user_id,
       type: "issue",
       data: issueData,
-      score: 100,
+      score: BASELINE_SCORE * ISSUE_MULTIPLIER,
       repo_id: repo.id,
       categories: isMyIssue || isAssignedToMe ? ["issues"] : undefined,
       dedupe_hash: dedupeHash,
