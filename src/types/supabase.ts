@@ -101,6 +101,7 @@ export type Database = {
           created_at: string;
           data: Json;
           dedupe_hash: string;
+          event_ids: string[] | null;
           id: string;
           is_read: boolean;
           repo_id: string | null;
@@ -115,6 +116,7 @@ export type Database = {
           created_at?: string;
           data: Json;
           dedupe_hash: string;
+          event_ids?: string[] | null;
           id?: string;
           is_read?: boolean;
           repo_id?: string | null;
@@ -129,6 +131,7 @@ export type Database = {
           created_at?: string;
           data?: Json;
           dedupe_hash?: string;
+          event_ids?: string[] | null;
           id?: string;
           is_read?: boolean;
           repo_id?: string | null;
