@@ -31,28 +31,12 @@ export const processGithubEvents = schedules.task({
     logger.info(`Processing ${events.length} events`);
 
     // First, handle any snoozed timeline entries that have reached their time
-    const { data: snoozedEntries } = await supabase
+    await supabase
       .from("user_timeline")
-      .select("*")
+      .update({ snooze_to: null, created_at: currentTimestamp })
       .not("snooze_to", "is", null)
       .lt("snooze_to", currentTimestamp)
       .throwOnError();
-
-    if (snoozedEntries && snoozedEntries.length > 0) {
-      logger.info(
-        `Processing ${snoozedEntries.length} snoozed timeline entries`
-      );
-
-      // Update snoozed entries to be visible again
-      await supabase
-        .from("user_timeline")
-        .update({ snooze_to: null, created_at: currentTimestamp })
-        .in(
-          "id",
-          snoozedEntries.map((entry) => entry.id)
-        )
-        .throwOnError();
-    }
 
     for (const event of events || []) {
       try {
