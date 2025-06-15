@@ -33,7 +33,7 @@ export const processGithubEvents = schedules.task({
     // First, handle any snoozed timeline entries that have reached their time
     await supabase
       .from("user_timeline")
-      .update({ snooze_to: null, created_at: currentTimestamp })
+      .update({ snooze_to: null, updated_at: currentTimestamp })
       .not("snooze_to", "is", null)
       .lt("snooze_to", currentTimestamp)
       .throwOnError();
