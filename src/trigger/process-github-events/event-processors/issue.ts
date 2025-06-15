@@ -95,6 +95,7 @@ export async function processIssueEvent({
       repo_id: repo.id,
       categories: isMyIssue || isAssignedToMe ? ["issues"] : undefined,
       dedupe_hash: dedupeHash,
+      updated_at: new Date().toISOString(),
     });
   }
 
