@@ -236,6 +236,7 @@ export async function processPullRequestEvent({
         dedupe_hash: dedupeHash,
         updated_at: currentTimestamp,
         event_ids: [event.id],
+        is_read: false,
       });
     }
 
@@ -272,6 +273,7 @@ export async function processPullRequestEvent({
         dedupe_hash: dedupeHash,
         updated_at: currentTimestamp,
         event_ids: [event.id],
+        is_read: false,
       });
     }
 
