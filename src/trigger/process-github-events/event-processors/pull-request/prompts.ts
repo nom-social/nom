@@ -3,7 +3,7 @@ import { z } from "zod";
 export const PR_ANALYSIS_PROMPT = `Analyze this pull request and provide a JSON response with the following structure:
 
 {
-  "summary": "A concise 1-2 sentence description of what the PR does",
+  "summary": "A concise 3-4 sentence summary",
   "review_time_minutes": number,
   "special_considerations": [
     "Important factors that need attention, such as significant risks, complex changes, or notable patterns",
@@ -40,6 +40,15 @@ Focus on:
    - Author experience or check status (only if there are specific concerns)
    - Other important factors that reviewers should be aware of
 4. Classifying the type of change based on the content
+
+Additionally, determine if this pull request needs special attention. A PR needs special attention if ANY of these conditions are met:
+- The PR addresses a critical bug (e.g., high-severity, urgent, or production issue)
+- The PR requires a database migration
+- The PR involves a service migration
+- The PR involves downtime or a maintenance window
+- The PR includes an update that can affect multiple components or modules
+
+If the PR meets any of these criteria, mention this in your summary. Explain why special attention is needed, citing specific evidence from the PR (such as the description, labels, diff, or special considerations). Be specific about the risks or impacts, and mention any actions reviewers should take or stakeholders to notify.
 
 Keep the analysis concise and actionable. The summary should be clear enough for someone to understand the PR's purpose without reading the full diff.`;
 
