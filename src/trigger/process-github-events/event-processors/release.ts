@@ -88,6 +88,7 @@ export async function processReleaseEvent({
       dedupe_hash: dedupeHash,
       updated_at: currentTimestamp,
       event_ids: [event.id],
+      is_read: false,
     });
   }
 
