@@ -77,14 +77,6 @@ export async function POST(request: Request) {
     // Handle star events
     if (payload.event_type === "star") {
       const actorLogin = payload.sender.login;
-      if (!actorLogin) {
-        console.error("Missing actor login for star event");
-        return NextResponse.json(
-          { error: "Missing actor login" },
-          { status: httpStatus.BAD_REQUEST }
-        );
-      }
-
       // Check if user exists in Supabase auth
       const { data: user } = await supabase
         .from("users")
