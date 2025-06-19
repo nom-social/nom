@@ -114,11 +114,6 @@ export async function POST(request: Request) {
           .eq("user_id", user.id)
           .eq("repo_id", repoData.id)
           .throwOnError();
-
-      return NextResponse.json({
-        message: "Star event processed successfully",
-        timestamp: new Date().toISOString(),
-      });
     }
 
     // Store in Supabase
