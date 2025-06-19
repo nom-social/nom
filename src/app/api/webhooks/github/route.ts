@@ -92,14 +92,7 @@ export async function POST(request: Request) {
         .eq("github_username", actorLogin)
         .single();
 
-      if (!user) {
-        return NextResponse.json({
-          message: "User not found, ignoring event",
-          timestamp: new Date().toISOString(),
-        });
-      }
-
-      if (payload.action === "created")
+      if (user && payload.action === "created")
         await supabase
           .from("subscriptions")
           .upsert(
@@ -107,7 +100,8 @@ export async function POST(request: Request) {
             { onConflict: "user_id,repo_id" }
           )
           .throwOnError();
-      if (payload.action === "deleted")
+
+      if (user && payload.action === "deleted")
         await supabase
           .from("subscriptions")
           .delete()
