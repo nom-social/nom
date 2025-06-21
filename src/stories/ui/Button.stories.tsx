@@ -1,4 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Search } from "lucide-react";
+import React from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -103,10 +105,11 @@ export const Large: Story = {
 };
 
 export const Icon: Story = {
-  args: {
-    children: "🔍",
-    size: "icon",
-  },
+  render: () => (
+    <Button size="icon">
+      <Search className="h-4 w-4" />
+    </Button>
+  ),
 };
 
 export const Disabled: Story = {
