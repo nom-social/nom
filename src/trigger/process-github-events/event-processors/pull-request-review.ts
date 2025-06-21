@@ -65,6 +65,7 @@ export async function processPullRequestReviewEvent({
         org: repo.org,
         repo: repo.repo,
         type: "pull_request_review",
+        review_id: review.id,
       })
     )
     .digest("hex");

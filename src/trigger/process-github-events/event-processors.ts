@@ -4,6 +4,7 @@ import { processPullRequestReviewEvent } from "./event-processors/pull-request-r
 import { processPullRequestEvent } from "./event-processors/pull-request";
 import { processIssueEvent } from "./event-processors/issue";
 import { processReleaseEvent } from "./event-processors/release";
+import { processIssueCommentEvent } from "./event-processors/issue-comment";
 
 // Helper function to process any event type
 export async function processEvent(args: {
@@ -19,6 +20,8 @@ export async function processEvent(args: {
       return processPullRequestReviewEvent(args);
     case "issues":
       return processIssueEvent(args);
+    case "issue_comment":
+      return processIssueCommentEvent(args);
     case "release":
       return processReleaseEvent(args);
     default:
