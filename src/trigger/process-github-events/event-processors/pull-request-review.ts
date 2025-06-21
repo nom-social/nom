@@ -13,7 +13,7 @@ import {
 } from "./shared/constants";
 
 const pullRequestReviewSchema = z.object({
-  action: z.enum(["submitted"]),
+  action: z.enum(["submitted", "edited"]),
   pull_request: z.object({
     number: z.number(),
     title: z.string(),

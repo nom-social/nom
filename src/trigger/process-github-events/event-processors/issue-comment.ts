@@ -8,7 +8,7 @@ import { TablesInsert } from "@/types/supabase";
 import { BASELINE_SCORE, ISSUE_MULTIPLIER } from "./shared/constants";
 
 const issueCommentSchema = z.object({
-  action: z.enum(["created", "deleted"]),
+  action: z.enum(["created", "edited"]),
   issue: z.object({
     number: z.number(),
     title: z.string(),
@@ -63,9 +63,6 @@ export async function processIssueCommentEvent({
 
   const validationResult = issueCommentSchema.parse(event.raw_payload);
   const { action, issue, comment } = validationResult;
-
-  // Skip processing for deleted comments
-  if (action === "deleted") return [];
 
   const dedupeHash = crypto
     .createHash("sha256")

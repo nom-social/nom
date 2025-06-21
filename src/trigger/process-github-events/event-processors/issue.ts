@@ -7,7 +7,7 @@ import { createClient } from "@/utils/supabase/background";
 import { BASELINE_SCORE, ISSUE_MULTIPLIER } from "./shared/constants";
 
 const issueSchema = z.object({
-  action: z.enum(["opened", "closed", "reopened", "assigned"]),
+  action: z.enum(["opened", "closed", "reopened", "assigned", "edited"]),
   issue: z.object({
     number: z.number(),
     title: z.string(),
