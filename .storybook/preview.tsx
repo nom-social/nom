@@ -1,8 +1,14 @@
 import React from "react";
 import type { Preview } from "@storybook/nextjs-vite";
+import { JetBrains_Mono } from "next/font/google";
 
 import "../src/app/globals.css";
 import { ThemeProvider } from "../src/components/theme-provider";
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+});
 
 const preview: Preview = {
   parameters: {
@@ -19,7 +25,7 @@ const preview: Preview = {
   decorators: [
     (Story) => (
       <ThemeProvider attribute="class" defaultTheme="dark">
-        <div className="dark">
+        <div className={`dark ${jetbrainsMono.variable} font-mono antialiased`}>
           <Story />
         </div>
       </ThemeProvider>
