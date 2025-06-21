@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const meta = {
   title: "UI/Dialog",
@@ -87,23 +88,25 @@ export const LongContent: Story = {
       <DialogTrigger asChild>
         <Button variant="outline">Open Long Dialog</Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[80vh]">
         <DialogHeader>
           <DialogTitle>Scrollable Content</DialogTitle>
           <DialogDescription>
             This dialog contains long content that will scroll.
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <p key={i} className="mb-4">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat.
-            </p>
-          ))}
-        </div>
+        <ScrollArea className="h-[60vh]">
+          <div className="py-4">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <p key={i} className="mb-4">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+                enim ad minim veniam, quis nostrud exercitation ullamco laboris
+                nisi ut aliquip ex ea commodo consequat.
+              </p>
+            ))}
+          </div>
+        </ScrollArea>
         <DialogFooter>
           <Button>Close</Button>
         </DialogFooter>
