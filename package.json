@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@octokit/rest": "^22.0.0",
+    "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-slot": "^1.2.3",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.50.0",
