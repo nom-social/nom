@@ -228,7 +228,7 @@ export async function processPullRequestEvent({
 
       timelineEntries.push({
         user_id: subscriber.user_id,
-        type: "pr update",
+        type: "pull_request",
         data: prData,
         score: BASELINE_SCORE * PULL_REQUEST_MULTIPLIER,
         repo_id: repo.id,
@@ -265,7 +265,7 @@ export async function processPullRequestEvent({
 
       timelineEntries.push({
         user_id: subscriber.user_id,
-        type: "pr update",
+        type: "pull_request",
         data: prData,
         score: BASELINE_SCORE * PULL_REQUEST_MULTIPLIER,
         repo_id: repo.id,

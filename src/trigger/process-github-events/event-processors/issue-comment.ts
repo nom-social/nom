@@ -116,7 +116,7 @@ export async function processIssueCommentEvent({
 
     timelineEntries.push({
       user_id: subscriber.user_id,
-      type: "issue comment",
+      type: "issue_comment",
       data: issueData,
       repo_id: repo.id,
       score: BASELINE_SCORE * ISSUE_MULTIPLIER,

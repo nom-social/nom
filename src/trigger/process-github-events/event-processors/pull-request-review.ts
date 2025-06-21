@@ -135,7 +135,7 @@ export async function processPullRequestReviewEvent({
 
     timelineEntries.push({
       user_id: subscriber.user_id,
-      type: "pr update",
+      type: "pull_request_review",
       data: prStats,
       repo_id: repo.id,
       score: BASELINE_SCORE * PULL_REQUEST_REVIEW_MULTIPLIER,
