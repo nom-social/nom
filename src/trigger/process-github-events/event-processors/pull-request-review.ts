@@ -13,7 +13,7 @@ import {
 } from "./shared/constants";
 
 const pullRequestReviewSchema = z.object({
-  action: z.enum(["submitted"]),
+  action: z.enum(["submitted", "edited"]),
   pull_request: z.object({
     number: z.number(),
     title: z.string(),
@@ -65,6 +65,7 @@ export async function processPullRequestReviewEvent({
         org: repo.org,
         repo: repo.repo,
         type: "pull_request_review",
+        review_id: review.id,
       })
     )
     .digest("hex");

@@ -1,22 +1,23 @@
-import { z } from "zod";
+import { Json } from "@trigger.dev/sdk";
 import crypto from "crypto";
+import z from "zod";
 
-import { Json, TablesInsert } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/background";
+import { TablesInsert } from "@/types/supabase";
 
 import { BASELINE_SCORE, ISSUE_MULTIPLIER } from "./shared/constants";
 
-const issueSchema = z.object({
-  action: z.enum(["opened", "closed", "reopened", "assigned", "edited"]),
+const issueCommentSchema = z.object({
+  action: z.enum(["created", "edited"]),
   issue: z.object({
     number: z.number(),
     title: z.string(),
-    body: z.string().nullable(),
-    html_url: z.string(),
-    created_at: z.coerce.date(),
-    updated_at: z.coerce.date(),
-    state: z.enum(["open", "closed"]),
     user: z.object({ login: z.string() }),
+    state: z.enum(["open", "closed"]),
+    html_url: z.string(),
+    body: z.string().nullable(),
+    created_at: z.coerce.date(),
+    assignees: z.array(z.object({ login: z.string() })),
     author_association: z.enum([
       "COLLABORATOR",
       "CONTRIBUTOR",
@@ -27,14 +28,27 @@ const issueSchema = z.object({
       "NONE",
       "OWNER",
     ]),
-    assignee: z.object({ login: z.string() }).nullable(),
-    assignees: z.array(z.object({ login: z.string() })),
-    labels: z.array(z.object({ name: z.string() })),
-    comments: z.number(),
+  }),
+  comment: z.object({
+    id: z.number(),
+    user: z.object({ login: z.string() }),
+    body: z.string(),
+    html_url: z.string(),
+    created_at: z.coerce.date(),
+    author_association: z.enum([
+      "COLLABORATOR",
+      "CONTRIBUTOR",
+      "FIRST_TIMER",
+      "FIRST_TIME_CONTRIBUTOR",
+      "MANNEQUIN",
+      "MEMBER",
+      "NONE",
+      "OWNER",
+    ]),
   }),
 });
 
-export async function processIssueEvent({
+export async function processIssueCommentEvent({
   event,
   repo,
   subscribers,
@@ -47,22 +61,8 @@ export async function processIssueEvent({
 }): Promise<TablesInsert<"user_timeline">[]> {
   const supabase = createClient();
 
-  const validationResult = issueSchema.parse(event.raw_payload);
-  const { action, issue } = validationResult;
-
-  const issueData = {
-    action,
-    issue: {
-      user: { login: issue.user.login },
-      number: issue.number,
-      title: issue.title,
-      body: issue.body,
-      html_url: issue.html_url,
-      created_at: issue.created_at.toISOString(),
-      assignees: issue.assignees,
-      state: issue.state,
-    },
-  };
+  const validationResult = issueCommentSchema.parse(event.raw_payload);
+  const { action, issue, comment } = validationResult;
 
   const dedupeHash = crypto
     .createHash("sha256")
@@ -70,14 +70,36 @@ export async function processIssueEvent({
       JSON.stringify({
         action,
         number: issue.number,
+        comment_id: comment.id,
         org: repo.org,
         repo: repo.repo,
-        type: "issue",
+        type: "issue_comment",
       })
     )
     .digest("hex");
 
+  const issueData = {
+    action,
+    issue: {
+      number: issue.number,
+      title: issue.title,
+      user: { login: issue.user.login },
+      state: issue.state,
+      html_url: issue.html_url,
+      body: issue.body,
+      created_at: issue.created_at.toISOString(),
+      assignees: issue.assignees,
+    },
+    comment: {
+      user: { login: comment.user.login },
+      body: comment.body,
+      html_url: comment.html_url,
+      created_at: comment.created_at.toISOString(),
+    },
+  };
+
   const timelineEntries: TablesInsert<"user_timeline">[] = [];
+
   for (const subscriber of subscribers) {
     const { data: user } = await supabase
       .from("users")
@@ -90,14 +112,16 @@ export async function processIssueEvent({
     const isAssignedToMe = issue.assignees.some(
       (assignee) => assignee.login === user.github_username
     );
+    const isMyComment = user.github_username === comment.user.login;
 
     timelineEntries.push({
       user_id: subscriber.user_id,
-      type: "issue",
+      type: "issue comment",
       data: issueData,
-      score: BASELINE_SCORE * ISSUE_MULTIPLIER,
       repo_id: repo.id,
-      categories: isMyIssue || isAssignedToMe ? ["issues"] : undefined,
+      score: BASELINE_SCORE * ISSUE_MULTIPLIER,
+      categories:
+        isMyIssue || isAssignedToMe || isMyComment ? ["issues"] : undefined,
       dedupe_hash: dedupeHash,
       updated_at: currentTimestamp,
       event_ids: [event.id],

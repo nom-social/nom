@@ -21,6 +21,7 @@ const pullRequestSchema = z.object({
     "review_requested",
     "reopened",
     "ready_for_review",
+    "edited",
   ]),
   pull_request: z.object({
     number: z.number(),
