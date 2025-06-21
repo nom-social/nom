@@ -26,7 +26,7 @@ type Story = StoryObj<typeof Card>;
 
 export const Default: Story = {
   render: () => (
-    <Card>
+    <Card className="w-[350px]">
       <CardHeader>
         <CardTitle>Card Title</CardTitle>
         <CardDescription>Card Description</CardDescription>
@@ -43,7 +43,7 @@ export const Default: Story = {
 
 export const WithAction: Story = {
   render: () => (
-    <Card>
+    <Card className="w-[350px]">
       <CardHeader>
         <CardTitle>Notification</CardTitle>
         <CardDescription>You have a new message</CardDescription>
@@ -68,7 +68,7 @@ export const WithAction: Story = {
 
 export const ContentOnly: Story = {
   render: () => (
-    <Card>
+    <Card className="w-[350px]">
       <CardContent>
         <p>A simple card with only content.</p>
       </CardContent>
@@ -78,7 +78,7 @@ export const ContentOnly: Story = {
 
 export const HeaderAndContent: Story = {
   render: () => (
-    <Card>
+    <Card className="w-[350px]">
       <CardHeader>
         <CardTitle>Welcome Back</CardTitle>
         <CardDescription>Continue where you left off</CardDescription>
@@ -101,21 +101,21 @@ export const KitchenSink: Story = {
     <div className="flex flex-col gap-8 p-4">
       {/* Basic Layout Variations */}
       <div className="grid grid-cols-2 gap-4">
-        <Card>
+        <Card className="w-[350px]">
           <CardHeader>
             <CardTitle>Header Only</CardTitle>
             <CardDescription>A card with just a header</CardDescription>
           </CardHeader>
         </Card>
 
-        <Card>
+        <Card className="w-[350px]">
           <CardContent>
             <p>Content Only</p>
             <p className="text-muted-foreground text-sm">No header or footer</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="w-[350px]">
           <CardHeader>
             <CardTitle>Header & Content</CardTitle>
             <CardDescription>Most common layout</CardDescription>
@@ -125,7 +125,7 @@ export const KitchenSink: Story = {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="w-[350px]">
           <CardHeader>
             <CardTitle>Complete Card</CardTitle>
             <CardDescription>With all sections</CardDescription>
@@ -141,7 +141,7 @@ export const KitchenSink: Story = {
 
       {/* Interactive Examples */}
       <div className="grid grid-cols-2 gap-4">
-        <Card>
+        <Card className="w-[350px]">
           <CardHeader>
             <CardTitle>With Action</CardTitle>
             <CardDescription>Card with action button</CardDescription>
@@ -156,7 +156,7 @@ export const KitchenSink: Story = {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="w-[350px]">
           <CardHeader>
             <CardTitle>Interactive Footer</CardTitle>
             <CardDescription>Common dialog-style layout</CardDescription>
@@ -164,7 +164,7 @@ export const KitchenSink: Story = {
           <CardContent>
             <p>Content with interactive footer</p>
           </CardContent>
-          <CardFooter className="justify-between">
+          <CardFooter className="gap-2 w-full">
             <Button variant="outline" size="sm">
               Cancel
             </Button>
