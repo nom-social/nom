@@ -59,14 +59,6 @@ export const tweetGithubEvents = schedules.task({
 
         processedEvents.push(...timelineEntries);
 
-        // Mark event as processed
-        await supabase
-          .from("github_event_log")
-          .update({ last_processed: currentTimestamp })
-          .eq("id", event.id)
-          .throwOnError();
-
-        // Add a small delay between processing each event to avoid overwhelming the database
         await wait.for({ seconds: 1 });
       } catch (error) {
         logger.error("Error processing event", { error, eventId: event.id });
@@ -81,6 +73,16 @@ export const tweetGithubEvents = schedules.task({
     logger.info(
       `Found ${uniqueTimelineEntries.length} unique timeline entries`
     );
+
+    // Mark events as processed
+    await supabase
+      .from("github_event_log")
+      .update({ last_processed: currentTimestamp })
+      .in(
+        "id",
+        events.map((event) => event.id)
+      )
+      .throwOnError();
 
     // TODO: Use an AI to split this into multiple tweets then,
     // TODO: Schedule an outgoing task (with a delay) to tweet the timeline entries

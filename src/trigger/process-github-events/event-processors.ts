@@ -1,5 +1,3 @@
-import { logger } from "@trigger.dev/sdk/v3";
-
 import { Json } from "@/types/supabase";
 
 import { processPullRequestReviewEvent } from "./event-processors/pull-request-review";
@@ -27,7 +25,6 @@ export async function processEvent(args: {
     case "release":
       return processReleaseEvent(args);
     default:
-      logger.error(`Unknown event type: ${args.event.event_type}`);
-      return [];
+      throw new Error(`Unknown event type: ${args.event.event_type}`);
   }
 }

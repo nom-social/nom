@@ -6,7 +6,7 @@ import { Json } from "@/types/supabase";
 import { TimelineEvent } from "./shared/types";
 
 const issueSchema = z.object({
-  action: z.enum(["opened", "closed", "reopened", "assigned", "edited"]),
+  action: z.enum(["opened", "closed"]),
   issue: z.object({
     number: z.number(),
     title: z.string(),
