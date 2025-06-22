@@ -7,8 +7,8 @@ const supabase = createClient();
 
 export const tweetGithubEvents = schedules.task({
   id: "tweet-github-events",
-  // Run every 5 minutes
-  cron: "*/1 * * * *",
+  // Run every hour
+  cron: "0 * * * *",
   maxDuration: 300, // 5 minutes max runtime
   run: async (payload) => {
     const currentTimestamp = new Date().toISOString();
