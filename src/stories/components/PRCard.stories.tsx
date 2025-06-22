@@ -72,14 +72,15 @@ const PRCard = ({
           <div className="flex-1 space-y-1.5">
             <CardTitle className="pr-8">{title}</CardTitle>
             <CardDescription className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <span>{author.name}</span>
                 <span>wants to merge</span>
               </div>
-              <div className="flex items-center gap-2 min-w-0 w-full">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                {/* TODO: Fix up the branch titles a little better. Also add a copy button beside each of them */}
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <code className="truncate px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground flex-shrink min-w-0 max-w-[45%]">
+                    <code className="truncate px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground flex-shrink min-w-0 max-w-[180px]">
                       {sourceBranch}
                     </code>
                   </TooltipTrigger>
@@ -88,7 +89,7 @@ const PRCard = ({
                 <span className="flex-shrink-0">→</span>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <code className="truncate px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground flex-shrink min-w-0 max-w-[45%]">
+                    <code className="truncate px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground flex-shrink min-w-0 max-w-[180px]">
                       {targetBranch}
                     </code>
                   </TooltipTrigger>
@@ -237,7 +238,8 @@ export const MergedPR: Story = {
 
 export const PRWithMarkdownAndImage: Story = {
   args: {
-    title: "feat: Redesign dashboard layout with new data visualization",
+    title:
+      "feat: Redesign dashboard layout with new data visualization\nAdd support for real-time updates and mobile responsiveness",
     author: {
       name: "Emma Wilson",
       avatar: "https://github.com/emma.png",
