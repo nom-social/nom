@@ -51,8 +51,6 @@ interface PRCardProps {
   prUrl: string;
 }
 
-// FIXME: Rethink the github PR card from first order.
-// TODO: Can we use AI to turn PRs into nice cards?
 const PRCard = ({
   title,
   author,
@@ -79,7 +77,6 @@ const PRCard = ({
                 <span>wants to merge</span>
               </div>
               <div className="flex items-center gap-2 min-w-0 flex-1">
-                {/* TODO: Fix up the branch titles a little better. Also add a copy button beside each of them */}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <code className="truncate px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground flex-shrink min-w-0 max-w-[180px]">
