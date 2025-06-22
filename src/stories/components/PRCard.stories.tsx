@@ -51,6 +51,8 @@ interface PRCardProps {
   prUrl: string;
 }
 
+// FIXME: Rethink the github PR card from first order.
+// TODO: Can we use AI to turn PRs into nice cards?
 const PRCard = ({
   title,
   author,
