@@ -1,11 +1,11 @@
+import { logger } from "@trigger.dev/sdk/v3";
+
 import { Json } from "@/types/supabase";
 
-// import { processPullRequestReviewEvent } from "./event-processors/pull-request-review";
-// import { processIssueEvent } from "./event-processors/issue";
-// import { processIssueCommentEvent } from "./event-processors/issue-comment";
 import { processReleaseEvent } from "./event-processors/release";
 import { TimelineEvent } from "./event-processors/shared/types";
 import { processPullRequestEvent } from "./event-processors/pull-request";
+import { processIssueEvent } from "./event-processors/issue";
 
 // Helper function to process any event type
 export async function processEvent(args: {
@@ -16,12 +16,11 @@ export async function processEvent(args: {
     case "pull_request":
       return processPullRequestEvent(args);
     case "issues":
-    // return processIssueEvent(args);
-    case "issue_comment":
-    // return processIssueCommentEvent(args);
+      return processIssueEvent(args);
     case "release":
       return processReleaseEvent(args);
     default:
-      throw new Error(`Unknown event type: ${args.event.event_type}`);
+      logger.error(`Unknown event type: ${args.event.event_type}`);
+      return [];
   }
 }
