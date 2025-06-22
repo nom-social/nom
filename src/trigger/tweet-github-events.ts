@@ -4,6 +4,7 @@ import * as R from "remeda";
 import { createClient } from "@/utils/supabase/background";
 
 import { processEvent } from "./tweet-github-events/event-processors";
+import { TimelineEvent } from "./tweet-github-events/event-processors/shared/types";
 
 // Initialize Supabase client
 const supabase = createClient();
@@ -31,6 +32,7 @@ export const tweetGithubEvents = schedules.task({
 
     logger.info(`Found ${events.length} unprocessed events`);
 
+    const processedEvents: TimelineEvent[] = [];
     for (const event of events || []) {
       try {
         // Log the event details
@@ -55,15 +57,7 @@ export const tweetGithubEvents = schedules.task({
           repo,
         });
 
-        const uniqueTimelineEntries = R.uniqueBy(
-          timelineEntries,
-          (data) => data.dedupeHash
-        );
-
-        // TODO: Schedule an outgoing task (with a delay) to tweet the timeline entries
-        logger.info(
-          `Found ${uniqueTimelineEntries.length} unique timeline entries`
-        );
+        processedEvents.push(...timelineEntries);
 
         // Mark event as processed
         await supabase
@@ -78,6 +72,18 @@ export const tweetGithubEvents = schedules.task({
         logger.error("Error processing event", { error, eventId: event.id });
       }
     }
+
+    const uniqueTimelineEntries = R.uniqueBy(
+      processedEvents,
+      (data) => data.dedupeHash
+    );
+
+    logger.info(
+      `Found ${uniqueTimelineEntries.length} unique timeline entries`
+    );
+
+    // TODO: Use an AI to split this into multiple tweets then,
+    // TODO: Schedule an outgoing task (with a delay) to tweet the timeline entries
 
     logger.info("Finished logging GitHub events");
   },
