@@ -66,16 +66,20 @@ const PRCard = ({
           </Avatar>
           <div className="flex-1 space-y-1.5">
             <CardTitle className="pr-8">{title}</CardTitle>
-            <CardDescription className="flex items-center gap-2">
-              <span>{author.name}</span>
-              <span>wants to merge</span>
-              <code className="px-1.5 py-0.5 rounded-md bg-muted">
-                {sourceBranch}
-              </code>
-              <span>→</span>
-              <code className="px-1.5 py-0.5 rounded-md bg-muted">
-                {targetBranch}
-              </code>
+            <CardDescription className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <div className="flex items-center gap-2">
+                <span>{author.name}</span>
+                <span>wants to merge</span>
+              </div>
+              <div className="flex items-center gap-2 min-w-0 w-full">
+                <code className="truncate px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground flex-shrink min-w-0 max-w-[45%]">
+                  {sourceBranch}
+                </code>
+                <span className="flex-shrink-0">→</span>
+                <code className="truncate px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground flex-shrink min-w-0 max-w-[45%]">
+                  {targetBranch}
+                </code>
+              </div>
             </CardDescription>
           </div>
           <Badge
@@ -223,7 +227,8 @@ export const PRWithMarkdownAndImage: Story = {
       name: "Emma Wilson",
       avatar: "https://github.com/emma.png",
     },
-    sourceBranch: "feature/dashboard-redesign",
+    sourceBranch:
+      "feature/dashboard-redesign-with-new-data-visualization-components",
     targetBranch: "main",
     status: "opened",
     summary: `Complete overhaul of the dashboard layout with new data visualization components:
