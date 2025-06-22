@@ -1,11 +1,11 @@
 import { Json } from "@/types/supabase";
 
 // import { processPullRequestReviewEvent } from "./event-processors/pull-request-review";
-// import { processPullRequestEvent } from "./event-processors/pull-request";
 // import { processIssueEvent } from "./event-processors/issue";
+// import { processIssueCommentEvent } from "./event-processors/issue-comment";
 import { processReleaseEvent } from "./event-processors/release";
 import { TimelineEvent } from "./event-processors/shared/types";
-// import { processIssueCommentEvent } from "./event-processors/issue-comment";
+import { processPullRequestEvent } from "./event-processors/pull-request";
 
 // Helper function to process any event type
 export async function processEvent(args: {
@@ -14,9 +14,7 @@ export async function processEvent(args: {
 }): Promise<TimelineEvent[]> {
   switch (args.event.event_type) {
     case "pull_request":
-    // return processPullRequestEvent(args);
-    case "pull_request_review":
-    // return processPullRequestReviewEvent(args);
+      return processPullRequestEvent(args);
     case "issues":
     // return processIssueEvent(args);
     case "issue_comment":
