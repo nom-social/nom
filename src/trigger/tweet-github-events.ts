@@ -1,6 +1,9 @@
 import { logger, schedules, wait } from "@trigger.dev/sdk/v3";
+import * as R from "remeda";
 
 import { createClient } from "@/utils/supabase/background";
+
+import { processEvent } from "./tweet-github-events/event-processors";
 
 // Initialize Supabase client
 const supabase = createClient();
@@ -38,6 +41,29 @@ export const tweetGithubEvents = schedules.task({
           eventType: event.event_type,
           createdAt: event.created_at,
         });
+
+        const { data: repo } = await supabase
+          .from("repositories")
+          .select("*")
+          .eq("repo", event.repo)
+          .eq("org", event.org)
+          .single()
+          .throwOnError();
+
+        const timelineEntries = await processEvent({
+          event,
+          repo,
+        });
+
+        const uniqueTimelineEntries = R.uniqueBy(
+          timelineEntries,
+          (data) => data.dedupeHash
+        );
+
+        // TODO: Schedule an outgoing task (with a delay) to tweet the timeline entries
+        logger.info(
+          `Found ${uniqueTimelineEntries.length} unique timeline entries`
+        );
 
         // Mark event as processed
         await supabase
