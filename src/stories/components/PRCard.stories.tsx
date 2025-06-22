@@ -15,6 +15,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
+import {
   GitPullRequestIcon,
   GitMergeIcon,
   FileIcon,
@@ -72,13 +77,23 @@ const PRCard = ({
                 <span>wants to merge</span>
               </div>
               <div className="flex items-center gap-2 min-w-0 w-full">
-                <code className="truncate px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground flex-shrink min-w-0 max-w-[45%]">
-                  {sourceBranch}
-                </code>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <code className="truncate px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground flex-shrink min-w-0 max-w-[45%]">
+                      {sourceBranch}
+                    </code>
+                  </TooltipTrigger>
+                  <TooltipContent>{sourceBranch}</TooltipContent>
+                </Tooltip>
                 <span className="flex-shrink-0">→</span>
-                <code className="truncate px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground flex-shrink min-w-0 max-w-[45%]">
-                  {targetBranch}
-                </code>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <code className="truncate px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground flex-shrink min-w-0 max-w-[45%]">
+                      {targetBranch}
+                    </code>
+                  </TooltipTrigger>
+                  <TooltipContent>{targetBranch}</TooltipContent>
+                </Tooltip>
               </div>
             </CardDescription>
           </div>
