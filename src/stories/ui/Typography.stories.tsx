@@ -38,6 +38,9 @@ const Typography = {
   Muted: ({ children }: { children: React.ReactNode }) => (
     <p className="text-muted-foreground text-sm">{children}</p>
   ),
+  Blockquote: ({ children }: { children: React.ReactNode }) => (
+    <blockquote className="mt-6 border-l-2 pl-6 italic">{children}</blockquote>
+  ),
 
   List: () => (
     <ul className="my-6 ml-6 list-disc [&>li]:mt-2">
@@ -175,6 +178,15 @@ export const TableExample: Story = {
   render: () => <Typography.Table />,
 };
 
+export const BlockquoteExample: Story = {
+  render: () => (
+    <Typography.Blockquote>
+      &ldquo;The only way to do great work is to love what you do.&rdquo; -
+      Steve Jobs
+    </Typography.Blockquote>
+  ),
+};
+
 export const ColoredTextExamples: Story = {
   render: () => {
     const colors = [
@@ -251,6 +263,11 @@ export const AllTypography: Story = {
           <Typography.InlineCode>@radix-ui/react-dialog</Typography.InlineCode>{" "}
           or other technical terms.
         </Typography.P>
+        <Typography.Blockquote>
+          &ldquo;Good design is actually a lot harder to notice than poor
+          design, in part because good designs fit our needs so well that the
+          design is invisible.&rdquo; - Don Norman
+        </Typography.Blockquote>
         <Typography.Table />
         <Typography.H3>Colored Text Variations</Typography.H3>
         <div className="space-y-4">
