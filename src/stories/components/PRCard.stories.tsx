@@ -93,7 +93,7 @@ const PRCard = ({
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <div className="prose prose-sm dark:prose-invert max-w-none">
+        <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none [&_ul]:list-disc [&_ul]:pl-4">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
@@ -107,9 +107,7 @@ const PRCard = ({
                   />
                 </div>
               ),
-              p: ({ children }) => (
-                <p className="text-sm text-muted-foreground">{children}</p>
-              ),
+              p: ({ children }) => <p>{children}</p>,
             }}
           >
             {summary}
