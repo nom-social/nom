@@ -155,7 +155,7 @@ const PRCard = ({
 
       <Separator />
 
-      <CardFooter className="py-4">
+      <CardFooter>
         <div className="flex items-center gap-2 w-full">
           <Button variant="outline" size="icon" className="gap-1.5 size-8">
             <HeartIcon className="size-4" />
