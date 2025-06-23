@@ -213,6 +213,16 @@ export async function processPullRequestEvent({
     const prData = await constructPRData();
 
     const timelineEntries: TablesInsert<"user_timeline">[] = [];
+    const timelineEntry = {
+      type: "pull_request",
+      data: prData,
+      score: BASELINE_SCORE * PULL_REQUEST_MULTIPLIER,
+      repo_id: repo.id,
+      dedupe_hash: dedupeHash,
+      updated_at: currentTimestamp,
+      event_ids: [event.id],
+      is_read: false,
+    };
     for (const subscriber of subscribers) {
       const { data: user } = await supabase
         .from("users")
@@ -228,18 +238,14 @@ export async function processPullRequestEvent({
 
       timelineEntries.push({
         user_id: subscriber.user_id,
-        type: "pull_request",
-        data: prData,
-        score: BASELINE_SCORE * PULL_REQUEST_MULTIPLIER,
-        repo_id: repo.id,
         categories:
           isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
-        dedupe_hash: dedupeHash,
-        updated_at: currentTimestamp,
-        event_ids: [event.id],
-        is_read: false,
+        ...timelineEntry,
       });
     }
+
+    // Add the timeline entry for general feed
+    timelineEntries.push(timelineEntry);
 
     return timelineEntries;
   }
@@ -250,6 +256,18 @@ export async function processPullRequestEvent({
     const prData = await constructPRData();
 
     const timelineEntries: TablesInsert<"user_timeline">[] = [];
+
+    const timelineEntry = {
+      type: "pull_request",
+      data: prData,
+      score: BASELINE_SCORE * PULL_REQUEST_MULTIPLIER,
+      repo_id: repo.id,
+      dedupe_hash: dedupeHash,
+      updated_at: currentTimestamp,
+      event_ids: [event.id],
+      is_read: false,
+    };
+
     for (const subscriber of subscribers) {
       const { data: user } = await supabase
         .from("users")
@@ -265,18 +283,14 @@ export async function processPullRequestEvent({
 
       timelineEntries.push({
         user_id: subscriber.user_id,
-        type: "pull_request",
-        data: prData,
-        score: BASELINE_SCORE * PULL_REQUEST_MULTIPLIER,
-        repo_id: repo.id,
         categories:
           isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
-        dedupe_hash: dedupeHash,
-        updated_at: currentTimestamp,
-        event_ids: [event.id],
-        is_read: false,
+        ...timelineEntry,
       });
     }
+
+    // Add the timeline entry for general feed
+    timelineEntries.push(timelineEntry);
 
     return timelineEntries;
   }
