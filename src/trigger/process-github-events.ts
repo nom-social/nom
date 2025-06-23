@@ -76,6 +76,7 @@ export const processGithubEvents = schedules.task({
             onConflict: "user_id,dedupe_hash",
           })
           .throwOnError();
+        // FIXME: When user id is null, upsert will store a duplicate entry
 
         // Add a small delay between processing each event to avoid overwhelming the database
         await wait.for({ seconds: 1 });
