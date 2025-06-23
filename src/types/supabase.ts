@@ -109,7 +109,7 @@ export type Database = {
           snooze_to: string | null;
           type: string;
           updated_at: string;
-          user_id: string;
+          user_id: string | null;
         };
         Insert: {
           categories?: string[] | null;
@@ -124,7 +124,7 @@ export type Database = {
           snooze_to?: string | null;
           type: string;
           updated_at?: string;
-          user_id: string;
+          user_id?: string | null;
         };
         Update: {
           categories?: string[] | null;
@@ -139,7 +139,7 @@ export type Database = {
           snooze_to?: string | null;
           type?: string;
           updated_at?: string;
-          user_id?: string;
+          user_id?: string | null;
         };
         Relationships: [
           {
