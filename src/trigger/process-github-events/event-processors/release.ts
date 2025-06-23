@@ -77,20 +77,27 @@ export async function processReleaseEvent({
 
   const timelineEntries: TablesInsert<"user_timeline">[] = [];
 
+  const timelineEntry = {
+    type: "release",
+    data: releaseData,
+    score: BASELINE_SCORE * RELEASE_MULTIPLIER,
+    repo_id: repo.id,
+    categories: ["releases"],
+    dedupe_hash: dedupeHash,
+    updated_at: currentTimestamp,
+    event_ids: [event.id],
+    is_read: false,
+  };
+
   for (const subscriber of subscribers) {
     timelineEntries.push({
       user_id: subscriber.user_id,
-      type: "release",
-      data: releaseData,
-      score: BASELINE_SCORE * RELEASE_MULTIPLIER,
-      repo_id: repo.id,
-      categories: ["releases"],
-      dedupe_hash: dedupeHash,
-      updated_at: currentTimestamp,
-      event_ids: [event.id],
-      is_read: false,
+      ...timelineEntry,
     });
   }
+
+  // Add the timeline entry for general feed
+  timelineEntries.push(timelineEntry);
 
   return timelineEntries;
 }
