@@ -212,7 +212,6 @@ export async function processPullRequestEvent({
 
     const prData = await constructPRData();
 
-    const timelineEntries: TablesInsert<"user_timeline">[] = [];
     const timelineEntry = {
       type: "pull_request",
       data: prData,
@@ -223,6 +222,8 @@ export async function processPullRequestEvent({
       event_ids: [event.id],
       is_read: false,
     };
+    const timelineEntries: TablesInsert<"user_timeline">[] = [timelineEntry];
+
     for (const subscriber of subscribers) {
       const { data: user } = await supabase
         .from("users")
@@ -243,9 +244,6 @@ export async function processPullRequestEvent({
         ...timelineEntry,
       });
     }
-
-    // Add the timeline entry for general feed
-    timelineEntries.push(timelineEntry);
 
     return timelineEntries;
   }
@@ -255,8 +253,6 @@ export async function processPullRequestEvent({
 
     const prData = await constructPRData();
 
-    const timelineEntries: TablesInsert<"user_timeline">[] = [];
-
     const timelineEntry = {
       type: "pull_request",
       data: prData,
@@ -267,6 +263,7 @@ export async function processPullRequestEvent({
       event_ids: [event.id],
       is_read: false,
     };
+    const timelineEntries: TablesInsert<"user_timeline">[] = [timelineEntry];
 
     for (const subscriber of subscribers) {
       const { data: user } = await supabase
@@ -288,9 +285,6 @@ export async function processPullRequestEvent({
         ...timelineEntry,
       });
     }
-
-    // Add the timeline entry for general feed
-    timelineEntries.push(timelineEntry);
 
     return timelineEntries;
   }

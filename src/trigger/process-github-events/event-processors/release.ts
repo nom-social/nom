@@ -75,8 +75,6 @@ export async function processReleaseEvent({
     )
     .digest("hex");
 
-  const timelineEntries: TablesInsert<"user_timeline">[] = [];
-
   const timelineEntry = {
     type: "release",
     data: releaseData,
@@ -88,6 +86,7 @@ export async function processReleaseEvent({
     event_ids: [event.id],
     is_read: false,
   };
+  const timelineEntries: TablesInsert<"user_timeline">[] = [timelineEntry];
 
   for (const subscriber of subscribers) {
     timelineEntries.push({
@@ -95,9 +94,6 @@ export async function processReleaseEvent({
       ...timelineEntry,
     });
   }
-
-  // Add the timeline entry for general feed
-  timelineEntries.push(timelineEntry);
 
   return timelineEntries;
 }

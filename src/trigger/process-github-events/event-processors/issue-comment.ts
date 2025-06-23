@@ -98,7 +98,17 @@ export async function processIssueCommentEvent({
     },
   };
 
-  const timelineEntries: TablesInsert<"user_timeline">[] = [];
+  const timelineEntry = {
+    type: "issue_comment",
+    data: issueData,
+    repo_id: repo.id,
+    score: BASELINE_SCORE * ISSUE_MULTIPLIER,
+    dedupe_hash: dedupeHash,
+    updated_at: currentTimestamp,
+    event_ids: [event.id],
+    is_read: false,
+  };
+  const timelineEntries: TablesInsert<"user_timeline">[] = [timelineEntry];
 
   for (const subscriber of subscribers) {
     const { data: user } = await supabase
@@ -116,16 +126,9 @@ export async function processIssueCommentEvent({
 
     timelineEntries.push({
       user_id: subscriber.user_id,
-      type: "issue_comment",
-      data: issueData,
-      repo_id: repo.id,
-      score: BASELINE_SCORE * ISSUE_MULTIPLIER,
       categories:
         isMyIssue || isAssignedToMe || isMyComment ? ["issues"] : undefined,
-      dedupe_hash: dedupeHash,
-      updated_at: currentTimestamp,
-      event_ids: [event.id],
-      is_read: false,
+      ...timelineEntry,
     });
   }
 

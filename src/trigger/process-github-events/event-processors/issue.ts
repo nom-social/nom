@@ -77,7 +77,18 @@ export async function processIssueEvent({
     )
     .digest("hex");
 
-  const timelineEntries: TablesInsert<"user_timeline">[] = [];
+  const timelineEntry = {
+    type: "issue",
+    data: issueData,
+    score: BASELINE_SCORE * ISSUE_MULTIPLIER,
+    repo_id: repo.id,
+    dedupe_hash: dedupeHash,
+    updated_at: currentTimestamp,
+    event_ids: [event.id],
+    is_read: false,
+  };
+  const timelineEntries: TablesInsert<"user_timeline">[] = [timelineEntry];
+
   for (const subscriber of subscribers) {
     const { data: user } = await supabase
       .from("users")
@@ -93,15 +104,8 @@ export async function processIssueEvent({
 
     timelineEntries.push({
       user_id: subscriber.user_id,
-      type: "issue",
-      data: issueData,
-      score: BASELINE_SCORE * ISSUE_MULTIPLIER,
-      repo_id: repo.id,
       categories: isMyIssue || isAssignedToMe ? ["issues"] : undefined,
-      dedupe_hash: dedupeHash,
-      updated_at: currentTimestamp,
-      event_ids: [event.id],
-      is_read: false,
+      ...timelineEntry,
     });
   }
 
