@@ -42,6 +42,59 @@ export type Database = {
         };
         Relationships: [];
       };
+      public_timeline: {
+        Row: {
+          categories: string[] | null;
+          created_at: string;
+          data: Json;
+          dedupe_hash: string;
+          event_ids: string[] | null;
+          id: string;
+          is_read: boolean;
+          repo_id: string | null;
+          score: number;
+          snooze_to: string | null;
+          type: string;
+          updated_at: string;
+        };
+        Insert: {
+          categories?: string[] | null;
+          created_at?: string;
+          data: Json;
+          dedupe_hash: string;
+          event_ids?: string[] | null;
+          id?: string;
+          is_read?: boolean;
+          repo_id?: string | null;
+          score: number;
+          snooze_to?: string | null;
+          type: string;
+          updated_at?: string;
+        };
+        Update: {
+          categories?: string[] | null;
+          created_at?: string;
+          data?: Json;
+          dedupe_hash?: string;
+          event_ids?: string[] | null;
+          id?: string;
+          is_read?: boolean;
+          repo_id?: string | null;
+          score?: number;
+          snooze_to?: string | null;
+          type?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "public_timeline_repo_id_fkey";
+            columns: ["repo_id"];
+            isOneToOne: false;
+            referencedRelation: "repositories";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       repositories: {
         Row: {
           access_token: string | null;
@@ -109,7 +162,7 @@ export type Database = {
           snooze_to: string | null;
           type: string;
           updated_at: string;
-          user_id: string | null;
+          user_id: string;
         };
         Insert: {
           categories?: string[] | null;
@@ -124,7 +177,7 @@ export type Database = {
           snooze_to?: string | null;
           type: string;
           updated_at?: string;
-          user_id?: string | null;
+          user_id: string;
         };
         Update: {
           categories?: string[] | null;
@@ -139,7 +192,7 @@ export type Database = {
           snooze_to?: string | null;
           type?: string;
           updated_at?: string;
-          user_id?: string | null;
+          user_id?: string;
         };
         Relationships: [
           {

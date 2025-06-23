@@ -58,7 +58,10 @@ export async function processIssueCommentEvent({
   repo: { repo: string; org: string; id: string; access_token: string | null };
   subscribers: { user_id: string }[];
   currentTimestamp: string;
-}): Promise<TablesInsert<"user_timeline">[]> {
+}): Promise<{
+  userTimelineEntries: TablesInsert<"user_timeline">[];
+  publicTimelineEntries: TablesInsert<"public_timeline">[];
+}> {
   const supabase = createClient();
 
   const validationResult = issueCommentSchema.parse(event.raw_payload);
@@ -108,7 +111,7 @@ export async function processIssueCommentEvent({
     event_ids: [event.id],
     is_read: false,
   };
-  const timelineEntries: TablesInsert<"user_timeline">[] = [timelineEntry];
+  const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
 
   for (const subscriber of subscribers) {
     const { data: user } = await supabase
@@ -124,7 +127,7 @@ export async function processIssueCommentEvent({
     );
     const isMyComment = user.github_username === comment.user.login;
 
-    timelineEntries.push({
+    userTimelineEntries.push({
       user_id: subscriber.user_id,
       categories:
         isMyIssue || isAssignedToMe || isMyComment ? ["issues"] : undefined,
@@ -132,5 +135,8 @@ export async function processIssueCommentEvent({
     });
   }
 
-  return timelineEntries;
+  return {
+    userTimelineEntries,
+    publicTimelineEntries: [timelineEntry],
+  };
 }

@@ -46,7 +46,10 @@ export async function processPullRequestReviewEvent({
   repo: { repo: string; org: string; id: string; access_token: string | null };
   subscribers: { user_id: string }[];
   currentTimestamp: string;
-}): Promise<TablesInsert<"user_timeline">[]> {
+}): Promise<{
+  userTimelineEntries: TablesInsert<"user_timeline">[];
+  publicTimelineEntries: TablesInsert<"public_timeline">[];
+}> {
   const supabase = createClient();
 
   const octokit = new Octokit({ auth: repo.access_token || undefined });
@@ -125,7 +128,7 @@ export async function processPullRequestReviewEvent({
     event_ids: [event.id],
     is_read: false,
   };
-  const timelineEntries: TablesInsert<"user_timeline">[] = [timelineEntry];
+  const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
 
   for (const subscriber of subscribers) {
     const { data: user } = await supabase
@@ -141,7 +144,7 @@ export async function processPullRequestReviewEvent({
         (reviewer) => reviewer.login === user.github_username
       ) || user.github_username === review.user.login;
 
-    timelineEntries.push({
+    userTimelineEntries.push({
       user_id: subscriber.user_id,
       categories:
         isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
@@ -149,5 +152,8 @@ export async function processPullRequestReviewEvent({
     });
   }
 
-  return timelineEntries;
+  return {
+    userTimelineEntries,
+    publicTimelineEntries: [timelineEntry],
+  };
 }

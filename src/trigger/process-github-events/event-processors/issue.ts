@@ -44,7 +44,10 @@ export async function processIssueEvent({
   repo: { repo: string; org: string; id: string; access_token: string | null };
   subscribers: { user_id: string }[];
   currentTimestamp: string;
-}): Promise<TablesInsert<"user_timeline">[]> {
+}): Promise<{
+  userTimelineEntries: TablesInsert<"user_timeline">[];
+  publicTimelineEntries: TablesInsert<"public_timeline">[];
+}> {
   const supabase = createClient();
 
   const validationResult = issueSchema.parse(event.raw_payload);
@@ -87,7 +90,7 @@ export async function processIssueEvent({
     event_ids: [event.id],
     is_read: false,
   };
-  const timelineEntries: TablesInsert<"user_timeline">[] = [timelineEntry];
+  const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
 
   for (const subscriber of subscribers) {
     const { data: user } = await supabase
@@ -102,12 +105,15 @@ export async function processIssueEvent({
       (assignee) => assignee.login === user.github_username
     );
 
-    timelineEntries.push({
+    userTimelineEntries.push({
       user_id: subscriber.user_id,
       categories: isMyIssue || isAssignedToMe ? ["issues"] : undefined,
       ...timelineEntry,
     });
   }
 
-  return timelineEntries;
+  return {
+    userTimelineEntries,
+    publicTimelineEntries: [timelineEntry],
+  };
 }

@@ -31,12 +31,20 @@ export const processGithubEvents = schedules.task({
     logger.info(`Processing ${events.length} events`);
 
     // First, handle any snoozed timeline entries that have reached their time
-    await supabase
-      .from("user_timeline")
-      .update({ snooze_to: null, updated_at: currentTimestamp })
-      .not("snooze_to", "is", null)
-      .lt("snooze_to", currentTimestamp)
-      .throwOnError();
+    await Promise.allSettled([
+      supabase
+        .from("user_timeline")
+        .update({ snooze_to: null, updated_at: currentTimestamp })
+        .not("snooze_to", "is", null)
+        .lt("snooze_to", currentTimestamp)
+        .throwOnError(),
+      supabase
+        .from("public_timeline")
+        .update({ snooze_to: null, updated_at: currentTimestamp })
+        .not("snooze_to", "is", null)
+        .lt("snooze_to", currentTimestamp)
+        .throwOnError(),
+    ]);
 
     for (const event of events || []) {
       try {
@@ -69,14 +77,21 @@ export const processGithubEvents = schedules.task({
           currentTimestamp,
         });
 
-        // Create timeline entries for each subscriber
-        await supabase
-          .from("user_timeline")
-          .upsert(processedEventsPerSubscriber, {
-            onConflict: "user_id,dedupe_hash",
-          })
-          .throwOnError();
-        // FIXME: When user id is null, upsert will store a duplicate entry
+        // Create timeline entries for each subscriber and general feed
+        await Promise.allSettled([
+          supabase
+            .from("user_timeline")
+            .upsert(processedEventsPerSubscriber.userTimelineEntries, {
+              onConflict: "user_id,dedupe_hash",
+            })
+            .throwOnError(),
+          supabase
+            .from("public_timeline")
+            .upsert(processedEventsPerSubscriber.publicTimelineEntries, {
+              onConflict: "dedupe_hash",
+            })
+            .throwOnError(),
+        ]);
 
         // Add a small delay between processing each event to avoid overwhelming the database
         await wait.for({ seconds: 1 });

@@ -38,7 +38,10 @@ export async function processReleaseEvent({
   repo: { repo: string; org: string; id: string; access_token: string | null };
   subscribers: { user_id: string }[];
   currentTimestamp: string;
-}): Promise<TablesInsert<"user_timeline">[]> {
+}): Promise<{
+  userTimelineEntries: TablesInsert<"user_timeline">[];
+  publicTimelineEntries: TablesInsert<"public_timeline">[];
+}> {
   const validationResult = releaseSchema.parse(event.raw_payload);
   const { action, release } = validationResult;
 
@@ -86,14 +89,17 @@ export async function processReleaseEvent({
     event_ids: [event.id],
     is_read: false,
   };
-  const timelineEntries: TablesInsert<"user_timeline">[] = [timelineEntry];
+  const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
 
   for (const subscriber of subscribers) {
-    timelineEntries.push({
+    userTimelineEntries.push({
       user_id: subscriber.user_id,
       ...timelineEntry,
     });
   }
 
-  return timelineEntries;
+  return {
+    userTimelineEntries,
+    publicTimelineEntries: [timelineEntry],
+  };
 }
