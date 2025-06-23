@@ -83,7 +83,6 @@ export async function processReleaseEvent({
     data: releaseData,
     score: BASELINE_SCORE * RELEASE_MULTIPLIER,
     repo_id: repo.id,
-    categories: ["releases"],
     dedupe_hash: dedupeHash,
     updated_at: currentTimestamp,
     event_ids: [event.id],
@@ -93,8 +92,9 @@ export async function processReleaseEvent({
 
   for (const subscriber of subscribers) {
     userTimelineEntries.push({
-      user_id: subscriber.user_id,
       ...timelineEntry,
+      user_id: subscriber.user_id,
+      categories: ["releases"],
     });
   }
 
