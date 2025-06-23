@@ -58,7 +58,10 @@ export async function processIssueCommentEvent({
   repo: { repo: string; org: string; id: string; access_token: string | null };
   subscribers: { user_id: string }[];
   currentTimestamp: string;
-}): Promise<TablesInsert<"user_timeline">[]> {
+}): Promise<{
+  userTimelineEntries: TablesInsert<"user_timeline">[];
+  publicTimelineEntries: TablesInsert<"public_timeline">[];
+}> {
   const supabase = createClient();
 
   const validationResult = issueCommentSchema.parse(event.raw_payload);
@@ -98,7 +101,17 @@ export async function processIssueCommentEvent({
     },
   };
 
-  const timelineEntries: TablesInsert<"user_timeline">[] = [];
+  const timelineEntry = {
+    type: "issue_comment",
+    data: issueData,
+    repo_id: repo.id,
+    score: BASELINE_SCORE * ISSUE_MULTIPLIER,
+    dedupe_hash: dedupeHash,
+    updated_at: currentTimestamp,
+    event_ids: [event.id],
+    is_read: false,
+  };
+  const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
 
   for (const subscriber of subscribers) {
     const { data: user } = await supabase
@@ -114,20 +127,16 @@ export async function processIssueCommentEvent({
     );
     const isMyComment = user.github_username === comment.user.login;
 
-    timelineEntries.push({
+    userTimelineEntries.push({
       user_id: subscriber.user_id,
-      type: "issue_comment",
-      data: issueData,
-      repo_id: repo.id,
-      score: BASELINE_SCORE * ISSUE_MULTIPLIER,
       categories:
         isMyIssue || isAssignedToMe || isMyComment ? ["issues"] : undefined,
-      dedupe_hash: dedupeHash,
-      updated_at: currentTimestamp,
-      event_ids: [event.id],
-      is_read: false,
+      ...timelineEntry,
     });
   }
 
-  return timelineEntries;
+  return {
+    userTimelineEntries,
+    publicTimelineEntries: [timelineEntry],
+  };
 }

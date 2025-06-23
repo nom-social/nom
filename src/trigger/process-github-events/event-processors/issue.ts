@@ -44,7 +44,10 @@ export async function processIssueEvent({
   repo: { repo: string; org: string; id: string; access_token: string | null };
   subscribers: { user_id: string }[];
   currentTimestamp: string;
-}): Promise<TablesInsert<"user_timeline">[]> {
+}): Promise<{
+  userTimelineEntries: TablesInsert<"user_timeline">[];
+  publicTimelineEntries: TablesInsert<"public_timeline">[];
+}> {
   const supabase = createClient();
 
   const validationResult = issueSchema.parse(event.raw_payload);
@@ -77,7 +80,18 @@ export async function processIssueEvent({
     )
     .digest("hex");
 
-  const timelineEntries: TablesInsert<"user_timeline">[] = [];
+  const timelineEntry = {
+    type: "issue",
+    data: issueData,
+    score: BASELINE_SCORE * ISSUE_MULTIPLIER,
+    repo_id: repo.id,
+    dedupe_hash: dedupeHash,
+    updated_at: currentTimestamp,
+    event_ids: [event.id],
+    is_read: false,
+  };
+  const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
+
   for (const subscriber of subscribers) {
     const { data: user } = await supabase
       .from("users")
@@ -91,19 +105,15 @@ export async function processIssueEvent({
       (assignee) => assignee.login === user.github_username
     );
 
-    timelineEntries.push({
+    userTimelineEntries.push({
       user_id: subscriber.user_id,
-      type: "issue",
-      data: issueData,
-      score: BASELINE_SCORE * ISSUE_MULTIPLIER,
-      repo_id: repo.id,
       categories: isMyIssue || isAssignedToMe ? ["issues"] : undefined,
-      dedupe_hash: dedupeHash,
-      updated_at: currentTimestamp,
-      event_ids: [event.id],
-      is_read: false,
+      ...timelineEntry,
     });
   }
 
-  return timelineEntries;
+  return {
+    userTimelineEntries,
+    publicTimelineEntries: [timelineEntry],
+  };
 }

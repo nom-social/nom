@@ -46,7 +46,10 @@ export async function processPullRequestReviewEvent({
   repo: { repo: string; org: string; id: string; access_token: string | null };
   subscribers: { user_id: string }[];
   currentTimestamp: string;
-}): Promise<TablesInsert<"user_timeline">[]> {
+}): Promise<{
+  userTimelineEntries: TablesInsert<"user_timeline">[];
+  publicTimelineEntries: TablesInsert<"public_timeline">[];
+}> {
   const supabase = createClient();
 
   const octokit = new Octokit({ auth: repo.access_token || undefined });
@@ -68,7 +71,64 @@ export async function processPullRequestReviewEvent({
     )
     .digest("hex");
 
-  const timelineEntries: TablesInsert<"user_timeline">[] = [];
+  const [prDetails, headCheckRuns] = await Promise.all([
+    octokit.pulls.get({
+      owner: repo.org,
+      repo: repo.repo,
+      pull_number: pull_request.number,
+    }),
+    octokit.checks.listForRef({
+      owner: repo.org,
+      repo: repo.repo,
+      ref: pull_request.head.sha,
+    }),
+  ]);
+  const prStats = {
+    pull_request: {
+      stats: {
+        comments_count: prDetails.data.comments,
+        additions: prDetails.data.additions,
+        deletions: prDetails.data.deletions,
+        changed_files: prDetails.data.changed_files,
+      },
+      head_checks: {
+        total: headCheckRuns.data.total_count,
+        passing: headCheckRuns.data.check_runs.filter(
+          (check) => check.conclusion === "success"
+        ).length,
+        failing: headCheckRuns.data.check_runs.filter(
+          (check) => check.conclusion === "failure"
+        ).length,
+      },
+      head: { ref: pull_request.head.ref },
+      base: { ref: pull_request.base.ref },
+      user: { login: pull_request.user.login },
+      html_url: pull_request.html_url,
+      number: pull_request.number,
+      title: pull_request.title,
+      body: pull_request.body,
+      created_at: pull_request.created_at.toISOString(),
+    },
+    action,
+    review: {
+      state: review.state,
+      user: { login: review.user.login },
+      body: review.body,
+      html_url: review.html_url,
+      submitted_at: review.submitted_at.toISOString(),
+    },
+  };
+  const timelineEntry = {
+    type: "pull_request_review",
+    data: prStats,
+    repo_id: repo.id,
+    score: BASELINE_SCORE * PULL_REQUEST_REVIEW_MULTIPLIER,
+    dedupe_hash: dedupeHash,
+    updated_at: currentTimestamp,
+    event_ids: [event.id],
+    is_read: false,
+  };
+  const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
 
   for (const subscriber of subscribers) {
     const { data: user } = await supabase
@@ -78,75 +138,22 @@ export async function processPullRequestReviewEvent({
       .single()
       .throwOnError();
 
-    const [prDetails, headCheckRuns] = await Promise.all([
-      octokit.pulls.get({
-        owner: repo.org,
-        repo: repo.repo,
-        pull_number: pull_request.number,
-      }),
-      octokit.checks.listForRef({
-        owner: repo.org,
-        repo: repo.repo,
-        ref: pull_request.head.sha,
-      }),
-    ]);
-
     const isMyReview = user.github_username === pull_request.user.login;
     const isReviewAssignedToMe =
       !!prDetails.data.requested_reviewers?.some(
         (reviewer) => reviewer.login === user.github_username
       ) || user.github_username === review.user.login;
 
-    const prStats = {
-      pull_request: {
-        stats: {
-          comments_count: prDetails.data.comments,
-          additions: prDetails.data.additions,
-          deletions: prDetails.data.deletions,
-          changed_files: prDetails.data.changed_files,
-        },
-        head_checks: {
-          total: headCheckRuns.data.total_count,
-          passing: headCheckRuns.data.check_runs.filter(
-            (check) => check.conclusion === "success"
-          ).length,
-          failing: headCheckRuns.data.check_runs.filter(
-            (check) => check.conclusion === "failure"
-          ).length,
-        },
-        head: { ref: pull_request.head.ref },
-        base: { ref: pull_request.base.ref },
-        user: { login: pull_request.user.login },
-        html_url: pull_request.html_url,
-        number: pull_request.number,
-        title: pull_request.title,
-        body: pull_request.body,
-        created_at: pull_request.created_at.toISOString(),
-      },
-      action,
-      review: {
-        state: review.state,
-        user: { login: review.user.login },
-        body: review.body,
-        html_url: review.html_url,
-        submitted_at: review.submitted_at.toISOString(),
-      },
-    };
-
-    timelineEntries.push({
+    userTimelineEntries.push({
       user_id: subscriber.user_id,
-      type: "pull_request_review",
-      data: prStats,
-      repo_id: repo.id,
-      score: BASELINE_SCORE * PULL_REQUEST_REVIEW_MULTIPLIER,
       categories:
         isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
-      dedupe_hash: dedupeHash,
-      updated_at: currentTimestamp,
-      event_ids: [event.id],
-      is_read: false,
+      ...timelineEntry,
     });
   }
 
-  return timelineEntries;
+  return {
+    userTimelineEntries,
+    publicTimelineEntries: [timelineEntry],
+  };
 }

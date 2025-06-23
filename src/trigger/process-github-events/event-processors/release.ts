@@ -38,7 +38,10 @@ export async function processReleaseEvent({
   repo: { repo: string; org: string; id: string; access_token: string | null };
   subscribers: { user_id: string }[];
   currentTimestamp: string;
-}): Promise<TablesInsert<"user_timeline">[]> {
+}): Promise<{
+  userTimelineEntries: TablesInsert<"user_timeline">[];
+  publicTimelineEntries: TablesInsert<"public_timeline">[];
+}> {
   const validationResult = releaseSchema.parse(event.raw_payload);
   const { action, release } = validationResult;
 
@@ -75,22 +78,28 @@ export async function processReleaseEvent({
     )
     .digest("hex");
 
-  const timelineEntries: TablesInsert<"user_timeline">[] = [];
+  const timelineEntry = {
+    type: "release",
+    data: releaseData,
+    score: BASELINE_SCORE * RELEASE_MULTIPLIER,
+    repo_id: repo.id,
+    dedupe_hash: dedupeHash,
+    updated_at: currentTimestamp,
+    event_ids: [event.id],
+    is_read: false,
+  };
+  const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
 
   for (const subscriber of subscribers) {
-    timelineEntries.push({
+    userTimelineEntries.push({
+      ...timelineEntry,
       user_id: subscriber.user_id,
-      type: "release",
-      data: releaseData,
-      score: BASELINE_SCORE * RELEASE_MULTIPLIER,
-      repo_id: repo.id,
       categories: ["releases"],
-      dedupe_hash: dedupeHash,
-      updated_at: currentTimestamp,
-      event_ids: [event.id],
-      is_read: false,
     });
   }
 
-  return timelineEntries;
+  return {
+    userTimelineEntries,
+    publicTimelineEntries: [timelineEntry],
+  };
 }

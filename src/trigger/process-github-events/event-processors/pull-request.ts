@@ -65,7 +65,10 @@ export async function processPullRequestEvent({
   repo: { repo: string; org: string; id: string; access_token: string | null };
   subscribers: { user_id: string }[];
   currentTimestamp: string;
-}): Promise<TablesInsert<"user_timeline">[]> {
+}): Promise<{
+  userTimelineEntries: TablesInsert<"user_timeline">[];
+  publicTimelineEntries: TablesInsert<"public_timeline">[];
+}> {
   const octokit = new Octokit({ auth: repo.access_token || undefined });
   const openaiClient = openai.createClient();
   const supabase = createClient();
@@ -208,11 +211,26 @@ export async function processPullRequestEvent({
     action === "ready_for_review" ||
     action === "review_requested"
   ) {
-    if (pull_request.draft) return [];
+    if (pull_request.draft)
+      return {
+        userTimelineEntries: [],
+        publicTimelineEntries: [],
+      };
 
     const prData = await constructPRData();
 
-    const timelineEntries: TablesInsert<"user_timeline">[] = [];
+    const timelineEntry = {
+      type: "pull_request",
+      data: prData,
+      score: BASELINE_SCORE * PULL_REQUEST_MULTIPLIER,
+      repo_id: repo.id,
+      dedupe_hash: dedupeHash,
+      updated_at: currentTimestamp,
+      event_ids: [event.id],
+      is_read: false,
+    };
+    const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
+
     for (const subscriber of subscribers) {
       const { data: user } = await supabase
         .from("users")
@@ -226,30 +244,41 @@ export async function processPullRequestEvent({
         (reviewer) => reviewer.login === user.github_username
       );
 
-      timelineEntries.push({
+      userTimelineEntries.push({
         user_id: subscriber.user_id,
-        type: "pull_request",
-        data: prData,
-        score: BASELINE_SCORE * PULL_REQUEST_MULTIPLIER,
-        repo_id: repo.id,
         categories:
           isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
-        dedupe_hash: dedupeHash,
-        updated_at: currentTimestamp,
-        event_ids: [event.id],
-        is_read: false,
+        ...timelineEntry,
       });
     }
 
-    return timelineEntries;
+    return {
+      userTimelineEntries,
+      publicTimelineEntries: [timelineEntry],
+    };
   }
 
   if (action === "closed") {
-    if (!pull_request.merged) return [];
+    if (!pull_request.merged)
+      return {
+        userTimelineEntries: [],
+        publicTimelineEntries: [],
+      };
 
     const prData = await constructPRData();
 
-    const timelineEntries: TablesInsert<"user_timeline">[] = [];
+    const timelineEntry = {
+      type: "pull_request",
+      data: prData,
+      score: BASELINE_SCORE * PULL_REQUEST_MULTIPLIER,
+      repo_id: repo.id,
+      dedupe_hash: dedupeHash,
+      updated_at: currentTimestamp,
+      event_ids: [event.id],
+      is_read: false,
+    };
+    const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
+
     for (const subscriber of subscribers) {
       const { data: user } = await supabase
         .from("users")
@@ -263,23 +292,22 @@ export async function processPullRequestEvent({
         (reviewer) => reviewer.login === user.github_username
       );
 
-      timelineEntries.push({
+      userTimelineEntries.push({
         user_id: subscriber.user_id,
-        type: "pull_request",
-        data: prData,
-        score: BASELINE_SCORE * PULL_REQUEST_MULTIPLIER,
-        repo_id: repo.id,
         categories:
           isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
-        dedupe_hash: dedupeHash,
-        updated_at: currentTimestamp,
-        event_ids: [event.id],
-        is_read: false,
+        ...timelineEntry,
       });
     }
 
-    return timelineEntries;
+    return {
+      userTimelineEntries,
+      publicTimelineEntries: [timelineEntry],
+    };
   }
 
-  return [];
+  return {
+    userTimelineEntries: [],
+    publicTimelineEntries: [],
+  };
 }
