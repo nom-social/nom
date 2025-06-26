@@ -102,6 +102,7 @@ export type Database = {
           id: string;
           org: string;
           repo: string;
+          secret: string | null;
         };
         Insert: {
           access_token?: string | null;
@@ -109,6 +110,7 @@ export type Database = {
           id?: string;
           org: string;
           repo: string;
+          secret?: string | null;
         };
         Update: {
           access_token?: string | null;
@@ -116,6 +118,7 @@ export type Database = {
           id?: string;
           org?: string;
           repo?: string;
+          secret?: string | null;
         };
         Relationships: [];
       };
