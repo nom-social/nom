@@ -90,7 +90,12 @@ export default function ReleaseCard({
       </CardContent>
       <CardFooter>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full justify-between">
-          <Button variant="outline" size="icon" className="size-8">
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-8"
+            aria-label="Like release"
+          >
             <HeartIcon className="size-4" />
           </Button>
           <Button variant="outline" size="sm">

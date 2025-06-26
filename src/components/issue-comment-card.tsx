@@ -1,5 +1,5 @@
 import React from "react";
-import { ShareIcon, HeartIcon, CircleDot } from "lucide-react";
+import { ShareIcon, HeartIcon, CircleDot, CircleCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 import {
@@ -15,15 +15,16 @@ import { Button } from "@/components/ui/button";
 import { AvatarGroup, Contributor } from "@/components/shared/avatar-group";
 import { Badge } from "@/components/ui/badge";
 import { Markdown } from "@/components/ui/markdown";
+import { cn } from "@/lib/utils";
 
-export type IssueCommentCardProps = {
+export type Props = {
   issueTitle: string;
   commentBody: string;
   commenter: Contributor[];
   issueUrl: string;
   repo: string;
   org: string;
-  state: string;
+  state: "open" | "closed";
   createdAt: Date;
 };
 
@@ -36,7 +37,7 @@ export default function IssueCommentCard({
   org,
   state,
   createdAt,
-}: IssueCommentCardProps) {
+}: Props) {
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
@@ -51,8 +52,15 @@ export default function IssueCommentCard({
           </a>
         </CardTitle>
         <CardAction>
-          <Badge className="bg-[var(--nom-red)] hover:opacity-90 border-transparent uppercase text-black">
-            <CircleDot />
+          <Badge
+            className={cn(
+              "hover:opacity-90 border-transparent uppercase text-black",
+              state === "open"
+                ? "bg-[var(--nom-green)]"
+                : "bg-[var(--nom-purple)]"
+            )}
+          >
+            {state === "open" ? <CircleDot /> : <CircleCheck />}
             Issue Comment • {state}
           </Badge>
         </CardAction>
@@ -83,7 +91,12 @@ export default function IssueCommentCard({
       </CardContent>
       <CardFooter>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full justify-between">
-          <Button variant="outline" size="icon" className="size-8">
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-8"
+            aria-label="Like comment"
+          >
             <HeartIcon className="size-4" />
           </Button>
           <Button variant="outline" size="sm">

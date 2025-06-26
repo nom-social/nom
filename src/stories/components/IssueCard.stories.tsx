@@ -33,3 +33,9 @@ const props: React.ComponentProps<typeof IssueCard> = {
 export const Default: Story = {
   render: () => <IssueCard {...props} />,
 };
+
+export const Closed: Story = {
+  render: () => (
+    <IssueCard {...props} state="closed" createdAt={new Date("2024-12-01")} />
+  ),
+};

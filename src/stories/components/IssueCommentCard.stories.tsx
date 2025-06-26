@@ -17,7 +17,7 @@ type Story = StoryObj<typeof IssueCommentCard>;
 const props: React.ComponentProps<typeof IssueCommentCard> = {
   issueTitle: "Fix: Unexpected behavior in user login flow",
   commentBody:
-    "I encountered this issue as well. The login button doesn't respond after entering credentials. Any updates?",
+    "> This is a critical issue for our users.\n\nI encountered this issue as well. The login button doesn't respond after entering credentials. Any updates?",
   commenter: [
     {
       name: "The Octocat",

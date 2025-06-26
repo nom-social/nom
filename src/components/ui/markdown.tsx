@@ -34,6 +34,11 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
               {children}
             </pre>
           ),
+          blockquote: ({ children }) => (
+            <blockquote className="border-l-4 border-muted-foreground pl-4 ml-0 mb-4 py-2 bg-muted/50 text-muted-foreground italic">
+              {children}
+            </blockquote>
+          ),
         }}
       >
         {children}
