@@ -9,37 +9,33 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShareIcon, ExternalLinkIcon, HeartIcon } from "lucide-react";
+import { ShareIcon, ExternalLinkIcon, AlertCircleIcon } from "lucide-react";
 import { AvatarGroup, Contributor } from "@/components/ui/avatar-group";
 import { Badge } from "@/components/ui/badge";
 import { Markdown } from "@/components/ui/markdown";
+import { formatDistanceToNow } from "date-fns";
 
-export type Props = {
+export type IssueCardProps = {
   title: string;
   contributors: Contributor[];
   body: string;
-  prUrl: string;
+  issueUrl: string;
   repo: string;
   org: string;
-  status: {
-    state: string;
-    type: "pr" | "issue" | "release";
-    icon?: React.ReactNode;
-    color: string;
-  };
-  ctaLabel: string;
+  state: string;
+  createdAt: Date;
 };
 
-export default function ActivityCard({
+export default function IssueCard({
   title,
   contributors,
   body,
-  prUrl,
+  issueUrl,
   repo,
   org,
-  status,
-  ctaLabel,
-}: Props) {
+  state,
+  createdAt,
+}: IssueCardProps) {
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
@@ -47,19 +43,16 @@ export default function ActivityCard({
           <Markdown>{title}</Markdown>
         </CardTitle>
         <CardAction>
-          <Badge
-            className={`bg-[${status.color}] hover:opacity-90 border-transparent uppercase text-black`}
-          >
-            {status.icon}
-            <>
-              {status.type} • {status.state}
-            </>
+          <Badge className="bg-[var(--nom-red)] hover:opacity-90 border-transparent uppercase text-black">
+            <AlertCircleIcon />
+            Issue • {state}
           </Badge>
         </CardAction>
         <CardDescription>
           <div className="flex gap-2 flex-col">
             <div className="text-muted-foreground text-sm">
-              {org}/{repo}
+              {org}/{repo} •{" "}
+              {formatDistanceToNow(createdAt, { addSuffix: false })}
             </div>
             <div className="flex items-center">
               <AvatarGroup contributors={contributors} />
@@ -74,19 +67,14 @@ export default function ActivityCard({
       </CardContent>
       <CardFooter>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full">
-          <div className="flex items-center gap-1 flex-wrap">
-            <Button variant="outline" size="icon" className="size-8">
-              <HeartIcon className="size-4" />
-            </Button>
-          </div>
           <div className="flex items-center gap-2 sm:ml-auto">
             <Button variant="outline" size="sm">
               <ShareIcon className="size-4" />
               Share
             </Button>
             <Button variant="default" size="sm" asChild>
-              <a href={prUrl} target="_blank" rel="noopener noreferrer">
-                {ctaLabel}
+              <a href={issueUrl} target="_blank" rel="noopener noreferrer">
+                View Issue
                 <ExternalLinkIcon className="size-4" />
               </a>
             </Button>
