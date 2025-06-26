@@ -1,3 +1,4 @@
+import React from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import IssueCard from "@/components/issue-card";
@@ -28,6 +29,27 @@ export default meta;
 type Story = StoryObj<typeof IssueCard>;
 
 export const Default: Story = {
+  render: (args) => {
+    const [liked, setLiked] = React.useState(false);
+    const [likeCount, setLikeCount] = React.useState(0);
+    return (
+      <div className="max-w-2xl w-full">
+        <IssueCard
+          {...args}
+          liked={liked}
+          likeCount={likeCount}
+          onLike={() => {
+            setLiked(true);
+            setLikeCount((c) => c + 1);
+          }}
+          onUnlike={() => {
+            setLiked(false);
+            setLikeCount((c) => Math.max(0, c - 1));
+          }}
+        />
+      </div>
+    );
+  },
   args: {
     title: "Fix: Unexpected behavior in user login flow",
     body: "> This is a critical issue for our users.\n\nI encountered this issue as well. The login button doesn't respond after entering credentials. Any updates?",
@@ -43,9 +65,4 @@ export const Default: Story = {
     state: "open",
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
   },
-  render: (args) => (
-    <div className="max-w-2xl w-full">
-      <IssueCard {...args} />
-    </div>
-  ),
 };

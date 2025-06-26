@@ -1,3 +1,4 @@
+import React from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import ReleaseCard from "@/components/release-card";
@@ -25,6 +26,27 @@ export default meta;
 type Story = StoryObj<typeof ReleaseCard>;
 
 export const Default: Story = {
+  render: (args) => {
+    const [liked, setLiked] = React.useState(false);
+    const [likeCount, setLikeCount] = React.useState(0);
+    return (
+      <div className="max-w-2xl w-full">
+        <ReleaseCard
+          {...args}
+          liked={liked}
+          likeCount={likeCount}
+          onLike={() => {
+            setLiked(true);
+            setLikeCount((c) => c + 1);
+          }}
+          onUnlike={() => {
+            setLiked(false);
+            setLikeCount((c) => Math.max(0, c - 1));
+          }}
+        />
+      </div>
+    );
+  },
   args: {
     title: "v2.0.0: Major Release 🚀",
     contributors: [
@@ -37,9 +59,4 @@ export const Default: Story = {
     tagName: "v2.0.0",
     publishedAt: new Date("2025-02-01"),
   },
-  render: (args) => (
-    <div className="max-w-2xl w-full">
-      <ReleaseCard {...args} />
-    </div>
-  ),
 };

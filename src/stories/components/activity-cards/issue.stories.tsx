@@ -1,3 +1,4 @@
+import React from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import IssueCard from "@/components/issue-card";
@@ -33,6 +34,27 @@ const mockContributors = [
 ];
 
 export const Default: Story = {
+  render: (args) => {
+    const [liked, setLiked] = React.useState(false);
+    const [likeCount, setLikeCount] = React.useState(0);
+    return (
+      <div className="max-w-2xl w-full">
+        <IssueCard
+          {...args}
+          liked={liked}
+          likeCount={likeCount}
+          onLike={() => {
+            setLiked(true);
+            setLikeCount((c) => c + 1);
+          }}
+          onUnlike={() => {
+            setLiked(false);
+            setLikeCount((c) => Math.max(0, c - 1));
+          }}
+        />
+      </div>
+    );
+  },
   args: {
     title:
       "Bug: Unexpected error from `read_file` tool when clicking the button",
@@ -44,9 +66,4 @@ export const Default: Story = {
     state: "open",
     createdAt: new Date("2025-01-01"),
   },
-  render: (args) => (
-    <div className="max-w-2xl w-full">
-      <IssueCard {...args} />
-    </div>
-  ),
 };

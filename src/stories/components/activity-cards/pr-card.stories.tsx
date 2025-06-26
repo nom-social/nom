@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import React from "react";
 
 import PRCard from "@/components/pr-card";
 
@@ -28,6 +29,27 @@ export default meta;
 type Story = StoryObj<typeof PRCard>;
 
 export const Default: Story = {
+  render: (args) => {
+    const [liked, setLiked] = React.useState(false);
+    const [likeCount, setLikeCount] = React.useState(0);
+    return (
+      <div className="max-w-2xl w-full">
+        <PRCard
+          {...args}
+          liked={liked}
+          likeCount={likeCount}
+          onLike={() => {
+            setLiked(true);
+            setLikeCount((c) => c + 1);
+          }}
+          onUnlike={() => {
+            setLiked(false);
+            setLikeCount((c) => Math.max(0, c - 1));
+          }}
+        />
+      </div>
+    );
+  },
   args: {
     title: "fix: Resolve race condition in data fetching",
     contributors: [
@@ -44,14 +66,30 @@ export const Default: Story = {
     state: "merged",
     createdAt: new Date("2025-01-01"),
   },
-  render: (args) => (
-    <div className="max-w-2xl w-full">
-      <PRCard {...args} />
-    </div>
-  ),
 };
 
 export const WithMarkdownAndImage: Story = {
+  render: (args) => {
+    const [liked, setLiked] = React.useState(false);
+    const [likeCount, setLikeCount] = React.useState(0);
+    return (
+      <div className="max-w-2xl w-full">
+        <PRCard
+          {...args}
+          liked={liked}
+          likeCount={likeCount}
+          onLike={() => {
+            setLiked(true);
+            setLikeCount((c) => c + 1);
+          }}
+          onUnlike={() => {
+            setLiked(false);
+            setLikeCount((c) => Math.max(0, c - 1));
+          }}
+        />
+      </div>
+    );
+  },
   args: {
     title:
       "feat: Redesign dashboard layout with new data visualization\nAdd " +
@@ -68,9 +106,4 @@ export const WithMarkdownAndImage: Story = {
     state: "merged",
     createdAt: new Date("2025-01-01"),
   },
-  render: (args) => (
-    <div className="max-w-2xl w-full">
-      <PRCard {...args} />
-    </div>
-  ),
 };
