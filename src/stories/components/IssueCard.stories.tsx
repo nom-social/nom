@@ -9,6 +9,19 @@ const meta: Meta<typeof IssueCard> = {
     layout: "centered",
   },
   tags: ["autodocs"],
+  argTypes: {
+    title: { control: "text" },
+    contributors: { control: "object" },
+    body: { control: "text" },
+    issueUrl: { control: "text" },
+    repo: { control: "text" },
+    org: { control: "text" },
+    state: {
+      control: "select",
+      options: ["open", "closed"],
+    },
+    createdAt: { control: "date" },
+  },
 };
 export default meta;
 
@@ -19,23 +32,16 @@ const mockContributors = [
   { name: "Sarah Chen", avatar: "https://github.com/sarah.png" },
 ];
 
-const props: React.ComponentProps<typeof IssueCard> = {
-  title: "Bug: Unexpected error from `read_file` tool when clicking the button",
-  contributors: mockContributors,
-  body: "When clicking the **Submit** button, an error appears in the console. Steps to reproduce:\n\n1. Go to the page.\n2. Click Submit.\n3. See error.",
-  issueUrl: "https://github.com/org/repo/issues/123",
-  repo: "repo",
-  org: "org",
-  state: "open",
-  createdAt: new Date("2025-01-01"),
-};
-
 export const Default: Story = {
-  render: () => <IssueCard {...props} />,
-};
-
-export const Closed: Story = {
-  render: () => (
-    <IssueCard {...props} state="closed" createdAt={new Date("2024-12-01")} />
-  ),
+  args: {
+    title:
+      "Bug: Unexpected error from `read_file` tool when clicking the button",
+    contributors: mockContributors,
+    body: "When clicking the **Submit** button, an error appears in the console. Steps to reproduce:\n\n1. Go to the page.\n2. Click Submit.\n3. See error.",
+    issueUrl: "https://github.com/org/repo/issues/123",
+    repo: "repo",
+    org: "org",
+    state: "open",
+    createdAt: new Date("2025-01-01"),
+  },
 };

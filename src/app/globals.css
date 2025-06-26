@@ -76,11 +76,10 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --nom-green: #60EC93;
-  --nom-blue: #77EBFF;
-  --nom-yellow: #FFE16A;
-  --nom-purple: #746AFF;
-  --nom-red: #F06363;
+  --nom-green: #60ec93;
+  --nom-blue: #77ebff;
+  --nom-yellow: #ffe16a;
+  --nom-purple: #746aff;
 }
 
 .dark {

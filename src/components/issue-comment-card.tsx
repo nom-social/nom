@@ -61,7 +61,7 @@ export default function IssueCommentCard({
             )}
           >
             {state === "open" ? <CircleDot /> : <CircleCheck />}
-            Issue Comment • {state}
+            {state}
           </Badge>
         </CardAction>
         <CardDescription>

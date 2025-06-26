@@ -9,6 +9,19 @@ const meta = {
     layout: "centered",
   },
   tags: ["autodocs"],
+  argTypes: {
+    title: { control: "text" },
+    contributors: { control: "object" },
+    body: { control: "text" },
+    prUrl: { control: "text" },
+    repo: { control: "text" },
+    org: { control: "text" },
+    state: {
+      control: "select",
+      options: ["open", "closed", "merged"],
+    },
+    createdAt: { control: "date" },
+  },
 } satisfies Meta<typeof PRCard>;
 
 export default meta;

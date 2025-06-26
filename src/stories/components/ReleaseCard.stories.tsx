@@ -9,6 +9,16 @@ const meta = {
     layout: "centered",
   },
   tags: ["autodocs"],
+  argTypes: {
+    title: { control: "text" },
+    contributors: { control: "object" },
+    body: { control: "text" },
+    releaseUrl: { control: "text" },
+    repo: { control: "text" },
+    org: { control: "text" },
+    tagName: { control: "text" },
+    publishedAt: { control: "date" },
+  },
 } satisfies Meta<typeof ReleaseCard>;
 
 export default meta;

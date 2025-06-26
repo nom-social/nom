@@ -1,5 +1,5 @@
 import React from "react";
-import { ShareIcon, HeartIcon, RocketIcon } from "lucide-react";
+import { ShareIcon, HeartIcon, TagIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 import {
@@ -59,8 +59,8 @@ export default function ReleaseCard({
         </CardTitle>
         <CardAction>
           <Badge className="bg-[var(--nom-green)] hover:opacity-90 border-transparent uppercase text-black">
-            <RocketIcon />
-            Release • {tagName}
+            <TagIcon />
+            {tagName}
           </Badge>
         </CardAction>
         <CardDescription>

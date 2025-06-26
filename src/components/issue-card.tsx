@@ -61,7 +61,7 @@ export default function IssueCard({
             )}
           >
             {state === "open" ? <CircleDot /> : <CircleCheck />}
-            Issue • {state}
+            {state}
           </Badge>
         </CardAction>
         <CardDescription>
