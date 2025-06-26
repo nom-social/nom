@@ -9,7 +9,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShareIcon, ExternalLinkIcon, HeartIcon } from "lucide-react";
+import {
+  ShareIcon,
+  ExternalLinkIcon,
+  HeartIcon,
+  GitMergeIcon,
+} from "lucide-react";
 import { AvatarGroup, Contributor } from "@/components/ui/avatar-group";
 import { Badge } from "@/components/ui/badge";
 import { Markdown } from "@/components/ui/markdown";
@@ -17,13 +22,15 @@ import { Markdown } from "@/components/ui/markdown";
 interface ActivityCardProps {
   title: string;
   contributors: Contributor[];
-  status: "opened" | "merged";
   body: string;
   prUrl: string;
   repo: string;
   org: string;
-  state?: "open" | "closed";
-  type: "pr" | "issue" | "release";
+  status: {
+    state?: "open" | "closed" | "merged";
+    type: "pr" | "issue" | "release";
+    icon?: React.ReactNode;
+  };
 }
 
 const ActivityCard = ({
@@ -33,8 +40,7 @@ const ActivityCard = ({
   prUrl,
   repo,
   org,
-  state,
-  type,
+  status,
 }: ActivityCardProps) => {
   return (
     <Card className="w-full max-w-2xl">
@@ -42,7 +48,10 @@ const ActivityCard = ({
         <CardTitle>{title}</CardTitle>
         <CardAction>
           <Badge className="bg-[#746AFF] hover:bg-[#746AFF]/90 border-transparent uppercase text-black">
-            {type} • {state}
+            {status.icon}
+            <>
+              {status.type} • {status.state}
+            </>
           </Badge>
         </CardAction>
         <CardDescription>
@@ -98,22 +107,6 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof ActivityCard>;
 
-export const OpenPR: Story = {
-  args: {
-    title: "feat: Add new authentication flow with OAuth2",
-    contributors: [
-      { name: "Sarah Chen", avatar: "https://github.com/sarah.png" },
-      { name: "Alex Kim", avatar: "https://github.com/alex.png" },
-    ],
-    body: "This PR implements a new authentication flow using OAuth2 with support for multiple providers. The changes include new API endpoints, updated frontend components, and comprehensive test coverage.",
-    prUrl: "https://github.com/org/repo/pull/123",
-    repo: "nom",
-    org: "nom-social",
-    state: "closed",
-    type: "pr",
-  },
-};
-
 export const MergedPR: Story = {
   args: {
     title: "fix: Resolve race condition in data fetching",
@@ -125,8 +118,11 @@ export const MergedPR: Story = {
     prUrl: "https://github.com/org/repo/pull/124",
     repo: "nom",
     org: "nom-social",
-    state: "closed",
-    type: "pr",
+    status: {
+      state: "merged",
+      type: "pr",
+      icon: <GitMergeIcon />,
+    },
   },
 };
 
@@ -143,7 +139,10 @@ export const PRWithMarkdownAndImage: Story = {
     prUrl: "https://github.com/org/repo/pull/125",
     repo: "nom",
     org: "nom-social",
-    state: "closed",
-    type: "pr",
+    status: {
+      state: "merged",
+      type: "pr",
+      icon: <GitMergeIcon />,
+    },
   },
 };
