@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import PRCard from "@/components/pr-card";
 
 const meta = {
-  title: "Components/PRCard",
+  title: "Components/ActivityCards/PR",
   component: PRCard,
   parameters: {
     layout: "centered",
