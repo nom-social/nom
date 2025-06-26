@@ -61,7 +61,7 @@ export default function PRCard({
       : "0";
 
   return (
-    <Card className="w-full gap-4">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="leading-relaxed font-bold">
           <a
