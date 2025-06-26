@@ -26,6 +26,10 @@ export type Props = {
   org: string;
   state: "open" | "closed";
   createdAt: Date;
+  likeCount: number;
+  liked: boolean;
+  onLike?: () => void;
+  onUnlike?: () => void;
 };
 
 export default function IssueCard({
@@ -37,7 +41,25 @@ export default function IssueCard({
   org,
   state,
   createdAt,
+  likeCount,
+  liked,
+  onLike,
+  onUnlike,
 }: Props) {
+  const handleLikeClick = () => {
+    if (liked) {
+      onUnlike?.();
+    } else {
+      onLike?.();
+    }
+  };
+  const formattedLikeCount =
+    likeCount > 0
+      ? new Intl.NumberFormat(undefined, {
+          notation: "compact",
+        }).format(likeCount)
+      : "0";
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -92,12 +114,14 @@ export default function IssueCard({
       <CardFooter>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full justify-between">
           <Button
-            variant="outline"
-            size="icon"
-            className="size-8"
-            aria-label="Like Issue"
+            variant="ghost"
+            aria-label={liked ? "Unlike Issue" : "Like Issue"}
+            onClick={handleLikeClick}
           >
-            <HeartIcon className="size-4" />
+            <HeartIcon
+              className={liked ? "size-4 fill-red-500 text-red-500" : "size-4"}
+            />
+            {formattedLikeCount}
           </Button>
           <Button variant="outline" size="sm">
             <ShareIcon className="size-4" />

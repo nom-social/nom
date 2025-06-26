@@ -25,6 +25,10 @@ export type Props = {
   org: string;
   state: string;
   createdAt: Date;
+  likeCount: number;
+  liked: boolean;
+  onLike?: () => void;
+  onUnlike?: () => void;
 };
 
 export default function PRCard({
@@ -36,7 +40,26 @@ export default function PRCard({
   org,
   state,
   createdAt,
+  likeCount,
+  liked,
+  onLike,
+  onUnlike,
 }: Props) {
+  const handleLikeClick = () => {
+    if (liked) {
+      onUnlike?.();
+    } else {
+      onLike?.();
+    }
+  };
+
+  const formattedLikeCount =
+    likeCount > 0
+      ? new Intl.NumberFormat(undefined, {
+          notation: "compact",
+        }).format(likeCount)
+      : "0";
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -83,14 +106,20 @@ export default function PRCard({
       </CardContent>
       <CardFooter>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full justify-between">
-          <Button
-            variant="outline"
-            size="icon"
-            className="size-8"
-            aria-label="Like PR"
-          >
-            <HeartIcon className="size-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              aria-label={liked ? "Unlike PR" : "Like PR"}
+              onClick={handleLikeClick}
+            >
+              <HeartIcon
+                className={
+                  liked ? "size-4 fill-red-500 text-red-500" : "size-4"
+                }
+              />
+              {formattedLikeCount}
+            </Button>
+          </div>
           <Button variant="outline" size="sm">
             <ShareIcon className="size-4" />
             Share
