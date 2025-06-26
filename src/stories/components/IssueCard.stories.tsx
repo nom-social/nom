@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import IssueCard, { IssueCardProps } from "@/components/issue-card";
+import IssueCard from "@/components/issue-card";
 
 const meta: Meta<typeof IssueCard> = {
   title: "Components/IssueCard",
@@ -19,7 +19,7 @@ const mockContributors = [
   { name: "Sarah Chen", avatar: "https://github.com/sarah.png" },
 ];
 
-const mockProps: IssueCardProps = {
+const props: React.ComponentProps<typeof IssueCard> = {
   title: "Bug: Unexpected error from `read_file` tool when clicking the button",
   contributors: mockContributors,
   body: "When clicking the **Submit** button, an error appears in the console. Steps to reproduce:\n\n1. Go to the page.\n2. Click Submit.\n3. See error.",
@@ -31,5 +31,5 @@ const mockProps: IssueCardProps = {
 };
 
 export const Default: Story = {
-  render: () => <IssueCard {...mockProps} />,
+  render: () => <IssueCard {...props} />,
 };

@@ -16,10 +16,10 @@ import { AvatarGroup, Contributor } from "@/components/ui/avatar-group";
 import { Badge } from "@/components/ui/badge";
 import { Markdown } from "@/components/ui/markdown";
 
-export type Props = {
-  title: string;
-  contributors: Contributor[];
-  body: string;
+export type IssueCommentCardProps = {
+  issueTitle: string;
+  commentBody: string;
+  commenter: Contributor[];
   issueUrl: string;
   repo: string;
   org: string;
@@ -27,16 +27,16 @@ export type Props = {
   createdAt: Date;
 };
 
-export default function IssueCard({
-  title,
-  contributors,
-  body,
+export default function IssueCommentCard({
+  issueTitle,
+  commentBody,
+  commenter,
   issueUrl,
   repo,
   org,
   state,
   createdAt,
-}: Props) {
+}: IssueCommentCardProps) {
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
@@ -47,13 +47,13 @@ export default function IssueCard({
             rel="noopener noreferrer"
             className="hover:underline focus:underline outline-none"
           >
-            <Markdown>{title}</Markdown>
+            <Markdown>{issueTitle}</Markdown>
           </a>
         </CardTitle>
         <CardAction>
           <Badge className="bg-[var(--nom-red)] hover:opacity-90 border-transparent uppercase text-black">
             <CircleDot />
-            Issue • {state}
+            Issue Comment • {state}
           </Badge>
         </CardAction>
         <CardDescription>
@@ -63,14 +63,14 @@ export default function IssueCard({
               {formatDistanceToNow(createdAt, { addSuffix: false })}
             </div>
             <div className="flex items-center">
-              <AvatarGroup contributors={contributors} />
+              <AvatarGroup contributors={commenter} />
             </div>
           </div>
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none font-normal">
-          <Markdown>{body}</Markdown>
+          <Markdown>{commentBody}</Markdown>
         </div>
       </CardContent>
       <CardFooter>
