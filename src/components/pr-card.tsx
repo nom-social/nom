@@ -61,7 +61,7 @@ export default function PRCard({
       : "0";
 
   return (
-    <Card className="w-full">
+    <Card className="w-full gap-4">
       <CardHeader>
         <CardTitle className="leading-relaxed font-bold">
           <a
@@ -108,15 +108,12 @@ export default function PRCard({
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full justify-between">
           <div className="flex items-center gap-2">
             <Button
-              variant="ghost"
+              variant="outline"
               aria-label={liked ? "Unlike PR" : "Like PR"}
               onClick={handleLikeClick}
+              size="sm"
             >
-              <HeartIcon
-                className={
-                  liked ? "size-4 fill-red-500 text-red-500" : "size-4"
-                }
-              />
+              <HeartIcon className={liked ? "fill-red-500 text-red-500" : ""} />
               {formattedLikeCount}
             </Button>
           </div>

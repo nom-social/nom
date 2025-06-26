@@ -67,7 +67,7 @@ export default function ReleaseCard({
       : "0";
 
   return (
-    <Card className="w-full">
+    <Card className="w-full gap-4">
       <CardHeader>
         <CardTitle className="leading-relaxed font-bold">
           <a
@@ -80,7 +80,7 @@ export default function ReleaseCard({
           </a>
         </CardTitle>
         <CardAction>
-          <Badge className="bg-[var(--nom-green)] hover:opacity-90 border-transparent uppercase text-black">
+          <Badge className="bg-[var(--nom-blue)] hover:opacity-90 border-transparent uppercase text-black">
             <TagIcon />
             {tagName}
           </Badge>
@@ -113,13 +113,12 @@ export default function ReleaseCard({
       <CardFooter>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full justify-between">
           <Button
-            variant="ghost"
+            variant="outline"
             aria-label={liked ? "Unlike release" : "Like release"}
             onClick={handleLikeClick}
+            size="sm"
           >
-            <HeartIcon
-              className={liked ? "size-4 fill-red-500 text-red-500" : "size-4"}
-            />
+            <HeartIcon className={liked ? "fill-red-500 text-red-500" : ""} />
             {formattedLikeCount}
           </Button>
           <Button variant="outline" size="sm">

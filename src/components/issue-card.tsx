@@ -61,7 +61,7 @@ export default function IssueCard({
       : "0";
 
   return (
-    <Card className="w-full">
+    <Card className="w-full gap-4">
       <CardHeader>
         <CardTitle className="leading-relaxed font-bold">
           <a
@@ -114,12 +114,13 @@ export default function IssueCard({
       <CardFooter>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full justify-between">
           <Button
-            variant="ghost"
+            variant="outline"
             aria-label={liked ? "Unlike Issue" : "Like Issue"}
             onClick={handleLikeClick}
+            size="sm"
           >
             <HeartIcon
-              className={liked ? "size-4 fill-red-500 text-red-500" : "size-4"}
+              className={liked ? "fill-red-500 text-red-500" : ""}
             />
             {formattedLikeCount}
           </Button>
