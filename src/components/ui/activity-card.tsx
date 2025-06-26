@@ -27,6 +27,7 @@ export type Props = {
     icon?: React.ReactNode;
     color: string;
   };
+  ctaLabel: string;
 };
 
 export default function ActivityCard({
@@ -37,6 +38,7 @@ export default function ActivityCard({
   repo,
   org,
   status,
+  ctaLabel,
 }: Props) {
   return (
     <Card className="w-full max-w-2xl">
@@ -66,25 +68,25 @@ export default function ActivityCard({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none [&_ul]:list-disc [&_ul]:pl-4 font-normal">
+        <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none font-normal">
           <Markdown>{body}</Markdown>
         </div>
       </CardContent>
       <CardFooter>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full">
           <div className="flex items-center gap-1 flex-wrap">
-            <Button variant="outline" size="icon" className="gap-1.5 size-8">
+            <Button variant="outline" size="icon" className="size-8">
               <HeartIcon className="size-4" />
             </Button>
           </div>
           <div className="flex items-center gap-2 sm:ml-auto">
-            <Button variant="outline" size="sm" className="gap-1.5">
+            <Button variant="outline" size="sm">
               <ShareIcon className="size-4" />
               Share
             </Button>
-            <Button variant="default" size="sm" className="gap-1.5" asChild>
+            <Button variant="default" size="sm" asChild>
               <a href={prUrl} target="_blank" rel="noopener noreferrer">
-                View PR
+                {ctaLabel}
                 <ExternalLinkIcon className="size-4" />
               </a>
             </Button>

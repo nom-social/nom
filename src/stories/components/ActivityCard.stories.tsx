@@ -34,6 +34,7 @@ export const MergedPR: Story = {
       icon: <GitMergeIcon />,
       color: "var(--nom-purple)",
     },
+    ctaLabel: "View PR",
   },
 };
 
@@ -57,6 +58,7 @@ export const PRWithMarkdownAndImage: Story = {
       icon: <GitMergeIcon />,
       color: "var(--nom-purple)",
     },
+    ctaLabel: "View PR",
   },
 };
 
@@ -78,5 +80,6 @@ export const Issue: Story = {
       icon: <CircleDot />,
       color: "var(--nom-red)",
     },
+    ctaLabel: "View Issue",
   },
 };
