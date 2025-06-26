@@ -71,7 +71,6 @@ export async function processIssueEvent({
     .createHash("sha256")
     .update(
       JSON.stringify({
-        action,
         number: issue.number,
         org: repo.org,
         repo: repo.repo,

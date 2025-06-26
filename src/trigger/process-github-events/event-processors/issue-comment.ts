@@ -71,7 +71,6 @@ export async function processIssueCommentEvent({
     .createHash("sha256")
     .update(
       JSON.stringify({
-        action,
         number: issue.number,
         comment_id: comment.id,
         org: repo.org,

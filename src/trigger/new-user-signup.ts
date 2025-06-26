@@ -5,8 +5,10 @@ import { subMonths } from "date-fns";
 import { createClient } from "@/utils/supabase/background";
 import { TablesInsert } from "@/types/supabase";
 
-export const devSyncUserTimelineFromPublic = schemaTask({
-  id: "dev-sync-user-timeline-from-public",
+// This task is triggered as part of the new user sign up flow.
+// It syncs relevant public_timeline events to the new user's user_timeline.
+export const newUserSignUpTask = schemaTask({
+  id: "new-user-signup-task",
   schema: z.object({
     userId: z.string(),
     repoIds: z.array(z.string()),
@@ -26,17 +28,13 @@ export const devSyncUserTimelineFromPublic = schemaTask({
     }
 
     // Fetch all public_timeline events for the given repoIds in a single query
-    const { data: publicEvents, error } = await supabase
+    const { data: publicEvents } = await supabase
       .from("public_timeline")
       .select("*")
       .in("repo_id", repoIds)
       .gte("created_at", oneMonthAgo)
       .throwOnError();
 
-    if (error) {
-      logger.error("Error fetching public_timeline events", { error });
-      return;
-    }
     if (!publicEvents || publicEvents.length === 0) {
       logger.info("No public_timeline events found for provided repoIds");
       return;

@@ -108,7 +108,6 @@ export async function processReleaseEvent({
     .createHash("sha256")
     .update(
       JSON.stringify({
-        action,
         tag_name: release.tag_name,
         org: repo.org,
         repo: repo.repo,

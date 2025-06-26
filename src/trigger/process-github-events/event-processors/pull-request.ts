@@ -189,7 +189,6 @@ export async function processPullRequestEvent({
     .createHash("sha256")
     .update(
       JSON.stringify({
-        action,
         number: pull_request.number,
         org: repo.org,
         repo: repo.repo,
