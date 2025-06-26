@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 
     const { data: repoData } = await supabase
       .from("repositories")
-      .select("id, hashed_secret")
+      .select("id, secret")
       .eq("org", org)
       .eq("repo", repo)
       .single();
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     }
 
     // Secret validation for GitHub webhook
-    if (repoData.hashed_secret) {
+    if (repoData.secret) {
       const signature = request.headers.get("x-hub-signature-256");
       if (!signature) {
         return NextResponse.json(
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
       }
       // Reconstruct the raw body for HMAC validation
       const rawBodyString = JSON.stringify(rawBody);
-      const hmac = crypto.createHmac("sha256", repoData.hashed_secret);
+      const hmac = crypto.createHmac("sha256", repoData.secret);
       hmac.update(rawBodyString);
       const digest = `sha256=${hmac.digest("hex")}`;
       if (

@@ -99,26 +99,26 @@ export type Database = {
         Row: {
           access_token: string | null;
           created_at: string;
-          hashed_secret: string | null;
           id: string;
           org: string;
           repo: string;
+          secret: string | null;
         };
         Insert: {
           access_token?: string | null;
           created_at?: string;
-          hashed_secret?: string | null;
           id?: string;
           org: string;
           repo: string;
+          secret?: string | null;
         };
         Update: {
           access_token?: string | null;
           created_at?: string;
-          hashed_secret?: string | null;
           id?: string;
           org?: string;
           repo?: string;
+          secret?: string | null;
         };
         Relationships: [];
       };
