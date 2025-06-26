@@ -7,6 +7,7 @@ import { TablesInsert } from "@/types/supabase";
 
 import { BASELINE_SCORE, ISSUE_MULTIPLIER } from "./shared/constants";
 
+// TODO: We should ignore issue comments that are from bots
 const issueCommentSchema = z.object({
   action: z.enum(["created", "edited"]),
   issue: z.object({
