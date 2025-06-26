@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import httpStatus from "http-status";
+import crypto from "crypto";
 
 import { createClient } from "@/utils/supabase/server";
 import { Json, TablesInsert } from "@/types/supabase";
@@ -51,7 +52,7 @@ export async function POST(request: Request) {
 
     const { data: repoData } = await supabase
       .from("repositories")
-      .select("id")
+      .select("id, hashed_secret")
       .eq("org", org)
       .eq("repo", repo)
       .single();
@@ -61,6 +62,30 @@ export async function POST(request: Request) {
         message: "Repository not tracked, ignoring webhook",
         timestamp: new Date().toISOString(),
       });
+    }
+
+    // Secret validation for GitHub webhook
+    if (repoData.hashed_secret) {
+      const signature = request.headers.get("x-hub-signature-256");
+      if (!signature) {
+        return NextResponse.json(
+          { error: "Missing signature" },
+          { status: httpStatus.UNAUTHORIZED }
+        );
+      }
+      // Reconstruct the raw body for HMAC validation
+      const rawBodyString = JSON.stringify(rawBody);
+      const hmac = crypto.createHmac("sha256", repoData.hashed_secret);
+      hmac.update(rawBodyString);
+      const digest = `sha256=${hmac.digest("hex")}`;
+      if (
+        !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest))
+      ) {
+        return NextResponse.json(
+          { error: "Invalid signature" },
+          { status: httpStatus.UNAUTHORIZED }
+        );
+      }
     }
 
     const eventData: TablesInsert<"github_event_log"> = {
