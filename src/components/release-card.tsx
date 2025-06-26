@@ -106,7 +106,7 @@ export default function ReleaseCard({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none font-normal">
+        <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none font-normal text-sm">
           <Markdown>{aiAnalysis?.summary || body}</Markdown>
         </div>
       </CardContent>
