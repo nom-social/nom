@@ -14,7 +14,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof PRCard>;
 
-export const MergedPR: Story = {
+export const Default: Story = {
   args: {
     title: "fix: Resolve race condition in data fetching",
     contributors: [
@@ -33,7 +33,7 @@ export const MergedPR: Story = {
   },
 };
 
-export const PRWithMarkdownAndImage: Story = {
+export const WithMarkdownAndImage: Story = {
   args: {
     title:
       "feat: Redesign dashboard layout with new data visualization\nAdd " +

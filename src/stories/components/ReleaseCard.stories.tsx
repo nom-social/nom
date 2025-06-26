@@ -14,7 +14,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof ReleaseCard>;
 
-export const BasicRelease: Story = {
+export const Default: Story = {
   args: {
     title: "v2.0.0: Major Release 🚀",
     contributors: [

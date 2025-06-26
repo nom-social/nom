@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AvatarGroup, Contributor } from "@/components/ui/avatar-group";
+import { AvatarGroup, Contributor } from "@/components/shared/avatar-group";
 import { Badge } from "@/components/ui/badge";
 import { Markdown } from "@/components/ui/markdown";
 
@@ -59,7 +59,15 @@ export default function IssueCard({
         <CardDescription>
           <div className="flex gap-2 flex-col">
             <div className="text-muted-foreground text-sm">
-              {org}/{repo} •{" "}
+              <a
+                href={`https://github.com/${org}/${repo}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline focus:underline outline-none"
+              >
+                {org}/{repo}
+              </a>
+              {" • "}
               {formatDistanceToNow(createdAt, { addSuffix: false })}
             </div>
             <div className="flex items-center">
