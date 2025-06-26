@@ -77,14 +77,17 @@ export const AsLink: Story = {
 export const CustomColors: Story = {
   render: () => (
     <div className="flex gap-4">
-      <Badge className="bg-[#60EC93] text-black hover:bg-[#60EC93]/90 border-transparent">
+      <Badge className="bg-[var(--nom-green)] text-black hover:opacity-90 border-transparent">
         Green
       </Badge>
-      <Badge className="bg-[#77EBFF] text-black hover:bg-[#77EBFF]/90 border-transparent">
+      <Badge className="bg-[var(--nom-blue)] text-black hover:opacity-90 border-transparent">
         Blue
       </Badge>
-      <Badge className="bg-[#FFE16A] text-black hover:bg-[#FFE16A]/90 border-transparent">
+      <Badge className="bg-[var(--nom-yellow)] text-black hover:opacity-90 border-transparent">
         Yellow
+      </Badge>
+      <Badge className="bg-[var(--nom-purple)] text-white hover:opacity-90 border-transparent">
+        Purple
       </Badge>
     </div>
   ),
@@ -106,9 +109,10 @@ export const KitchenSink: Story = {
     ] as const;
 
     const customColors = [
-      { bg: "#60EC93", label: "Green" },
-      { bg: "#77EBFF", label: "Blue" },
-      { bg: "#FFE16A", label: "Yellow" },
+      { bg: "var(--nom-green)", label: "Green" },
+      { bg: "var(--nom-blue)", label: "Blue" },
+      { bg: "var(--nom-yellow)", label: "Yellow" },
+      { bg: "var(--nom-purple)", label: "Purple" },
     ];
 
     return (
