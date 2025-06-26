@@ -45,7 +45,7 @@ export default function ReleaseCard({
   aiAnalysis,
 }: Props) {
   return (
-    <Card className="w-full max-w-2xl">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="leading-relaxed font-bold">
           <a

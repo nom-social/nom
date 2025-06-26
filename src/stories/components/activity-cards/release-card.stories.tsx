@@ -30,15 +30,16 @@ export const Default: Story = {
     contributors: [
       { name: "Jane Doe", avatar: "https://github.com/janedoe.png" },
     ],
-    body: `- Project-Scoped Roles: Assign permissions per project for tighter security and clearer access control.
-- MCP Server Enhancements: Develop in VS Code and deploy EdgeFunctions directly from the MCP server.
-- UI Library Blocks: Drop-in Infinite Query for smooth infinite scrolling and Social Auth for ready-made login screens.
-- Compliance Resources: New SOC 2 report and security documentation for audit and trustworthiness.
-- Community Showcases: Dozens of tutorials and sample apps (React, Vue, n8n, WordPress, etc.) to jump-start your integrations.`,
+    body: `- Project-Scoped Roles: Assign permissions per project for tighter security and clearer access control.\n- MCP Server Enhancements: Develop in VS Code and deploy EdgeFunctions directly from the MCP server.\n- UI Library Blocks: Drop-in Infinite Query for smooth infinite scrolling and Social Auth for ready-made login screens.\n- Compliance Resources: New SOC 2 report and security documentation for audit and trustworthiness.\n- Community Showcases: Dozens of tutorials and sample apps (React, Vue, n8n, WordPress, etc.) to jump-start your integrations.`,
     releaseUrl: "https://github.com/org/repo/releases/tag/v2.0.0",
     repo: "repo",
     org: "org",
     tagName: "v2.0.0",
     publishedAt: new Date("2025-02-01"),
   },
+  render: (args) => (
+    <div className="max-w-2xl w-full">
+      <ReleaseCard {...args} />
+    </div>
+  ),
 };

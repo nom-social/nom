@@ -44,6 +44,11 @@ export const Default: Story = {
     state: "merged",
     createdAt: new Date("2025-01-01"),
   },
+  render: (args) => (
+    <div className="max-w-2xl w-full">
+      <PRCard {...args} />
+    </div>
+  ),
 };
 
 export const WithMarkdownAndImage: Story = {
@@ -63,4 +68,9 @@ export const WithMarkdownAndImage: Story = {
     state: "merged",
     createdAt: new Date("2025-01-01"),
   },
+  render: (args) => (
+    <div className="max-w-2xl w-full">
+      <PRCard {...args} />
+    </div>
+  ),
 };

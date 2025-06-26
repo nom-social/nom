@@ -43,4 +43,9 @@ export const Default: Story = {
     state: "open",
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
   },
+  render: (args) => (
+    <div className="max-w-2xl w-full">
+      <IssueCard {...args} />
+    </div>
+  ),
 };

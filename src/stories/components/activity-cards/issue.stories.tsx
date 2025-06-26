@@ -44,4 +44,9 @@ export const Default: Story = {
     state: "open",
     createdAt: new Date("2025-01-01"),
   },
+  render: (args) => (
+    <div className="max-w-2xl w-full">
+      <IssueCard {...args} />
+    </div>
+  ),
 };
