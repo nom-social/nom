@@ -1,6 +1,5 @@
 import { Json } from "@/types/supabase";
 
-import { processPullRequestReviewEvent } from "./event-processors/pull-request-review";
 import { processPullRequestEvent } from "./event-processors/pull-request";
 import { processIssueEvent } from "./event-processors/issue";
 import { processReleaseEvent } from "./event-processors/release";
@@ -16,8 +15,6 @@ export async function processEvent(args: {
   switch (args.event.event_type) {
     case "pull_request":
       return processPullRequestEvent(args);
-    case "pull_request_review":
-      return processPullRequestReviewEvent(args);
     case "issues":
       return processIssueEvent(args);
     case "issue_comment":

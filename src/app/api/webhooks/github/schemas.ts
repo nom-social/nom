@@ -34,10 +34,7 @@ export const githubWebhookPayloadSchema = z.discriminatedUnion("event_type", [
   z.object({
     event_type: z.literal("pull_request"),
     ...githubWebhookBaseSchema.shape,
-  }),
-  z.object({
-    event_type: z.literal("pull_request_review"),
-    ...githubWebhookBaseSchema.shape,
+    action: z.enum(["closed"]),
   }),
   z.object({
     event_type: z.literal("issues"),

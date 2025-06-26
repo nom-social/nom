@@ -15,14 +15,7 @@ import {
 import { BASELINE_SCORE, PULL_REQUEST_MULTIPLIER } from "./shared/constants";
 
 const pullRequestSchema = z.object({
-  action: z.enum([
-    "opened",
-    "closed",
-    "review_requested",
-    "reopened",
-    "ready_for_review",
-    "edited",
-  ]),
+  action: z.enum(["closed"]),
   pull_request: z.object({
     number: z.number(),
     title: z.string(),
@@ -205,109 +198,49 @@ export async function processPullRequestEvent({
     )
     .digest("hex");
 
-  if (
-    action === "opened" ||
-    action === "reopened" ||
-    action === "ready_for_review" ||
-    action === "review_requested"
-  ) {
-    if (pull_request.draft)
-      return {
-        userTimelineEntries: [],
-        publicTimelineEntries: [],
-      };
-
-    const prData = await constructPRData();
-
-    const timelineEntry = {
-      type: "pull_request",
-      data: prData,
-      score: BASELINE_SCORE * PULL_REQUEST_MULTIPLIER,
-      repo_id: repo.id,
-      dedupe_hash: dedupeHash,
-      updated_at: currentTimestamp,
-      event_ids: [event.id],
-      is_read: false,
-    };
-    const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
-
-    for (const subscriber of subscribers) {
-      const { data: user } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", subscriber.user_id)
-        .single()
-        .throwOnError();
-
-      const isMyReview = user.github_username === pull_request.user.login;
-      const isReviewAssignedToMe = !!pull_request.requested_reviewers?.some(
-        (reviewer) => reviewer.login === user.github_username
-      );
-
-      userTimelineEntries.push({
-        user_id: subscriber.user_id,
-        categories:
-          isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
-        ...timelineEntry,
-      });
-    }
-
+  if (!pull_request.merged)
     return {
-      userTimelineEntries,
-      publicTimelineEntries: [timelineEntry],
+      userTimelineEntries: [],
+      publicTimelineEntries: [],
     };
-  }
 
-  if (action === "closed") {
-    if (!pull_request.merged)
-      return {
-        userTimelineEntries: [],
-        publicTimelineEntries: [],
-      };
+  const prData = await constructPRData();
 
-    const prData = await constructPRData();
+  const timelineEntry = {
+    type: "pull_request",
+    data: prData,
+    score: BASELINE_SCORE * PULL_REQUEST_MULTIPLIER,
+    repo_id: repo.id,
+    dedupe_hash: dedupeHash,
+    updated_at: currentTimestamp,
+    event_ids: [event.id],
+    is_read: false,
+  };
+  const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
 
-    const timelineEntry = {
-      type: "pull_request",
-      data: prData,
-      score: BASELINE_SCORE * PULL_REQUEST_MULTIPLIER,
-      repo_id: repo.id,
-      dedupe_hash: dedupeHash,
-      updated_at: currentTimestamp,
-      event_ids: [event.id],
-      is_read: false,
-    };
-    const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
+  for (const subscriber of subscribers) {
+    const { data: user } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", subscriber.user_id)
+      .single()
+      .throwOnError();
 
-    for (const subscriber of subscribers) {
-      const { data: user } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", subscriber.user_id)
-        .single()
-        .throwOnError();
+    const isMyReview = user.github_username === pull_request.user.login;
+    const isReviewAssignedToMe = !!pull_request.requested_reviewers?.some(
+      (reviewer) => reviewer.login === user.github_username
+    );
 
-      const isMyReview = user.github_username === pull_request.user.login;
-      const isReviewAssignedToMe = !!pull_request.requested_reviewers?.some(
-        (reviewer) => reviewer.login === user.github_username
-      );
-
-      userTimelineEntries.push({
-        user_id: subscriber.user_id,
-        categories:
-          isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
-        ...timelineEntry,
-      });
-    }
-
-    return {
-      userTimelineEntries,
-      publicTimelineEntries: [timelineEntry],
-    };
+    userTimelineEntries.push({
+      user_id: subscriber.user_id,
+      categories:
+        isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
+      ...timelineEntry,
+    });
   }
 
   return {
-    userTimelineEntries: [],
-    publicTimelineEntries: [],
+    userTimelineEntries,
+    publicTimelineEntries: [timelineEntry],
   };
 }
