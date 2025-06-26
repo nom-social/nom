@@ -86,6 +86,9 @@ export const CustomColors: Story = {
       <Badge className="bg-[#FFE16A] text-black hover:bg-[#FFE16A]/90 border-transparent">
         Yellow
       </Badge>
+      <Badge className="bg-[#746AFF] text-white hover:bg-[#746AFF]/90 border-transparent">
+        Purple
+      </Badge>
     </div>
   ),
 };
@@ -109,6 +112,7 @@ export const KitchenSink: Story = {
       { bg: "#60EC93", label: "Green" },
       { bg: "#77EBFF", label: "Blue" },
       { bg: "#FFE16A", label: "Yellow" },
+      { bg: "#746AFF", label: "Purple" },
     ];
 
     return (

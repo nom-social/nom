@@ -1,9 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import {
   Card,
+  CardAction,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShareIcon, ExternalLinkIcon, HeartIcon } from "lucide-react";
@@ -19,36 +22,39 @@ interface ActivityCardProps {
   prUrl: string;
   repo: string;
   org: string;
+  state?: "open" | "closed";
+  type: "pr" | "issue" | "release";
 }
 
 const ActivityCard = ({
   title,
   contributors,
-  status,
   body,
   prUrl,
   repo,
   org,
+  state,
+  type,
 }: ActivityCardProps) => {
   return (
-    <Card className="w-full max-w-2xl bg-card rounded-lg border border-border shadow-sm relative hover:shadow-md transition-shadow duration-200">
+    <Card className="w-full max-w-2xl">
       <CardHeader>
-        <div className="space-y-3">
-          <div className="flex items-center gap-3 w-full justify-between">
-            <h3 className="text-base font-semibold text-card-foreground line-clamp-2 leading-tight">
-              {title}
-            </h3>
-            <Badge className="px-2 sm:px-2.5 py-1 rounded-full text-xs font-medium bg-[#746AFF] text-black">
-              PR • {status === "merged" ? "Merged" : "Open"}
-            </Badge>
+        <CardTitle>{title}</CardTitle>
+        <CardAction>
+          <Badge className="bg-[#746AFF] hover:bg-[#746AFF]/90 border-transparent uppercase text-black">
+            {type} • {state}
+          </Badge>
+        </CardAction>
+        <CardDescription>
+          <div className="flex gap-2 flex-col">
+            <div className="text-muted-foreground text-sm">
+              {org}/{repo}
+            </div>
+            <div className="flex items-center">
+              <AvatarGroup contributors={contributors} />
+            </div>
           </div>
-          <div className="text-muted-foreground text-sm">
-            {org}/{repo}
-          </div>
-          <div className="flex items-center">
-            <AvatarGroup contributors={contributors} />
-          </div>
-        </div>
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none [&_ul]:list-disc [&_ul]:pl-4">
@@ -99,11 +105,12 @@ export const OpenPR: Story = {
       { name: "Sarah Chen", avatar: "https://github.com/sarah.png" },
       { name: "Alex Kim", avatar: "https://github.com/alex.png" },
     ],
-    status: "opened",
     body: "This PR implements a new authentication flow using OAuth2 with support for multiple providers. The changes include new API endpoints, updated frontend components, and comprehensive test coverage.",
     prUrl: "https://github.com/org/repo/pull/123",
     repo: "nom",
     org: "nom-social",
+    state: "closed",
+    type: "pr",
   },
 };
 
@@ -114,11 +121,12 @@ export const MergedPR: Story = {
       { name: "Alex Kim", avatar: "https://github.com/alex.png" },
       { name: "Sarah Chen", avatar: "https://github.com/sarah.png" },
     ],
-    status: "merged",
     body: "Fixed a critical race condition in the data fetching layer that was causing intermittent failures. Added proper request cancellation and implemented a request queue system.",
     prUrl: "https://github.com/org/repo/pull/124",
     repo: "nom",
     org: "nom-social",
+    state: "closed",
+    type: "pr",
   },
 };
 
@@ -131,10 +139,11 @@ export const PRWithMarkdownAndImage: Story = {
       { name: "Alex Kim", avatar: "https://github.com/alex.png" },
       { name: "Sarah Chen", avatar: "https://github.com/sarah.png" },
     ],
-    status: "opened",
     body: `Complete overhaul of the dashboard layout with new data visualization components:\n\n![New dashboard layout preview](https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/og.jpg)\n\nKey improvements include:\n- Interactive charts with real-time updates\n- Responsive grid system for better mobile experience\n- Dark mode support with automatic theme switching\n- Improved data readability with new typography scale\n\nThe new design focuses on improving the overall user experience while maintaining performance.`,
     prUrl: "https://github.com/org/repo/pull/125",
     repo: "nom",
     org: "nom-social",
+    state: "closed",
+    type: "pr",
   },
 };
