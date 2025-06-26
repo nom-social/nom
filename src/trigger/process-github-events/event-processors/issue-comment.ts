@@ -7,7 +7,6 @@ import { TablesInsert } from "@/types/supabase";
 
 import { BASELINE_SCORE, ISSUE_MULTIPLIER } from "./shared/constants";
 
-// TODO: We should ignore issue comments that are from bots
 const issueCommentSchema = z.object({
   action: z.enum(["created", "edited"]),
   issue: z.object({
@@ -47,6 +46,7 @@ const issueCommentSchema = z.object({
       "OWNER",
     ]),
   }),
+  sender: z.object({ type: z.string() }),
 });
 
 export async function processIssueCommentEvent({
@@ -66,7 +66,15 @@ export async function processIssueCommentEvent({
   const supabase = createClient();
 
   const validationResult = issueCommentSchema.parse(event.raw_payload);
-  const { action, issue, comment } = validationResult;
+  const { action, issue, comment, sender } = validationResult;
+
+  // Ignore events from bots
+  if (sender.type === "Bot") {
+    return {
+      userTimelineEntries: [],
+      publicTimelineEntries: [],
+    };
+  }
 
   const dedupeHash = crypto
     .createHash("sha256")
