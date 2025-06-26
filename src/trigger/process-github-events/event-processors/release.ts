@@ -1,9 +1,12 @@
 import { z } from "zod";
 import crypto from "crypto";
+import { zodResponseFormat } from "openai/helpers/zod";
 
 import { Json, TablesInsert } from "@/types/supabase";
+import * as openai from "@/utils/openai/client";
 
 import { BASELINE_SCORE, RELEASE_MULTIPLIER } from "./shared/constants";
+import { RELEASE_ANALYSIS_PROMPT } from "./release/prompts";
 
 const releaseSchema = z.object({
   action: z.enum(["published"]),
@@ -28,6 +31,15 @@ const releaseSchema = z.object({
   }),
 });
 
+// Release analysis prompt and schema
+
+const releaseAnalysisResponseSchema = z.object({
+  summary: z.string(),
+  breaking_changes: z.array(z.string()),
+  notable_additions: z.array(z.string()),
+  migration_notes: z.array(z.string()),
+});
+
 export async function processReleaseEvent({
   event,
   repo,
@@ -44,6 +56,32 @@ export async function processReleaseEvent({
 }> {
   const validationResult = releaseSchema.parse(event.raw_payload);
   const { action, release } = validationResult;
+
+  // LLM summarization of release notes
+  const openaiClient = openai.createClient();
+  const prompt = RELEASE_ANALYSIS_PROMPT.replace("{tag_name}", release.tag_name)
+    .replace("{name}", release.name || "(no name)")
+    .replace("{author}", release.author.login)
+    .replace("{published_at}", release.published_at?.toISOString() || "N/A")
+    .replace("{body}", release.body || "No release notes provided");
+
+  const completion = await openaiClient.chat.completions.parse({
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are a helpful assistant that summarizes GitHub releases for repo " +
+          "consumers/integrators. Provide your analysis in JSON format as specified.",
+      },
+      { role: "user", content: prompt },
+    ],
+    response_format: zodResponseFormat(
+      releaseAnalysisResponseSchema,
+      "release_analysis"
+    ),
+  });
+  const analysis = completion.choices[0].message.parsed;
 
   const releaseData = {
     action,
@@ -62,6 +100,7 @@ export async function processReleaseEvent({
         content_type: asset.content_type,
         browser_download_url: asset.browser_download_url,
       })),
+      ai_analysis: analysis,
     },
   };
 
