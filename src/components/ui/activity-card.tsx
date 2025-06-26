@@ -22,7 +22,7 @@ export type Props = {
   repo: string;
   org: string;
   status: {
-    state?: "open" | "closed" | "merged";
+    state: string;
     type: "pr" | "issue" | "release";
     icon?: React.ReactNode;
     color: string;
@@ -41,7 +41,9 @@ export default function ActivityCard({
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle className="leading-relaxed font-bold">
+          <Markdown>{title}</Markdown>
+        </CardTitle>
         <CardAction>
           <Badge
             className={`bg-[${status.color}] hover:opacity-90 border-transparent uppercase text-black`}
@@ -64,7 +66,7 @@ export default function ActivityCard({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none [&_ul]:list-disc [&_ul]:pl-4">
+        <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none [&_ul]:list-disc [&_ul]:pl-4 font-normal">
           <Markdown>{body}</Markdown>
         </div>
       </CardContent>

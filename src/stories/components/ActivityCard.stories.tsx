@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import ActivityCard from "@/components/ui/activity-card";
-import { GitMergeIcon } from "lucide-react";
+import { CircleDot, GitMergeIcon } from "lucide-react";
 
 const meta = {
   title: "Components/ActivityCard",
@@ -56,6 +56,27 @@ export const PRWithMarkdownAndImage: Story = {
       type: "pr",
       icon: <GitMergeIcon />,
       color: "var(--nom-purple)",
+    },
+  },
+};
+
+// FIXME: fix this red not showing up
+export const Issue: Story = {
+  args: {
+    title: "fix: `read_file` tool truncation causing incomplete LLM context",
+    contributors: [
+      { name: "Sarah Chen", avatar: "https://github.com/sarah.png" },
+      { name: "Alex Kim", avatar: "https://github.com/alex.png" },
+    ],
+    body: "This issue happens because the read_file tool is truncating your local sudoku_gui.py (ending abruptly with 'def __in…'), even though the file isn't large. As a result, the LLM never sees your full code and can't reliably perform edits, search/replace, or explain the file. You should care because any LLM-driven integration or automation will fail or produce incorrect results without the complete source context.",
+    prUrl: "https://github.com/org/repo/pull/126",
+    repo: "nom",
+    org: "nom-social",
+    status: {
+      state: "open",
+      type: "issue",
+      icon: <CircleDot />,
+      color: "var(--nom-red)",
     },
   },
 };
