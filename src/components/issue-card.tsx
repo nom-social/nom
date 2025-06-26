@@ -9,7 +9,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShareIcon, ExternalLinkIcon, AlertCircleIcon } from "lucide-react";
+import {
+  ShareIcon,
+  ExternalLinkIcon,
+  AlertCircleIcon,
+  HeartIcon,
+} from "lucide-react";
 import { AvatarGroup, Contributor } from "@/components/ui/avatar-group";
 import { Badge } from "@/components/ui/badge";
 import { Markdown } from "@/components/ui/markdown";
@@ -67,6 +72,11 @@ export default function IssueCard({
       </CardContent>
       <CardFooter>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full">
+          <div className="flex items-center gap-1 flex-wrap">
+            <Button variant="outline" size="icon" className="size-8">
+              <HeartIcon className="size-4" />
+            </Button>
+          </div>
           <div className="flex items-center gap-2 sm:ml-auto">
             <Button variant="outline" size="sm">
               <ShareIcon className="size-4" />
