@@ -51,9 +51,9 @@ const ActivityCard = ({
         </div>
       </CardHeader>
       <CardContent>
-        <Markdown className="text-sm text-card-foreground leading-relaxed">
-          {body}
-        </Markdown>
+        <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none [&_ul]:list-disc [&_ul]:pl-4">
+          <Markdown>{body}</Markdown>
+        </div>
       </CardContent>
       <CardFooter>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full">
