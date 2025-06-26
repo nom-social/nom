@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ShareIcon, ExternalLinkIcon, HeartIcon } from "lucide-react";
 import { AvatarGroup, Contributor } from "@/components/ui/avatar-group";
 import { Badge } from "@/components/ui/badge";
-import { Markdown } from "@/components/ui/Markdown";
+import { Markdown } from "@/components/ui/markdown";
 
 interface ActivityCardProps {
   title: string;
