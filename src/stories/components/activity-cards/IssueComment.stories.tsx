@@ -3,16 +3,15 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import IssueCard from "@/components/issue-card";
 
 const meta: Meta<typeof IssueCard> = {
-  title: "Components/IssueCard",
+  title: "Components/ActivityCards/IssueComment",
   component: IssueCard,
   parameters: {
     layout: "centered",
   },
   tags: ["autodocs"],
   argTypes: {
-    title: { control: "text" },
-    contributors: { control: "object" },
     body: { control: "text" },
+    contributors: { control: "object" },
     issueUrl: { control: "text" },
     repo: { control: "text" },
     org: { control: "text" },
@@ -21,27 +20,27 @@ const meta: Meta<typeof IssueCard> = {
       options: ["open", "closed"],
     },
     createdAt: { control: "date" },
+    title: { control: "text" },
   },
 };
 export default meta;
 
 type Story = StoryObj<typeof IssueCard>;
 
-const mockContributors = [
-  { name: "Alex Kim", avatar: "https://github.com/alex.png" },
-  { name: "Sarah Chen", avatar: "https://github.com/sarah.png" },
-];
-
 export const Default: Story = {
   args: {
-    title:
-      "Bug: Unexpected error from `read_file` tool when clicking the button",
-    contributors: mockContributors,
-    body: "When clicking the **Submit** button, an error appears in the console. Steps to reproduce:\n\n1. Go to the page.\n2. Click Submit.\n3. See error.",
+    title: "Fix: Unexpected behavior in user login flow",
+    body: "> This is a critical issue for our users.\n\nI encountered this issue as well. The login button doesn't respond after entering credentials. Any updates?",
+    contributors: [
+      {
+        name: "The Octocat",
+        avatar: "https://github.com/octocat.png",
+      },
+    ],
     issueUrl: "https://github.com/org/repo/issues/123",
     repo: "repo",
     org: "org",
     state: "open",
-    createdAt: new Date("2025-01-01"),
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
   },
 };
