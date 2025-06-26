@@ -1,4 +1,7 @@
 import React from "react";
+import { ShareIcon, HeartIcon, CircleDot } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+
 import {
   Card,
   CardAction,
@@ -9,16 +12,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  ShareIcon,
-  ExternalLinkIcon,
-  AlertCircleIcon,
-  HeartIcon,
-} from "lucide-react";
 import { AvatarGroup, Contributor } from "@/components/ui/avatar-group";
 import { Badge } from "@/components/ui/badge";
 import { Markdown } from "@/components/ui/markdown";
-import { formatDistanceToNow } from "date-fns";
 
 export type IssueCardProps = {
   title: string;
@@ -45,11 +41,18 @@ export default function IssueCard({
     <Card className="w-full max-w-2xl">
       <CardHeader>
         <CardTitle className="leading-relaxed font-bold">
-          <Markdown>{title}</Markdown>
+          <a
+            href={issueUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline focus:underline outline-none"
+          >
+            <Markdown>{title}</Markdown>
+          </a>
         </CardTitle>
         <CardAction>
           <Badge className="bg-[var(--nom-red)] hover:opacity-90 border-transparent uppercase text-black">
-            <AlertCircleIcon />
+            <CircleDot />
             Issue • {state}
           </Badge>
         </CardAction>
@@ -71,24 +74,14 @@ export default function IssueCard({
         </div>
       </CardContent>
       <CardFooter>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full">
-          <div className="flex items-center gap-1 flex-wrap">
-            <Button variant="outline" size="icon" className="size-8">
-              <HeartIcon className="size-4" />
-            </Button>
-          </div>
-          <div className="flex items-center gap-2 sm:ml-auto">
-            <Button variant="outline" size="sm">
-              <ShareIcon className="size-4" />
-              Share
-            </Button>
-            <Button variant="default" size="sm" asChild>
-              <a href={issueUrl} target="_blank" rel="noopener noreferrer">
-                View Issue
-                <ExternalLinkIcon className="size-4" />
-              </a>
-            </Button>
-          </div>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full justify-between">
+          <Button variant="outline" size="icon" className="size-8">
+            <HeartIcon className="size-4" />
+          </Button>
+          <Button variant="outline" size="sm">
+            <ShareIcon className="size-4" />
+            Share
+          </Button>
         </div>
       </CardFooter>
     </Card>

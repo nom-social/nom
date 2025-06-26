@@ -22,7 +22,7 @@ const mockContributors = [
 const mockProps: IssueCardProps = {
   title: "Bug: Unexpected error from `read_file` tool when clicking the button",
   contributors: mockContributors,
-  body: "When clicking the **Submit** button, an error appears in the console. Steps to reproduce: 1. Go to the page. 2. Click Submit. 3. See error.",
+  body: "When clicking the **Submit** button, an error appears in the console. Steps to reproduce:\n\n1. Go to the page.\n2. Click Submit.\n3. See error.",
   issueUrl: "https://github.com/org/repo/issues/123",
   repo: "repo",
   org: "org",

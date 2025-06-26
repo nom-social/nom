@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  ShareIcon,
-  ExternalLinkIcon,
-  HeartIcon,
-  GitMergeIcon,
-} from "lucide-react";
+import { ShareIcon, HeartIcon, GitMergeIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 import {
@@ -46,7 +41,14 @@ export default function PRCard({
     <Card className="w-full max-w-2xl">
       <CardHeader>
         <CardTitle className="leading-relaxed font-bold">
-          <Markdown>{title}</Markdown>
+          <a
+            href={prUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline focus:underline outline-none"
+          >
+            <Markdown>{title}</Markdown>
+          </a>
         </CardTitle>
         <CardAction>
           <Badge className="bg-[var(--nom-purple)] hover:opacity-90 border-transparent uppercase text-black">
@@ -72,24 +74,14 @@ export default function PRCard({
         </div>
       </CardContent>
       <CardFooter>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full">
-          <div className="flex items-center gap-1 flex-wrap">
-            <Button variant="outline" size="icon" className="size-8">
-              <HeartIcon className="size-4" />
-            </Button>
-          </div>
-          <div className="flex items-center gap-2 sm:ml-auto">
-            <Button variant="outline" size="sm">
-              <ShareIcon className="size-4" />
-              Share
-            </Button>
-            <Button variant="default" size="sm" asChild>
-              <a href={prUrl} target="_blank" rel="noopener noreferrer">
-                View PR
-                <ExternalLinkIcon className="size-4" />
-              </a>
-            </Button>
-          </div>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full justify-between">
+          <Button variant="outline" size="icon" className="size-8">
+            <HeartIcon className="size-4" />
+          </Button>
+          <Button variant="outline" size="sm">
+            <ShareIcon className="size-4" />
+            Share
+          </Button>
         </div>
       </CardFooter>
     </Card>

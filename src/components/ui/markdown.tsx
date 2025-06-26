@@ -9,7 +9,7 @@ interface MarkdownProps {
 
 export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
   return (
-    <div className="[&_ul]:list-disc [&_ul]:pl-4">
+    <div className="[&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-7">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
