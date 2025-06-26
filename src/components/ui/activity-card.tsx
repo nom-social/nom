@@ -25,6 +25,7 @@ export type Props = {
     state?: "open" | "closed" | "merged";
     type: "pr" | "issue" | "release";
     icon?: React.ReactNode;
+    color: string;
   };
 };
 
@@ -42,7 +43,9 @@ export default function ActivityCard({
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardAction>
-          <Badge className="bg-[#746AFF] hover:bg-[#746AFF]/90 border-transparent uppercase text-black">
+          <Badge
+            className={`bg-[${status.color}] hover:opacity-90 border-transparent uppercase text-black`}
+          >
             {status.icon}
             <>
               {status.type} • {status.state}

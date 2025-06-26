@@ -32,6 +32,7 @@ export const MergedPR: Story = {
       state: "merged",
       type: "pr",
       icon: <GitMergeIcon />,
+      color: "var(--nom-purple)",
     },
   },
 };
@@ -54,6 +55,7 @@ export const PRWithMarkdownAndImage: Story = {
       state: "merged",
       type: "pr",
       icon: <GitMergeIcon />,
+      color: "var(--nom-purple)",
     },
   },
 };
