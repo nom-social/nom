@@ -47,11 +47,22 @@ export default function LoginForm({ onLogin }: Props) {
               onLogin();
             }}
           >
-            {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Github />
-            )}{" "}
+            <div className="relative w-5 h-5 flex items-center justify-center">
+              <span
+                className={`absolute transition-transform duration-200 ${
+                  isLoading ? "scale-0" : "scale-100"
+                }`}
+              >
+                <Github />
+              </span>
+              <span
+                className={`absolute transition-transform duration-200 ${
+                  isLoading ? "scale-100" : "scale-0"
+                }`}
+              >
+                <Loader2 className="animate-spin" />
+              </span>
+            </div>
             github.auth()
           </ButtonLogin>
           <p className="text-sm text-muted-foreground text-center">
