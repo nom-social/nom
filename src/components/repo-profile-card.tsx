@@ -19,6 +19,11 @@ type Props = {
   description: string;
   websiteUrl: string;
   avatarUrl: string;
+  topLanguages: {
+    name: string;
+    color: string;
+  }[];
+  license: string;
 };
 
 export default function RepoProfileCard({
@@ -28,6 +33,8 @@ export default function RepoProfileCard({
   description,
   websiteUrl,
   avatarUrl,
+  topLanguages,
+  license,
 }: Props) {
   return (
     <Card className="w-full">
@@ -53,12 +60,19 @@ export default function RepoProfileCard({
               </div>
               <div className="flex flex-row gap-1">
                 <Badge variant="outline">Public</Badge>
-                <Badge
-                  variant="outline"
-                  className="border-[#2b7489] text-[#2b7489]"
-                >
-                  Typescript
-                </Badge>
+                {topLanguages.map((language) => (
+                  <Badge
+                    key={language.name}
+                    variant="outline"
+                    className="border"
+                    style={{
+                      borderColor: language.color,
+                      color: language.color,
+                    }}
+                  >
+                    {language.name}
+                  </Badge>
+                ))}
               </div>
             </div>
           </div>
@@ -103,7 +117,7 @@ export default function RepoProfileCard({
 
             <div className="flex flex-row gap-1 items-center">
               <Scale className="w-3 h-3 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">MIT License</p>
+              <p className="text-xs text-muted-foreground">{license} license</p>
             </div>
           </div>
         </div>

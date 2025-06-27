@@ -17,6 +17,8 @@ const meta = {
     description: { control: "text" },
     websiteUrl: { control: "text" },
     avatarUrl: { control: "text" },
+    topLanguages: { control: "object" },
+    license: { control: "text" },
   },
 } satisfies Meta<typeof RepoProfileCard>;
 
@@ -40,5 +42,11 @@ export const Default: Story = {
       "Features hot reload, TypeScript support, and one-command deployment.",
     websiteUrl: "https://ui.shadcn.com/",
     avatarUrl: "https://github.com/shadcn.png",
+    topLanguages: [
+      { name: "TypeScript", color: "#2b7489" },
+      { name: "JavaScript", color: "#f1e05a" },
+      { name: "CSS", color: "#563d7c" },
+    ],
+    license: "MIT",
   },
 };
