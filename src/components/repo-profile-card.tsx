@@ -10,28 +10,36 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Avatar, AvatarImage } from "./ui/avatar";
 
 type Props = {
   org: string;
   repo: string;
+  createdAt: Date;
+  description: string;
+  websiteUrl: string;
+  avatarUrl: string;
 };
 
-export default function RepoProfileCard({ org, repo }: Props) {
-  const createdAt = new Date("2025-06-27");
-
+export default function RepoProfileCard({
+  org,
+  repo,
+  createdAt,
+  description,
+  websiteUrl,
+  avatarUrl,
+}: Props) {
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle>
           <div className="flex flex-row gap-3 items-center">
             <Avatar className="w-18 h-18">
-              <AvatarImage src="https://github.com/shadcn.png" alt="shadcn" />
-              <AvatarFallback>CN</AvatarFallback>
+              <AvatarImage src={avatarUrl} alt={`${org} avatar`} />
             </Avatar>
             <div className="flex flex-col gap-1">
-              <p className="text-foreground text-xl sm:text-2xl">
-                StreamlineJS
+              <p className="text-foreground text-xl sm:text-2xl uppercase">
+                {repo}
               </p>
               <div className="text-muted-foreground text-sm">
                 <a
@@ -72,21 +80,17 @@ export default function RepoProfileCard({ org, repo }: Props) {
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-3">
-          <p className="text-sm">
-            The fastest way to build modern web applications with zero
-            configuration. Features hot reload, TypeScript support, and
-            one-command deployment.
-          </p>
+          <p className="text-sm">{description}</p>
           <div className="flex flex-row gap-4">
             <div className="flex flex-row gap-1 items-center">
               <Globe className="w-3 h-3 text-muted-foreground" />
               <a
-                href="https://streamlinejs.dev"
+                href={websiteUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:underline focus:underline outline-none text-xs text-[var(--nom-purple)]"
               >
-                streamlinejs.dev
+                {new URL(websiteUrl).hostname.replace(/^www\./, "")}
               </a>
             </div>
 
