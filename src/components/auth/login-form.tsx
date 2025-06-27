@@ -1,3 +1,6 @@
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+
 import {
   Card,
   CardContent,
@@ -16,6 +19,8 @@ type Props = {
 };
 
 export default function LoginForm({ onLogin }: Props) {
+  const [isLoading, setIsLoading] = useState(false);
+
   return (
     <Card>
       <CardHeader>
@@ -36,8 +41,29 @@ export default function LoginForm({ onLogin }: Props) {
       <Separator className="w-full" />
       <CardContent>
         <div className="flex flex-col gap-6 p-6">
-          <ButtonLogin onClick={onLogin}>
-            <Github /> github.auth()
+          <ButtonLogin
+            onClick={() => {
+              setIsLoading(true);
+              onLogin();
+            }}
+          >
+            <div className="relative w-5 h-5 flex items-center justify-center">
+              <span
+                className={`absolute transition-transform duration-200 ${
+                  isLoading ? "scale-0" : "scale-100"
+                }`}
+              >
+                <Github />
+              </span>
+              <span
+                className={`absolute transition-transform duration-200 ${
+                  isLoading ? "scale-100" : "scale-0"
+                }`}
+              >
+                <Loader2 className="animate-spin" />
+              </span>
+            </div>
+            github.auth()
           </ButtonLogin>
           <p className="text-sm text-muted-foreground text-center">
             Authenticate with your GitHub account to access Nom. This will
