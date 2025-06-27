@@ -11,11 +11,11 @@ import Github from "@/components/ui/icons/github";
 
 import ButtonLogin from "./login-form/button-login";
 
-interface LoginFormProps {
-  onLogin?: () => void;
-}
+type Props = {
+  onLogin: () => void;
+};
 
-export default function LoginForm({ onLogin }: LoginFormProps) {
+export default function LoginForm({ onLogin }: Props) {
   return (
     <Card>
       <CardHeader>
