@@ -9,7 +9,7 @@ import { BASELINE_SCORE, RELEASE_MULTIPLIER } from "./shared/constants";
 import { RELEASE_ANALYSIS_PROMPT } from "./release/prompts";
 
 const releaseSchema = z.object({
-  action: z.enum(["published"]),
+  action: z.enum(["published", "edited"]),
   release: z.object({
     id: z.number(),
     tag_name: z.string(),
@@ -108,7 +108,6 @@ export async function processReleaseEvent({
     .createHash("sha256")
     .update(
       JSON.stringify({
-        action,
         tag_name: release.tag_name,
         org: repo.org,
         repo: repo.repo,
