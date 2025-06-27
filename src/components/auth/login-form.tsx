@@ -11,7 +11,11 @@ import Github from "@/components/ui/icons/github";
 
 import ButtonLogin from "./login-form/button-login";
 
-export default function LoginForm() {
+interface LoginFormProps {
+  onLogin?: () => void;
+}
+
+export default function LoginForm({ onLogin }: LoginFormProps) {
   return (
     <Card>
       <CardHeader>
@@ -32,7 +36,7 @@ export default function LoginForm() {
       <Separator className="w-full" />
       <CardContent>
         <div className="flex flex-col gap-6 p-6">
-          <ButtonLogin>
+          <ButtonLogin onClick={onLogin}>
             <Github /> github.auth()
           </ButtonLogin>
           <p className="text-sm text-muted-foreground text-center">
