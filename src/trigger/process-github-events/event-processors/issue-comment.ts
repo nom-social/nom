@@ -46,7 +46,7 @@ const issueCommentSchema = z.object({
       "OWNER",
     ]),
   }),
-  sender: z.object({ type: z.string() }),
+  sender: z.object({ type: z.enum(["User"]) }),
 });
 
 export async function processIssueCommentEvent({
@@ -66,15 +66,7 @@ export async function processIssueCommentEvent({
   const supabase = createClient();
 
   const validationResult = issueCommentSchema.parse(event.raw_payload);
-  const { action, issue, comment, sender } = validationResult;
-
-  // Ignore events from bots
-  if (sender.type === "Bot") {
-    return {
-      userTimelineEntries: [],
-      publicTimelineEntries: [],
-    };
-  }
+  const { action, issue, comment } = validationResult;
 
   const dedupeHash = crypto
     .createHash("sha256")

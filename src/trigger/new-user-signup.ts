@@ -5,27 +5,29 @@ import { subMonths } from "date-fns";
 import { createClient } from "@/utils/supabase/background";
 import { TablesInsert } from "@/types/supabase";
 
+import { syncUserStars } from "./shared/sync-subscriptions";
+
 // This task is triggered as part of the new user sign up flow.
 // It syncs relevant public_timeline events to the new user's user_timeline.
 export const newUserSignUpTask = schemaTask({
   id: "new-user-signup-task",
-  schema: z.object({
-    userId: z.string(),
-    repoIds: z.array(z.string()),
-  }),
-  run: async ({ userId, repoIds }) => {
-    logger.info("Starting sync from public_timeline to user_timeline", {
-      userId,
-      repoIds,
-    });
-
+  schema: z.object({ userId: z.string() }),
+  run: async ({ userId }) => {
     const supabase = createClient();
     const oneMonthAgo = subMonths(new Date(), 1).toISOString();
 
-    if (!repoIds.length) {
-      logger.info("No repoIds provided, skipping sync");
-      return;
-    }
+    logger.info("Starting sync from public_timeline to user_timeline", {
+      userId,
+    });
+
+    await syncUserStars(userId);
+
+    const { data: subscriptions } = await supabase
+      .from("subscriptions")
+      .select("repo_id")
+      .eq("user_id", userId)
+      .throwOnError();
+    const repoIds = subscriptions.map((subscription) => subscription.repo_id);
 
     // Fetch all public_timeline events for the given repoIds in a single query
     const { data: publicEvents } = await supabase
