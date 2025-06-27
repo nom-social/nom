@@ -44,19 +44,27 @@ export default function RepoProfileCard({ org, repo }: Props) {
                 </a>
               </div>
               <div className="flex flex-row gap-1">
-                <Badge>Public</Badge>
-                <Badge>Typescript</Badge>
+                <Badge variant="outline">Public</Badge>
+                <Badge
+                  variant="outline"
+                  className="border-[#2b7489] text-[#2b7489]"
+                >
+                  Typescript
+                </Badge>
               </div>
             </div>
           </div>
         </CardTitle>
         <CardAction>
           <div className="flex flex-row gap-2">
-            <Button>
+            <Button className="bg-[var(--nom-purple)] text-white hover:bg-[var(--nom-purple)]/90">
               <UserPlus />
               Subscribe
             </Button>
-            <Button size="icon">
+            <Button
+              size="icon"
+              className="bg-[var(--nom-blue)] hover:bg-[var(--nom-blue)]/90"
+            >
               <Share />
             </Button>
           </div>
