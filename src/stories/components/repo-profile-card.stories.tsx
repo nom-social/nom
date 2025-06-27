@@ -38,8 +38,8 @@ export const Default: Story = {
     repo: "ui",
     createdAt: new Date("2025-06-27"),
     description:
-      "The fastest way to build modern web applications with zero configuration. " +
-      "Features hot reload, TypeScript support, and one-command deployment.",
+      "A set of beautifully-designed, accessible components and a code distribution platform. " +
+      "Works with your favorite frameworks. Open Source. Open Code.",
     websiteUrl: "https://ui.shadcn.com/",
     avatarUrl: "https://github.com/shadcn.png",
     topLanguages: [
