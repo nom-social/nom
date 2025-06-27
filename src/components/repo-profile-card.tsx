@@ -1,4 +1,5 @@
-import { Globe, Share, UserPlus } from "lucide-react";
+import { Calendar, Globe, Scale, Share, UserPlus } from "lucide-react";
+import { format } from "date-fns";
 
 import { Button } from "./ui/button";
 import {
@@ -17,6 +18,8 @@ type Props = {
 };
 
 export default function RepoProfileCard({ org, repo }: Props) {
+  const createdAt = new Date("2025-06-27");
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -66,21 +69,32 @@ export default function RepoProfileCard({ org, repo }: Props) {
             configuration. Features hot reload, TypeScript support, and
             one-command deployment.
           </p>
-          <div className="flex flex-row gap-2">
+          <div className="flex flex-row gap-4">
             <div className="flex flex-row gap-1 items-center">
               <Globe className="w-3 h-3 text-muted-foreground" />
               <a
                 href="https://streamlinejs.dev"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:underline focus:underline outline-none text-xs"
+                className="hover:underline focus:underline outline-none text-xs text-[var(--nom-purple)]"
               >
                 streamlinejs.dev
               </a>
             </div>
+
+            <div className="flex flex-row gap-1 items-center">
+              <Calendar className="w-3 h-3 text-muted-foreground" />
+              <p className="text-xs text-muted-foreground">
+                Created {format(createdAt, "MMM yyyy")}
+              </p>
+            </div>
+
+            <div className="flex flex-row gap-1 items-center">
+              <Scale className="w-3 h-3 text-muted-foreground" />
+              <p className="text-xs text-muted-foreground">MIT License</p>
+            </div>
           </div>
         </div>
-        {/* TODO: continue building this out */}
       </CardContent>
     </Card>
   );
