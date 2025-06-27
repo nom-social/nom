@@ -80,6 +80,7 @@ export default function RepoProfileCard({ org, repo }: Props) {
             </div>
           </div>
         </div>
+        {/* TODO: continue building this out */}
       </CardContent>
     </Card>
   );
