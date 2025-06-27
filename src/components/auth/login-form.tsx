@@ -7,7 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+
+import ButtonLogin from "./login-form/button-login";
 
 export default function LoginForm() {
   return (
@@ -28,10 +29,10 @@ export default function LoginForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Button className="w-full" variant="outline">
+        <ButtonLogin>
           {/* TODO: Use a different github icon */}
           <Github /> github.auth()
-        </Button>
+        </ButtonLogin>
       </CardContent>
     </Card>
   );
