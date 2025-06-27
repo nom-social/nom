@@ -1,12 +1,13 @@
-import { Github } from "lucide-react";
-
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import Github from "@/components/ui/icons/github";
 
 import ButtonLogin from "./login-form/button-login";
 
@@ -28,12 +29,26 @@ export default function LoginForm() {
           Connect your GitHub account to continue
         </CardDescription>
       </CardHeader>
+      <Separator className="w-full" />
       <CardContent>
-        <ButtonLogin>
-          {/* TODO: Use a different github icon */}
-          <Github /> github.auth()
-        </ButtonLogin>
+        <div className="flex flex-col gap-6 p-6">
+          <ButtonLogin>
+            <Github /> github.auth()
+          </ButtonLogin>
+          <p className="text-sm text-muted-foreground text-center">
+            Authenticate with your GitHub account to access Nom. This will
+            redirect you to GitHub&apos;s secure authentication page.
+          </p>
+        </div>
       </CardContent>
+      <Separator className="w-full" />
+      <CardFooter>
+        <div className="flex flex-row justify-between w-full">
+          <p className="text-muted-foreground text-xs">status: ready</p>
+          <p className="text-muted-foreground text-xs">auth: github</p>
+          <p className="text-muted-foreground text-xs">v1.0.0</p>
+        </div>
+      </CardFooter>
     </Card>
   );
 }
