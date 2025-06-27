@@ -124,3 +124,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Force styles on Sonner toasts */
+.toaster, .toaster * {
+  font-family: var(--font-jetbrains-mono), monospace !important;
+  border-radius: var(--radius-md) !important;
+}
