@@ -12,7 +12,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AvatarGroup, Contributor } from "@/components/shared/avatar-group";
+import ContributorAvatarGroup, {
+  Contributor,
+} from "@/components/shared/contributor-avatar-group";
 import { Badge } from "@/components/ui/badge";
 import { Markdown } from "@/components/ui/markdown";
 import { cn } from "@/lib/utils";
@@ -101,7 +103,7 @@ export default function IssueCard({
               {formatDistanceToNow(createdAt, { addSuffix: false })}
             </div>
             <div className="flex items-center">
-              <AvatarGroup contributors={contributors} />
+              <ContributorAvatarGroup contributors={contributors} />
             </div>
           </div>
         </CardDescription>
@@ -119,9 +121,7 @@ export default function IssueCard({
             onClick={handleLikeClick}
             size="sm"
           >
-            <HeartIcon
-              className={liked ? "fill-red-500 text-red-500" : ""}
-            />
+            <HeartIcon className={liked ? "fill-red-500 text-red-500" : ""} />
             {formattedLikeCount}
           </Button>
           <Button variant="outline" size="sm">

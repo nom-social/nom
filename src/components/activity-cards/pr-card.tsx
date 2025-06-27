@@ -1,5 +1,5 @@
 import React from "react";
-import { ShareIcon, HeartIcon, TagIcon } from "lucide-react";
+import { ShareIcon, HeartIcon, GitMergeIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 import {
@@ -11,42 +11,37 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { AvatarGroup, Contributor } from "@/components/shared/avatar-group";
+import ContributorAvatarGroup, {
+  Contributor,
+} from "@/components/shared/contributor-avatar-group";
 import { Badge } from "@/components/ui/badge";
 import { Markdown } from "@/components/ui/markdown";
 import { Button } from "@/components/ui/button";
 
-type Props = {
+export type Props = {
   title: string;
   contributors: Contributor[];
   body: string;
-  releaseUrl: string;
+  prUrl: string;
   repo: string;
   org: string;
-  tagName: string;
-  publishedAt: Date;
-  aiAnalysis?: {
-    summary?: string;
-    breaking_changes?: string[];
-    notable_additions?: string[];
-    migration_notes?: string[];
-  };
+  state: string;
+  createdAt: Date;
   likeCount: number;
   liked: boolean;
   onLike?: () => void;
   onUnlike?: () => void;
 };
 
-export default function ReleaseCard({
+export default function PRCard({
   title,
   contributors,
   body,
-  releaseUrl,
+  prUrl,
   repo,
   org,
-  tagName,
-  publishedAt,
-  aiAnalysis,
+  state,
+  createdAt,
   likeCount,
   liked,
   onLike,
@@ -59,6 +54,7 @@ export default function ReleaseCard({
       onLike?.();
     }
   };
+
   const formattedLikeCount =
     likeCount > 0
       ? new Intl.NumberFormat(undefined, {
@@ -71,7 +67,7 @@ export default function ReleaseCard({
       <CardHeader>
         <CardTitle className="leading-relaxed font-bold">
           <a
-            href={releaseUrl}
+            href={prUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="hover:underline focus:underline outline-none"
@@ -80,9 +76,9 @@ export default function ReleaseCard({
           </a>
         </CardTitle>
         <CardAction>
-          <Badge className="bg-[var(--nom-blue)] hover:opacity-90 border-transparent uppercase text-black">
-            <TagIcon />
-            {tagName}
+          <Badge className="bg-[var(--nom-purple)] hover:opacity-90 border-transparent uppercase text-black">
+            <GitMergeIcon />
+            {state}
           </Badge>
         </CardAction>
         <CardDescription>
@@ -97,30 +93,32 @@ export default function ReleaseCard({
                 {org}/{repo}
               </a>
               {" • "}
-              {formatDistanceToNow(publishedAt, { addSuffix: false })}
+              {formatDistanceToNow(createdAt, { addSuffix: false })}
             </div>
             <div className="flex items-center">
-              <AvatarGroup contributors={contributors} />
+              <ContributorAvatarGroup contributors={contributors} />
             </div>
           </div>
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none font-normal text-sm">
-          <Markdown>{aiAnalysis?.summary || body}</Markdown>
+          <Markdown>{body}</Markdown>
         </div>
       </CardContent>
       <CardFooter>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full justify-between">
-          <Button
-            variant="outline"
-            aria-label={liked ? "Unlike release" : "Like release"}
-            onClick={handleLikeClick}
-            size="sm"
-          >
-            <HeartIcon className={liked ? "fill-red-500 text-red-500" : ""} />
-            {formattedLikeCount}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              aria-label={liked ? "Unlike PR" : "Like PR"}
+              onClick={handleLikeClick}
+              size="sm"
+            >
+              <HeartIcon className={liked ? "fill-red-500 text-red-500" : ""} />
+              {formattedLikeCount}
+            </Button>
+          </div>
           <Button variant="outline" size="sm">
             <ShareIcon className="size-4" />
             Share

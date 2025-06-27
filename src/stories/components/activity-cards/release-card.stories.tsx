@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import ReleaseCard from "@/components/release-card";
+import ReleaseCard from "@/components/activity-cards/release-card";
 
 const meta = {
   title: "Components/ActivityCards/Release",

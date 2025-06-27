@@ -5,12 +5,12 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 
-export interface Contributor {
+export type Contributor = {
   name: string;
   avatar: string;
-}
+};
 
-export function AvatarGroup({
+export default function ContributorAvatarGroup({
   contributors,
   className = "",
 }: {
