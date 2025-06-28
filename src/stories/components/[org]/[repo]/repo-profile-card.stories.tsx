@@ -1,10 +1,10 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import RepoProfileCard from "@/components/repo-profile-card";
+import RepoProfileCard from "@/components/[org]/[repo]/repo-profile-card";
 
 const meta = {
-  title: "Components/RepoProfileCard",
+  title: "Components/[org]/[repo]/RepoProfileCard",
   component: RepoProfileCard,
   parameters: {
     layout: "centered",

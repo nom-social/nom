@@ -1,16 +1,16 @@
 import { Calendar, Globe, Scale, Share, UserPlus } from "lucide-react";
 import { format } from "date-fns";
 
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardAction,
   CardContent,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { Badge } from "./ui/badge";
-import { Avatar, AvatarImage } from "./ui/avatar";
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 type Props = {
   org: string;
