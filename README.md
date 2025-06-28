@@ -113,6 +113,4 @@ Storybook will be available at [http://localhost:6006](http://localhost:6006).
 
 We welcome contributions! Please open issues or pull requests for any improvements, bug fixes, or suggestions.
 
-## License
-
-[MIT](./LICENSE)
+For detailed guidelines, please check out our [CONTRIBUTING.md](./CONTRIBUTING.md) document.
