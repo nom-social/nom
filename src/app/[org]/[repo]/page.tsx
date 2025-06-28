@@ -11,7 +11,7 @@ export default function RepoPage() {
   const { org, repo } = params as { org: string; repo: string };
 
   return (
-    <div className="flex flex-col justify-center">
+    <div className="flex flex-col justify-center gap-4">
       <RepoProfileCard
         org={org}
         repo={repo}
