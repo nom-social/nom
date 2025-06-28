@@ -1,3 +1,5 @@
+![Nom Banner](./images/header.png)
+
 # Nom
 
 Welcome to the Nom project! This repository powers the Nom social platform, helping you track, share, and celebrate open source activity.
@@ -8,7 +10,6 @@ Before you begin, make sure you have the following installed:
 
 - **Node.js** (v22+ recommended)
 - **Docker** (for local Supabase)
-- **vlt** package manager ([vlt](https://www.vlt.sh/))
 
 ## Environment Variables
 
@@ -32,7 +33,7 @@ OPENAI_API_KEY=""
 ### 1. Install dependencies
 
 ```sh
-vlt install
+npm install
 ```
 
 ### 2. Setup Supabase (Local Development)
@@ -86,7 +87,7 @@ We use [Trigger.dev](https://trigger.dev/) for background jobs and workflows.
 Start the Next.js app in development mode:
 
 ```sh
-vlt run dev
+npm run dev
 ```
 
 The app will be available at [http://localhost:3000](http://localhost:3000).
@@ -96,7 +97,7 @@ The app will be available at [http://localhost:3000](http://localhost:3000).
 You can also run Storybook to view and develop UI components in isolation:
 
 ```sh
-vlt run storybook
+npm run storybook
 ```
 
 Storybook will be available at [http://localhost:6006](http://localhost:6006).
