@@ -10,6 +10,23 @@ Before you begin, make sure you have the following installed:
 - **Docker** (for local Supabase)
 - **vlt** package manager ([vlt](https://www.vlt.sh/))
 
+## Environment Variables
+
+Before running the application, copy the example environment file and fill in the required values:
+
+```sh
+cp .env.sample .env.local
+```
+
+Then, open `.env.local` and fill in the following variables:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=""
+NEXT_PUBLIC_SUPABASE_ANON_KEY=""
+SUPABASE_SERVICE_ROLE_KEY=""
+OPENAI_API_KEY=""
+```
+
 ## Getting Started
 
 ### 1. Install dependencies
