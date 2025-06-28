@@ -100,6 +100,7 @@ export type Database = {
           access_token: string | null;
           created_at: string;
           id: string;
+          metadata: Json | null;
           org: string;
           repo: string;
           secret: string | null;
@@ -108,6 +109,7 @@ export type Database = {
           access_token?: string | null;
           created_at?: string;
           id?: string;
+          metadata?: Json | null;
           org: string;
           repo: string;
           secret?: string | null;
@@ -116,6 +118,7 @@ export type Database = {
           access_token?: string | null;
           created_at?: string;
           id?: string;
+          metadata?: Json | null;
           org?: string;
           repo?: string;
           secret?: string | null;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import z from "zod";
 
 import RepoProfileCard from "@/components/[org]/[repo]/repo-profile-card";
 
@@ -8,7 +9,11 @@ import RepoProfileCard from "@/components/[org]/[repo]/repo-profile-card";
 // TODO: Implement the repo page
 export default function RepoPage() {
   const params = useParams();
-  const { org, repo } = params as { org: string; repo: string };
+  const repoSchema = z.object({
+    org: z.string(),
+    repo: z.string(),
+  });
+  const { org, repo } = repoSchema.parse(params);
 
   return (
     <div className="flex flex-col justify-center gap-4">
