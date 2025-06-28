@@ -2,6 +2,8 @@
 
 import { useParams } from "next/navigation";
 
+// TODO: Add a 404 component in case the repo is not found
+// TODO: Implement the repo page
 export default function RepoPage() {
   const params = useParams();
   const { org, repo } = params as { org: string; repo: string };
