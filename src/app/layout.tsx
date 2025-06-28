@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
 
-import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import {
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuLink,
+} from "@/components/ui/navigation-menu";
+
+import "./globals.css";
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
@@ -22,9 +29,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${jetbrainsMono.variable} font-mono antialiased`}>
+      <body
+        className={`${jetbrainsMono.variable} font-mono antialiased min-h-screen`}
+      >
         <ThemeProvider attribute="class" defaultTheme="dark">
-          {children}
+          <NavigationMenu className="w-full min-w-full py-2 bg-background fixed top-0 left-0 z-50 border-b border-border shadow-sm">
+            <div className="max-w-3xl mx-auto w-full">
+              <NavigationMenuList className="justify-start">
+                <NavigationMenuItem>
+                  <NavigationMenuLink href="/">Nom</NavigationMenuLink>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </div>
+          </NavigationMenu>
+
+          <div className="max-w-3xl mx-auto pt-16">{children}</div>
         </ThemeProvider>
       </body>
     </html>
