@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nom
+
+Welcome to the Nom project! This repository powers the Nom social platform, helping you track, share, and celebrate open source activity.
+
+## Prerequisites
+
+Before you begin, make sure you have the following installed:
+
+- **Node.js** (v22+ recommended)
+- **Docker** (for local Supabase)
+- **vlt** package manager ([vlt](https://www.vlt.sh/))
 
 ## Getting Started
 
-First, run the development server:
+### 1. Install dependencies
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```sh
+vlt install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Setup Supabase (Local Development)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+We use [Supabase](https://supabase.com/) for our database and authentication. To run it locally:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Install the Supabase CLI:**
 
-## Learn More
+   ```sh
+   npm install -g supabase
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+2. **Start Supabase locally:**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```sh
+   npx supabase start
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   This will spin up Supabase using Docker. You can access Supabase Studio at [http://localhost:54323](http://localhost:54323).
 
-## Deploy on Vercel
+3. **Apply database migrations:**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   ```sh
+   npx supabase db reset
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   This will reset and migrate your local database to the latest schema.
+
+### 3. Setup Trigger.dev (Background Jobs)
+
+We use [Trigger.dev](https://trigger.dev/) for background jobs and workflows.
+
+1. **Initialize Trigger.dev (if not already):**
+
+   ```sh
+   npx trigger.dev@latest init
+   ```
+
+   This will set up the config and `/trigger` directory if needed.
+
+2. **Run Trigger.dev in development mode:**
+
+   ```sh
+   npx trigger.dev@latest dev
+   ```
+
+   This will watch your `/trigger` directory and run background jobs locally.
+
+### 4. Run the Application
+
+Start the Next.js app in development mode:
+
+```sh
+vlt run dev
+```
+
+The app will be available at [http://localhost:3000](http://localhost:3000).
+
+### (Optional) Run Storybook
+
+You can also run Storybook to view and develop UI components in isolation:
+
+```sh
+vlt run storybook
+```
+
+Storybook will be available at [http://localhost:6006](http://localhost:6006).
+
+---
+
+## Useful Links
+
+- [Supabase Local Development Guide](https://supabase.com/docs/guides/local-development)
+- [Trigger.dev Quick Start](https://trigger.dev/docs/quick-start)
+- [vlt Package Manager](https://vlt.dev/)
+
+## Contributing
+
+We welcome contributions! Please open issues or pull requests for any improvements, bug fixes, or suggestions.
+
+## License
+
+[MIT](./LICENSE)
