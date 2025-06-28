@@ -7,6 +7,7 @@ import RepoProfileCard from "@/components/[org]/[repo]/repo-profile-card";
 
 // TODO: Add a 404 component in case the repo is not found
 // TODO: Implement the repo page
+// TODO: Fix up migration and local supabase setup
 export default function RepoPage() {
   const params = useParams();
   const repoSchema = z.object({
