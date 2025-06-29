@@ -24,7 +24,6 @@ export async function POST(request: Request) {
     });
 
     if (!validationResult.success) {
-      console.error("Validation error:", validationResult.error);
       return NextResponse.json(
         {
           error: "Invalid webhook payload",
@@ -135,8 +134,7 @@ export async function POST(request: Request) {
       message: "Webhook received and stored successfully",
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
-    console.error("Error processing GitHub webhook:", error);
+  } catch {
     return NextResponse.json(
       { error: "Failed to process webhook" },
       { status: httpStatus.INTERNAL_SERVER_ERROR }
