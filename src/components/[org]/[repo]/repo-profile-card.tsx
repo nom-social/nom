@@ -1,7 +1,9 @@
-import { Calendar, Github, Globe, Scale, UserPlus } from "lucide-react";
-import { format } from "date-fns";
+"use client";
 
-import { Button } from "@/components/ui/button";
+import { Calendar, Github, Globe, Scale } from "lucide-react";
+import { format } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
+
 import {
   Card,
   CardAction,
@@ -12,8 +14,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
+import {
+  createSubscription,
+  isSubscribed,
+  removeSubscription,
+} from "./repo-profile-card/actions";
 import ShareButton from "./repo-profile-card/share-button";
 import ShareButtonMobile from "./repo-profile-card/share-button-mobile";
+import SubscribeButton from "./repo-profile-card/subscribe-button";
 
 type Props = {
   org: string;
@@ -41,6 +49,16 @@ export default function RepoProfileCard({
   license,
   subscriptionCount,
 }: Props) {
+  const {
+    data: subscribedData,
+    isLoading,
+    refetch,
+    isRefetching,
+  } = useQuery({
+    queryKey: [isSubscribed, org, repo],
+    queryFn: () => isSubscribed(org, repo),
+  });
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -84,10 +102,19 @@ export default function RepoProfileCard({
         </CardTitle>
         <CardAction>
           <div className="flex flex-row gap-2">
-            <Button className="hidden md:flex bg-[var(--nom-purple)] text-white hover:bg-[var(--nom-purple)]/90">
-              <UserPlus />
-              Subscribe
-            </Button>
+            <SubscribeButton
+              isSubscribed={subscribedData?.subscribed ?? false}
+              className="hidden md:flex"
+              onSubscribe={async () => {
+                await createSubscription(org, repo);
+                refetch();
+              }}
+              onUnsubscribe={async () => {
+                await removeSubscription(org, repo);
+                refetch();
+              }}
+              isLoading={isLoading || isRefetching}
+            />
 
             <ShareButton org={org} repo={repo} />
           </div>
@@ -133,10 +160,20 @@ export default function RepoProfileCard({
               </a>
             </div>
           </div>
-          <Button className="flex md:hidden bg-[var(--nom-purple)] text-white hover:bg-[var(--nom-purple)]/90">
-            <UserPlus />
-            Subscribe
-          </Button>
+
+          <SubscribeButton
+            isSubscribed={subscribedData?.subscribed ?? false}
+            className="flex md:hidden"
+            onSubscribe={async () => {
+              await createSubscription(org, repo);
+              refetch();
+            }}
+            onUnsubscribe={async () => {
+              await removeSubscription(org, repo);
+              refetch();
+            }}
+            isLoading={isLoading || isRefetching}
+          />
 
           <ShareButtonMobile org={org} repo={repo} />
         </div>
