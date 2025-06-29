@@ -1,7 +1,6 @@
 import React from "react";
 import { ShareIcon, HeartIcon, CircleDot, CircleCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import Link from "next/link";
 
 import {
   Card,
@@ -92,12 +91,14 @@ export default function IssueCard({
         <CardDescription>
           <div className="flex gap-2 flex-col">
             <div className="text-muted-foreground text-sm">
-              <Link
-                href={`/${org}/${repo}`}
+              <a
+                href={`https://github.com/${org}/${repo}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="hover:underline focus:underline outline-none"
               >
                 {org}/{repo}
-              </Link>
+              </a>
               {" • "}
               {formatDistanceToNow(createdAt, { addSuffix: false })}
             </div>
