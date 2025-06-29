@@ -185,12 +185,13 @@ export async function processPullRequestEvent({
         ai_analysis: completion.choices[0].message.parsed,
         requested_reviewers: pull_request.requested_reviewers,
         merged: pull_request.merged,
-        commit_authors: [
-          ...new Set(
-            commits.data
+        contributors: [
+          ...new Set([
+            pull_request.user.login,
+            ...commits.data
               .map((commit) => commit.author?.login)
-              .filter((login): login is string => Boolean(login))
-          ),
+              .filter((login): login is string => Boolean(login)),
+          ]),
         ],
       },
     };
