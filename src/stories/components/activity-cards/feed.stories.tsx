@@ -75,6 +75,8 @@ export const CombinedFeed: Story = {
       org: "org",
       tagName: "v2.0.0",
       publishedAt: new Date("2025-02-01"),
+      aiSummary:
+        "This release introduces project-scoped roles, MCP server enhancements, and a UI library blocks. It also includes compliance resources and community showcases.",
     };
     // Add more example data for additional cards
     const moreIssueArgs = {
@@ -125,6 +127,8 @@ export const CombinedFeed: Story = {
       org: "org",
       tagName: "v2.1.0",
       publishedAt: new Date("2025-03-01"),
+      aiSummary:
+        "This release introduces project-scoped roles, MCP server enhancements, and a UI library blocks. It also includes compliance resources and community showcases.",
     };
     // Like state for each card (now 8 cards)
     const [liked, setLiked] = React.useState([
