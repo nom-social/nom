@@ -33,7 +33,6 @@ export async function fetchFeedItem({
     .eq("id", statusId)
     .eq("repo_id", repoData.id)
     .single();
-  console.log("🚀 ~ data:", data);
 
   if (!data) return null;
 
