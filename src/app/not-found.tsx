@@ -13,33 +13,24 @@ export default function NotFound() {
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <rect
-            x="12"
-            y="12"
-            width="96"
-            height="96"
-            stroke="#77ebff"
-            strokeWidth="8"
-            fill="#1e1e1e"
-            rx="2"
-          />
-          <ellipse cx="60" cy="80" rx="28" ry="10" fill="#ffe16a" />
-          <ellipse cx="45" cy="55" rx="6" ry="8" fill="#fff" />
-          <ellipse cx="75" cy="55" rx="6" ry="8" fill="#fff" />
-          <circle cx="45" cy="57" r="2" fill="#1e1e1e" />
-          <circle cx="75" cy="57" r="2" fill="#1e1e1e" />
+          <ellipse cx="60" cy="80" rx="32" ry="18" fill="#e0f7fa" />
+          <ellipse cx="45" cy="75" rx="18" ry="12" fill="#e0f7fa" />
+          <ellipse cx="75" cy="75" rx="18" ry="12" fill="#e0f7fa" />
+          <ellipse cx="60" cy="80" rx="10" ry="6" fill="#fff" />
+          <ellipse cx="55" cy="80" rx="2.5" ry="3" fill="#1e1e1e" />
+          <ellipse cx="65" cy="80" rx="2.5" ry="3" fill="#1e1e1e" />
           <path
-            d="M50 70 Q60 78 70 70"
+            d="M57 84 Q60 87 63 84"
             stroke="#1e1e1e"
-            strokeWidth="2"
+            strokeWidth="1.5"
             fill="none"
           />
+          <ellipse cx="52" cy="83" rx="1.5" ry="0.8" fill="#ffe16a" />
+          <ellipse cx="68" cy="83" rx="1.5" ry="0.8" fill="#ffe16a" />
         </svg>
-        <h1 className="text-3xl font-bold">404: Not Found</h1>
+        <h1 className="text-3xl font-bold">Whoopsie! 404 Not Found</h1>
         <p className="text-muted-foreground max-w-md">
-          Oops! The page you&apos;re looking for doesn&apos;t exist.
-          <br />
-          Maybe you followed a broken link, or typed the wrong URL.
+          This page doesn&apos;t exist (yet?) or maybe it just wandered off.
         </p>
       </div>
       <Link href="/">
