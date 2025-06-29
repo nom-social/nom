@@ -22,6 +22,7 @@ import {
 import ShareButton from "./repo-profile-card/share-button";
 import ShareButtonMobile from "./repo-profile-card/share-button-mobile";
 import SubscribeButton from "./repo-profile-card/subscribe-button";
+import { useState } from "react";
 
 type Props = {
   org: string;
@@ -35,7 +36,7 @@ type Props = {
     color: string | null;
   }[];
   license: string;
-  subscriptionCount: number;
+  initialSubscriptionCount: number;
 };
 
 export default function RepoProfileCard({
@@ -47,8 +48,12 @@ export default function RepoProfileCard({
   avatarUrl,
   topLanguages,
   license,
-  subscriptionCount,
+  initialSubscriptionCount,
 }: Props) {
+  const [subscriptionCount, setSubscriptionCount] = useState(
+    initialSubscriptionCount
+  );
+
   const {
     data: subscribedData,
     isLoading,
@@ -58,6 +63,18 @@ export default function RepoProfileCard({
     queryKey: [isSubscribed, org, repo],
     queryFn: () => isSubscribed(org, repo),
   });
+
+  const handleSubscribe = async () => {
+    await createSubscription(org, repo);
+    setSubscriptionCount(subscriptionCount + 1);
+    refetch();
+  };
+
+  const handleUnsubscribe = async () => {
+    await removeSubscription(org, repo);
+    setSubscriptionCount(subscriptionCount - 1);
+    refetch();
+  };
 
   return (
     <Card className="w-full">
@@ -105,14 +122,8 @@ export default function RepoProfileCard({
             <SubscribeButton
               isSubscribed={subscribedData?.subscribed ?? false}
               className="hidden md:flex"
-              onSubscribe={async () => {
-                await createSubscription(org, repo);
-                refetch();
-              }}
-              onUnsubscribe={async () => {
-                await removeSubscription(org, repo);
-                refetch();
-              }}
+              onSubscribe={handleSubscribe}
+              onUnsubscribe={handleUnsubscribe}
               isLoading={isLoading || isRefetching}
             />
 
@@ -164,14 +175,8 @@ export default function RepoProfileCard({
           <SubscribeButton
             isSubscribed={subscribedData?.subscribed ?? false}
             className="flex md:hidden"
-            onSubscribe={async () => {
-              await createSubscription(org, repo);
-              refetch();
-            }}
-            onUnsubscribe={async () => {
-              await removeSubscription(org, repo);
-              refetch();
-            }}
+            onSubscribe={handleSubscribe}
+            onUnsubscribe={handleUnsubscribe}
             isLoading={isLoading || isRefetching}
           />
 
