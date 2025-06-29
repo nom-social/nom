@@ -22,15 +22,7 @@ export const prDataSchema = z.object({
     body: z.string().nullable(),
     html_url: z.string(),
     created_at: z.string(),
-    ai_analysis: z
-      .object({
-        summary: z.string(),
-        review_time_minutes: z.number(),
-        special_considerations: z.array(z.string()),
-        change_type: z.enum(["FEATURE", "BUG_FIX", "TECH_DEBT"]),
-        change_type_reason: z.string(),
-      })
-      .nullable(),
+    ai_summary: z.string(),
     requested_reviewers: z.array(z.object({ login: z.string() })).optional(),
     merged: z.boolean(),
     contributors: z.array(z.string()),

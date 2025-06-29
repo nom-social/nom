@@ -85,11 +85,7 @@ export default function Feed({
                   avatar: `https://github.com/${login}.png`,
                 })
               )}
-              body={
-                parseResult.data.pull_request.body ||
-                parseResult.data.pull_request.ai_analysis?.summary ||
-                ""
-              }
+              body={parseResult.data.pull_request.ai_summary}
               prUrl={parseResult.data.pull_request.html_url}
               repo={repo}
               org={org}

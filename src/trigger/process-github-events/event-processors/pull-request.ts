@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { Octokit } from "@octokit/rest";
-import { zodResponseFormat } from "openai/helpers/zod";
 import crypto from "crypto";
 
 import { Json, TablesInsert } from "@/types/supabase";
@@ -9,10 +8,7 @@ import { createClient } from "@/utils/supabase/background";
 import { PrData } from "@/components/activity-cards/shared/schemas";
 
 import { getProcessedPullRequestDiff } from "./pull-request/utils";
-import {
-  PR_ANALYSIS_PROMPT,
-  prAnalysisResponseSchema,
-} from "./pull-request/prompts";
+import { PR_SUMMARY_ONLY_PROMPT } from "./pull-request/prompts";
 import { BASELINE_SCORE, PULL_REQUEST_MULTIPLIER } from "./shared/constants";
 
 const pullRequestSchema = z.object({
@@ -129,7 +125,7 @@ export async function processPullRequestEvent({
         .map((c) => "- " + c.name)
         .join("\n");
 
-    const prompt = PR_ANALYSIS_PROMPT.replace("{title}", pull_request.title)
+    const prompt = PR_SUMMARY_ONLY_PROMPT.replace("{title}", pull_request.title)
       .replace("{author}", pull_request.user.login)
       .replace("{author_association}", pull_request.author_association)
       .replace("{description}", pull_request.body || "No description provided")
@@ -140,22 +136,22 @@ export async function processPullRequestEvent({
       .replace("{checks_status}", checksStatusText)
       .replace("{pr_diff}", combinedDiff);
 
-    const completion = await openaiClient.chat.completions.parse({
+    const completion = await openaiClient.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
           content:
-            "You are a helpful assistant that analyzes pull requests. " +
-            "Provide your analysis in JSON format as specified.",
+            "You are a helpful assistant that summarizes pull requests. Provide a concise summary as instructed.",
         },
         { role: "user", content: prompt },
       ],
-      response_format: zodResponseFormat(
-        prAnalysisResponseSchema,
-        "pr_analysis"
-      ),
     });
+
+    const ai_summary = completion.choices[0].message.content;
+    if (!ai_summary) {
+      throw new Error("Failed to generate AI summary for pull request");
+    }
 
     const prData: PrData = {
       action,
@@ -183,7 +179,7 @@ export async function processPullRequestEvent({
         body: pull_request.body,
         html_url: pull_request.html_url,
         created_at: pull_request.created_at.toISOString(),
-        ai_analysis: completion.choices[0].message.parsed,
+        ai_summary,
         requested_reviewers: pull_request.requested_reviewers,
         merged: pull_request.merged,
         contributors: [
