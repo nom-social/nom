@@ -27,6 +27,7 @@ const pullRequestSchema = z.object({
     merged: z.boolean(),
     draft: z.boolean().optional(),
     requested_reviewers: z.array(z.object({ login: z.string() })).optional(),
+    assignees: z.array(z.object({ login: z.string() })).optional(),
     user: z.object({ login: z.string() }),
     author_association: z.enum([
       "COLLABORATOR",
@@ -191,6 +192,11 @@ export async function processPullRequestEvent({
             ...commits.data
               .map((commit) => commit.author?.login)
               .filter((login): login is string => Boolean(login)),
+            ...(pull_request.assignees?.map((assignee) => assignee.login) ||
+              []),
+            ...(pull_request.requested_reviewers?.map(
+              (reviewer) => reviewer.login
+            ) || []),
           ]),
         ],
       },

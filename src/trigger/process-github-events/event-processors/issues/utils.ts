@@ -75,6 +75,7 @@ export async function generateIssueData({
           ...comments
             .map((comment) => comment.user?.login)
             .filter((login): login is string => Boolean(login)),
+          ...issue.assignees.map((assignee) => assignee.login),
         ]),
       ],
       ai_summary,
