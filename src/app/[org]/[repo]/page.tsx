@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 
 import RepoProfileCard from "@/components/[org]/[repo]/repo-profile-card";
 import { Separator } from "@/components/ui/separator";
@@ -37,4 +38,43 @@ export default async function RepoPage({
       <Feed repoId={repoProfile.id} repo={repo} org={org} />
     </div>
   );
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ org: string; repo: string }>;
+}): Promise<Metadata> {
+  const { org, repo } = await params;
+  const repoProfile = await fetchRepoProfile(org, repo);
+
+  if (!repoProfile) return {};
+
+  const truncate = (str: string) =>
+    str.length > 200 ? str.slice(0, 200) + "..." : str;
+  const description = truncate(
+    repoProfile.description || `View ${repo} by ${org} on Nom Social.`
+  );
+
+  return {
+    title: `${org}/${repo} - Nom`,
+    description,
+    openGraph: {
+      title: `${repo} by ${org} - Nom Social`,
+      description,
+      url: `https://nom.social/${org}/${repo}`,
+      images: [
+        {
+          url: repoProfile.avatarUrl,
+          alt: `${org} avatar`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${repo} by ${org} - Nom Social`,
+      description,
+      images: [repoProfile.avatarUrl],
+    },
+  };
 }
