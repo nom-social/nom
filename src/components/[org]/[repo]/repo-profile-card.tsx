@@ -1,4 +1,4 @@
-import { Calendar, Globe, Scale, Share, UserPlus } from "lucide-react";
+import { Calendar, Globe, Scale, UserPlus } from "lucide-react";
 import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,9 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+
+import ShareButton from "./repo-profile-card/share-button";
+import ShareButtonMobile from "./repo-profile-card/share-button-mobile";
 
 type Props = {
   org: string;
@@ -87,12 +90,8 @@ export default function RepoProfileCard({
               <UserPlus />
               Subscribe
             </Button>
-            <Button
-              size="icon"
-              className="hidden md:flex bg-[var(--nom-blue)] hover:bg-[var(--nom-blue)]/90"
-            >
-              <Share />
-            </Button>
+
+            <ShareButton org={org} repo={repo} />
           </div>
         </CardAction>
       </CardHeader>
@@ -129,10 +128,7 @@ export default function RepoProfileCard({
             Subscribe
           </Button>
 
-          <Button className="flex md:hidden bg-[var(--nom-blue)] hover:bg-[var(--nom-blue)]/90">
-            <Share />
-            Share
-          </Button>
+          <ShareButtonMobile org={org} repo={repo} />
         </div>
       </CardContent>
     </Card>
