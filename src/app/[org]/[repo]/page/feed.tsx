@@ -10,7 +10,6 @@ import IssueCard from "@/components/activity-cards/issue-card";
 import { issueDataSchema } from "@/components/activity-cards/shared/schemas";
 import ReleaseCard from "@/components/activity-cards/release-card";
 import { releaseDataSchema } from "@/components/activity-cards/shared/schemas";
-import { issueCommentDataSchema } from "@/components/activity-cards/shared/schemas";
 
 import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
 
@@ -103,6 +102,8 @@ export default function Feed({
         }
         if (item.type === "issue") {
           const parseResult = issueDataSchema.safeParse(item.data);
+          console.log("🚀 ~ {items.map ~ parseResult:", parseResult.error);
+
           if (!parseResult.success) {
             return null;
           }
@@ -116,7 +117,7 @@ export default function Feed({
                   avatar: `https://github.com/${login}.png`,
                 })
               )}
-              body={parseResult.data.issue.body || "No description provided."}
+              body={parseResult.data.issue.ai_summary}
               issueUrl={parseResult.data.issue.html_url}
               repo={repo}
               org={org}
@@ -155,34 +156,6 @@ export default function Feed({
                   : new Date(release.created_at)
               }
               aiAnalysis={release.ai_analysis || undefined}
-              likeCount={0}
-              liked={false}
-            />
-          );
-        }
-        // TODO: Maybe not shown the status here
-        if (item.type === "issue_comment") {
-          const parseResult = issueCommentDataSchema.safeParse(item.data);
-          if (!parseResult.success) {
-            return null;
-          }
-          const { issue, comment } = parseResult.data;
-          return (
-            <IssueCard
-              key={item.id}
-              title={issue.title}
-              contributors={[
-                {
-                  name: comment.user.login,
-                  avatar: `https://github.com/${comment.user.login}.png`,
-                },
-              ]}
-              body={comment.body}
-              issueUrl={comment.html_url}
-              repo={repo}
-              org={org}
-              state={issue.state}
-              createdAt={new Date(comment.created_at)}
               likeCount={0}
               liked={false}
             />

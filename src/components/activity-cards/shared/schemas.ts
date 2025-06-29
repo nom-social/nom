@@ -51,6 +51,7 @@ export const issueDataSchema = z.object({
     assignees: z.array(z.object({ login: z.string() })),
     state: z.enum(["open", "closed"]),
     contributors: z.array(z.string()),
+    ai_summary: z.string(),
   }),
 });
 

@@ -5,8 +5,10 @@ import { Octokit } from "@octokit/rest";
 import { Json, TablesInsert } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/background";
 import { IssueData } from "@/components/activity-cards/shared/schemas";
+import * as openai from "@/utils/openai/client";
 
 import { BASELINE_SCORE, ISSUE_MULTIPLIER } from "./shared/constants";
+import { ISSUE_SUMMARY_PROMPT } from "./issues/prompts";
 
 const issueSchema = z.object({
   action: z.enum(["opened", "closed", "reopened", "assigned", "edited"]),
@@ -63,6 +65,32 @@ export async function processIssueEvent({
     per_page: 100,
   });
 
+  // Generate AI summary for the issue and its comments
+  const openaiClient = openai.createClient();
+  const commentsText = comments
+    .map((c) => `- ${c.user?.login}: ${c.body}`)
+    .join("\n");
+  const prompt = ISSUE_SUMMARY_PROMPT.replace("{title}", issue.title)
+    .replace("{author}", issue.user.login)
+    .replace("{body}", issue.body || "No description provided")
+    .replace("{comments}", commentsText || "No comments");
+
+  const completion = await openaiClient.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are a helpful assistant that summarizes GitHub issues and their discussions for a timeline feed.",
+      },
+      { role: "user", content: prompt },
+    ],
+  });
+  const ai_summary = completion.choices[0].message.content;
+  if (!ai_summary) {
+    throw new Error("Failed to generate AI summary for issue");
+  }
+
   const issueData: IssueData = {
     action,
     issue: {
@@ -75,11 +103,14 @@ export async function processIssueEvent({
       assignees: issue.assignees,
       state: issue.state,
       contributors: [
-        issue.user.login,
-        ...comments
-          .map((comment) => comment.user?.login)
-          .filter((login): login is string => Boolean(login)),
+        ...new Set([
+          issue.user.login,
+          ...comments
+            .map((comment) => comment.user?.login)
+            .filter((login): login is string => Boolean(login)),
+        ]),
       ],
+      ai_summary,
     },
   };
 
