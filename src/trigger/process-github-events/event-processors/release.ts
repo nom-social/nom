@@ -3,7 +3,7 @@ import crypto from "crypto";
 
 import { Json, TablesInsert } from "@/types/supabase";
 import * as openai from "@/utils/openai/client";
-import { ReleaseData } from "@/components/activity-cards/shared/schemas";
+import { ReleaseData } from "@/components/shared/activity-cards/shared/schemas";
 
 import { BASELINE_SCORE, RELEASE_MULTIPLIER } from "./shared/constants";
 import { RELEASE_SUMMARY_PROMPT } from "./release/prompts";

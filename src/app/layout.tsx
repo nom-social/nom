@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
-import ReactQueryProvider from "@/components/react-query-provider";
 
-import { ThemeProvider } from "@/components/theme-provider";
+import ReactQueryProvider from "@/components/layout/react-query-provider";
+import { ThemeProvider } from "@/components/layout/theme-provider";
 import {
   NavigationMenu,
   NavigationMenuList,

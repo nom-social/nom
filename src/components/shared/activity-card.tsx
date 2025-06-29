@@ -1,12 +1,12 @@
 "use client";
 
-import PRCard from "@/components/activity-cards/pr-card";
-import IssueCard from "@/components/activity-cards/issue-card";
-import ReleaseCard from "@/components/activity-cards/release-card";
+import PRCard from "@/components/shared/activity-cards/pr-card";
+import IssueCard from "@/components/shared/activity-cards/issue-card";
+import ReleaseCard from "@/components/shared/activity-cards/release-card";
 import { Tables } from "@/types/supabase";
-import { issueDataSchema } from "@/components/activity-cards/shared/schemas";
-import { prDataSchema } from "@/components/activity-cards/shared/schemas";
-import { releaseDataSchema } from "@/components/activity-cards/shared/schemas";
+import { issueDataSchema } from "@/components/shared/activity-cards/shared/schemas";
+import { prDataSchema } from "@/components/shared/activity-cards/shared/schemas";
+import { releaseDataSchema } from "@/components/shared/activity-cards/shared/schemas";
 
 export default function ActivityCard({
   item,

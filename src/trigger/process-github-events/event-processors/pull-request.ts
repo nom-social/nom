@@ -5,7 +5,7 @@ import crypto from "crypto";
 import { Json, TablesInsert } from "@/types/supabase";
 import * as openai from "@/utils/openai/client";
 import { createClient } from "@/utils/supabase/background";
-import { PrData } from "@/components/activity-cards/shared/schemas";
+import { PrData } from "@/components/shared/activity-cards/shared/schemas";
 
 import { getProcessedPullRequestDiff } from "./pull-request/utils";
 import { PR_SUMMARY_ONLY_PROMPT } from "./pull-request/prompts";

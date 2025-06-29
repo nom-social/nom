@@ -4,7 +4,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import ActivityCard from "@/components/activity-card";
+import ActivityCard from "@/components/shared/activity-card";
 
 import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
 

@@ -1,7 +1,7 @@
 import { Octokit } from "@octokit/rest";
 
 import * as openai from "@/utils/openai/client";
-import { IssueData } from "@/components/activity-cards/shared/schemas";
+import { IssueData } from "@/components/shared/activity-cards/shared/schemas";
 
 import { ISSUE_SUMMARY_PROMPT } from "./prompts";
 
