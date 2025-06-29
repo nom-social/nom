@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Calendar, Github, Globe, Scale } from "lucide-react";
 import { format } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
@@ -22,7 +23,6 @@ import {
 import ShareButton from "./repo-profile-card/share-button";
 import ShareButtonMobile from "./repo-profile-card/share-button-mobile";
 import SubscribeButton from "./repo-profile-card/subscribe-button";
-import { useState } from "react";
 
 type Props = {
   org: string;
