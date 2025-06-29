@@ -9,9 +9,9 @@ import { fetchRepoProfile } from "./actions";
 export default async function RepoPage({
   params,
 }: {
-  params: { org: string; repo: string };
+  params: Promise<{ org: string; repo: string }>;
 }) {
-  const { org, repo } = params;
+  const { org, repo } = await params;
   const repoProfile = await fetchRepoProfile(org, repo);
 
   if (!repoProfile) return notFound();
