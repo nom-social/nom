@@ -42,6 +42,38 @@ export type Database = {
         };
         Relationships: [];
       };
+      public_repository_data: {
+        Row: {
+          created_at: string;
+          id: string;
+          metadata: Json;
+          org: string;
+          repo: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          metadata: Json;
+          org: string;
+          repo: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          metadata?: Json;
+          org?: string;
+          repo?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "public_repository_data_id_fkey";
+            columns: ["id"];
+            isOneToOne: true;
+            referencedRelation: "repositories";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       public_timeline: {
         Row: {
           categories: string[] | null;
@@ -100,27 +132,18 @@ export type Database = {
           access_token: string | null;
           created_at: string;
           id: string;
-          metadata: Json;
-          org: string;
-          repo: string;
           secret: string | null;
         };
         Insert: {
           access_token?: string | null;
           created_at?: string;
           id?: string;
-          metadata: Json;
-          org: string;
-          repo: string;
           secret?: string | null;
         };
         Update: {
           access_token?: string | null;
           created_at?: string;
           id?: string;
-          metadata?: Json;
-          org?: string;
-          repo?: string;
           secret?: string | null;
         };
         Relationships: [];

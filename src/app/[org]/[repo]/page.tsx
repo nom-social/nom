@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 
 import RepoProfileCard from "@/components/[org]/[repo]/repo-profile-card";
-import PRCard from "@/components/activity-cards/pr-card";
 import { Separator } from "@/components/ui/separator";
 
 import { fetchRepoProfile } from "./actions";
+import Feed from "./page/feed";
 
 export default async function RepoPage({
   params,
@@ -34,25 +34,7 @@ export default async function RepoPage({
         <Separator className="flex-1" />
       </div>
 
-      <PRCard
-        title="fix: Resolve race condition in data fetching"
-        contributors={[
-          { name: "Alex Kim", avatar: "https://github.com/alex.png" },
-          { name: "Sarah Chen", avatar: "https://github.com/sarah.png" },
-        ]}
-        body={
-          "Fixed a critical race condition in the data fetching layer that was " +
-          "causing intermittent failures. Added proper request cancellation and " +
-          "implemented a request queue system."
-        }
-        prUrl="https://github.com/org/repo/pull/124"
-        repo={repo}
-        org={org}
-        state="merged"
-        createdAt={new Date("2025-01-01")}
-        liked={false}
-        likeCount={0}
-      />
+      <Feed repoId={repoProfile.id} repo={repo} org={org} />
     </div>
   );
 }

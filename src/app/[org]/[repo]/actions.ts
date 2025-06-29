@@ -21,8 +21,8 @@ const metadataSchema = z.object({
 export async function fetchRepoProfile(org: string, repo: string) {
   const supabase = createClient(cookies());
   const { data } = await supabase
-    .from("repositories")
-    .select("metadata, org, repo")
+    .from("public_repository_data")
+    .select("metadata, org, repo, id")
     .eq("org", org)
     .eq("repo", repo)
     .single();
@@ -46,5 +46,6 @@ export async function fetchRepoProfile(org: string, repo: string) {
     avatarUrl: meta.avatar_url,
     topLanguages: meta.languages,
     license: meta.license,
+    id: data.id,
   };
 }

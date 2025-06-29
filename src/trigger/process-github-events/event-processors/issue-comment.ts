@@ -56,7 +56,7 @@ export async function processIssueCommentEvent({
   currentTimestamp,
 }: {
   event: { event_type: string; raw_payload: Json; id: string };
-  repo: { repo: string; org: string; id: string; access_token: string | null };
+  repo: { repo: string; org: string; id: string; access_token?: string | null };
   subscribers: { user_id: string }[];
   currentTimestamp: string;
 }): Promise<{

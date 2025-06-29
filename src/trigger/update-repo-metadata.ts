@@ -14,17 +14,19 @@ export const updateRepoMetadata = schedules.task({
     const supabase = createClient();
     logger.info("Starting repository metadata update");
 
-    // Fetch all repositories
+    // Fetch all repositories with metadata and access_token
     const { data: repos } = await supabase
-      .from("repositories")
-      .select("id, org, repo, access_token")
+      .from("public_repository_data")
+      .select(`id, org, repo, metadata, repositories(access_token)`) // join repositories by id
       .throwOnError();
 
     logger.info(`Fetched ${repos.length} repositories`);
 
     for (const repo of repos) {
       try {
-        const octokit = new Octokit({ auth: repo.access_token || undefined });
+        // repositories is the joined object
+        const access_token = repo.repositories?.access_token || undefined;
+        const octokit = new Octokit({ auth: access_token });
 
         // Fetch repo details
         const [{ data: repoData }, { data: languagesData }] = await Promise.all(
@@ -59,9 +61,9 @@ export const updateRepoMetadata = schedules.task({
           license: repoData.license?.spdx_id || repoData.license?.name || null,
         };
 
-        // Update metadata in Supabase
+        // Update metadata in public_repository_data
         await supabase
-          .from("repositories")
+          .from("public_repository_data")
           .update({ metadata })
           .eq("id", repo.id)
           .throwOnError();

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
+import ReactQueryProvider from "@/components/ReactQueryProvider";
 
 import { ThemeProvider } from "@/components/theme-provider";
 import {
@@ -33,17 +34,18 @@ export default function RootLayout({
         className={`${jetbrainsMono.variable} font-mono antialiased min-h-screen`}
       >
         <ThemeProvider attribute="class" defaultTheme="dark">
-          <NavigationMenu className="w-full min-w-full py-2 bg-background fixed top-0 left-0 z-50 border-b border-border shadow-sm">
-            <div className="max-w-3xl mx-auto w-full">
-              <NavigationMenuList className="justify-start">
-                <NavigationMenuItem>
-                  <NavigationMenuLink href="/">Nom</NavigationMenuLink>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </div>
-          </NavigationMenu>
-
-          <div className="max-w-3xl mx-auto pt-16">{children}</div>
+          <ReactQueryProvider>
+            <NavigationMenu className="w-full min-w-full py-2 bg-background fixed top-0 left-0 z-50 border-b border-border shadow-sm">
+              <div className="max-w-3xl mx-auto w-full">
+                <NavigationMenuList className="justify-start">
+                  <NavigationMenuItem>
+                    <NavigationMenuLink href="/">Nom</NavigationMenuLink>
+                  </NavigationMenuItem>
+                </NavigationMenuList>
+              </div>
+            </NavigationMenu>
+            <div className="max-w-3xl mx-auto pt-16">{children}</div>
+          </ReactQueryProvider>
         </ThemeProvider>
       </body>
     </html>
