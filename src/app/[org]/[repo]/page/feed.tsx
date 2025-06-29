@@ -10,6 +10,7 @@ import IssueCard from "@/components/activity-cards/issue-card";
 import { issueDataSchema } from "@/components/activity-cards/shared/schemas";
 import ReleaseCard from "@/components/activity-cards/release-card";
 import { releaseDataSchema } from "@/components/activity-cards/shared/schemas";
+import { issueCommentDataSchema } from "@/components/activity-cards/shared/schemas";
 
 import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
 
@@ -159,7 +160,34 @@ export default function Feed({
             />
           );
         }
-        // TODO: Add support for IssueCard, ReleaseCard, etc.
+        if (item.type === "issue_comment") {
+          const parseResult = issueCommentDataSchema.safeParse(item.data);
+          if (!parseResult.success) {
+            return null;
+          }
+          const { issue, comment } = parseResult.data;
+          return (
+            <IssueCard
+              key={item.id}
+              title={issue.title}
+              contributors={[
+                {
+                  name: comment.user.login,
+                  avatar: `https://github.com/${comment.user.login}.png`,
+                },
+              ]}
+              body={comment.body}
+              issueUrl={comment.html_url}
+              repo={repo}
+              org={org}
+              state={issue.state}
+              createdAt={new Date(comment.created_at)}
+              likeCount={0}
+              liked={false}
+            />
+          );
+        }
+
         return null;
       })}
       {hasNextPage && (

@@ -4,6 +4,7 @@ import z from "zod";
 
 import { createClient } from "@/utils/supabase/background";
 import { TablesInsert } from "@/types/supabase";
+import { IssueCommentData } from "@/components/activity-cards/shared/schemas";
 
 import { BASELINE_SCORE, ISSUE_MULTIPLIER } from "./shared/constants";
 
@@ -81,7 +82,7 @@ export async function processIssueCommentEvent({
     )
     .digest("hex");
 
-  const issueData = {
+  const issueData: IssueCommentData = {
     action,
     issue: {
       number: issue.number,

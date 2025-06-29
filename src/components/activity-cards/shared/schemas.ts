@@ -88,3 +88,25 @@ export const releaseDataSchema = z.object({
 });
 
 export type ReleaseData = z.infer<typeof releaseDataSchema>;
+
+export const issueCommentDataSchema = z.object({
+  action: z.string(),
+  issue: z.object({
+    number: z.number(),
+    title: z.string(),
+    user: z.object({ login: z.string() }),
+    state: z.enum(["open", "closed"]),
+    html_url: z.string(),
+    body: z.string().nullable(),
+    created_at: z.string(),
+    assignees: z.array(z.object({ login: z.string() })),
+  }),
+  comment: z.object({
+    user: z.object({ login: z.string() }),
+    body: z.string(),
+    html_url: z.string(),
+    created_at: z.string(),
+  }),
+});
+
+export type IssueCommentData = z.infer<typeof issueCommentDataSchema>;
