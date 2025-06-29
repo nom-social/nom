@@ -55,3 +55,36 @@ export const issueDataSchema = z.object({
 });
 
 export type IssueData = z.infer<typeof issueDataSchema>;
+
+export const releaseDataSchema = z.object({
+  action: z.string(),
+  release: z.object({
+    tag_name: z.string(),
+    name: z.string().nullable(),
+    body: z.string().nullable(),
+    html_url: z.string(),
+    created_at: z.string(),
+    published_at: z.string().nullable(),
+    author: z.object({ login: z.string() }),
+    assets: z.array(
+      z.object({
+        name: z.string(),
+        size: z.number(),
+        download_count: z.number(),
+        content_type: z.string(),
+        browser_download_url: z.string(),
+      })
+    ),
+    ai_analysis: z
+      .object({
+        summary: z.string(),
+        breaking_changes: z.array(z.string()),
+        notable_additions: z.array(z.string()),
+        migration_notes: z.array(z.string()),
+      })
+      .nullable(),
+    contributors: z.array(z.string()).optional(), // for UI mapping
+  }),
+});
+
+export type ReleaseData = z.infer<typeof releaseDataSchema>;

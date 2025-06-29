@@ -7,6 +7,7 @@ import * as openai from "@/utils/openai/client";
 
 import { BASELINE_SCORE, RELEASE_MULTIPLIER } from "./shared/constants";
 import { RELEASE_ANALYSIS_PROMPT } from "./release/prompts";
+import { ReleaseData } from "@/components/activity-cards/shared/schemas";
 
 const releaseSchema = z.object({
   action: z.enum(["published", "edited"]),
@@ -83,7 +84,7 @@ export async function processReleaseEvent({
   });
   const analysis = completion.choices[0].message.parsed;
 
-  const releaseData = {
+  const releaseData: ReleaseData = {
     action,
     release: {
       tag_name: release.tag_name,

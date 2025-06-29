@@ -8,6 +8,8 @@ import { prDataSchema } from "@/components/activity-cards/shared/schemas";
 import { Button } from "@/components/ui/button";
 import IssueCard from "@/components/activity-cards/issue-card";
 import { issueDataSchema } from "@/components/activity-cards/shared/schemas";
+import ReleaseCard from "@/components/activity-cards/release-card";
+import { releaseDataSchema } from "@/components/activity-cards/shared/schemas";
 
 import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
 
@@ -119,6 +121,39 @@ export default function Feed({
               org={org}
               state={parseResult.data.issue.state}
               createdAt={new Date(parseResult.data.issue.created_at)}
+              likeCount={0}
+              liked={false}
+            />
+          );
+        }
+        if (item.type === "release") {
+          const parseResult = releaseDataSchema.safeParse(item.data);
+          if (!parseResult.success) {
+            return null;
+          }
+          const release = parseResult.data.release;
+
+          return (
+            <ReleaseCard
+              key={item.id}
+              title={release.name || release.tag_name}
+              contributors={[
+                {
+                  name: release.author.login,
+                  avatar: `https://github.com/${release.author.login}.png`,
+                },
+              ]}
+              body={release.body || "No release notes provided."}
+              releaseUrl={release.html_url}
+              repo={repo}
+              org={org}
+              tagName={release.tag_name}
+              publishedAt={
+                release.published_at
+                  ? new Date(release.published_at)
+                  : new Date(release.created_at)
+              }
+              aiAnalysis={release.ai_analysis || undefined}
               likeCount={0}
               liked={false}
             />
