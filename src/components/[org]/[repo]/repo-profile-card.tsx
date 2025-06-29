@@ -27,6 +27,7 @@ type Props = {
     color: string | null;
   }[];
   license: string;
+  subscriptionCount: number;
 };
 
 export default function RepoProfileCard({
@@ -38,6 +39,7 @@ export default function RepoProfileCard({
   avatarUrl,
   topLanguages,
   license,
+  subscriptionCount,
 }: Props) {
   return (
     <Card className="w-full">
@@ -52,14 +54,10 @@ export default function RepoProfileCard({
                 {repo}
               </p>
               <div className="text-muted-foreground text-sm w-full">
-                <a
-                  href={`https://github.com/${org}/${repo}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline focus:underline outline-none block break-all w-full"
-                >
-                  {org}/{repo}
-                </a>
+                {Intl.NumberFormat("en", { notation: "compact" }).format(
+                  subscriptionCount
+                )}{" "}
+                Subscriber{subscriptionCount === 1 ? "" : "s"}
               </div>
               <div className="flex flex-row flex-wrap gap-1 sm:gap-2 items-center">
                 <Badge variant="outline">Public</Badge>
