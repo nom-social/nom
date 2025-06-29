@@ -1,8 +1,10 @@
 import { z } from "zod";
 import crypto from "crypto";
+import { Octokit } from "@octokit/rest";
 
 import { Json, TablesInsert } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/background";
+import { IssueData } from "@/components/activity-cards/shared/schemas";
 
 import { BASELINE_SCORE, ISSUE_MULTIPLIER } from "./shared/constants";
 
@@ -53,7 +55,15 @@ export async function processIssueEvent({
   const validationResult = issueSchema.parse(event.raw_payload);
   const { action, issue } = validationResult;
 
-  const issueData = {
+  const octokit = new Octokit({ auth: repo.access_token || undefined });
+  const comments = await octokit.paginate(octokit.issues.listComments, {
+    owner: repo.org,
+    repo: repo.repo,
+    issue_number: issue.number,
+    per_page: 100,
+  });
+
+  const issueData: IssueData = {
     action,
     issue: {
       user: { login: issue.user.login },
@@ -64,6 +74,12 @@ export async function processIssueEvent({
       created_at: issue.created_at.toISOString(),
       assignees: issue.assignees,
       state: issue.state,
+      contributors: [
+        issue.user.login,
+        ...comments
+          .map((comment) => comment.user?.login)
+          .filter((login): login is string => Boolean(login)),
+      ],
     },
   };
 

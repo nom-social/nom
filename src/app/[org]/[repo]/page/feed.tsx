@@ -6,6 +6,8 @@ import { Loader2 } from "lucide-react";
 import PRCard from "@/components/activity-cards/pr-card";
 import { prDataSchema } from "@/components/activity-cards/shared/schemas";
 import { Button } from "@/components/ui/button";
+import IssueCard from "@/components/activity-cards/issue-card";
+import { issueDataSchema } from "@/components/activity-cards/shared/schemas";
 
 import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
 
@@ -91,6 +93,32 @@ export default function Feed({
               org={org}
               state={parseResult.data.pull_request.merged ? "merged" : "open"}
               createdAt={new Date(parseResult.data.pull_request.created_at)}
+              likeCount={0}
+              liked={false}
+            />
+          );
+        }
+        if (item.type === "issue") {
+          const parseResult = issueDataSchema.safeParse(item.data);
+          if (!parseResult.success) {
+            return null;
+          }
+          return (
+            <IssueCard
+              key={item.id}
+              title={parseResult.data.issue.title}
+              contributors={parseResult.data.issue.contributors.map(
+                (login) => ({
+                  name: login,
+                  avatar: `https://github.com/${login}.png`,
+                })
+              )}
+              body={parseResult.data.issue.body || "No description provided."}
+              issueUrl={parseResult.data.issue.html_url}
+              repo={repo}
+              org={org}
+              state={parseResult.data.issue.state}
+              createdAt={new Date(parseResult.data.issue.created_at)}
               likeCount={0}
               liked={false}
             />

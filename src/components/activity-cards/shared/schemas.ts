@@ -38,3 +38,20 @@ export const prDataSchema = z.object({
 });
 
 export type PrData = z.infer<typeof prDataSchema>;
+
+export const issueDataSchema = z.object({
+  action: z.string(),
+  issue: z.object({
+    user: z.object({ login: z.string() }),
+    number: z.number(),
+    title: z.string(),
+    body: z.string().nullable(),
+    html_url: z.string(),
+    created_at: z.string(),
+    assignees: z.array(z.object({ login: z.string() })),
+    state: z.enum(["open", "closed"]),
+    contributors: z.array(z.string()),
+  }),
+});
+
+export type IssueData = z.infer<typeof issueDataSchema>;
