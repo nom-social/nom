@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react";
+import { Loader } from "lucide-react";
 import { useState } from "react";
 
 import {
@@ -60,7 +60,7 @@ export default function LoginForm({ onLogin }: Props) {
                   isLoading ? "scale-100" : "scale-0"
                 }`}
               >
-                <Loader2 className="animate-spin" />
+                <Loader className="animate-spin" />
               </span>
             </div>
             github.auth()

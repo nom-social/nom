@@ -1,7 +1,7 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import ActivityCard from "@/components/shared/activity-card";
@@ -72,8 +72,8 @@ export default function Feed({
           variant="ghost"
           className="mb-4"
         >
-          {isFetchingNextPage ? <Loader2 className="animate-spin" /> : null}{" "}
-          Load more
+          {isFetchingNextPage ? <Loader className="animate-spin" /> : null} Load
+          more
         </Button>
       )}
     </div>
