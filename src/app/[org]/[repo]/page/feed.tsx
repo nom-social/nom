@@ -7,6 +7,8 @@ import { prDataSchema } from "@/components/activity-cards/shared/schemas";
 
 import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
 
+const LIMIT = 4;
+
 export default function Feed({
   repoId,
   repo,
@@ -26,14 +28,21 @@ export default function Feed({
     error,
   } = useInfiniteQuery<FetchFeedPageResult, Error>({
     queryKey: ["feed", repoId],
-    queryFn: ({ pageParam }: { pageParam?: unknown }) =>
-      fetchFeedPage({
+    queryFn: ({ pageParam }) => {
+      const offset = typeof pageParam === "number" ? pageParam : 0;
+      return fetchFeedPage({
         repoId,
-        limit: 10,
-        cursor: pageParam as string | undefined,
-      }),
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
-    initialPageParam: undefined,
+        limit: LIMIT,
+        offset,
+      });
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.hasMore) {
+        return allPages.reduce((acc, page) => acc + page.items.length, 0);
+      }
+      return undefined;
+    },
+    initialPageParam: 0,
   });
 
   // TODO: Add proper loading state

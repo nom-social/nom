@@ -6,46 +6,35 @@ export type FeedItem = Tables<"public_timeline">;
 export type FetchFeedPageParams = {
   repoId: string;
   limit: number;
-  cursor?: string; // ISO string for created_at
+  offset: number;
 };
 
 export type FetchFeedPageResult = {
   items: FeedItem[];
-  nextCursor?: string;
+  hasMore: boolean;
 };
 
 export async function fetchFeedPage({
   repoId,
   limit,
-  cursor,
+  offset,
 }: FetchFeedPageParams): Promise<FetchFeedPageResult> {
   const supabase = createClient();
 
-  let query = supabase
+  const { data, error } = await supabase
     .from("public_timeline")
     .select("*")
     .eq("repo_id", repoId)
     .order("updated_at", { ascending: false })
-    .limit(limit + 1); // Fetch one extra to check for next page
-
-  if (cursor) {
-    query = query.lt("updated_at", cursor);
-  }
-
-  const { data, error } = await query;
+    .range(offset, offset + limit - 1);
 
   if (error) {
     throw error;
   }
 
   const items = data || [];
-  let nextCursor: string | undefined = undefined;
+  // If we got less than limit, there are no more items
+  const hasMore = items.length === limit;
 
-  if (items.length > limit) {
-    const paginatedItems = items.slice(0, limit);
-    nextCursor = items[limit]?.updated_at;
-    return { items: paginatedItems, nextCursor };
-  }
-
-  return { items, nextCursor };
+  return { items, hasMore };
 }
