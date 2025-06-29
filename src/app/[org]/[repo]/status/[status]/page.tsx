@@ -7,10 +7,10 @@ import Link from "next/link";
 import ActivityCard from "@/components/shared/activity-card";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import type {
-  PrData,
-  IssueData,
-  ReleaseData,
+import {
+  prDataSchema,
+  issueDataSchema,
+  releaseDataSchema,
 } from "@/components/shared/activity-cards/shared/schemas";
 
 import { fetchFeedItem } from "./page/actions";
@@ -75,31 +75,31 @@ export async function generateMetadata({
     statusItem.data &&
     typeof statusItem.data === "object"
   ) {
-    const pr = (statusItem.data as PrData)["pull_request"];
-    if (pr) {
-      title = pr.title ? `${pr.title} - ${org}/${repo}` : title;
-      description = truncate(pr.ai_summary || pr.body || description);
-    }
+    const parseResult = prDataSchema.safeParse(statusItem.data);
+    if (!parseResult.success) return {};
+    const pr = parseResult.data.pull_request;
+    title = pr.title ? `${pr.title} - ${org}/${repo}` : title;
+    description = truncate(pr.ai_summary || pr.body || description);
   } else if (
     statusItem.type === "issue" &&
     statusItem.data &&
     typeof statusItem.data === "object"
   ) {
-    const issue = (statusItem.data as IssueData)["issue"];
-    if (issue) {
-      title = issue.title ? `${issue.title} - ${org}/${repo}` : title;
-      description = truncate(issue.ai_summary || issue.body || description);
-    }
+    const parseResult = issueDataSchema.safeParse(statusItem.data);
+    if (!parseResult.success) return {};
+    const issue = parseResult.data.issue;
+    title = issue.title ? `${issue.title} - ${org}/${repo}` : title;
+    description = truncate(issue.ai_summary || issue.body || description);
   } else if (
     statusItem.type === "release" &&
     statusItem.data &&
     typeof statusItem.data === "object"
   ) {
-    const release = (statusItem.data as ReleaseData)["release"];
-    if (release) {
-      title = release.name ? `${release.name} - ${org}/${repo}` : title;
-      description = truncate(release.ai_summary || release.body || description);
-    }
+    const parseResult = releaseDataSchema.safeParse(statusItem.data);
+    if (!parseResult.success) return {};
+    const release = parseResult.data.release;
+    title = release.name ? `${release.name} - ${org}/${repo}` : title;
+    description = truncate(release.ai_summary || release.body || description);
   }
 
   return {

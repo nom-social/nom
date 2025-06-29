@@ -1,4 +1,4 @@
-import { Calendar, Globe, Scale, UserPlus } from "lucide-react";
+import { Calendar, Github, Globe, Scale, UserPlus } from "lucide-react";
 import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
@@ -121,6 +121,18 @@ export default function RepoProfileCard({
             <div className="flex flex-row gap-1 items-center">
               <Scale className="w-3 h-3 text-muted-foreground" />
               <p className="text-xs text-muted-foreground">{license} license</p>
+            </div>
+
+            <div className="flex flex-row gap-1 items-center">
+              <Github className="w-3 h-3 text-muted-foreground" />
+              <a
+                href={`https://github.com/${org}/${repo}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline focus:underline outline-none text-xs text-muted-foreground"
+              >
+                {org}/{repo}
+              </a>
             </div>
           </div>
           <Button className="flex md:hidden bg-[var(--nom-purple)] text-white hover:bg-[var(--nom-purple)]/90">

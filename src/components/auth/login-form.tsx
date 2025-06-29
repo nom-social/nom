@@ -40,7 +40,7 @@ export default function LoginForm({ onLogin }: Props) {
       </CardHeader>
       <Separator className="w-full" />
       <CardContent>
-        <div className="flex flex-col gap-6 p-6">
+        <div className="flex flex-col gap-6 p-2 sm:p-6">
           <ButtonLogin
             onClick={() => {
               setIsLoading(true);
