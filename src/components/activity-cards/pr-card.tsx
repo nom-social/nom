@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { ShareIcon, HeartIcon, GitMergeIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";

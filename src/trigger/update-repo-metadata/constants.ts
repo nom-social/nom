@@ -11,5 +11,5 @@ export const LANGUAGE_COLORS: Record<string, string> = {
   "C#": "#178600",
   Shell: "#89e051",
   Rust: "#dea584",
-  // ... add more as needed
+  CSS: "#563d7c",
 };
