@@ -39,6 +39,11 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
+  // Only protect the root path '/'; skip auth for all other paths
+  if (request.nextUrl.pathname !== "/") {
+    return response;
+  }
+
   // If there's no session, redirect to login
   if (!session) {
     const redirectUrl = new URL("/auth/login", request.url);

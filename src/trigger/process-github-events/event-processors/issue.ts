@@ -1,10 +1,12 @@
-import { z } from "zod";
+import z from "zod";
 import crypto from "crypto";
+import { Octokit } from "@octokit/rest";
 
 import { Json, TablesInsert } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/background";
 
 import { BASELINE_SCORE, ISSUE_MULTIPLIER } from "./shared/constants";
+import { generateIssueData } from "./issues/utils";
 
 const issueSchema = z.object({
   action: z.enum(["opened", "closed", "reopened", "assigned", "edited"]),
@@ -41,7 +43,7 @@ export async function processIssueEvent({
   currentTimestamp,
 }: {
   event: { event_type: string; raw_payload: Json; id: string };
-  repo: { repo: string; org: string; id: string; access_token: string | null };
+  repo: { repo: string; org: string; id: string; access_token?: string | null };
   subscribers: { user_id: string }[];
   currentTimestamp: string;
 }): Promise<{
@@ -51,21 +53,16 @@ export async function processIssueEvent({
   const supabase = createClient();
 
   const validationResult = issueSchema.parse(event.raw_payload);
-  const { action, issue } = validationResult;
+  const { issue } = validationResult;
 
-  const issueData = {
-    action,
-    issue: {
-      user: { login: issue.user.login },
-      number: issue.number,
-      title: issue.title,
-      body: issue.body,
-      html_url: issue.html_url,
-      created_at: issue.created_at.toISOString(),
-      assignees: issue.assignees,
-      state: issue.state,
-    },
-  };
+  const octokit = new Octokit({ auth: repo.access_token || undefined });
+
+  const issueData = await generateIssueData({
+    octokit,
+    repo,
+    action: validationResult.action,
+    issue,
+  });
 
   const dedupeHash = crypto
     .createHash("sha256")

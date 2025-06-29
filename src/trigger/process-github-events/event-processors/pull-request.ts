@@ -1,17 +1,14 @@
 import { z } from "zod";
 import { Octokit } from "@octokit/rest";
-import { zodResponseFormat } from "openai/helpers/zod";
 import crypto from "crypto";
 
 import { Json, TablesInsert } from "@/types/supabase";
 import * as openai from "@/utils/openai/client";
 import { createClient } from "@/utils/supabase/background";
+import { PrData } from "@/components/shared/activity-cards/shared/schemas";
 
 import { getProcessedPullRequestDiff } from "./pull-request/utils";
-import {
-  PR_ANALYSIS_PROMPT,
-  prAnalysisResponseSchema,
-} from "./pull-request/prompts";
+import { PR_SUMMARY_ONLY_PROMPT } from "./pull-request/prompts";
 import { BASELINE_SCORE, PULL_REQUEST_MULTIPLIER } from "./shared/constants";
 
 const pullRequestSchema = z.object({
@@ -26,6 +23,7 @@ const pullRequestSchema = z.object({
     merged: z.boolean(),
     draft: z.boolean().optional(),
     requested_reviewers: z.array(z.object({ login: z.string() })).optional(),
+    assignees: z.array(z.object({ login: z.string() })).optional(),
     user: z.object({ login: z.string() }),
     author_association: z.enum([
       "COLLABORATOR",
@@ -55,7 +53,7 @@ export async function processPullRequestEvent({
   currentTimestamp,
 }: {
   event: { event_type: string; raw_payload: Json; id: string };
-  repo: { repo: string; org: string; id: string; access_token: string | null };
+  repo: { repo: string; org: string; id: string; access_token?: string | null };
   subscribers: { user_id: string }[];
   currentTimestamp: string;
 }): Promise<{
@@ -70,7 +68,7 @@ export async function processPullRequestEvent({
   const { action, pull_request } = validationResult;
 
   const constructPRData = async () => {
-    const [combinedDiff, checks] = await Promise.all([
+    const [combinedDiff, checks, commits] = await Promise.all([
       getProcessedPullRequestDiff(
         octokit,
         { org: repo.org, repo: repo.repo },
@@ -80,6 +78,11 @@ export async function processPullRequestEvent({
         owner: repo.org,
         repo: repo.repo,
         ref: pull_request.head.sha,
+      }),
+      octokit.pulls.listCommits({
+        owner: repo.org,
+        repo: repo.repo,
+        pull_number: pull_request.number,
       }),
     ]);
 
@@ -122,7 +125,7 @@ export async function processPullRequestEvent({
         .map((c) => "- " + c.name)
         .join("\n");
 
-    const prompt = PR_ANALYSIS_PROMPT.replace("{title}", pull_request.title)
+    const prompt = PR_SUMMARY_ONLY_PROMPT.replace("{title}", pull_request.title)
       .replace("{author}", pull_request.user.login)
       .replace("{author_association}", pull_request.author_association)
       .replace("{description}", pull_request.body || "No description provided")
@@ -133,24 +136,24 @@ export async function processPullRequestEvent({
       .replace("{checks_status}", checksStatusText)
       .replace("{pr_diff}", combinedDiff);
 
-    const completion = await openaiClient.chat.completions.parse({
+    const completion = await openaiClient.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
           content:
-            "You are a helpful assistant that analyzes pull requests. " +
-            "Provide your analysis in JSON format as specified.",
+            "You are a helpful assistant that summarizes pull requests. Provide a concise summary as instructed.",
         },
         { role: "user", content: prompt },
       ],
-      response_format: zodResponseFormat(
-        prAnalysisResponseSchema,
-        "pr_analysis"
-      ),
     });
 
-    const prData = {
+    const ai_summary = completion.choices[0].message.content;
+    if (!ai_summary) {
+      throw new Error("Failed to generate AI summary for pull request");
+    }
+
+    const prData: PrData = {
       action,
       pull_request: {
         stats: {
@@ -176,9 +179,22 @@ export async function processPullRequestEvent({
         body: pull_request.body,
         html_url: pull_request.html_url,
         created_at: pull_request.created_at.toISOString(),
-        ai_analysis: completion.choices[0].message.parsed,
+        ai_summary,
         requested_reviewers: pull_request.requested_reviewers,
         merged: pull_request.merged,
+        contributors: [
+          ...new Set([
+            pull_request.user.login,
+            ...commits.data
+              .map((commit) => commit.author?.login)
+              .filter((login): login is string => Boolean(login)),
+            ...(pull_request.assignees?.map((assignee) => assignee.login) ||
+              []),
+            ...(pull_request.requested_reviewers?.map(
+              (reviewer) => reviewer.login
+            ) || []),
+          ]),
+        ],
       },
     };
 

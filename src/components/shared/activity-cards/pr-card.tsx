@@ -1,5 +1,5 @@
 import React from "react";
-import { ShareIcon, HeartIcon, CircleDot, CircleCheck } from "lucide-react";
+import { ShareIcon, HeartIcon, GitMergeIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 import {
@@ -11,34 +11,40 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import ContributorAvatarGroup, {
   Contributor,
 } from "@/components/shared/contributor-avatar-group";
 import { Badge } from "@/components/ui/badge";
 import { Markdown } from "@/components/ui/markdown";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
+import { useShare } from "@/hooks/use-share";
 
 export type Props = {
   title: string;
   contributors: Contributor[];
   body: string;
-  issueUrl: string;
+  prUrl: string;
   repo: string;
   org: string;
-  state: "open" | "closed";
+  state: string;
   createdAt: Date;
   likeCount: number;
   liked: boolean;
   onLike?: () => void;
   onUnlike?: () => void;
+  id: string;
 };
 
-export default function IssueCard({
+export default function PRCard({
   title,
   contributors,
   body,
-  issueUrl,
+  prUrl,
   repo,
   org,
   state,
@@ -47,6 +53,7 @@ export default function IssueCard({
   liked,
   onLike,
   onUnlike,
+  id,
 }: Props) {
   const handleLikeClick = () => {
     if (liked) {
@@ -55,6 +62,8 @@ export default function IssueCard({
       onLike?.();
     }
   };
+  const share = useShare();
+
   const formattedLikeCount =
     likeCount > 0
       ? new Intl.NumberFormat(undefined, {
@@ -67,7 +76,7 @@ export default function IssueCard({
       <CardHeader>
         <CardTitle className="leading-relaxed font-bold">
           <a
-            href={issueUrl}
+            href={prUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="hover:underline focus:underline outline-none"
@@ -76,21 +85,14 @@ export default function IssueCard({
           </a>
         </CardTitle>
         <CardAction>
-          <Badge
-            className={cn(
-              "hover:opacity-90 border-transparent uppercase text-black",
-              state === "open"
-                ? "bg-[var(--nom-green)]"
-                : "bg-[var(--nom-purple)]"
-            )}
-          >
-            {state === "open" ? <CircleDot /> : <CircleCheck />}
+          <Badge className="bg-[var(--nom-purple)] hover:opacity-90 border-transparent uppercase text-black">
+            <GitMergeIcon />
             {state}
           </Badge>
         </CardAction>
         <CardDescription>
           <div className="flex gap-2 flex-col">
-            <div className="text-muted-foreground text-sm">
+            <div className="text-muted-foreground text-xs">
               <a
                 href={`https://github.com/${org}/${repo}`}
                 target="_blank"
@@ -100,7 +102,18 @@ export default function IssueCard({
                 {org}/{repo}
               </a>
               {" • "}
-              {formatDistanceToNow(createdAt, { addSuffix: false })}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    {formatDistanceToNow(createdAt, { addSuffix: false })}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {createdAt instanceof Date
+                    ? createdAt.toLocaleString()
+                    : new Date(createdAt).toLocaleString()}
+                </TooltipContent>
+              </Tooltip>
             </div>
             <div className="flex items-center">
               <ContributorAvatarGroup contributors={contributors} />
@@ -114,17 +127,28 @@ export default function IssueCard({
         </div>
       </CardContent>
       <CardFooter>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full justify-between">
+        <div className="flex flex-row items-center gap-3 sm:gap-4 w-full justify-between">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              aria-label={liked ? "Unlike PR" : "Like PR"}
+              onClick={handleLikeClick}
+              size="sm"
+            >
+              <HeartIcon className={liked ? "fill-red-500 text-red-500" : ""} />
+              {formattedLikeCount}
+            </Button>
+          </div>
           <Button
             variant="outline"
-            aria-label={liked ? "Unlike Issue" : "Like Issue"}
-            onClick={handleLikeClick}
             size="sm"
+            onClick={() =>
+              share(
+                `${window.location.origin}/${org}/${repo}/status/${id}`,
+                title
+              )
+            }
           >
-            <HeartIcon className={liked ? "fill-red-500 text-red-500" : ""} />
-            {formattedLikeCount}
-          </Button>
-          <Button variant="outline" size="sm">
             <ShareIcon className="size-4" />
             Share
           </Button>

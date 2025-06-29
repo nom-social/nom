@@ -17,42 +17,43 @@ import ContributorAvatarGroup, {
 import { Badge } from "@/components/ui/badge";
 import { Markdown } from "@/components/ui/markdown";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
+import { useShare } from "@/hooks/use-share";
 
 type Props = {
   title: string;
   contributors: Contributor[];
-  body: string;
   releaseUrl: string;
   repo: string;
   org: string;
   tagName: string;
   publishedAt: Date;
-  aiAnalysis?: {
-    summary?: string;
-    breaking_changes?: string[];
-    notable_additions?: string[];
-    migration_notes?: string[];
-  };
+  body: string;
   likeCount: number;
   liked: boolean;
   onLike?: () => void;
   onUnlike?: () => void;
+  id: string;
 };
 
 export default function ReleaseCard({
   title,
   contributors,
-  body,
   releaseUrl,
   repo,
   org,
   tagName,
   publishedAt,
-  aiAnalysis,
+  body,
   likeCount,
   liked,
   onLike,
   onUnlike,
+  id,
 }: Props) {
   const handleLikeClick = () => {
     if (liked) {
@@ -61,6 +62,7 @@ export default function ReleaseCard({
       onLike?.();
     }
   };
+  const share = useShare();
   const formattedLikeCount =
     likeCount > 0
       ? new Intl.NumberFormat(undefined, {
@@ -89,7 +91,7 @@ export default function ReleaseCard({
         </CardAction>
         <CardDescription>
           <div className="flex gap-2 flex-col">
-            <div className="text-muted-foreground text-sm">
+            <div className="text-muted-foreground text-xs">
               <a
                 href={`https://github.com/${org}/${repo}`}
                 target="_blank"
@@ -99,7 +101,18 @@ export default function ReleaseCard({
                 {org}/{repo}
               </a>
               {" • "}
-              {formatDistanceToNow(publishedAt, { addSuffix: false })}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    {formatDistanceToNow(publishedAt, { addSuffix: false })}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {publishedAt instanceof Date
+                    ? publishedAt.toLocaleString()
+                    : new Date(publishedAt).toLocaleString()}
+                </TooltipContent>
+              </Tooltip>
             </div>
             <div className="flex items-center">
               <ContributorAvatarGroup contributors={contributors} />
@@ -109,11 +122,11 @@ export default function ReleaseCard({
       </CardHeader>
       <CardContent>
         <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none font-normal text-sm">
-          <Markdown>{aiAnalysis?.summary || body}</Markdown>
+          <Markdown>{body}</Markdown>
         </div>
       </CardContent>
       <CardFooter>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full justify-between">
+        <div className="flex flex-row items-center gap-3 sm:gap-4 w-full justify-between">
           <Button
             variant="outline"
             aria-label={liked ? "Unlike release" : "Like release"}
@@ -123,7 +136,16 @@ export default function ReleaseCard({
             <HeartIcon className={liked ? "fill-red-500 text-red-500" : ""} />
             {formattedLikeCount}
           </Button>
-          <Button variant="outline" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              share(
+                `${window.location.origin}/${org}/${repo}/status/${id}`,
+                title
+              )
+            }
+          >
             <ShareIcon className="size-4" />
             Share
           </Button>

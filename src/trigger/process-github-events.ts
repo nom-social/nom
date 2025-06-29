@@ -50,7 +50,7 @@ export const processGithubEvents = schedules.task({
       try {
         const { data: repo } = await supabase
           .from("repositories")
-          .select("*")
+          .select("id, repo, org, access_token")
           .eq("repo", event.repo)
           .eq("org", event.org)
           .single()

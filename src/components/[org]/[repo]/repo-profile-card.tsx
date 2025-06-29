@@ -1,4 +1,4 @@
-import { Calendar, Globe, Scale, Share, UserPlus } from "lucide-react";
+import { Calendar, Globe, Scale, UserPlus } from "lucide-react";
 import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
+import ShareButton from "./repo-profile-card/share-button";
+import ShareButtonMobile from "./repo-profile-card/share-button-mobile";
+
 type Props = {
   org: string;
   repo: string;
@@ -21,7 +24,7 @@ type Props = {
   avatarUrl: string;
   topLanguages: {
     name: string;
-    color: string;
+    color: string | null;
   }[];
   license: string;
 };
@@ -45,30 +48,34 @@ export default function RepoProfileCard({
               <AvatarImage src={avatarUrl} alt={`${org} avatar`} />
             </Avatar>
             <div className="flex flex-col gap-1">
-              <p className="text-foreground text-xl sm:text-2xl uppercase">
+              <p className="text-foreground text-xl uppercase break-all">
                 {repo}
               </p>
-              <div className="text-muted-foreground text-sm">
+              <div className="text-muted-foreground text-sm w-full">
                 <a
                   href={`https://github.com/${org}/${repo}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:underline focus:underline outline-none"
+                  className="hover:underline focus:underline outline-none block break-all w-full"
                 >
                   {org}/{repo}
                 </a>
               </div>
-              <div className="flex flex-row gap-1">
+              <div className="flex flex-row flex-wrap gap-1 sm:gap-2 items-center">
                 <Badge variant="outline">Public</Badge>
                 {topLanguages.map((language) => (
                   <Badge
                     key={language.name}
                     variant="outline"
                     className="border"
-                    style={{
-                      borderColor: language.color,
-                      color: language.color,
-                    }}
+                    style={
+                      language.color
+                        ? {
+                            borderColor: language.color,
+                            color: language.color,
+                          }
+                        : {}
+                    }
                   >
                     {language.name}
                   </Badge>
@@ -79,23 +86,19 @@ export default function RepoProfileCard({
         </CardTitle>
         <CardAction>
           <div className="flex flex-row gap-2">
-            <Button className="bg-[var(--nom-purple)] text-white hover:bg-[var(--nom-purple)]/90">
+            <Button className="hidden md:flex bg-[var(--nom-purple)] text-white hover:bg-[var(--nom-purple)]/90">
               <UserPlus />
               Subscribe
             </Button>
-            <Button
-              size="icon"
-              className="bg-[var(--nom-blue)] hover:bg-[var(--nom-blue)]/90"
-            >
-              <Share />
-            </Button>
+
+            <ShareButton org={org} repo={repo} />
           </div>
         </CardAction>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-3">
           <p className="text-sm">{description}</p>
-          <div className="flex flex-row gap-4">
+          <div className="flex flex-col items-start gap-2 md:gap-4 md:flex-row md:items-center">
             <div className="flex flex-row gap-1 items-center">
               <Globe className="w-3 h-3 text-muted-foreground" />
               <a
@@ -120,6 +123,12 @@ export default function RepoProfileCard({
               <p className="text-xs text-muted-foreground">{license} license</p>
             </div>
           </div>
+          <Button className="flex md:hidden bg-[var(--nom-purple)] text-white hover:bg-[var(--nom-purple)]/90">
+            <UserPlus />
+            Subscribe
+          </Button>
+
+          <ShareButtonMobile org={org} repo={repo} />
         </div>
       </CardContent>
     </Card>

@@ -44,6 +44,22 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
         ol: ({ children }) => (
           <ol className="list-decimal pl-7 mb-2">{children}</ol>
         ),
+        a: ({ href, children }) => (
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline hover:text-[var(--nom-blue)]"
+          >
+            {children}
+          </a>
+        ),
+        h1: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
+        h2: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
+        h3: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
+        h4: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
+        h5: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
+        h6: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
       }}
     >
       {children}

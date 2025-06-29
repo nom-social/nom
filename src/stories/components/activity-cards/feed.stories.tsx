@@ -1,9 +1,10 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import IssueCard from "@/components/activity-cards/issue-card";
-import PRCard from "@/components/activity-cards/pr-card";
-import ReleaseCard from "@/components/activity-cards/release-card";
+import IssueCard from "@/components/shared/activity-cards/issue-card";
+import PRCard from "@/components/shared/activity-cards/pr-card";
+import ReleaseCard from "@/components/shared/activity-cards/release-card";
+import { randomUUID } from "crypto";
 
 const meta: Meta = {
   title: "Components/ActivityCards/Feed",
@@ -32,6 +33,7 @@ export const CombinedFeed: Story = {
       org: "org",
       state: "open" as const,
       createdAt: new Date("2025-01-01"),
+      id: randomUUID(),
     };
     const prArgs = {
       title: "fix: Resolve race condition in data fetching",
@@ -48,6 +50,7 @@ export const CombinedFeed: Story = {
       org: "org",
       state: "merged" as const,
       createdAt: new Date("2025-01-01"),
+      id: randomUUID(),
     };
     const issueCommentArgs = {
       title: "Fix: Unexpected behavior in user login flow",
@@ -63,6 +66,7 @@ export const CombinedFeed: Story = {
       org: "org",
       state: "open" as const,
       createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+      id: randomUUID(),
     };
     const releaseArgs = {
       title: "v2.0.0: Major Release 🚀",
@@ -75,6 +79,9 @@ export const CombinedFeed: Story = {
       org: "org",
       tagName: "v2.0.0",
       publishedAt: new Date("2025-02-01"),
+      aiSummary:
+        "This release introduces project-scoped roles, MCP server enhancements, and a UI library blocks. It also includes compliance resources and community showcases.",
+      id: randomUUID(),
     };
     // Add more example data for additional cards
     const moreIssueArgs = {
@@ -88,6 +95,7 @@ export const CombinedFeed: Story = {
       org: "org",
       state: "open" as const,
       createdAt: new Date("2025-01-05"),
+      id: randomUUID(),
     };
     const morePRArgs = {
       title: "chore: Refactor authentication logic for clarity",
@@ -100,6 +108,7 @@ export const CombinedFeed: Story = {
       org: "org",
       state: "open" as const,
       createdAt: new Date("2025-01-06"),
+      id: randomUUID(),
     };
     const moreIssueCommentArgs = {
       title: "Docs: Update README with new setup instructions",
@@ -112,6 +121,7 @@ export const CombinedFeed: Story = {
       org: "org",
       state: "closed" as const,
       createdAt: new Date("2025-01-07"),
+      id: randomUUID(),
     };
     const moreReleaseArgs = {
       title: "v2.1.0: Minor Improvements & Bugfixes",
@@ -125,6 +135,9 @@ export const CombinedFeed: Story = {
       org: "org",
       tagName: "v2.1.0",
       publishedAt: new Date("2025-03-01"),
+      aiSummary:
+        "This release introduces project-scoped roles, MCP server enhancements, and a UI library blocks. It also includes compliance resources and community showcases.",
+      id: randomUUID(),
     };
     // Like state for each card (now 8 cards)
     const [liked, setLiked] = React.useState([
