@@ -5,8 +5,8 @@ import { createClient } from "@/utils/supabase/background";
 
 import { LANGUAGE_COLORS } from "./update-repo-metadata/constants";
 
-export const updateRepoMetadata = schedules.task({
-  id: "update-repo-metadata",
+export const syncRepoMetadata = schedules.task({
+  id: "sync-repo-metadata",
   // Run every 10 minutes
   cron: "*/10 * * * *",
   maxDuration: 600, // 10 minutes max runtime
@@ -16,16 +16,15 @@ export const updateRepoMetadata = schedules.task({
 
     // Fetch all repositories with metadata and access_token
     const { data: repos } = await supabase
-      .from("public_repository_data")
-      .select(`id, org, repo, metadata, repositories(access_token)`) // join repositories by id
+      .from("repositories")
+      .select(`id, org, repo, access_token`) // join repositories by id
       .throwOnError();
 
     logger.info(`Fetched ${repos.length} repositories`);
 
     for (const repo of repos) {
       try {
-        // repositories is the joined object
-        const access_token = repo.repositories?.access_token || undefined;
+        const access_token = repo.access_token || undefined;
         const octokit = new Octokit({ auth: access_token });
 
         // Fetch repo details
@@ -64,8 +63,15 @@ export const updateRepoMetadata = schedules.task({
         // Update metadata in public_repository_data
         await supabase
           .from("public_repository_data")
-          .update({ metadata })
-          .eq("id", repo.id)
+          .upsert(
+            {
+              metadata,
+              org: repo.org,
+              repo: repo.repo,
+              id: repo.id,
+            },
+            { onConflict: "id" }
+          )
           .throwOnError();
 
         logger.info("Updated metadata for repo", {

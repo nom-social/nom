@@ -6,6 +6,7 @@ import crypto from "crypto";
 import { Json, TablesInsert } from "@/types/supabase";
 import * as openai from "@/utils/openai/client";
 import { createClient } from "@/utils/supabase/background";
+import { PrData } from "@/components/activity-cards/shared/schemas";
 
 import { getProcessedPullRequestDiff } from "./pull-request/utils";
 import {
@@ -150,7 +151,7 @@ export async function processPullRequestEvent({
       ),
     });
 
-    const prData = {
+    const prData: PrData = {
       action,
       pull_request: {
         stats: {

@@ -2,9 +2,10 @@
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
 import PRCard from "@/components/activity-cards/pr-card";
-import { prDataSchema } from "@/components/activity-cards/shared/schema";
+import { prDataSchema } from "@/components/activity-cards/shared/schemas";
+
+import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
 
 export default function Feed({
   repoId,
@@ -35,6 +36,7 @@ export default function Feed({
     initialPageParam: undefined,
   });
 
+  // TODO: Add proper loading state
   if (isLoading) return <div>Loading...</div>;
   if (isError)
     return (
@@ -79,7 +81,7 @@ export default function Feed({
               org={org}
               state={parseResult.data.pull_request.merged ? "merged" : "open"}
               createdAt={new Date(parseResult.data.pull_request.created_at)}
-              likeCount={parseResult.data.pull_request.stats.comments_count}
+              likeCount={0}
               liked={false}
             />
           );
@@ -87,6 +89,7 @@ export default function Feed({
         // TODO: Add support for IssueCard, ReleaseCard, etc.
         return null;
       })}
+      {/* TODO: add better infinite loader */}
       {hasNextPage && (
         <button
           className="mt-4 px-4 py-2 rounded bg-primary text-primary-foreground"

@@ -132,18 +132,24 @@ export type Database = {
           access_token: string | null;
           created_at: string;
           id: string;
+          org: string;
+          repo: string;
           secret: string | null;
         };
         Insert: {
           access_token?: string | null;
           created_at?: string;
           id?: string;
+          org: string;
+          repo: string;
           secret?: string | null;
         };
         Update: {
           access_token?: string | null;
           created_at?: string;
           id?: string;
+          org?: string;
+          repo?: string;
           secret?: string | null;
         };
         Relationships: [];
