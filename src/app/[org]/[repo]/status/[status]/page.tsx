@@ -65,12 +65,10 @@ export async function generateMetadata({
 
   if (!statusItem) return {};
 
-  let title = `${repo} by ${org} - Nom Social`;
+  let title = `${org}/${repo} - Nom`;
   const truncate = (str: string) =>
     str.length > 200 ? str.slice(0, 200) + "..." : str;
-  let description = truncate(
-    `View status update for ${repo} by ${org} on Nom Social.`
-  );
+  let description = truncate(`View status update for ${org}/${repo} on Nom.`);
 
   if (
     statusItem.type === "pull_request" &&
@@ -79,7 +77,7 @@ export async function generateMetadata({
   ) {
     const pr = (statusItem.data as PrData)["pull_request"];
     if (pr) {
-      title = pr.title ? `${pr.title} - ${repo} by ${org}` : title;
+      title = pr.title ? `${pr.title} - ${org}/${repo}` : title;
       description = truncate(pr.ai_summary || pr.body || description);
     }
   } else if (
@@ -89,7 +87,7 @@ export async function generateMetadata({
   ) {
     const issue = (statusItem.data as IssueData)["issue"];
     if (issue) {
-      title = issue.title ? `${issue.title} - ${repo} by ${org}` : title;
+      title = issue.title ? `${issue.title} - ${org}/${repo}` : title;
       description = truncate(issue.ai_summary || issue.body || description);
     }
   } else if (
@@ -99,7 +97,7 @@ export async function generateMetadata({
   ) {
     const release = (statusItem.data as ReleaseData)["release"];
     if (release) {
-      title = release.name ? `${release.name} - ${repo} by ${org}` : title;
+      title = release.name ? `${release.name} - ${org}/${repo}` : title;
       description = truncate(release.ai_summary || release.body || description);
     }
   }
