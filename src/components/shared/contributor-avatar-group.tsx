@@ -35,7 +35,9 @@ export default function ContributorAvatarGroup({
                     src={contributor.avatar}
                     alt={contributor.name}
                   />
-                  <AvatarFallback>{contributor.name[0]}</AvatarFallback>
+                  <AvatarFallback className="rounded-none">
+                    {contributor.name[0]}
+                  </AvatarFallback>
                 </Avatar>
               </TooltipTrigger>
               <TooltipContent side="top" className="px-2 py-1 text-xs">
