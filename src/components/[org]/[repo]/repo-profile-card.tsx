@@ -45,13 +45,15 @@ export default function RepoProfileCard({
               <AvatarImage src={avatarUrl} alt={`${org} avatar`} />
             </Avatar>
             <div className="flex flex-col gap-1">
-              <p className="text-foreground text-xl uppercase">{repo}</p>
-              <div className="text-muted-foreground text-sm max-w-xs">
+              <p className="text-foreground text-xl uppercase break-all">
+                {repo}
+              </p>
+              <div className="text-muted-foreground text-sm w-full">
                 <a
                   href={`https://github.com/${org}/${repo}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:underline focus:underline outline-none block overflow-hidden whitespace-nowrap truncate max-w-xs"
+                  className="hover:underline focus:underline outline-none block break-all w-full"
                 >
                   {org}/{repo}
                 </a>
@@ -97,7 +99,7 @@ export default function RepoProfileCard({
       <CardContent>
         <div className="flex flex-col gap-3">
           <p className="text-sm">{description}</p>
-          <div className="flex flex-col items-start gap-4 md:flex-row md:items-center">
+          <div className="flex flex-col items-start gap-2 md:gap-4 md:flex-row md:items-center">
             <div className="flex flex-row gap-1 items-center">
               <Globe className="w-3 h-3 text-muted-foreground" />
               <a
