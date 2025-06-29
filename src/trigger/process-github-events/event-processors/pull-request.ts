@@ -179,6 +179,7 @@ export async function processPullRequestEvent({
         body: pull_request.body,
         html_url: pull_request.html_url,
         created_at: pull_request.created_at.toISOString(),
+        updated_at: pull_request.updated_at.toISOString(),
         ai_summary,
         requested_reviewers: pull_request.requested_reviewers,
         merged: pull_request.merged,

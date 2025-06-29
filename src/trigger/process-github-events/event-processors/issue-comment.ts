@@ -37,6 +37,7 @@ const issueCommentSchema = z.object({
     body: z.string(),
     html_url: z.string(),
     created_at: z.coerce.date(),
+    updated_at: z.coerce.date(),
     author_association: z.enum([
       "COLLABORATOR",
       "CONTRIBUTOR",
@@ -68,7 +69,7 @@ export async function processIssueCommentEvent({
   const supabase = createClient();
 
   const validationResult = issueCommentSchema.parse(event.raw_payload);
-  const { action, issue } = validationResult;
+  const { action, issue, comment } = validationResult;
 
   const octokit = new Octokit({ auth: repo.access_token || undefined });
 
@@ -76,7 +77,10 @@ export async function processIssueCommentEvent({
     octokit,
     repo,
     action,
-    issue,
+    issue: {
+      ...issue,
+      updated_at: new Date(comment.updated_at),
+    },
   });
 
   const dedupeHash = crypto
