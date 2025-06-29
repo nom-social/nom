@@ -3,7 +3,7 @@ import type { Preview } from "@storybook/nextjs-vite";
 import { JetBrains_Mono } from "next/font/google";
 
 import "../src/app/globals.css";
-import { ThemeProvider } from "../src/components/theme-provider";
+import { ThemeProvider } from "../src/components/layout/theme-provider";
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",

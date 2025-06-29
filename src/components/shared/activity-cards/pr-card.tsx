@@ -22,6 +22,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
+import { useShare } from "@/hooks/use-share";
 
 export type Props = {
   title: string;
@@ -36,6 +37,7 @@ export type Props = {
   liked: boolean;
   onLike?: () => void;
   onUnlike?: () => void;
+  id: string;
 };
 
 export default function PRCard({
@@ -51,6 +53,7 @@ export default function PRCard({
   liked,
   onLike,
   onUnlike,
+  id,
 }: Props) {
   const handleLikeClick = () => {
     if (liked) {
@@ -59,6 +62,7 @@ export default function PRCard({
       onLike?.();
     }
   };
+  const share = useShare();
 
   const formattedLikeCount =
     likeCount > 0
@@ -135,7 +139,16 @@ export default function PRCard({
               {formattedLikeCount}
             </Button>
           </div>
-          <Button variant="outline" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              share(
+                `${window.location.origin}/${org}/${repo}/status/${id}`,
+                title
+              )
+            }
+          >
             <ShareIcon className="size-4" />
             Share
           </Button>

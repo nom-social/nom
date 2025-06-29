@@ -22,6 +22,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
+import { useShare } from "@/hooks/use-share";
 
 type Props = {
   title: string;
@@ -36,6 +37,7 @@ type Props = {
   liked: boolean;
   onLike?: () => void;
   onUnlike?: () => void;
+  id: string;
 };
 
 export default function ReleaseCard({
@@ -51,6 +53,7 @@ export default function ReleaseCard({
   liked,
   onLike,
   onUnlike,
+  id,
 }: Props) {
   const handleLikeClick = () => {
     if (liked) {
@@ -59,6 +62,7 @@ export default function ReleaseCard({
       onLike?.();
     }
   };
+  const share = useShare();
   const formattedLikeCount =
     likeCount > 0
       ? new Intl.NumberFormat(undefined, {
@@ -132,7 +136,16 @@ export default function ReleaseCard({
             <HeartIcon className={liked ? "fill-red-500 text-red-500" : ""} />
             {formattedLikeCount}
           </Button>
-          <Button variant="outline" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              share(
+                `${window.location.origin}/${org}/${repo}/status/${id}`,
+                title
+              )
+            }
+          >
             <ShareIcon className="size-4" />
             Share
           </Button>

@@ -9,6 +9,7 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
+import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
 
@@ -35,6 +36,7 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="dark">
           <ReactQueryProvider>
+            <Toaster />
             <NavigationMenu className="w-full min-w-full py-2 bg-background fixed top-0 left-0 z-50 border-b border-border shadow-sm">
               <div className="max-w-3xl mx-auto w-full">
                 <NavigationMenuList className="justify-start">

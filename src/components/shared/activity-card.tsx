@@ -41,6 +41,7 @@ export default function ActivityCard({
         createdAt={new Date(parseResult.data.pull_request.created_at)}
         likeCount={0}
         liked={false}
+        id={item.id}
       />
     );
   }
@@ -66,6 +67,7 @@ export default function ActivityCard({
         createdAt={new Date(parseResult.data.issue.created_at)}
         likeCount={0}
         liked={false}
+        id={item.id}
       />
     );
   }
@@ -96,6 +98,7 @@ export default function ActivityCard({
         body={release.ai_summary}
         likeCount={0}
         liked={false}
+        id={item.id}
       />
     );
   }
