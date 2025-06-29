@@ -62,6 +62,7 @@ export default function RepoProfileCard({
   } = useQuery({
     queryKey: [isSubscribed, org, repo],
     queryFn: () => isSubscribed(org, repo),
+    refetchOnWindowFocus: false,
   });
 
   const handleSubscribe = async () => {
