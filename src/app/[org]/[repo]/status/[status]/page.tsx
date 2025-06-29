@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import React from "react";
 
+import ActivityCard from "@/components/activity-card";
+
 import { fetchFeedItem } from "./page/actions";
-import FeedItem from "./page/feed-item";
 
 export default async function StatusPage({
   params,
@@ -20,7 +21,7 @@ export default async function StatusPage({
 
   return (
     <div className="flex flex-col justify-center gap-4 px-2">
-      <FeedItem item={statusItem} repo={repo} org={org} />
+      <ActivityCard item={statusItem} repo={repo} org={org} />
     </div>
   );
 }

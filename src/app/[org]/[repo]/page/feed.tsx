@@ -4,7 +4,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import FeedItem from "@/app/[org]/[repo]/status/[status]/page/feed-item";
+import ActivityCard from "@/components/activity-card";
 
 import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
 
@@ -63,7 +63,7 @@ export default function Feed({
         <div className="text-muted-foreground">No activity yet.</div>
       )}
       {items.map((item) => (
-        <FeedItem key={item.id} item={item} repo={repo} org={org} />
+        <ActivityCard key={item.id} item={item} repo={repo} org={org} />
       ))}
       {hasNextPage && (
         <Button

@@ -8,12 +8,12 @@ import { issueDataSchema } from "@/components/activity-cards/shared/schemas";
 import { prDataSchema } from "@/components/activity-cards/shared/schemas";
 import { releaseDataSchema } from "@/components/activity-cards/shared/schemas";
 
-export default function FeedItem({
+export default function ActivityCard({
   item,
   repo,
   org,
 }: {
-  item: Tables<"public_timeline">;
+  item: Tables<"public_timeline"> | Tables<"user_timeline">;
   repo: string;
   org: string;
 }) {
