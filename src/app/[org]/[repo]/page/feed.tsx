@@ -160,6 +160,7 @@ export default function Feed({
             />
           );
         }
+        // TODO: Maybe not shown the status here
         if (item.type === "issue_comment") {
           const parseResult = issueCommentDataSchema.safeParse(item.data);
           if (!parseResult.success) {

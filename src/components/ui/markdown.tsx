@@ -54,6 +54,12 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
             {children}
           </a>
         ),
+        h1: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
+        h2: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
+        h3: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
+        h4: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
+        h5: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
+        h6: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
       }}
     >
       {children}
