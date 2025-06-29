@@ -18,6 +18,11 @@ import ContributorAvatarGroup, {
 import { Badge } from "@/components/ui/badge";
 import { Markdown } from "@/components/ui/markdown";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 
 export type Props = {
   title: string;
@@ -90,7 +95,7 @@ export default function IssueCard({
         </CardAction>
         <CardDescription>
           <div className="flex gap-2 flex-col">
-            <div className="text-muted-foreground text-sm">
+            <div className="text-muted-foreground text-xs">
               <a
                 href={`https://github.com/${org}/${repo}`}
                 target="_blank"
@@ -100,7 +105,18 @@ export default function IssueCard({
                 {org}/{repo}
               </a>
               {" • "}
-              {formatDistanceToNow(createdAt, { addSuffix: false })}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    {formatDistanceToNow(createdAt, { addSuffix: false })}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {createdAt instanceof Date
+                    ? createdAt.toLocaleString()
+                    : new Date(createdAt).toLocaleString()}
+                </TooltipContent>
+              </Tooltip>
             </div>
             <div className="flex items-center">
               <ContributorAvatarGroup contributors={contributors} />
