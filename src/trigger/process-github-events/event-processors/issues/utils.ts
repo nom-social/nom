@@ -20,6 +20,7 @@ export async function generateIssueData({
     body: string | null;
     user: { login: string };
     created_at: Date;
+    updated_at: Date;
     state: "open" | "closed";
     html_url: string;
     assignees: { login: string }[];
@@ -67,6 +68,7 @@ export async function generateIssueData({
       body: issue.body,
       html_url: issue.html_url,
       created_at: issue.created_at.toISOString(),
+      updated_at: issue.updated_at.toISOString(),
       assignees: issue.assignees,
       state: issue.state,
       contributors: [

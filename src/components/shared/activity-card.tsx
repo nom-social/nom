@@ -38,7 +38,7 @@ export default function ActivityCard({
         repo={repo}
         org={org}
         state={parseResult.data.pull_request.merged ? "merged" : "open"}
-        createdAt={new Date(parseResult.data.pull_request.created_at)}
+        createdAt={new Date(parseResult.data.pull_request.updated_at)}
         likeCount={0}
         liked={false}
         id={item.id}
@@ -64,7 +64,7 @@ export default function ActivityCard({
         repo={repo}
         org={org}
         state={parseResult.data.issue.state}
-        createdAt={new Date(parseResult.data.issue.created_at)}
+        createdAt={new Date(parseResult.data.issue.updated_at)}
         likeCount={0}
         liked={false}
         id={item.id}
