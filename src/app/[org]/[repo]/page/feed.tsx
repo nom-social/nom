@@ -134,13 +134,12 @@ export default function Feed({
             <ReleaseCard
               key={item.id}
               title={release.name || release.tag_name}
-              contributors={[
-                {
-                  name: release.author.login,
-                  avatar: `https://github.com/${release.author.login}.png`,
-                },
-              ]}
-              body={release.body || "No release notes provided."}
+              contributors={parseResult.data.release.contributors.map(
+                (login) => ({
+                  name: login,
+                  avatar: `https://github.com/${login}.png`,
+                })
+              )}
               releaseUrl={release.html_url}
               repo={repo}
               org={org}
@@ -150,7 +149,7 @@ export default function Feed({
                   ? new Date(release.published_at)
                   : new Date(release.created_at)
               }
-              aiAnalysis={release.ai_analysis || undefined}
+              aiSummary={release.ai_summary}
               likeCount={0}
               liked={false}
             />

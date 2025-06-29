@@ -21,18 +21,12 @@ import { Button } from "@/components/ui/button";
 type Props = {
   title: string;
   contributors: Contributor[];
-  body: string;
   releaseUrl: string;
   repo: string;
   org: string;
   tagName: string;
   publishedAt: Date;
-  aiAnalysis?: {
-    summary?: string;
-    breaking_changes?: string[];
-    notable_additions?: string[];
-    migration_notes?: string[];
-  };
+  aiSummary: string;
   likeCount: number;
   liked: boolean;
   onLike?: () => void;
@@ -42,13 +36,12 @@ type Props = {
 export default function ReleaseCard({
   title,
   contributors,
-  body,
   releaseUrl,
   repo,
   org,
   tagName,
   publishedAt,
-  aiAnalysis,
+  aiSummary,
   likeCount,
   liked,
   onLike,
@@ -109,7 +102,7 @@ export default function ReleaseCard({
       </CardHeader>
       <CardContent>
         <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none font-normal text-sm">
-          <Markdown>{aiAnalysis?.summary || body}</Markdown>
+          <Markdown>{aiSummary}</Markdown>
         </div>
       </CardContent>
       <CardFooter>
