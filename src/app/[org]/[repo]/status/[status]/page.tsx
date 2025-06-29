@@ -54,9 +54,9 @@ export default async function StatusPage({
 export async function generateMetadata({
   params,
 }: {
-  params: { org: string; repo: string; status: string };
+  params: Promise<{ org: string; repo: string; status: string }>;
 }): Promise<Metadata> {
-  const { org, repo, status } = params;
+  const { org, repo, status } = await params;
   const statusItem = await fetchFeedItem({
     org,
     repo,
