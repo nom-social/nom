@@ -26,7 +26,6 @@ export async function fetchFeedPage({
     .select("*")
     .eq("repo_id", repoId)
     .order("updated_at", { ascending: false })
-    .order("score", { ascending: false })
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
