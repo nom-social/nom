@@ -33,6 +33,7 @@ export const prDataSchema = z.object({
       .nullable(),
     requested_reviewers: z.array(z.object({ login: z.string() })).optional(),
     merged: z.boolean(),
+    commit_authors: z.array(z.string()).optional(),
   }),
 });
 

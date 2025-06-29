@@ -71,7 +71,7 @@ export async function processPullRequestEvent({
   const { action, pull_request } = validationResult;
 
   const constructPRData = async () => {
-    const [combinedDiff, checks] = await Promise.all([
+    const [combinedDiff, checks, commits] = await Promise.all([
       getProcessedPullRequestDiff(
         octokit,
         { org: repo.org, repo: repo.repo },
@@ -81,6 +81,11 @@ export async function processPullRequestEvent({
         owner: repo.org,
         repo: repo.repo,
         ref: pull_request.head.sha,
+      }),
+      octokit.pulls.listCommits({
+        owner: repo.org,
+        repo: repo.repo,
+        pull_number: pull_request.number,
       }),
     ]);
 
@@ -180,6 +185,13 @@ export async function processPullRequestEvent({
         ai_analysis: completion.choices[0].message.parsed,
         requested_reviewers: pull_request.requested_reviewers,
         merged: pull_request.merged,
+        commit_authors: [
+          ...new Set(
+            commits.data
+              .map((commit) => commit.author?.login)
+              .filter((login): login is string => Boolean(login))
+          ),
+        ],
       },
     };
 

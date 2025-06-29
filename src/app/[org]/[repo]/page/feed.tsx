@@ -1,6 +1,7 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { uniqueBy } from "remeda";
 
 import PRCard from "@/components/activity-cards/pr-card";
 import { prDataSchema } from "@/components/activity-cards/shared/schemas";
@@ -64,13 +65,25 @@ export default function Feed({
             <PRCard
               key={item.id}
               title={parseResult.data.pull_request.title}
-              contributors={[
-                // TODO: See if there's a way to fetch other contributors to a PR as well?
-                {
-                  name: parseResult.data.pull_request.user.login,
-                  avatar: `https://github.com/${parseResult.data.pull_request.user.login}.png`,
-                },
-              ]}
+              contributors={uniqueBy(
+                [
+                  {
+                    name: parseResult.data.pull_request.user.login,
+                    avatar: `https://github.com/${parseResult.data.pull_request.user.login}.png`,
+                  },
+                  ...(
+                    parseResult.data.pull_request.commit_authors
+                      ?.filter(
+                        (login) => login !== parseResult.data.pull_request.user.login
+                      )
+                      .map((login) => ({
+                        name: login,
+                        avatar: `https://github.com/${login}.png`,
+                      })) || []
+                  ),
+                ],
+                (contributor: { name: string; avatar: string }) => contributor.name
+              )}
               body={
                 parseResult.data.pull_request.body ||
                 parseResult.data.pull_request.ai_analysis?.summary ||
