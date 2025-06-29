@@ -1,42 +1,12 @@
-import { z } from "zod";
 import crypto from "crypto";
 import { Octokit } from "@octokit/rest";
 
 import { Json, TablesInsert } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/background";
-import { IssueData } from "@/components/activity-cards/shared/schemas";
-import * as openai from "@/utils/openai/client";
 
 import { BASELINE_SCORE, ISSUE_MULTIPLIER } from "./shared/constants";
-import { ISSUE_SUMMARY_PROMPT } from "./issues/prompts";
-
-const issueSchema = z.object({
-  action: z.enum(["opened", "closed", "reopened", "assigned", "edited"]),
-  issue: z.object({
-    number: z.number(),
-    title: z.string(),
-    body: z.string().nullable(),
-    html_url: z.string(),
-    created_at: z.coerce.date(),
-    updated_at: z.coerce.date(),
-    state: z.enum(["open", "closed"]),
-    user: z.object({ login: z.string() }),
-    author_association: z.enum([
-      "COLLABORATOR",
-      "CONTRIBUTOR",
-      "FIRST_TIMER",
-      "FIRST_TIME_CONTRIBUTOR",
-      "MANNEQUIN",
-      "MEMBER",
-      "NONE",
-      "OWNER",
-    ]),
-    assignee: z.object({ login: z.string() }).nullable(),
-    assignees: z.array(z.object({ login: z.string() })),
-    labels: z.array(z.object({ name: z.string() })),
-    comments: z.number(),
-  }),
-});
+import { issueSchema } from "./issues/schemas";
+import { generateIssueData } from "./issues/utils";
 
 export async function processIssueEvent({
   event,
@@ -55,64 +25,16 @@ export async function processIssueEvent({
   const supabase = createClient();
 
   const validationResult = issueSchema.parse(event.raw_payload);
-  const { action, issue } = validationResult;
+  const { issue } = validationResult;
 
   const octokit = new Octokit({ auth: repo.access_token || undefined });
-  const comments = await octokit.paginate(octokit.issues.listComments, {
-    owner: repo.org,
-    repo: repo.repo,
-    issue_number: issue.number,
-    per_page: 100,
+
+  const issueData = await generateIssueData({
+    octokit,
+    repo,
+    action: validationResult.action,
+    issue,
   });
-
-  // Generate AI summary for the issue and its comments
-  const openaiClient = openai.createClient();
-  const commentsText = comments
-    .map((c) => `- ${c.user?.login}: ${c.body}`)
-    .join("\n");
-  const prompt = ISSUE_SUMMARY_PROMPT.replace("{title}", issue.title)
-    .replace("{author}", issue.user.login)
-    .replace("{body}", issue.body || "No description provided")
-    .replace("{comments}", commentsText || "No comments");
-
-  const completion = await openaiClient.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are a helpful assistant that summarizes GitHub issues and their discussions for a timeline feed.",
-      },
-      { role: "user", content: prompt },
-    ],
-  });
-  const ai_summary = completion.choices[0].message.content;
-  if (!ai_summary) {
-    throw new Error("Failed to generate AI summary for issue");
-  }
-
-  const issueData: IssueData = {
-    action,
-    issue: {
-      user: { login: issue.user.login },
-      number: issue.number,
-      title: issue.title,
-      body: issue.body,
-      html_url: issue.html_url,
-      created_at: issue.created_at.toISOString(),
-      assignees: issue.assignees,
-      state: issue.state,
-      contributors: [
-        ...new Set([
-          issue.user.login,
-          ...comments
-            .map((comment) => comment.user?.login)
-            .filter((login): login is string => Boolean(login)),
-        ]),
-      ],
-      ai_summary,
-    },
-  };
 
   const dedupeHash = crypto
     .createHash("sha256")

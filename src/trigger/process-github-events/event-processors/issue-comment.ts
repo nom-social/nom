@@ -1,11 +1,12 @@
 import { Json } from "@trigger.dev/sdk";
 import crypto from "crypto";
 import z from "zod";
+import { Octokit } from "@octokit/rest";
 
 import { createClient } from "@/utils/supabase/background";
 import { TablesInsert } from "@/types/supabase";
-import { IssueCommentData } from "@/components/activity-cards/shared/schemas";
 
+import { generateIssueData } from "./issues/utils";
 import { BASELINE_SCORE, ISSUE_MULTIPLIER } from "./shared/constants";
 
 const issueCommentSchema = z.object({
@@ -67,43 +68,31 @@ export async function processIssueCommentEvent({
   const supabase = createClient();
 
   const validationResult = issueCommentSchema.parse(event.raw_payload);
-  const { action, issue, comment } = validationResult;
+  const { action, issue } = validationResult;
+
+  const octokit = new Octokit({ auth: repo.access_token || undefined });
+
+  const issueData = await generateIssueData({
+    octokit,
+    repo,
+    action,
+    issue,
+  });
 
   const dedupeHash = crypto
     .createHash("sha256")
     .update(
       JSON.stringify({
         number: issue.number,
-        comment_id: comment.id,
         org: repo.org,
         repo: repo.repo,
-        type: "issue_comment",
+        type: "issue",
       })
     )
     .digest("hex");
 
-  const issueData: IssueCommentData = {
-    action,
-    issue: {
-      number: issue.number,
-      title: issue.title,
-      user: { login: issue.user.login },
-      state: issue.state,
-      html_url: issue.html_url,
-      body: issue.body,
-      created_at: issue.created_at.toISOString(),
-      assignees: issue.assignees,
-    },
-    comment: {
-      user: { login: comment.user.login },
-      body: comment.body,
-      html_url: comment.html_url,
-      created_at: comment.created_at.toISOString(),
-    },
-  };
-
   const timelineEntry = {
-    type: "issue_comment",
+    type: "issue",
     data: issueData,
     repo_id: repo.id,
     score: BASELINE_SCORE * ISSUE_MULTIPLIER,
@@ -126,7 +115,9 @@ export async function processIssueCommentEvent({
     const isAssignedToMe = issue.assignees.some(
       (assignee) => assignee.login === user.github_username
     );
-    const isMyComment = user.github_username === comment.user.login;
+    // For comments, also check if the user is the commenter
+    const isMyComment =
+      validationResult.comment?.user?.login === user.github_username;
 
     userTimelineEntries.push({
       user_id: subscriber.user_id,
