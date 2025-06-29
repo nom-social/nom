@@ -54,7 +54,7 @@ export const updateRepoMetadata = schedules.task({
           avatar_url: `https://github.com/${repo.org}.png`,
           description: repoData.description || null,
           created_at: repoData.created_at || null,
-          homepage: repoData.homepage || null,
+          homepage_url: repoData.homepage || null,
           languages,
           license: repoData.license?.spdx_id || repoData.license?.name || null,
         };

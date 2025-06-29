@@ -21,7 +21,7 @@ type Props = {
   avatarUrl: string;
   topLanguages: {
     name: string;
-    color: string;
+    color: string | null;
   }[];
   license: string;
 };
@@ -65,10 +65,14 @@ export default function RepoProfileCard({
                     key={language.name}
                     variant="outline"
                     className="border"
-                    style={{
-                      borderColor: language.color,
-                      color: language.color,
-                    }}
+                    style={
+                      language.color
+                        ? {
+                            borderColor: language.color,
+                            color: language.color,
+                          }
+                        : {}
+                    }
                   >
                     {language.name}
                   </Badge>
