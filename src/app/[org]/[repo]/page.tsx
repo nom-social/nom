@@ -15,7 +15,7 @@ export default async function RepoPage({ params }: Props) {
   if (!repoProfile) return notFound();
 
   return (
-    <div className="flex flex-col justify-center gap-4">
+    <div className="flex flex-col justify-center gap-4 px-2">
       <RepoProfileCard
         org={org}
         repo={repo}
