@@ -1,9 +1,11 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 
 import PRCard from "@/components/activity-cards/pr-card";
 import { prDataSchema } from "@/components/activity-cards/shared/schemas";
+import { Button } from "@/components/ui/button";
 
 import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
 
@@ -97,15 +99,16 @@ export default function Feed({
         // TODO: Add support for IssueCard, ReleaseCard, etc.
         return null;
       })}
-      {/* TODO: add better infinite loader */}
       {hasNextPage && (
-        <button
-          className="mt-4 px-4 py-2 rounded bg-primary text-primary-foreground"
+        <Button
           onClick={() => fetchNextPage()}
           disabled={isFetchingNextPage}
+          variant="ghost"
+          className="mb-4"
         >
-          {isFetchingNextPage ? "Loading more..." : "Load More"}
-        </button>
+          {isFetchingNextPage ? <Loader2 className="animate-spin" /> : null}{" "}
+          Load more
+        </Button>
       )}
     </div>
   );
