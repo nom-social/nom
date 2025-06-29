@@ -102,11 +102,10 @@ export default function Feed({
         }
         if (item.type === "issue") {
           const parseResult = issueDataSchema.safeParse(item.data);
-          console.log("🚀 ~ {items.map ~ parseResult:", parseResult.error);
-
           if (!parseResult.success) {
             return null;
           }
+
           return (
             <IssueCard
               key={item.id}
