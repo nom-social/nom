@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import RepoProfileCard from "@/components/[org]/[repo]/repo-profile-card";
 
 import { fetchRepoProfile } from "./actions";
+import { Separator } from "@/components/ui/separator";
 
 type Props = {
   params: { org: string; repo: string };
@@ -26,6 +27,11 @@ export default async function RepoPage({ params }: Props) {
         topLanguages={repoProfile.topLanguages.slice(0, 3)}
         license={repoProfile.license}
       />
+
+      <div className="flex flex-row gap-2 items-center">
+        <p className="text-muted-foreground text-xs">Recent activities</p>
+        <Separator className="flex-1" />
+      </div>
     </div>
   );
 }
