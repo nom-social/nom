@@ -57,7 +57,7 @@ export default function RepoProfileCard({
                 {Intl.NumberFormat("en", { notation: "compact" }).format(
                   subscriptionCount
                 )}{" "}
-                Subscriber{subscriptionCount === 1 ? "" : "s"}
+                subscriber{subscriptionCount === 1 ? "" : "s"}
               </div>
               <div className="flex flex-row flex-wrap gap-1 sm:gap-2 items-center">
                 <Badge variant="outline">Public</Badge>
