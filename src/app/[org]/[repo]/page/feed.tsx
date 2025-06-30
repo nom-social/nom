@@ -46,20 +46,22 @@ export default function Feed({
     initialPageParam: 0,
   });
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError)
-    return (
-      <div>
-        Error: {error instanceof Error ? error.message : "Unknown error"}
-      </div>
-    );
-
   const items = data?.pages.flatMap((page) => page.items) ?? [];
 
   return (
     <div className="flex flex-col gap-4">
-      {items.length === 0 && (
+      {items.length === 0 && !isLoading && (
         <div className="text-muted-foreground">No activity yet.</div>
+      )}
+      {isError && (
+        <div className="text-muted-foreground">
+          Error: {error instanceof Error ? error.message : "Unknown error"}
+        </div>
+      )}
+      {isLoading && (
+        <div className="flex flex-row items-center gap-2 text-muted-foreground">
+          <Loader className="animate-spin w-4 h-4" /> Loading...
+        </div>
       )}
       {items.map((item) => (
         <ActivityCard key={item.id} item={item} repo={repo} org={org} />
