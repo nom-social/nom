@@ -1,7 +1,12 @@
-import { Calendar, Globe, Scale, UserPlus } from "lucide-react";
-import { format } from "date-fns";
+"use client";
 
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { Calendar, Github, Globe, Scale } from "lucide-react";
+import { format } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
 import {
   Card,
   CardAction,
@@ -12,8 +17,15 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
+import {
+  createSubscription,
+  isSubscribed,
+  NotAuthenticatedError,
+  removeSubscription,
+} from "./repo-profile-card/actions";
 import ShareButton from "./repo-profile-card/share-button";
 import ShareButtonMobile from "./repo-profile-card/share-button-mobile";
+import SubscribeButton from "./repo-profile-card/subscribe-button";
 
 type Props = {
   org: string;
@@ -27,6 +39,7 @@ type Props = {
     color: string | null;
   }[];
   license: string;
+  initialSubscriptionCount: number;
 };
 
 export default function RepoProfileCard({
@@ -38,7 +51,65 @@ export default function RepoProfileCard({
   avatarUrl,
   topLanguages,
   license,
+  initialSubscriptionCount,
 }: Props) {
+  const [subscriptionCount, setSubscriptionCount] = useState(
+    initialSubscriptionCount
+  );
+
+  const {
+    data: subscribedData,
+    isLoading,
+    refetch,
+    isRefetching,
+  } = useQuery({
+    queryKey: [isSubscribed.key, org, repo],
+    queryFn: () => isSubscribed(org, repo),
+    refetchOnWindowFocus: false,
+  });
+
+  const router = useRouter();
+
+  const handleSubscribe = async () => {
+    try {
+      await createSubscription(org, repo);
+    } catch (error) {
+      if (error instanceof NotAuthenticatedError)
+        router.push(
+          `/auth/login?next=${encodeURIComponent(window.location.pathname)}`
+        );
+      return;
+    }
+    setSubscriptionCount((prev) => prev + 1);
+    await refetch();
+    toast.success(
+      `🔥 YOOO! Welcome to ${repo}! You just joined ${Intl.NumberFormat("en", {
+        notation: "compact",
+      }).format(initialSubscriptionCount)} dev${
+        initialSubscriptionCount === 1 ? "" : "s"
+      } building the future! LFG! 🚀`,
+      { icon: null }
+    );
+  };
+
+  const handleUnsubscribe = async () => {
+    try {
+      await removeSubscription(org, repo);
+    } catch (error) {
+      if (error instanceof NotAuthenticatedError)
+        router.push(
+          `/auth/login?next=${encodeURIComponent(window.location.pathname)}`
+        );
+      return;
+    }
+    setSubscriptionCount((prev) => prev - 1);
+    await refetch();
+    toast(
+      "💔 NOOO! We're literally crying! You're breaking our heart but we respect your choice. " +
+        "We'll miss you! 😭"
+    );
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -52,14 +123,10 @@ export default function RepoProfileCard({
                 {repo}
               </p>
               <div className="text-muted-foreground text-sm w-full">
-                <a
-                  href={`https://github.com/${org}/${repo}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline focus:underline outline-none block break-all w-full"
-                >
-                  {org}/{repo}
-                </a>
+                {Intl.NumberFormat("en", { notation: "compact" }).format(
+                  subscriptionCount
+                )}{" "}
+                subscriber{subscriptionCount === 1 ? "" : "s"}
               </div>
               <div className="flex flex-row flex-wrap gap-1 sm:gap-2 items-center">
                 <Badge variant="outline">Public</Badge>
@@ -86,10 +153,13 @@ export default function RepoProfileCard({
         </CardTitle>
         <CardAction>
           <div className="flex flex-row gap-2">
-            <Button className="hidden md:flex bg-[var(--nom-purple)] text-white hover:bg-[var(--nom-purple)]/90">
-              <UserPlus />
-              Subscribe
-            </Button>
+            <SubscribeButton
+              isSubscribed={subscribedData?.subscribed ?? false}
+              className="hidden md:flex"
+              onSubscribe={handleSubscribe}
+              onUnsubscribe={handleUnsubscribe}
+              isLoading={isLoading || isRefetching}
+            />
 
             <ShareButton org={org} repo={repo} />
           </div>
@@ -122,11 +192,27 @@ export default function RepoProfileCard({
               <Scale className="w-3 h-3 text-muted-foreground" />
               <p className="text-xs text-muted-foreground">{license} license</p>
             </div>
+
+            <div className="flex flex-row gap-1 items-center">
+              <Github className="w-3 h-3 text-muted-foreground" />
+              <a
+                href={`https://github.com/${org}/${repo}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline focus:underline outline-none text-xs text-muted-foreground"
+              >
+                {org}/{repo}
+              </a>
+            </div>
           </div>
-          <Button className="flex md:hidden bg-[var(--nom-purple)] text-white hover:bg-[var(--nom-purple)]/90">
-            <UserPlus />
-            Subscribe
-          </Button>
+
+          <SubscribeButton
+            isSubscribed={subscribedData?.subscribed ?? false}
+            className="flex md:hidden"
+            onSubscribe={handleSubscribe}
+            onUnsubscribe={handleUnsubscribe}
+            isLoading={isLoading || isRefetching}
+          />
 
           <ShareButtonMobile org={org} repo={repo} />
         </div>

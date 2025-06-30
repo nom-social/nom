@@ -28,6 +28,7 @@ export default async function RepoPage({
         avatarUrl={repoProfile.avatarUrl}
         topLanguages={repoProfile.topLanguages.slice(0, 3)}
         license={repoProfile.license}
+        initialSubscriptionCount={repoProfile.subscriptionCount}
       />
 
       <div className="flex flex-row gap-2 items-center">

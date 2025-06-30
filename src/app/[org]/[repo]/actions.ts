@@ -27,6 +27,11 @@ export async function fetchRepoProfile(org: string, repo: string) {
     .eq("repo", repo)
     .single();
 
+  const { count: subscriptionCount } = await supabase
+    .from("subscriptions")
+    .select("*", { count: "exact", head: true })
+    .eq("repo_id", data?.id || "");
+
   if (!data) {
     return null;
   }
@@ -47,5 +52,6 @@ export async function fetchRepoProfile(org: string, repo: string) {
     topLanguages: meta.languages,
     license: meta.license,
     id: data.id,
+    subscriptionCount: subscriptionCount || 0,
   };
 }

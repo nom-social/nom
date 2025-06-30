@@ -48,5 +48,6 @@ export const Default: Story = {
       { name: "CSS", color: "#563d7c" },
     ],
     license: "MIT",
+    initialSubscriptionCount: 1_200,
   },
 };
