@@ -162,7 +162,6 @@ export async function processPullRequestEvent({
         },
         { role: "user", content: prompt },
       ],
-      temperature: 0.7,
     });
 
     const ai_summary = completion.choices[0].message.content;
