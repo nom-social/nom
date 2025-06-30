@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tables } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/client";
+import Link from "next/link";
 
 type Props = {
   user: Tables<"users">;
@@ -37,6 +38,11 @@ export default function DropdownContent({ user }: Props) {
         </div>
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
+
+      <Link href="/">
+        <DropdownMenuItem className="cursor-pointer">Home</DropdownMenuItem>
+      </Link>
+
       <DropdownMenuItem
         className="cursor-pointer"
         variant="destructive"

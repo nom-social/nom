@@ -66,7 +66,7 @@ export async function syncUserStars(userId: string) {
 
     // Batch fetch all matching repositories using OR conditions for exact pairs
     const { data: matchingRepos } = await supabase
-      .from("public_repository_data")
+      .from("repositories")
       .select("id, org, repo")
       .or(
         starredRepos

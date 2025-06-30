@@ -19,7 +19,7 @@ export async function fetchFeedItem({
   const supabase = createClient(cookies());
 
   const { data: repoData } = await supabase
-    .from("public_repository_data")
+    .from("repositories")
     .select("*")
     .eq("repo", repo)
     .eq("org", org)
