@@ -34,7 +34,7 @@ export type Props = {
   org: string;
   state: "open" | "closed";
   createdAt: Date;
-  likeCount: number;
+  likeCount: number | null;
   liked: boolean;
   onLike?: () => void;
   onUnlike?: () => void;
@@ -65,11 +65,11 @@ export default function IssueCard({
   };
   const share = useShare();
   const formattedLikeCount =
-    likeCount > 0
+    likeCount !== null
       ? new Intl.NumberFormat(undefined, {
           notation: "compact",
         }).format(likeCount)
-      : "0";
+      : "--";
 
   return (
     <Card className="w-full">

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import PRCard from "@/components/shared/activity-cards/pr-card";
 import IssueCard from "@/components/shared/activity-cards/issue-card";
@@ -17,6 +17,7 @@ import {
   createLike,
   deleteLike,
   NotAuthenticatedError,
+  getLikeCount,
 } from "./activity-card/actions";
 
 export default function ActivityCard({
@@ -29,7 +30,7 @@ export default function ActivityCard({
   org: string;
 }) {
   const router = useRouter();
-  const [likeCount, setLikeCount] = useState(0);
+  const [likeCount, setLikeCount] = useState<number | null>(null);
   // Query for like state
   const { data: likeData, refetch: refetchLike } = useQuery({
     queryKey: [isLiked.key, item.dedupe_hash],
@@ -37,11 +38,17 @@ export default function ActivityCard({
     refetchOnWindowFocus: false,
   });
 
+  const getLikeCountQuery = useQuery({
+    queryKey: [getLikeCount.key, item.dedupe_hash],
+    queryFn: () => getLikeCount(item.dedupe_hash),
+    refetchOnWindowFocus: false,
+  });
+
   const likeMutation = useMutation({
     mutationFn: () => createLike(item.dedupe_hash),
     onSuccess: async () => {
       await refetchLike();
-      setLikeCount((prev) => prev + 1);
+      setLikeCount((prev) => (prev ?? 0) + 1);
       toast.success("🔥 Liked!", { icon: null });
     },
     onError: (error) => {
@@ -56,7 +63,7 @@ export default function ActivityCard({
     mutationFn: () => deleteLike(item.dedupe_hash),
     onSuccess: async () => {
       await refetchLike();
-      setLikeCount((prev) => prev - 1);
+      setLikeCount((prev) => (prev ?? 0) - 1);
       toast("💔 Un-liked!");
     },
     onError: (error) => {
@@ -66,6 +73,11 @@ export default function ActivityCard({
         );
     },
   });
+
+  useEffect(() => {
+    if (getLikeCountQuery.data !== undefined)
+      setLikeCount(getLikeCountQuery.data);
+  }, [getLikeCountQuery.data]);
 
   const liked = likeData?.liked ?? false;
 

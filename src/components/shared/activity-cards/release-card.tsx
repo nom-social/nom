@@ -33,7 +33,7 @@ type Props = {
   tagName: string;
   publishedAt: Date;
   body: string;
-  likeCount: number;
+  likeCount: number | null;
   liked: boolean;
   onLike?: () => void;
   onUnlike?: () => void;
@@ -64,11 +64,11 @@ export default function ReleaseCard({
   };
   const share = useShare();
   const formattedLikeCount =
-    likeCount > 0
+    likeCount !== null
       ? new Intl.NumberFormat(undefined, {
           notation: "compact",
         }).format(likeCount)
-      : "0";
+      : "--";
 
   return (
     <Card className="w-full">

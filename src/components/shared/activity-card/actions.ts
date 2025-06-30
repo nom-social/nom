@@ -57,3 +57,16 @@ export async function deleteLike(dedupe_hash: string) {
     .eq("dedupe_hash", dedupe_hash)
     .throwOnError();
 }
+
+export async function getLikeCount(dedupe_hash: string) {
+  const supabase = createClient();
+  const { count } = await supabase
+    .from("timeline_likes")
+    .select("id", { count: "exact", head: true })
+    .eq("dedupe_hash", dedupe_hash)
+    .throwOnError();
+
+  return count ?? 0;
+}
+
+getLikeCount.key = "src/components/shared/activity-card/actions/getLikeCount";
