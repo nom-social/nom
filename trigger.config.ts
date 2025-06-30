@@ -26,8 +26,8 @@ export default defineConfig({
     extensions: [
       esbuildPlugin(
         sentryEsbuildPlugin({
-          org: process.env.SENTRY_ORG, // Set this in your env or replace with your org slug
-          project: process.env.SENTRY_PROJECT, // Set this in your env or replace with your project slug
+          org: "nom-zu",
+          project: "nom",
           authToken: process.env.SENTRY_AUTH_TOKEN,
         }),
         { placement: "last", target: "deploy" }
