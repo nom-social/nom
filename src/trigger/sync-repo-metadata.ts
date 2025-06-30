@@ -106,7 +106,7 @@ export const syncRepoMetadata = schedules.task({
 
         await supabase
           .from("repositories_secure")
-          .update({
+          .upsert({
             settings: {
               pull_request_summary_template: pullRequestTemplate,
               issue_summary_template: issueTemplate,

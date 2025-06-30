@@ -3,22 +3,14 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import ActivityCard from "@/components/shared/activity-card";
+import { Button } from "@/components/ui/button";
 
-import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
+import { fetchFeed } from "./feed/actions";
 
 const LIMIT = 10;
 
-export default function Feed({
-  repoId,
-  repo,
-  org,
-}: {
-  repoId: string;
-  repo: string;
-  org: string;
-}) {
+export default function Feed() {
   const {
     data,
     fetchNextPage,
@@ -27,16 +19,9 @@ export default function Feed({
     isLoading,
     isError,
     error,
-  } = useInfiniteQuery<FetchFeedPageResult, Error>({
-    queryKey: [fetchFeedPage.key, repoId],
-    queryFn: ({ pageParam }) => {
-      const offset = typeof pageParam === "number" ? pageParam : 0;
-      return fetchFeedPage({
-        repoId,
-        limit: LIMIT,
-        offset,
-      });
-    },
+  } = useInfiniteQuery({
+    queryKey: [fetchFeed.key],
+    queryFn: ({ pageParam }) => fetchFeed({ limit: LIMIT, offset: pageParam }),
     getNextPageParam: (lastPage, allPages) => {
       if (lastPage.hasMore) {
         return allPages.reduce((acc, page) => acc + page.items.length, 0);
@@ -61,9 +46,11 @@ export default function Feed({
       {items.length === 0 && (
         <div className="text-muted-foreground">No activity yet.</div>
       )}
-      {items.map((item) => (
-        <ActivityCard key={item.id} item={item} repo={repo} org={org} />
-      ))}
+      {items.map((item) => {
+        const org = item.repositories.org;
+        const repo = item.repositories.repo;
+        return <ActivityCard key={item.id} item={item} repo={repo} org={org} />;
+      })}
       {hasNextPage && (
         <Button
           onClick={() => fetchNextPage()}

@@ -25,7 +25,7 @@ export async function fetchFeed({
 
   const { data } = await supabase
     .from("user_timeline")
-    .select("*")
+    .select("*, repositories ( org, repo )")
     .eq("user_id", session.user.id)
     .order("updated_at", { ascending: false })
     .order("created_at", { ascending: false })
@@ -38,3 +38,5 @@ export async function fetchFeed({
 
   return { items, hasMore };
 }
+
+fetchFeed.key = "src/app/page/feed/actions/fetchFeed";

@@ -36,3 +36,5 @@ export async function fetchFeedPage({
 
   return { items, hasMore };
 }
+
+fetchFeedPage.key = "src/app/[org]/[repo]/page/feed/actions/fetchFeedPage";
