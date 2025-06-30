@@ -1,5 +1,5 @@
 import React from "react";
-import { ShareIcon, HeartIcon, CircleDot, CircleCheck } from "lucide-react";
+import { ShareIcon, CircleDot, CircleCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 
@@ -140,7 +140,19 @@ export default function IssueCard({
             onClick={handleLikeClick}
             size="sm"
           >
-            <HeartIcon className={liked ? "fill-red-500 text-red-500" : ""} />
+            <span
+              role="img"
+              aria-label={liked ? "Like issue" : "Unlike issue"}
+              style={{
+                opacity: liked ? 1 : 0.4,
+                fontSize: "1.25em",
+                transition: "opacity 0.2s",
+                marginRight: "0.25em",
+                verticalAlign: "middle",
+              }}
+            >
+              🚀
+            </span>
             {formattedLikeCount}
           </Button>
           <Button
