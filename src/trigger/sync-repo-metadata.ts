@@ -106,14 +106,17 @@ export const syncRepoMetadata = schedules.task({
 
         await supabase
           .from("repositories_secure")
-          .upsert({
-            settings: {
-              pull_request_summary_template: pullRequestTemplate,
-              issue_summary_template: issueTemplate,
-              release_summary_template: releaseTemplate,
+          .upsert(
+            {
+              settings: {
+                pull_request_summary_template: pullRequestTemplate,
+                issue_summary_template: issueTemplate,
+                release_summary_template: releaseTemplate,
+              },
+              id: repo.id,
             },
-          })
-          .eq("id", repo.id)
+            { onConflict: "id" }
+          )
           .throwOnError();
 
         logger.info("Updated metadata for repo", {
