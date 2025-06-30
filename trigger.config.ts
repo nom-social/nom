@@ -1,4 +1,7 @@
 import { defineConfig } from "@trigger.dev/sdk/v3";
+import { esbuildPlugin } from "@trigger.dev/build/extensions";
+import { sentryEsbuildPlugin } from "@sentry/esbuild-plugin";
+import * as Sentry from "@sentry/node";
 
 export default defineConfig({
   project: "proj_dbbjgfoapapbbywhkgjq",
@@ -19,4 +22,32 @@ export default defineConfig({
     },
   },
   dirs: ["./src/trigger"],
+  build: {
+    extensions: [
+      esbuildPlugin(
+        sentryEsbuildPlugin({
+          org: process.env.SENTRY_ORG, // Set this in your env or replace with your org slug
+          project: process.env.SENTRY_PROJECT, // Set this in your env or replace with your project slug
+          authToken: process.env.SENTRY_AUTH_TOKEN,
+        }),
+        { placement: "last", target: "deploy" }
+      ),
+    ],
+  },
+  init: async () => {
+    Sentry.init({
+      defaultIntegrations: false,
+      dsn: process.env.SENTRY_DSN,
+      environment:
+        process.env.NODE_ENV === "production" ? "production" : "development",
+    });
+  },
+  onFailure: async (payload, error, { ctx }) => {
+    Sentry.captureException(error, {
+      extra: {
+        payload,
+        ctx,
+      },
+    });
+  },
 });
