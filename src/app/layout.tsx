@@ -12,6 +12,7 @@ import {
 import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
+import ProfileDropdown from "./layout/profile-dropdown";
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
@@ -46,7 +47,7 @@ export default function RootLayout({
             <Toaster />
             <NavigationMenu className="w-full min-w-full py-2 bg-background fixed top-0 left-0 z-50 border-b border-border shadow-sm">
               <div className="max-w-3xl mx-auto w-full">
-                <NavigationMenuList className="justify-start">
+                <NavigationMenuList className="justify-between items-center">
                   <NavigationMenuItem>
                     <NavigationMenuLink
                       href="/"
@@ -55,6 +56,8 @@ export default function RootLayout({
                       NOM
                     </NavigationMenuLink>
                   </NavigationMenuItem>
+
+                  <ProfileDropdown />
                 </NavigationMenuList>
               </div>
             </NavigationMenu>
