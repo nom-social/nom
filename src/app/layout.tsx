@@ -40,7 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${jetbrainsMono.variable} ${jersey15.variable} font-mono antialiased min-h-screen`}
+        className={`${jetbrainsMono.variable} ${jersey15.variable} font-mono antialiased min-h-screen overflow-y-scroll`}
       >
         <ThemeProvider attribute="class" defaultTheme="dark">
           <ReactQueryProvider>
