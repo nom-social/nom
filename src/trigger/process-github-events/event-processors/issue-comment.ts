@@ -1,10 +1,9 @@
-import { Json } from "@trigger.dev/sdk";
 import crypto from "crypto";
 import z from "zod";
 import { Octokit } from "@octokit/rest";
 
 import { createClient } from "@/utils/supabase/background";
-import { TablesInsert } from "@/types/supabase";
+import { Json, TablesInsert } from "@/types/supabase";
 
 import { generateIssueData } from "./issues/utils";
 import { BASELINE_SCORE, ISSUE_MULTIPLIER } from "./shared/constants";
@@ -59,7 +58,13 @@ export async function processIssueCommentEvent({
   currentTimestamp,
 }: {
   event: { event_type: string; raw_payload: Json; id: string };
-  repo: { repo: string; org: string; id: string; access_token?: string | null };
+  repo: {
+    repo: string;
+    org: string;
+    id: string;
+    settings: Json | null;
+    access_token?: string | null;
+  };
   subscribers: { user_id: string }[];
   currentTimestamp: string;
 }): Promise<{
