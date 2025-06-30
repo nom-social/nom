@@ -45,7 +45,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="dark">
           <ReactQueryProvider>
             <Toaster />
-            <NavigationMenu className="w-full min-w-full py-2 bg-background fixed top-0 left-0 z-50 border-b border-border shadow-sm">
+            <NavigationMenu className="w-full min-w-full bg-background fixed top-0 left-0 z-50 border-b border-border shadow-sm p-2">
               <div className="max-w-3xl mx-auto w-full">
                 <NavigationMenuList className="justify-between items-center">
                   <NavigationMenuItem>
