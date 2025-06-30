@@ -178,8 +178,6 @@ export async function processPullRequestEvent({
       .replace("{commit_messages}", commitMessagesText)
       .replace("{pr_reviews}", reviewsText);
 
-    console.log("🚀 ~ constructPRData ~ prompt:", prompt);
-
     const completion = await openaiClient.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
