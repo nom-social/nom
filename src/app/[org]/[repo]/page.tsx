@@ -18,7 +18,7 @@ export default async function RepoPage({
   if (!repoProfile) return notFound();
 
   return (
-    <div className="flex flex-col justify-center gap-4 px-2">
+    <main className="flex flex-col justify-center gap-4 px-2">
       <RepoProfileCard
         org={org}
         repo={repo}
@@ -37,7 +37,7 @@ export default async function RepoPage({
       </div>
 
       <Feed repoId={repoProfile.id} repo={repo} org={org} />
-    </div>
+    </main>
   );
 }
 

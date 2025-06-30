@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono } from "next/font/google";
+import { JetBrains_Mono, Jersey_15 } from "next/font/google";
 
 import ReactQueryProvider from "@/components/layout/react-query-provider";
 import { ThemeProvider } from "@/components/layout/theme-provider";
@@ -12,11 +12,18 @@ import {
 import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
+import ProfileDropdown from "./layout/profile-dropdown";
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
+});
+
+const jersey15 = Jersey_15({
+  variable: "--font-jersey-15",
+  subsets: ["latin"],
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
@@ -33,21 +40,28 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${jetbrainsMono.variable} font-mono antialiased min-h-screen`}
+        className={`${jetbrainsMono.variable} ${jersey15.variable} font-mono antialiased min-h-screen`}
       >
         <ThemeProvider attribute="class" defaultTheme="dark">
           <ReactQueryProvider>
             <Toaster />
             <NavigationMenu className="w-full min-w-full py-2 bg-background fixed top-0 left-0 z-50 border-b border-border shadow-sm">
               <div className="max-w-3xl mx-auto w-full">
-                <NavigationMenuList className="justify-start">
+                <NavigationMenuList className="justify-between items-center">
                   <NavigationMenuItem>
-                    <NavigationMenuLink href="/">Nom</NavigationMenuLink>
+                    <NavigationMenuLink
+                      href="/"
+                      className="font-jersey-15 text-lg"
+                    >
+                      NOM
+                    </NavigationMenuLink>
                   </NavigationMenuItem>
+
+                  <ProfileDropdown />
                 </NavigationMenuList>
               </div>
             </NavigationMenu>
-            <div className="max-w-3xl mx-auto pt-16">{children}</div>
+            <div className="max-w-3xl mx-auto pt-18">{children}</div>
           </ReactQueryProvider>
         </ThemeProvider>
       </body>
