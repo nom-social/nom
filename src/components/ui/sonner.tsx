@@ -28,7 +28,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
         }}
         {...props}
       />
-      <style>{`.toaster [data-icon] { display: none !important; }`}</style>
     </>
   );
 };

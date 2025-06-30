@@ -87,7 +87,8 @@ export default function RepoProfileCard({
         notation: "compact",
       }).format(initialSubscriptionCount)} dev${
         initialSubscriptionCount === 1 ? "" : "s"
-      } building the future! LFG! 🚀`
+      } building the future! LFG! 🚀`,
+      { icon: null }
     );
   };
 

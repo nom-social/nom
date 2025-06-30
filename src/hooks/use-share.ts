@@ -12,7 +12,7 @@ export function useShare() {
     if (isMobile && navigator.share) {
       try {
         await navigator.share(title ? { url, title } : { url });
-        toast.success("Link shared!");
+        toast.success("Link shared!", { icon: null });
       } catch (err) {
         if (err instanceof Error && err.name !== "AbortError") {
           toast.error("Failed to share link.");
@@ -21,7 +21,7 @@ export function useShare() {
     } else if (navigator.clipboard) {
       try {
         await navigator.clipboard.writeText(url);
-        toast.success("Link copied to clipboard!");
+        toast.success("Link copied to clipboard!", { icon: null });
       } catch {
         toast.error("Failed to copy link.");
       }
@@ -34,7 +34,7 @@ export function useShare() {
         textarea.select();
         document.execCommand("copy");
         document.body.removeChild(textarea);
-        toast.success("Link copied to clipboard!");
+        toast.success("Link copied to clipboard!", { icon: null });
       } catch {
         toast.error("Failed to copy link.");
       }

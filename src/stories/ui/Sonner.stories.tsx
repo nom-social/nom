@@ -38,8 +38,12 @@ export const KitchenSink: Story = {
       <Toaster />
       <div className="flex gap-2">
         <Button onClick={() => toast("Default toast")}>Default</Button>
-        <Button onClick={() => toast.success("Success toast")}>Success</Button>
-        <Button onClick={() => toast.error("Error toast")}>Error</Button>
+        <Button onClick={() => toast.success("Success toast", { icon: null })}>
+          Success
+        </Button>
+        <Button onClick={() => toast.error("Error toast", { icon: null })}>
+          Error
+        </Button>
         <Button onClick={() => toast.loading("Loading toast")}>Loading</Button>
         <Button
           onClick={() =>
