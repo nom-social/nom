@@ -46,6 +46,10 @@ const pullRequestSchema = z.object({
   }),
 });
 
+const pullRequestSummaryTemplateSchema = z.object({
+  pull_request_summary_template: z.string().max(1_000),
+});
+
 export async function processPullRequestEvent({
   event,
   repo,
@@ -53,7 +57,13 @@ export async function processPullRequestEvent({
   currentTimestamp,
 }: {
   event: { event_type: string; raw_payload: Json; id: string };
-  repo: { repo: string; org: string; id: string; access_token?: string | null };
+  repo: {
+    repo: string;
+    org: string;
+    id: string;
+    access_token?: string | null;
+    settings: Json | null;
+  };
   subscribers: { user_id: string }[];
   currentTimestamp: string;
 }): Promise<{
@@ -125,7 +135,13 @@ export async function processPullRequestEvent({
         .map((c) => "- " + c.name)
         .join("\n");
 
-    const prompt = PR_SUMMARY_ONLY_PROMPT.replace("{title}", pull_request.title)
+    const pullRequestSummaryTemplate = repo.settings
+      ? pullRequestSummaryTemplateSchema.safeParse(repo.settings)
+      : null;
+    const prompt =
+      pullRequestSummaryTemplate?.data?.pull_request_summary_template ||
+      PR_SUMMARY_ONLY_PROMPT
+      .replace("{title}", pull_request.title)
       .replace("{author}", pull_request.user.login)
       .replace("{author_association}", pull_request.author_association)
       .replace("{description}", pull_request.body || "No description provided")

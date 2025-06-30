@@ -31,6 +31,10 @@ const releaseSchema = z.object({
   }),
 });
 
+const releaseSummaryTemplateSchema = z.object({
+  release_summary_template: z.string().max(1_000),
+});
+
 export async function processReleaseEvent({
   event,
   repo,
@@ -38,7 +42,13 @@ export async function processReleaseEvent({
   currentTimestamp,
 }: {
   event: { event_type: string; raw_payload: Json; id: string };
-  repo: { repo: string; org: string; id: string; access_token?: string | null };
+  repo: {
+    repo: string;
+    org: string;
+    id: string;
+    access_token?: string | null;
+    settings: Json | null;
+  };
   subscribers: { user_id: string }[];
   currentTimestamp: string;
 }): Promise<{
@@ -50,7 +60,15 @@ export async function processReleaseEvent({
 
   // LLM summarization of release notes
   const openaiClient = openai.createClient();
-  const prompt = RELEASE_SUMMARY_PROMPT.replace("{tag_name}", release.tag_name)
+  const releaseSummaryTemplate = repo.settings
+    ? releaseSummaryTemplateSchema.safeParse(repo.settings)
+    : null;
+
+  const prompt = (
+    releaseSummaryTemplate?.data?.release_summary_template ||
+    RELEASE_SUMMARY_PROMPT
+  )
+    .replace("{tag_name}", release.tag_name)
     .replace("{name}", release.name || "(no name)")
     .replace("{author}", release.author.login)
     .replace("{published_at}", release.published_at?.toISOString() || "N/A")

@@ -1,9 +1,15 @@
+import z from "zod";
 import { Octokit } from "@octokit/rest";
 
 import * as openai from "@/utils/openai/client";
 import { IssueData } from "@/components/shared/activity-cards/shared/schemas";
+import { Json } from "@/types/supabase";
 
 import { ISSUE_SUMMARY_PROMPT } from "./prompts";
+
+const issueSummaryTemplateSchema = z.object({
+  issue_summary_template: z.string().max(1_000),
+});
 
 export async function generateIssueData({
   octokit,
@@ -12,7 +18,7 @@ export async function generateIssueData({
   issue,
 }: {
   octokit: Octokit;
-  repo: { org: string; repo: string };
+  repo: { org: string; repo: string; settings: Json | null };
   action: string;
   issue: {
     number: number;
@@ -38,7 +44,14 @@ export async function generateIssueData({
   const commentsText = comments
     .map((c) => `- ${c.user?.login}: ${c.body}`)
     .join("\n");
-  const prompt = ISSUE_SUMMARY_PROMPT.replace("{title}", issue.title)
+
+  const issueSummaryTemplate = repo.settings
+    ? issueSummaryTemplateSchema.safeParse(repo.settings)
+    : null;
+  const prompt = (
+    issueSummaryTemplate?.data?.issue_summary_template || ISSUE_SUMMARY_PROMPT
+  )
+    .replace("{title}", issue.title)
     .replace("{author}", issue.user.login)
     .replace("{body}", issue.body || "No description provided")
     .replace("{comments}", commentsText || "No comments");
