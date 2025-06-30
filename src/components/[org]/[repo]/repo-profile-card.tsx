@@ -5,6 +5,7 @@ import { Calendar, Github, Globe, Scale } from "lucide-react";
 import { format } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import {
   Card,
@@ -80,7 +81,14 @@ export default function RepoProfileCard({
       return;
     }
     setSubscriptionCount((prev) => prev + 1);
-    refetch();
+    await refetch();
+    toast.success(
+      `🔥 YOOO! Welcome to ${repo}! You just joined ${Intl.NumberFormat("en", {
+        notation: "compact",
+      }).format(initialSubscriptionCount)} dev${
+        initialSubscriptionCount === 1 ? "" : "s"
+      } building the future! LFG! 🚀`
+    );
   };
 
   const handleUnsubscribe = async () => {
@@ -94,7 +102,11 @@ export default function RepoProfileCard({
       return;
     }
     setSubscriptionCount((prev) => prev - 1);
-    refetch();
+    await refetch();
+    toast(
+      "💔 NOOO! We're literally crying! You're breaking our heart but we respect your choice. " +
+        "We'll miss you! 😭"
+    );
   };
 
   return (
