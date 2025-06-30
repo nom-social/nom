@@ -31,13 +31,12 @@ export default function ActivityCard({
 }) {
   const router = useRouter();
   const [likeCount, setLikeCount] = useState<number | null>(null);
-  // Query for like state
+
   const { data: likeData, refetch: refetchLike } = useQuery({
     queryKey: [isLiked.key, item.dedupe_hash],
     queryFn: () => isLiked(item.dedupe_hash),
     refetchOnWindowFocus: false,
   });
-
   const getLikeCountQuery = useQuery({
     queryKey: [getLikeCount.key, item.dedupe_hash],
     queryFn: () => getLikeCount(item.dedupe_hash),
@@ -45,7 +44,7 @@ export default function ActivityCard({
   });
 
   const likeMutation = useMutation({
-    mutationFn: () => createLike(item.dedupe_hash),
+    mutationFn: ({ hash }: { hash: string }) => createLike(hash),
     onSuccess: async () => {
       await refetchLike();
       setLikeCount((prev) => (prev ?? 0) + 1);
@@ -60,7 +59,7 @@ export default function ActivityCard({
   });
 
   const unlikeMutation = useMutation({
-    mutationFn: () => deleteLike(item.dedupe_hash),
+    mutationFn: ({ hash }: { hash: string }) => deleteLike(hash),
     onSuccess: async () => {
       await refetchLike();
       setLikeCount((prev) => (prev ?? 0) - 1);
@@ -105,8 +104,8 @@ export default function ActivityCard({
         createdAt={new Date(parseResult.data.pull_request.updated_at)}
         likeCount={likeCount}
         liked={liked}
-        onLike={() => likeMutation.mutate()}
-        onUnlike={() => unlikeMutation.mutate()}
+        onLike={() => likeMutation.mutate({ hash: item.dedupe_hash })}
+        onUnlike={() => unlikeMutation.mutate({ hash: item.dedupe_hash })}
         id={item.id}
       />
     );
@@ -133,8 +132,8 @@ export default function ActivityCard({
         createdAt={new Date(parseResult.data.issue.updated_at)}
         likeCount={likeCount}
         liked={liked}
-        onLike={() => likeMutation.mutate()}
-        onUnlike={() => unlikeMutation.mutate()}
+        onLike={() => likeMutation.mutate({ hash: item.dedupe_hash })}
+        onUnlike={() => unlikeMutation.mutate({ hash: item.dedupe_hash })}
         id={item.id}
       />
     );
@@ -166,8 +165,8 @@ export default function ActivityCard({
         body={release.ai_summary}
         likeCount={likeCount}
         liked={liked}
-        onLike={() => likeMutation.mutate()}
-        onUnlike={() => unlikeMutation.mutate()}
+        onLike={() => likeMutation.mutate({ hash: item.dedupe_hash })}
+        onUnlike={() => unlikeMutation.mutate({ hash: item.dedupe_hash })}
         id={item.id}
       />
     );
