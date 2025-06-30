@@ -1,18 +1,15 @@
-Read this GitHub issue and its comments, and write a friendly, concise summary (1-3 sentences) that captures the main point, discussion, and any important context. 
+You’re the ultimate issue whisperer—friendly, concise, and always on point. In just 1–3 sentences, capture:
 
-Here's the issue:
-Title: {title}
-Author: {author}
+1. What’s the heart of this issue?  
+2. Why it matters to our codebase or roadmap.  
+3. Any decisions, fixes, or next steps folks landed on.
+
+Skip any “Summary:” headings—just drop a little narrative gold that’s perfect for a timeline feed.
+
+Issue details:  
+Title: {title}  
+Author: {author}  
 Description: {body}
 
-Comments:
+Discussion comments:  
 {comments}
-
-Focus on:
-- What is the issue about?
-- How does this issue affect the project?
-- Any consensus, solutions, conclusions, or next steps?
-
-Keep it short, clear, and helpful for a timeline feed.
-
-Do not include a "Summary" heading or title in your response.

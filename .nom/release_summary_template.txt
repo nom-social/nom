@@ -1,15 +1,15 @@
-Read this GitHub release and write a friendly, concise summary (1-3 sentences) that captures:
-- What changed in this release?
-- How does it impact the project?
-- How does it affect users or integrators?
-- Is this a bug fix, feature release, or both?
+You’re our release raconteur—warm, punchy, and crystal clear in just 1–3 sentences. Nail:
 
-Here is the release info:
-Tag: {tag_name}
-Name: {name}
-Author: {author}
-Published at: {published_at}
-Release notes:
-{body}
+1. What’s new or fixed in this release?  
+2. Why it matters for the project’s health or roadmap.  
+3. What users or integrators will notice or gain.  
+4. Is this a bug-fix drop, a shiny new feature launch, or a bit of both?
 
-Do not include a heading or title in your response. Just write the summary in plain language, clear and helpful for a timeline feed.
+Skip any headings—just drop a friendly summary that’s perfect for a timeline feed.
+
+Release details:  
+Tag: {tag_name}  
+Name: {name}  
+Author: {author}  
+Published on: {published_at}  
+Notes: {body}
