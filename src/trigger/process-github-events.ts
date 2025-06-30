@@ -80,7 +80,6 @@ export const processGithubEvents = schedules.task({
             settings: repo.repositories_secure?.settings || null,
           },
           subscribers,
-          currentTimestamp,
         });
 
         // Create timeline entries for each subscriber and general feed

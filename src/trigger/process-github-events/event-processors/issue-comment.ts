@@ -55,7 +55,6 @@ export async function processIssueCommentEvent({
   event,
   repo,
   subscribers,
-  currentTimestamp,
 }: {
   event: { event_type: string; raw_payload: Json; id: string };
   repo: {
@@ -66,7 +65,6 @@ export async function processIssueCommentEvent({
     access_token?: string | null;
   };
   subscribers: { user_id: string }[];
-  currentTimestamp: string;
 }): Promise<{
   userTimelineEntries: TablesInsert<"user_timeline">[];
   publicTimelineEntries: TablesInsert<"public_timeline">[];
@@ -106,7 +104,7 @@ export async function processIssueCommentEvent({
     repo_id: repo.id,
     score: BASELINE_SCORE * ISSUE_MULTIPLIER,
     dedupe_hash: dedupeHash,
-    updated_at: currentTimestamp,
+    updated_at: comment.updated_at.toISOString(),
     event_ids: [event.id],
     is_read: false,
   };
