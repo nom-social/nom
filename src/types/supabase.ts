@@ -224,7 +224,7 @@ export type Database = {
           event_ids: string[] | null;
           id: string;
           is_read: boolean;
-          repo_id: string | null;
+          repo_id: string;
           score: number;
           snooze_to: string | null;
           type: string;
@@ -239,7 +239,7 @@ export type Database = {
           event_ids?: string[] | null;
           id?: string;
           is_read?: boolean;
-          repo_id?: string | null;
+          repo_id: string;
           score: number;
           snooze_to?: string | null;
           type: string;
@@ -254,7 +254,7 @@ export type Database = {
           event_ids?: string[] | null;
           id?: string;
           is_read?: boolean;
-          repo_id?: string | null;
+          repo_id?: string;
           score?: number;
           snooze_to?: string | null;
           type?: string;

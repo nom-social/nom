@@ -21,17 +21,14 @@ export async function fetchFeedPage({
 }: FetchFeedPageParams): Promise<FetchFeedPageResult> {
   const supabase = createClient();
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("public_timeline")
     .select("*")
     .eq("repo_id", repoId)
     .order("updated_at", { ascending: false })
     .order("created_at", { ascending: false })
-    .range(offset, offset + limit - 1);
-
-  if (error) {
-    throw error;
-  }
+    .range(offset, offset + limit - 1)
+    .throwOnError();
 
   const items = data || [];
   // If we got less than limit, there are no more items
