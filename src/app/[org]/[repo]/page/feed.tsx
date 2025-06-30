@@ -46,7 +46,6 @@ export default function Feed({
     initialPageParam: 0,
   });
 
-  // TODO: Add proper loading state
   if (isLoading) return <div>Loading...</div>;
   if (isError)
     return (
