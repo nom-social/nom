@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Calendar, Github, Globe, Scale } from "lucide-react";
 import { format } from "date-fns";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -53,6 +53,8 @@ export default function RepoProfileCard({
   license,
   initialSubscriptionCount,
 }: Props) {
+  const router = useRouter();
+
   const [subscriptionCount, setSubscriptionCount] = useState(
     initialSubscriptionCount
   );
@@ -68,47 +70,48 @@ export default function RepoProfileCard({
     refetchOnWindowFocus: false,
   });
 
-  const router = useRouter();
-
-  const handleSubscribe = async () => {
-    try {
-      await createSubscription(org, repo);
-    } catch (error) {
+  const createSubscriptionMutation = useMutation({
+    mutationFn: ({ org, repo }: { org: string; repo: string }) =>
+      createSubscription(org, repo),
+    onSuccess: async () => {
+      setSubscriptionCount((prev) => prev + 1);
+      await refetch();
+      toast.success(
+        `🔥 YOOO! Welcome to ${repo}! You just joined ${Intl.NumberFormat(
+          "en",
+          { notation: "compact" }
+        ).format(initialSubscriptionCount)} dev${
+          initialSubscriptionCount === 1 ? "" : "s"
+        } building the future! LFG! 🚀`,
+        { icon: null }
+      );
+    },
+    onError: (error) => {
       if (error instanceof NotAuthenticatedError)
         router.push(
           `/auth/login?next=${encodeURIComponent(window.location.pathname)}`
         );
-      return;
-    }
-    setSubscriptionCount((prev) => prev + 1);
-    await refetch();
-    toast.success(
-      `🔥 YOOO! Welcome to ${repo}! You just joined ${Intl.NumberFormat("en", {
-        notation: "compact",
-      }).format(initialSubscriptionCount)} dev${
-        initialSubscriptionCount === 1 ? "" : "s"
-      } building the future! LFG! 🚀`,
-      { icon: null }
-    );
-  };
+    },
+  });
 
-  const handleUnsubscribe = async () => {
-    try {
-      await removeSubscription(org, repo);
-    } catch (error) {
+  const removeSubscriptionMutation = useMutation({
+    mutationFn: ({ org, repo }: { org: string; repo: string }) =>
+      removeSubscription(org, repo),
+    onSuccess: async () => {
+      setSubscriptionCount((prev) => prev - 1);
+      await refetch();
+      toast(
+        `💔 NOOO! We're literally crying! You're breaking our heart but we respect your choice. ` +
+          "We'll miss you! 😭"
+      );
+    },
+    onError: (error) => {
       if (error instanceof NotAuthenticatedError)
         router.push(
           `/auth/login?next=${encodeURIComponent(window.location.pathname)}`
         );
-      return;
-    }
-    setSubscriptionCount((prev) => prev - 1);
-    await refetch();
-    toast(
-      "💔 NOOO! We're literally crying! You're breaking our heart but we respect your choice. " +
-        "We'll miss you! 😭"
-    );
-  };
+    },
+  });
 
   return (
     <Card className="w-full">
@@ -156,9 +159,18 @@ export default function RepoProfileCard({
             <SubscribeButton
               isSubscribed={subscribedData?.subscribed ?? false}
               className="hidden md:flex"
-              onSubscribe={handleSubscribe}
-              onUnsubscribe={handleUnsubscribe}
-              isLoading={isLoading || isRefetching}
+              onSubscribe={() =>
+                createSubscriptionMutation.mutate({ org, repo })
+              }
+              onUnsubscribe={() =>
+                removeSubscriptionMutation.mutate({ org, repo })
+              }
+              isLoading={
+                createSubscriptionMutation.isPending ||
+                removeSubscriptionMutation.isPending ||
+                isLoading ||
+                isRefetching
+              }
             />
 
             <ShareButton org={org} repo={repo} />
@@ -209,9 +221,16 @@ export default function RepoProfileCard({
           <SubscribeButton
             isSubscribed={subscribedData?.subscribed ?? false}
             className="flex md:hidden"
-            onSubscribe={handleSubscribe}
-            onUnsubscribe={handleUnsubscribe}
-            isLoading={isLoading || isRefetching}
+            onSubscribe={() => createSubscriptionMutation.mutate({ org, repo })}
+            onUnsubscribe={() =>
+              removeSubscriptionMutation.mutate({ org, repo })
+            }
+            isLoading={
+              createSubscriptionMutation.isPending ||
+              removeSubscriptionMutation.isPending ||
+              isLoading ||
+              isRefetching
+            }
           />
 
           <ShareButtonMobile org={org} repo={repo} />
