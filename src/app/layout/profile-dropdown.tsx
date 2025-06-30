@@ -13,8 +13,8 @@ export default async function ProfileDropdown() {
   if (!user) return null;
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger>
+    <DropdownMenu modal={false}>
+      <DropdownMenuTrigger className="cursor-pointer">
         <Avatar className="w-8 h-8">
           <AvatarImage src={`https://github.com/${user.github_username}.png`} />
           <AvatarFallback>{user.github_username.charAt(0)}</AvatarFallback>

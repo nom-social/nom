@@ -25,11 +25,25 @@ export default function DropdownContent({ user }: Props) {
   };
 
   return (
-    <DropdownMenuContent>
-      <DropdownMenuLabel>{user.github_username}</DropdownMenuLabel>
-      <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
+    <DropdownMenuContent align="end" className="min-w-[200px]">
+      <DropdownMenuLabel>
+        <div className="flex flex-col">
+          <span className="text-sm font-medium break-all whitespace-normal">
+            {user.github_username}
+          </span>
+          <span className="text-xs text-muted-foreground break-all whitespace-normal">
+            {user.email}
+          </span>
+        </div>
+      </DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+      <DropdownMenuItem
+        className="cursor-pointer"
+        variant="destructive"
+        onClick={handleLogout}
+      >
+        Logout
+      </DropdownMenuItem>
     </DropdownMenuContent>
   );
 }

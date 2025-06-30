@@ -30,7 +30,7 @@ export default async function StatusPage({
   if (!statusItem) notFound();
 
   return (
-    <div className="flex flex-col justify-center gap-4 px-2">
+    <main className="flex flex-col justify-center gap-4 px-2">
       <Link href={`/${org}/${repo}`} passHref>
         <Button
           variant="ghost"
@@ -47,7 +47,7 @@ export default async function StatusPage({
         </Button>
       </Link>
       <ActivityCard item={statusItem} repo={repo} org={org} />
-    </div>
+    </main>
   );
 }
 
