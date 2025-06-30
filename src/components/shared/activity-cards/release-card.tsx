@@ -37,7 +37,7 @@ type Props = {
   liked: boolean;
   onLike?: () => void;
   onUnlike?: () => void;
-  id: string;
+  hash: string;
 };
 
 export default function ReleaseCard({
@@ -53,7 +53,7 @@ export default function ReleaseCard({
   liked,
   onLike,
   onUnlike,
-  id,
+  hash,
 }: Props) {
   const handleLikeClick = () => {
     if (liked) {
@@ -141,7 +141,7 @@ export default function ReleaseCard({
             size="sm"
             onClick={() =>
               share(
-                `${window.location.origin}/${org}/${repo}/status/${id}`,
+                `${window.location.origin}/${org}/${repo}/status/${hash}`,
                 title
               )
             }

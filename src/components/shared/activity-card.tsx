@@ -106,7 +106,7 @@ export default function ActivityCard({
         liked={liked}
         onLike={() => likeMutation.mutate({ hash: item.dedupe_hash })}
         onUnlike={() => unlikeMutation.mutate({ hash: item.dedupe_hash })}
-        id={item.id}
+        hash={item.dedupe_hash}
       />
     );
   }
@@ -134,7 +134,7 @@ export default function ActivityCard({
         liked={liked}
         onLike={() => likeMutation.mutate({ hash: item.dedupe_hash })}
         onUnlike={() => unlikeMutation.mutate({ hash: item.dedupe_hash })}
-        id={item.id}
+        hash={item.dedupe_hash}
       />
     );
   }
@@ -167,7 +167,7 @@ export default function ActivityCard({
         liked={liked}
         onLike={() => likeMutation.mutate({ hash: item.dedupe_hash })}
         onUnlike={() => unlikeMutation.mutate({ hash: item.dedupe_hash })}
-        id={item.id}
+        hash={item.dedupe_hash}
       />
     );
   }

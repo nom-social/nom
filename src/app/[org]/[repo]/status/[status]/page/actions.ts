@@ -30,7 +30,7 @@ export async function fetchFeedItem({
   const { data } = await supabase
     .from("public_timeline")
     .select("*")
-    .eq("id", statusId)
+    .eq("dedupe_hash", statusId)
     .eq("repo_id", repoData.id)
     .single();
 
