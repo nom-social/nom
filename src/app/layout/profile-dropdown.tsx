@@ -1,20 +1,25 @@
+import Link from "next/link";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 import { getCurrentUser } from "./profile-dropdown/actions";
 import DropdownContent from "./profile-dropdown/dropdown-content";
-import { Button } from "@/components/ui/button";
 
 export default async function ProfileDropdown() {
   const user = await getCurrentUser();
 
   if (!user)
     return (
-      <Button className="bg-[var(--nom-green)] text-black hover:bg-[var(--nom-green)]/90">
-        Login
+      <Button
+        asChild
+        className="bg-[var(--nom-green)] text-black hover:bg-[var(--nom-green)]/90"
+      >
+        <Link href="/auth/login">Login</Link>
       </Button>
     );
 

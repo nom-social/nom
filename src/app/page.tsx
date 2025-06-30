@@ -1,9 +1,11 @@
-import { createClient } from "@/utils/supabase/client";
+import { cookies } from "next/headers";
+
+import { createClient } from "@/utils/supabase/server";
 
 import Feed from "./page/feed";
 
 export default async function Home() {
-  const supabase = createClient();
+  const supabase = createClient(cookies());
   const {
     data: { session },
   } = await supabase.auth.getSession();
