@@ -1,6 +1,7 @@
+import { subMonths } from "date-fns";
+
 import { createClient } from "@/utils/supabase/client";
 import type { Tables } from "@/types/supabase";
-import { subMonths } from "date-fns";
 
 export class NotAuthenticatedError extends Error {
   constructor() {
