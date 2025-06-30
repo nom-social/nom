@@ -135,6 +135,7 @@ export type Database = {
           org: string;
           repo: string;
           secret: string | null;
+          settings: Json | null;
         };
         Insert: {
           access_token?: string | null;
@@ -143,6 +144,7 @@ export type Database = {
           org: string;
           repo: string;
           secret?: string | null;
+          settings?: Json | null;
         };
         Update: {
           access_token?: string | null;
@@ -151,6 +153,7 @@ export type Database = {
           org?: string;
           repo?: string;
           secret?: string | null;
+          settings?: Json | null;
         };
         Relationships: [];
       };
