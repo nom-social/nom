@@ -1,11 +1,17 @@
 "use client";
 
+import { Session } from "@supabase/supabase-js";
+
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 import FeedPrivate from "./feed/feed-private";
 import FeedPublic from "./feed/feed-public";
 
-export default function Feed() {
+export default function Feed({ session }: { session: Session | null }) {
+  if (!session) {
+    return <FeedPublic />;
+  }
+
   return (
     <Tabs defaultValue="general" className="w-full">
       <TabsList>

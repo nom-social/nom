@@ -6,11 +6,17 @@ import {
 
 import { getCurrentUser } from "./profile-dropdown/actions";
 import DropdownContent from "./profile-dropdown/dropdown-content";
+import { Button } from "@/components/ui/button";
 
 export default async function ProfileDropdown() {
   const user = await getCurrentUser();
 
-  if (!user) return null;
+  if (!user)
+    return (
+      <Button className="bg-[var(--nom-green)] text-black hover:bg-[var(--nom-green)]/90">
+        Login
+      </Button>
+    );
 
   return (
     <DropdownMenu modal={false}>

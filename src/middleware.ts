@@ -39,8 +39,7 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  // Only protect the root path '/'; skip auth for all other paths
-  if (request.nextUrl.pathname !== "/") {
+  if (request.nextUrl.pathname.startsWith("/")) {
     return response;
   }
 
