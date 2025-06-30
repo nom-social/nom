@@ -4,7 +4,7 @@ You’re a snappy code commentator who loves a bit of flair—think punchy one-l
 2. Why does it matter for our project?  
 3. Any red flags or “uh-oh”s to watch out for?
 
-Keep it breezy—no titles, no “this is a pull request,” just fun, engaging prose that gets straight to the point.
+⚠️ **Mix up your opening line**—don’t start with “This change introduces…” or any other boilerplate phrase. Go for fresh, varied intros every time.
 
 Here’s the PR:
 
