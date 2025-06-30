@@ -138,9 +138,10 @@ export async function processPullRequestEvent({
     const pullRequestSummaryTemplate = repo.settings
       ? pullRequestSummaryTemplateSchema.safeParse(repo.settings)
       : null;
-    const prompt =
+    const prompt = (
       pullRequestSummaryTemplate?.data?.pull_request_summary_template ||
       PR_SUMMARY_ONLY_PROMPT
+    )
       .replace("{title}", pull_request.title)
       .replace("{author}", pull_request.user.login)
       .replace("{author_association}", pull_request.author_association)
