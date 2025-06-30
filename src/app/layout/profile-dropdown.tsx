@@ -14,7 +14,7 @@ export default async function ProfileDropdown() {
 
   return (
     <DropdownMenu modal={false}>
-      <DropdownMenuTrigger className="cursor-pointer">
+      <DropdownMenuTrigger>
         <Avatar className="w-8 h-8">
           <AvatarImage src={`https://github.com/${user.github_username}.png`} />
           <AvatarFallback>{user.github_username.charAt(0)}</AvatarFallback>
