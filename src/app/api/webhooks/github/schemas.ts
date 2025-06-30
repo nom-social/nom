@@ -3,7 +3,6 @@ import { z } from "zod";
 export const githubUserSchema = z.object({
   login: z.string(),
   id: z.number(),
-  type: z.string(),
 });
 
 export const githubRepositorySchema = z.object({
@@ -44,7 +43,9 @@ export const githubWebhookPayloadSchema = z.discriminatedUnion("event_type", [
   z.object({
     event_type: z.literal("issue_comment"),
     ...githubWebhookBaseSchema.shape,
-    sender: githubUserSchema,
+    sender: githubUserSchema.extend({
+      type: z.string(),
+    }),
   }),
   z.object({
     event_type: z.literal("release"),
