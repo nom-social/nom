@@ -1,9 +1,13 @@
+import { z } from "zod";
 import { logger, schedules } from "@trigger.dev/sdk/v3";
 import { Octokit } from "@octokit/rest";
 
 import { createClient } from "@/utils/supabase/background";
 
 import { LANGUAGE_COLORS } from "./update-repo-metadata/constants";
+
+// Zod schema for template validation
+const templateSchema = z.string().max(1_000);
 
 export const syncRepoMetadata = schedules.task({
   id: "sync-repo-metadata",
@@ -41,6 +45,38 @@ export const syncRepoMetadata = schedules.task({
           ]
         );
 
+        // Fetch .nom templates from the root if present
+        async function fetchNomTemplate(
+          filename: string
+        ): Promise<string | null> {
+          try {
+            const { data } = await octokit.repos.getContent({
+              owner: repo.org,
+              repo: repo.repo,
+              path: `.nom/${filename}`,
+            });
+            // Handle both file and array (should be file)
+            if (Array.isArray(data) || !("content" in data)) return null;
+            // Decode base64 content
+            const content = Buffer.from(data.content, "base64").toString(
+              "utf-8"
+            );
+            // Validate with Zod
+            const parsed = templateSchema.safeParse(content);
+            return parsed.success ? content : null;
+          } catch {
+            // Not found or error
+            return null;
+          }
+        }
+
+        const [pullRequestTemplate, issueTemplate, releaseTemplate] =
+          await Promise.all([
+            fetchNomTemplate("pull_request_summary_template.txt"),
+            fetchNomTemplate("issue_summary_template.txt"),
+            fetchNomTemplate("release_summary_template.txt"),
+          ]);
+
         // Convert to array with color
         const languages = Object.entries(languagesData)
           .map(([name, bytes]) => ({
@@ -72,6 +108,18 @@ export const syncRepoMetadata = schedules.task({
             },
             { onConflict: "id" }
           )
+          .throwOnError();
+
+        await supabase
+          .from("repositories")
+          .update({
+            settings: {
+              pull_request_summary_template: pullRequestTemplate,
+              issue_summary_template: issueTemplate,
+              release_summary_template: releaseTemplate,
+            },
+          })
+          .eq("id", repo.id)
           .throwOnError();
 
         logger.info("Updated metadata for repo", {
