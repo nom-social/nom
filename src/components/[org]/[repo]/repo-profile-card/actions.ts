@@ -1,13 +1,19 @@
 import { createClient } from "@/utils/supabase/client";
 
+export class NotAuthenticatedError extends Error {
+  constructor() {
+    super("Not authenticated");
+  }
+}
+
 export async function createSubscription(org: string, repo: string) {
   const supabase = createClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
-  if (!session?.user) {
-    return { success: false, error: "Not authenticated" };
-  }
+
+  if (!session?.user) throw new NotAuthenticatedError();
+
   const userId = session.user.id;
 
   // Get repo id from org/repo
@@ -30,9 +36,8 @@ export async function removeSubscription(org: string, repo: string) {
   const {
     data: { session },
   } = await supabase.auth.getSession();
-  if (!session?.user) {
-    return { success: false, error: "Not authenticated" };
-  }
+  if (!session?.user) throw new NotAuthenticatedError();
+
   const userId = session.user.id;
 
   // Get repo id from org/repo
@@ -59,7 +64,7 @@ export async function isSubscribed(org: string, repo: string) {
     data: { session },
   } = await supabase.auth.getSession();
   if (!session?.user) {
-    return { subscribed: false, error: "Not authenticated" };
+    return { subscribed: false };
   }
   const userId = session.user.id;
 
@@ -82,3 +87,6 @@ export async function isSubscribed(org: string, repo: string) {
 
   return { subscribed: !!subData };
 }
+
+isSubscribed.key =
+  "src/components/[org]/[repo]/repo-profile-card/actions/isSubscribed";

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Calendar, Github, Globe, Scale } from "lucide-react";
 import { format } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 import {
   Card,
@@ -18,6 +19,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import {
   createSubscription,
   isSubscribed,
+  NotAuthenticatedError,
   removeSubscription,
 } from "./repo-profile-card/actions";
 import ShareButton from "./repo-profile-card/share-button";
@@ -60,20 +62,38 @@ export default function RepoProfileCard({
     refetch,
     isRefetching,
   } = useQuery({
-    queryKey: [isSubscribed, org, repo],
+    queryKey: [isSubscribed.key, org, repo],
     queryFn: () => isSubscribed(org, repo),
     refetchOnWindowFocus: false,
   });
 
+  const router = useRouter();
+
   const handleSubscribe = async () => {
-    await createSubscription(org, repo);
-    setSubscriptionCount(subscriptionCount + 1);
+    try {
+      await createSubscription(org, repo);
+    } catch (error) {
+      if (error instanceof NotAuthenticatedError)
+        router.push(
+          `/auth/login?next=${encodeURIComponent(window.location.pathname)}`
+        );
+      return;
+    }
+    setSubscriptionCount((prev) => prev + 1);
     refetch();
   };
 
   const handleUnsubscribe = async () => {
-    await removeSubscription(org, repo);
-    setSubscriptionCount(subscriptionCount - 1);
+    try {
+      await removeSubscription(org, repo);
+    } catch (error) {
+      if (error instanceof NotAuthenticatedError)
+        router.push(
+          `/auth/login?next=${encodeURIComponent(window.location.pathname)}`
+        );
+      return;
+    }
+    setSubscriptionCount((prev) => prev - 1);
     refetch();
   };
 
