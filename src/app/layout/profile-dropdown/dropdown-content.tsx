@@ -40,14 +40,10 @@ export default function DropdownContent({ user }: Props) {
       <DropdownMenuSeparator />
 
       <Link href="/">
-        <DropdownMenuItem className="cursor-pointer">Home</DropdownMenuItem>
+        <DropdownMenuItem>Home</DropdownMenuItem>
       </Link>
 
-      <DropdownMenuItem
-        className="cursor-pointer"
-        variant="destructive"
-        onClick={handleLogout}
-      >
+      <DropdownMenuItem variant="destructive" onClick={handleLogout}>
         Logout
       </DropdownMenuItem>
     </DropdownMenuContent>

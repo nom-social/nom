@@ -9,7 +9,7 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  const supabase = createServerClient(
+  createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -25,31 +25,6 @@ export async function middleware(request: NextRequest) {
       },
     }
   );
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  // Skip auth checks for all /auth/* paths
-  if (request.nextUrl.pathname.startsWith("/auth/")) {
-    return response;
-  }
-
-  if (request.nextUrl.pathname.startsWith("/api/webhooks/github")) {
-    return response;
-  }
-
-  // Only protect the root path '/'; skip auth for all other paths
-  if (request.nextUrl.pathname !== "/") {
-    return response;
-  }
-
-  // If there's no session, redirect to login
-  if (!session) {
-    const redirectUrl = new URL("/auth/login", request.url);
-    redirectUrl.searchParams.set("next", request.nextUrl.pathname);
-    return NextResponse.redirect(redirectUrl);
-  }
 
   return response;
 }
