@@ -54,7 +54,6 @@ export async function processPullRequestEvent({
   event,
   repo,
   subscribers,
-  currentTimestamp,
 }: {
   event: { event_type: string; raw_payload: Json; id: string };
   repo: {
@@ -65,7 +64,6 @@ export async function processPullRequestEvent({
     settings: Json | null;
   };
   subscribers: { user_id: string }[];
-  currentTimestamp: string;
 }): Promise<{
   userTimelineEntries: TablesInsert<"user_timeline">[];
   publicTimelineEntries: TablesInsert<"public_timeline">[];
@@ -246,7 +244,7 @@ export async function processPullRequestEvent({
     score: BASELINE_SCORE * PULL_REQUEST_MULTIPLIER,
     repo_id: repo.id,
     dedupe_hash: dedupeHash,
-    updated_at: currentTimestamp,
+    updated_at: pull_request.updated_at.toISOString(),
     event_ids: [event.id],
     is_read: false,
   };

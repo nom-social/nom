@@ -39,7 +39,6 @@ export async function processReleaseEvent({
   event,
   repo,
   subscribers,
-  currentTimestamp,
 }: {
   event: { event_type: string; raw_payload: Json; id: string };
   repo: {
@@ -50,7 +49,6 @@ export async function processReleaseEvent({
     settings: Json | null;
   };
   subscribers: { user_id: string }[];
-  currentTimestamp: string;
 }): Promise<{
   userTimelineEntries: TablesInsert<"user_timeline">[];
   publicTimelineEntries: TablesInsert<"public_timeline">[];
@@ -132,7 +130,8 @@ export async function processReleaseEvent({
     score: BASELINE_SCORE * RELEASE_MULTIPLIER,
     repo_id: repo.id,
     dedupe_hash: dedupeHash,
-    updated_at: currentTimestamp,
+    updated_at:
+      release.published_at?.toISOString() || release.created_at.toISOString(),
     event_ids: [event.id],
     is_read: false,
   };

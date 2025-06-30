@@ -16,7 +16,6 @@ export async function processEvent(args: {
     settings: Json | null;
   };
   subscribers: { user_id: string }[];
-  currentTimestamp: string;
 }) {
   switch (args.event.event_type) {
     case "pull_request":
