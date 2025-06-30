@@ -8,7 +8,7 @@ import ActivityCard from "@/components/shared/activity-card";
 
 import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
 
-const LIMIT = 4;
+const LIMIT = 10;
 
 export default function Feed({
   repoId,
