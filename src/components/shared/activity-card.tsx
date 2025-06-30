@@ -1,5 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+
 import PRCard from "@/components/shared/activity-cards/pr-card";
 import IssueCard from "@/components/shared/activity-cards/issue-card";
 import ReleaseCard from "@/components/shared/activity-cards/release-card";
@@ -7,6 +12,12 @@ import { Tables } from "@/types/supabase";
 import { issueDataSchema } from "@/components/shared/activity-cards/shared/schemas";
 import { prDataSchema } from "@/components/shared/activity-cards/shared/schemas";
 import { releaseDataSchema } from "@/components/shared/activity-cards/shared/schemas";
+import {
+  isLiked,
+  createLike,
+  deleteLike,
+  NotAuthenticatedError,
+} from "./activity-card/actions";
 
 export default function ActivityCard({
   item,
@@ -17,6 +28,47 @@ export default function ActivityCard({
   repo: string;
   org: string;
 }) {
+  const router = useRouter();
+  const [likeCount, setLikeCount] = useState(0);
+  // Query for like state
+  const { data: likeData, refetch: refetchLike } = useQuery({
+    queryKey: [isLiked.key, item.dedupe_hash],
+    queryFn: () => isLiked(item.dedupe_hash),
+    refetchOnWindowFocus: false,
+  });
+
+  const likeMutation = useMutation({
+    mutationFn: () => createLike(item.dedupe_hash),
+    onSuccess: async () => {
+      await refetchLike();
+      setLikeCount((prev) => prev + 1);
+      toast.success("🔥 Liked!", { icon: null });
+    },
+    onError: (error) => {
+      if (error instanceof NotAuthenticatedError)
+        router.push(
+          `/auth/login?next=${encodeURIComponent(window.location.pathname)}`
+        );
+    },
+  });
+
+  const unlikeMutation = useMutation({
+    mutationFn: () => deleteLike(item.dedupe_hash),
+    onSuccess: async () => {
+      await refetchLike();
+      setLikeCount((prev) => prev - 1);
+      toast("💔 Un-liked!");
+    },
+    onError: (error) => {
+      if (error instanceof NotAuthenticatedError)
+        router.push(
+          `/auth/login?next=${encodeURIComponent(window.location.pathname)}`
+        );
+    },
+  });
+
+  const liked = likeData?.liked ?? false;
+
   if (item.type === "pull_request") {
     const parseResult = prDataSchema.safeParse(item.data);
     if (!parseResult.success) {
@@ -39,8 +91,10 @@ export default function ActivityCard({
         org={org}
         state={parseResult.data.pull_request.merged ? "merged" : "open"}
         createdAt={new Date(parseResult.data.pull_request.updated_at)}
-        likeCount={0}
-        liked={false}
+        likeCount={likeCount}
+        liked={liked}
+        onLike={() => likeMutation.mutate()}
+        onUnlike={() => unlikeMutation.mutate()}
         id={item.id}
       />
     );
@@ -65,8 +119,10 @@ export default function ActivityCard({
         org={org}
         state={parseResult.data.issue.state}
         createdAt={new Date(parseResult.data.issue.updated_at)}
-        likeCount={0}
-        liked={false}
+        likeCount={likeCount}
+        liked={liked}
+        onLike={() => likeMutation.mutate()}
+        onUnlike={() => unlikeMutation.mutate()}
         id={item.id}
       />
     );
@@ -96,8 +152,10 @@ export default function ActivityCard({
             : new Date(release.created_at)
         }
         body={release.ai_summary}
-        likeCount={0}
-        liked={false}
+        likeCount={likeCount}
+        liked={liked}
+        onLike={() => likeMutation.mutate()}
+        onUnlike={() => unlikeMutation.mutate()}
         id={item.id}
       />
     );
