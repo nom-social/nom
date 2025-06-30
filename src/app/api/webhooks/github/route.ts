@@ -41,6 +41,17 @@ export async function POST(request: Request) {
       "unknown";
     const repo = payload.repository?.name || "unknown";
 
+    // Skip database operations for bot comments
+    if (
+      payload.event_type === "issue_comment" &&
+      payload.sender.type === "Bot"
+    ) {
+      return NextResponse.json({
+        message: "Bot comment, ignoring webhook",
+        timestamp: new Date().toISOString(),
+      });
+    }
+
     // Skip database operations for ping events
     if (payload.event_type === "ping") {
       return NextResponse.json({

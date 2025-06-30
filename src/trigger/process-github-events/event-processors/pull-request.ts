@@ -76,7 +76,7 @@ export async function processPullRequestEvent({
   const { action, pull_request } = validationResult;
 
   const constructPRData = async () => {
-    const [combinedDiff, checks, commits] = await Promise.all([
+    const [combinedDiff, checks, commits, reviews] = await Promise.all([
       getProcessedPullRequestDiff(
         octokit,
         { org: repo.org, repo: repo.repo },
@@ -92,7 +92,32 @@ export async function processPullRequestEvent({
         repo: repo.repo,
         pull_number: pull_request.number,
       }),
+      octokit.pulls.listReviews({
+        owner: repo.org,
+        repo: repo.repo,
+        pull_number: pull_request.number,
+      }),
     ]);
+
+    // Format commit messages
+    const commitMessages = commits.data
+      .map(
+        (commit) =>
+          `- ${commit.commit.message} (${commit.author?.login || "unknown"})`
+      )
+      .join("\n");
+    const commitMessagesText = `Commit Messages (latest first):\n${commitMessages}`;
+
+    // Format reviews
+    const reviewSummaries = reviews.data
+      .map(
+        (review) =>
+          `- ${review.user?.login || "unknown"} [${review.state}]: ${
+            review.body ? review.body.substring(0, 200) : "No comment"
+          }`
+      )
+      .join("\n");
+    const reviewsText = `Pull Request Reviews:\n${reviewSummaries}`;
 
     const checksStatus = {
       total: checks.data.total_count,
@@ -149,7 +174,11 @@ export async function processPullRequestEvent({
       .replace("{deletions}", pull_request.deletions.toString())
       .replace("{labels}", pull_request.labels.map((l) => l.name).join(", "))
       .replace("{checks_status}", checksStatusText)
-      .replace("{pr_diff}", combinedDiff);
+      .replace("{pr_diff}", combinedDiff)
+      .replace("{commit_messages}", commitMessagesText)
+      .replace("{pr_reviews}", reviewsText);
+
+    console.log("🚀 ~ constructPRData ~ prompt:", prompt);
 
     const completion = await openaiClient.chat.completions.create({
       model: "gpt-4o-mini",
