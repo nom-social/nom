@@ -1,6 +1,7 @@
 import React from "react";
 import { ShareIcon, HeartIcon, TagIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import Link from "next/link";
 
 import {
   Card,
@@ -92,14 +93,12 @@ export default function ReleaseCard({
         <CardDescription>
           <div className="flex gap-2 flex-col">
             <div className="text-muted-foreground text-xs">
-              <a
-                href={`https://github.com/${org}/${repo}`}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href={`/${org}/${repo}`}
                 className="hover:underline focus:underline outline-none"
               >
                 {org}/{repo}
-              </a>
+              </Link>
               {" • "}
               <Tooltip>
                 <TooltipTrigger asChild>
