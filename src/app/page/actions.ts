@@ -32,26 +32,7 @@ export async function fetchFeed({
     .range(offset, offset + limit - 1)
     .throwOnError();
 
-  const repoIds = Array.from(new Set(data.map((item) => item.repo_id)));
-
-  const { data: repos } = await supabase
-    .from("public_repository_data")
-    .select("*")
-    .in("id", repoIds)
-    .throwOnError();
-
-  const repoDataMap = repos.reduce<
-    Record<string, Tables<"public_repository_data">>
-  >((acc, repo) => {
-    acc[repo.id] = repo;
-    return acc;
-  }, {});
-
-  const items = data.map((item) => ({
-    ...item,
-    repo: repoDataMap[item.repo_id],
-  }));
-
+  const items = data;
   // If we got less than limit, there are no more items
   const hasMore = items.length === limit;
 

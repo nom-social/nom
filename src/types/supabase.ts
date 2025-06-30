@@ -42,38 +42,6 @@ export type Database = {
         };
         Relationships: [];
       };
-      public_repository_data: {
-        Row: {
-          created_at: string;
-          id: string;
-          metadata: Json;
-          org: string;
-          repo: string;
-        };
-        Insert: {
-          created_at?: string;
-          id?: string;
-          metadata: Json;
-          org: string;
-          repo: string;
-        };
-        Update: {
-          created_at?: string;
-          id?: string;
-          metadata?: Json;
-          org?: string;
-          repo?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "public_repository_data_id_fkey";
-            columns: ["id"];
-            isOneToOne: true;
-            referencedRelation: "repositories";
-            referencedColumns: ["id"];
-          }
-        ];
-      };
       public_timeline: {
         Row: {
           categories: string[] | null;
@@ -83,7 +51,7 @@ export type Database = {
           event_ids: string[] | null;
           id: string;
           is_read: boolean;
-          repo_id: string | null;
+          repo_id: string;
           score: number;
           snooze_to: string | null;
           type: string;
@@ -97,7 +65,7 @@ export type Database = {
           event_ids?: string[] | null;
           id?: string;
           is_read?: boolean;
-          repo_id?: string | null;
+          repo_id: string;
           score: number;
           snooze_to?: string | null;
           type: string;
@@ -111,7 +79,7 @@ export type Database = {
           event_ids?: string[] | null;
           id?: string;
           is_read?: boolean;
-          repo_id?: string | null;
+          repo_id?: string;
           score?: number;
           snooze_to?: string | null;
           type?: string;
@@ -129,11 +97,33 @@ export type Database = {
       };
       repositories: {
         Row: {
+          created_at: string;
+          id: string;
+          metadata: Json | null;
+          org: string;
+          repo: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          metadata?: Json | null;
+          org: string;
+          repo: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          metadata?: Json | null;
+          org?: string;
+          repo?: string;
+        };
+        Relationships: [];
+      };
+      repositories_secure: {
+        Row: {
           access_token: string | null;
           created_at: string;
           id: string;
-          org: string;
-          repo: string;
           secret: string | null;
           settings: Json | null;
         };
@@ -141,8 +131,6 @@ export type Database = {
           access_token?: string | null;
           created_at?: string;
           id?: string;
-          org: string;
-          repo: string;
           secret?: string | null;
           settings?: Json | null;
         };
@@ -150,12 +138,18 @@ export type Database = {
           access_token?: string | null;
           created_at?: string;
           id?: string;
-          org?: string;
-          repo?: string;
           secret?: string | null;
           settings?: Json | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "repositories_secure_id_fkey";
+            columns: ["id"];
+            isOneToOne: true;
+            referencedRelation: "repositories";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       subscriptions: {
         Row: {

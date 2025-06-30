@@ -21,7 +21,7 @@ export async function createSubscription(org: string, repo: string) {
 
   // Get repo id from org/repo
   const { data: repoData } = await supabase
-    .from("public_repository_data")
+    .from("repositories")
     .select("id")
     .eq("org", org)
     .eq("repo", repo)
@@ -79,7 +79,7 @@ export async function removeSubscription(org: string, repo: string) {
 
   // Get repo id from org/repo
   const { data: repoData } = await supabase
-    .from("public_repository_data")
+    .from("repositories")
     .select("id")
     .eq("org", org)
     .eq("repo", repo)
@@ -107,7 +107,7 @@ export async function isSubscribed(org: string, repo: string) {
 
   // Get repo id from org/repo
   const { data: repoData } = await supabase
-    .from("public_repository_data")
+    .from("repositories")
     .select("id")
     .eq("org", org)
     .eq("repo", repo)

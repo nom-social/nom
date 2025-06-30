@@ -21,14 +21,15 @@ export const syncRepoMetadata = schedules.task({
     // Fetch all repositories with metadata and access_token
     const { data: repos } = await supabase
       .from("repositories")
-      .select(`id, org, repo, access_token`) // join repositories by id
+      .select(`id, org, repo, repositories_secure ( access_token )`)
       .throwOnError();
 
     logger.info(`Fetched ${repos.length} repositories`);
 
     for (const repo of repos) {
       try {
-        const access_token = repo.access_token || undefined;
+        const access_token =
+          repo.repositories_secure?.access_token || undefined;
         const octokit = new Octokit({ auth: access_token });
 
         // Fetch repo details
@@ -96,22 +97,15 @@ export const syncRepoMetadata = schedules.task({
           license: repoData.license?.spdx_id || repoData.license?.name || null,
         };
 
-        // Update metadata in public_repository_data
+        // Update metadata in repositories
         await supabase
-          .from("public_repository_data")
-          .upsert(
-            {
-              metadata,
-              org: repo.org,
-              repo: repo.repo,
-              id: repo.id,
-            },
-            { onConflict: "id" }
-          )
+          .from("repositories")
+          .update({ metadata })
+          .eq("id", repo.id)
           .throwOnError();
 
         await supabase
-          .from("repositories")
+          .from("repositories_secure")
           .update({
             settings: {
               pull_request_summary_template: pullRequestTemplate,
