@@ -2,7 +2,7 @@
 
 # Nom
 
-Welcome to the Nom project! This repository powers the Nom social platform, helping you track, share, and celebrate open source activity.
+Welcome to the Nom project! This repository powers the Nom platform, helping you track, share, and celebrate open source activity.
 
 ## Prerequisites
 
