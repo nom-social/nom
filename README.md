@@ -62,6 +62,24 @@ We use [Supabase](https://supabase.com/) for our database and authentication. To
 
    This will reset and migrate your local database to the latest schema.
 
+### 2.1. Migrating Up (Applying New Migrations)
+
+If you make changes to the database schema (for example, by editing files in `supabase/migrations/`), you need to apply these migrations to your local Supabase instance:
+
+```sh
+npx supabase db push
+```
+
+This command will apply any new migrations to your running local database.
+
+If you want to generate a new migration after making schema changes, use:
+
+```sh
+npx supabase migration new <migration_name>
+```
+
+Then edit the generated SQL file in `supabase/migrations/`, and run `npx supabase db push` again to apply it.
+
 ### 3. Setup Trigger.dev (Background Jobs)
 
 We use [Trigger.dev](https://trigger.dev/) for background jobs and workflows.
