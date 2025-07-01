@@ -110,24 +110,24 @@ export async function processIssueCommentEvent({
   };
   const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
 
-  for (const subscriber of subscribers) {
-    const { data: user } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", subscriber.user_id)
-      .single()
-      .throwOnError();
+  // Batch query all subscriber users at once
+  const subscriberIds = subscribers.map((s) => s.user_id);
+  const { data: users } = await supabase
+    .from("users")
+    .select("*")
+    .in("id", subscriberIds)
+    .throwOnError();
 
+  for (const user of users ?? []) {
     const isMyIssue = user.github_username === issue.user.login;
     const isAssignedToMe = issue.assignees.some(
       (assignee) => assignee.login === user.github_username
     );
-    // For comments, also check if the user is the commenter
     const isMyComment =
       validationResult.comment?.user?.login === user.github_username;
 
     userTimelineEntries.push({
-      user_id: subscriber.user_id,
+      user_id: user.id,
       categories:
         isMyIssue || isAssignedToMe || isMyComment ? ["issues"] : undefined,
       ...timelineEntry,

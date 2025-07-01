@@ -204,21 +204,22 @@ export async function processPushEvent({
   const pusherUsername = payload.pusher.username;
 
   const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
-  for (const subscriber of subscribers) {
-    const { data: user } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", subscriber.user_id)
-      .single()
-      .throwOnError();
 
-    // Check if user is pusher or commit author
+  // Batch query all subscriber users at once
+  const subscriberIds = subscribers.map((s) => s.user_id);
+  const { data: users } = await supabase
+    .from("users")
+    .select("*")
+    .in("id", subscriberIds)
+    .throwOnError();
+
+  for (const user of users ?? []) {
     if (
       user.github_username === pusherUsername ||
       commitAuthors.has(user.github_username)
     ) {
       userTimelineEntries.push({
-        user_id: subscriber.user_id,
+        user_id: user.id,
         categories: ["pushes"],
         ...timelineEntry,
       });
