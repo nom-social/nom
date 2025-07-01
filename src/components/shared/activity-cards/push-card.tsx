@@ -1,5 +1,5 @@
 import React from "react";
-import { ShareIcon, UploadIcon } from "lucide-react";
+import { GitCommitVertical, ShareIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 
@@ -85,7 +85,7 @@ export default function PushCard({
         </CardTitle>
         <CardAction>
           <Badge className="bg-[var(--nom-green)] border-transparent uppercase text-black">
-            <UploadIcon />
+            <GitCommitVertical />
             pushed
           </Badge>
         </CardAction>
