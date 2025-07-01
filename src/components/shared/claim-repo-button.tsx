@@ -18,8 +18,15 @@ export default function ClaimRepoButton() {
   if (data > 0) return null;
 
   return (
-    <Button size="sm" className="w-full bg-[var(--nom-yellow)] text-black">
-      Claim your repo 🎉
-    </Button>
+    <a
+      href="https://tally.so/r/mVaDaN"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="w-full"
+    >
+      <Button size="sm" className="w-full bg-[var(--nom-yellow)] text-black">
+        Claim your repo 🎉
+      </Button>
+    </a>
   );
 }
