@@ -86,7 +86,7 @@ export default function PRCard({
           </a>
         </CardTitle>
         <CardAction>
-          <Badge className="bg-[var(--nom-purple)] hover:opacity-90 border-transparent uppercase text-black">
+          <Badge className="bg-[var(--nom-purple)] border-transparent uppercase text-black">
             <GitMergeIcon />
             {state}
           </Badge>

@@ -88,7 +88,7 @@ export default function IssueCard({
         <CardAction>
           <Badge
             className={cn(
-              "hover:opacity-90 border-transparent uppercase text-black",
+              "border-transparent uppercase text-black",
               state === "open"
                 ? "bg-[var(--nom-green)]"
                 : "bg-[var(--nom-purple)]"

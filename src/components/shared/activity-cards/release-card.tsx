@@ -85,7 +85,7 @@ export default function ReleaseCard({
           </a>
         </CardTitle>
         <CardAction>
-          <Badge className="bg-[var(--nom-blue)] hover:opacity-90 border-transparent uppercase text-black">
+          <Badge className="bg-[var(--nom-blue)] border-transparent uppercase text-black">
             <TagIcon />
             {tagName}
           </Badge>

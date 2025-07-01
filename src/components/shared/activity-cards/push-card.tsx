@@ -84,9 +84,9 @@ export default function PushCard({
           </a>
         </CardTitle>
         <CardAction>
-          <Badge className="bg-[var(--nom-purple)] hover:opacity-90 border-transparent uppercase text-black">
+          <Badge className="bg-[var(--nom-green)] border-transparent uppercase text-black">
             <UploadIcon />
-            PUSHED
+            pushed
           </Badge>
         </CardAction>
         <CardDescription>
