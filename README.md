@@ -2,131 +2,26 @@
 
 # Nom
 
-Welcome to the Nom project! This repository powers the Nom platform, helping you track, share, and celebrate open source activity.
+A social feed for your project's activities on Github.
 
-## Prerequisites
+## Features
 
-Before you begin, make sure you have the following installed:
+- Real-time social feed of your project's GitHub activities (issues, PRs, releases, comments, etc.)
+- Share and subscribe repositories
+- Highly customizable AI prompt for feed generation ([see example](.nom/pull_request_summary_template.txt))
 
-- **Node.js** (v22+ recommended)
-- **Docker** (for local Supabase)
 
-## Environment Variables
+## Built with
+- [Next.js](https://nextjs.org/) - Highly performant React framework
+- [shadcn/ui](https://ui.shadcn.com/) - UI component library
+- [Supabase](https://supabase.com/) - Open source BaaS
+- [Trigger.dev](https://trigger.dev/) - Open source background jobs management
+- [Tanstack Query](https://tanstack.com/query/latest) - Data fetching and caching for React
+- [Zod](https://zod.dev/) - TypeScript-first schema validation
+- [OpenAI](https://openai.com/) - Summarize context for feed content
 
-Before running the application, copy the example environment file and fill in the required values:
-
-```sh
-cp .env.sample .env.local
-```
-
-Then, open `.env.local` and fill in the following variables:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=""
-NEXT_PUBLIC_SUPABASE_ANON_KEY=""
-SUPABASE_SERVICE_ROLE_KEY=""
-OPENAI_API_KEY=""
-```
-
-## Getting Started
-
-### 1. Install dependencies
-
-```sh
-npm install
-```
-
-### 2. Setup Supabase (Local Development)
-
-We use [Supabase](https://supabase.com/) for our database and authentication. To run it locally:
-
-1. **Install the Supabase CLI:**
-
-   ```sh
-   npm install -g supabase
-   ```
-
-2. **Start Supabase locally:**
-
-   ```sh
-   npx supabase start
-   ```
-
-   This will spin up Supabase using Docker. You can access Supabase Studio at [http://localhost:54323](http://localhost:54323).
-
-3. **Apply database migrations:**
-
-   ```sh
-   npx supabase db reset
-   ```
-
-   This will reset and migrate your local database to the latest schema.
-
-### 2.1. Migrating Up (Applying New Migrations)
-
-If you make changes to the database schema (for example, by editing files in `supabase/migrations/`), you need to apply these migrations to your local Supabase instance:
-
-```sh
-npx supabase db push
-```
-
-This command will apply any new migrations to your running local database.
-
-If you want to generate a new migration after making schema changes, use:
-
-```sh
-npx supabase migration new <migration_name>
-```
-
-Then edit the generated SQL file in `supabase/migrations/`, and run `npx supabase db push` again to apply it.
-
-### 3. Setup Trigger.dev (Background Jobs)
-
-We use [Trigger.dev](https://trigger.dev/) for background jobs and workflows.
-
-1. **Initialize Trigger.dev (if not already):**
-
-   ```sh
-   npx trigger.dev@latest init
-   ```
-
-   This will set up the config and `/trigger` directory if needed.
-
-2. **Run Trigger.dev in development mode:**
-
-   ```sh
-   npx trigger.dev@latest dev
-   ```
-
-   This will watch your `/trigger` directory and run background jobs locally.
-
-### 4. Run the Application
-
-Start the Next.js app in development mode:
-
-```sh
-npm run dev
-```
-
-The app will be available at [http://localhost:3000](http://localhost:3000).
-
-### (Optional) Run Storybook
-
-You can also run Storybook to view and develop UI components in isolation:
-
-```sh
-npm run storybook
-```
-
-Storybook will be available at [http://localhost:6006](http://localhost:6006).
-
----
-
-## Useful Links
-
-- [Supabase Local Development Guide](https://supabase.com/docs/guides/local-development)
-- [Trigger.dev Quick Start](https://trigger.dev/docs/quick-start)
-- [vlt Package Manager](https://vlt.dev/)
+## Local development
+See [CONTRIBUTING.md](CONTRIBUTING.md) for more information about setting up locally.
 
 ## Contributing
 
