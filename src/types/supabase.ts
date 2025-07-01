@@ -151,6 +151,35 @@ export type Database = {
           }
         ];
       };
+      repositories_users: {
+        Row: {
+          created_at: string;
+          id: string;
+          repo_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          repo_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          repo_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "repositories_users_repo_id_fkey";
+            columns: ["repo_id"];
+            isOneToOne: false;
+            referencedRelation: "repositories";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       subscriptions: {
         Row: {
           created_at: string;
