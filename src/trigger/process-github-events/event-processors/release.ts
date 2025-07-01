@@ -59,6 +59,7 @@ export async function processReleaseEvent({
 
   // LLM summarization of release notes
   const supabase = createClient();
+  const openaiClient = openai.createClient();
   const releaseSummaryTemplate = repo.settings
     ? releaseSummaryTemplateSchema.safeParse(repo.settings)
     : null;
@@ -73,7 +74,7 @@ export async function processReleaseEvent({
     .replace("{published_at}", release.published_at?.toISOString() || "N/A")
     .replace("{body}", release.body || "No release notes provided");
 
-  const completion = await openai.createClient().chat.completions.create({
+  const completion = await openaiClient.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
       {
