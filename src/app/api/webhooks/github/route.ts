@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       ...rawBody,
     });
 
-    if (!validationResult.success) {
+    if (!validationResult.success)
       return NextResponse.json(
         {
           error: "Invalid webhook payload",
@@ -31,7 +31,6 @@ export async function POST(request: Request) {
         },
         { status: httpStatus.BAD_REQUEST }
       );
-    }
 
     const payload = validationResult.data;
 
@@ -42,23 +41,18 @@ export async function POST(request: Request) {
     const repo = payload.repository?.name || "unknown";
 
     // Skip database operations for bot comments
-    if (
-      payload.event_type === "issue_comment" &&
-      payload.sender.type === "Bot"
-    ) {
+    if (payload.event_type === "issue_comment" && payload.sender.type === "Bot")
       return NextResponse.json({
         message: "Bot comment, ignoring webhook",
         timestamp: new Date().toISOString(),
       });
-    }
 
     // Skip database operations for ping events
-    if (payload.event_type === "ping") {
+    if (payload.event_type === "ping")
       return NextResponse.json({
         message: "Ping received successfully",
         timestamp: new Date().toISOString(),
       });
-    }
 
     const { data: repoData } = await supabase
       .from("repositories")
@@ -67,38 +61,38 @@ export async function POST(request: Request) {
       .eq("repo", repo)
       .single();
 
-    if (!repoData) {
+    if (!repoData)
       return NextResponse.json({
         message: "Repository not tracked, ignoring webhook",
         timestamp: new Date().toISOString(),
       });
-    }
+    if (!repoData.repositories_secure?.secret)
+      return NextResponse.json({
+        message: "Repository not tracked, ignoring webhook",
+        timestamp: new Date().toISOString(),
+      });
 
     // Secret validation for GitHub webhook
-    if (repoData.repositories_secure?.secret) {
-      const signature = request.headers.get("x-hub-signature-256");
-      if (!signature) {
-        return NextResponse.json(
-          { error: "Missing signature" },
-          { status: httpStatus.UNAUTHORIZED }
-        );
-      }
-      // Reconstruct the raw body for HMAC validation
-      const rawBodyString = JSON.stringify(rawBody);
-      const hmac = crypto.createHmac(
-        "sha256",
-        repoData.repositories_secure.secret
+    const signature = request.headers.get("x-hub-signature-256");
+    if (!signature) {
+      return NextResponse.json(
+        { error: "Missing signature" },
+        { status: httpStatus.UNAUTHORIZED }
       );
-      hmac.update(rawBodyString);
-      const digest = `sha256=${hmac.digest("hex")}`;
-      if (
-        !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest))
-      ) {
-        return NextResponse.json(
-          { error: "Invalid signature" },
-          { status: httpStatus.UNAUTHORIZED }
-        );
-      }
+    }
+    // Reconstruct the raw body for HMAC validation
+    const rawBodyString = JSON.stringify(rawBody);
+    const hmac = crypto.createHmac(
+      "sha256",
+      repoData.repositories_secure.secret
+    );
+    hmac.update(rawBodyString);
+    const digest = `sha256=${hmac.digest("hex")}`;
+    if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest))) {
+      return NextResponse.json(
+        { error: "Invalid signature" },
+        { status: httpStatus.UNAUTHORIZED }
+      );
     }
 
     const eventData: TablesInsert<"github_event_log"> = {
