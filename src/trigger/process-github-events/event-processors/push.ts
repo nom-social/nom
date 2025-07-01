@@ -1,11 +1,14 @@
 import { z } from "zod";
 import crypto from "crypto";
+import { Octokit } from "@octokit/rest";
 
+import * as openai from "@/utils/openai/client";
 import { createClient } from "@/utils/supabase/background";
 import { Json, TablesInsert } from "@/types/supabase";
+import { PushData } from "@/components/shared/activity-cards/shared/schemas";
 
 import { BASELINE_SCORE } from "./shared/constants";
-import { PushData } from "@/components/shared/activity-cards/shared/schemas";
+import { PUSH_SUMMARY_PROMPT } from "./push/prompts";
 
 // Define the schema for push events
 const pushEventSchema = z.object({
@@ -78,8 +81,10 @@ export async function processPushEvent({
   userTimelineEntries: TablesInsert<"user_timeline">[];
   publicTimelineEntries: TablesInsert<"public_timeline">[];
 }> {
-  const payload = pushEventSchema.parse(event.raw_payload);
+  const openaiClient = openai.createClient();
   const supabase = createClient();
+  const payload = pushEventSchema.parse(event.raw_payload);
+  const octokit = new Octokit({ auth: repo.access_token });
 
   // Check if any commit is a merge or squash merge of a PR
   const hasMergedPRCommit = payload.commits.some((commit) =>
@@ -102,6 +107,66 @@ export async function processPushEvent({
     };
   }
 
+  // Fetch the diff for the latest commit
+  let commitDiff = "";
+  try {
+    const commitResp = await octokit.repos.getCommit({
+      owner: repo.org,
+      repo: repo.repo,
+      ref: latestCommit.id,
+    });
+    if (commitResp.data.files) {
+      commitDiff = commitResp.data.files
+        .map((file) => {
+          if (!file.patch) return null;
+          return `=== File: ${file.filename} ===\n${file.patch}`;
+        })
+        .filter(Boolean)
+        .join("\n\n");
+    }
+  } catch (err) {
+    commitDiff = "";
+  }
+
+  // Format commit messages (latest first)
+  const commitMessages = [...payload.commits]
+    .reverse()
+    .map(
+      (commit) =>
+        `- ${commit.message.replace(/\n/g, " ")} (${
+          commit.author.username || commit.author.name || "unknown"
+        })`
+    )
+    .join("\n");
+
+  // Compose prompt
+  const contributors = payload.commits
+    .map((commit) => commit.author.username)
+    .filter((username): username is string => Boolean(username));
+
+  const branch = payload.ref.replace("refs/heads/", "");
+  const pusher = payload.pusher.username || payload.pusher.name;
+  const prompt = PUSH_SUMMARY_PROMPT.replace("{branch}", branch)
+    .replace("{pusher}", pusher)
+    .replace("{contributors}", contributors.join(", "))
+    .replace("{commit_messages}", commitMessages)
+    .replace("{commit_diff}", commitDiff);
+
+  // Generate AI summary
+  const completion = await openaiClient.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are a helpful assistant that summarizes push events. " +
+          "Provide a concise summary as instructed.",
+      },
+      { role: "user", content: prompt },
+    ],
+    temperature: 0.7,
+  });
+
   // Generate dedupe hash similar to pull-request.ts
   const dedupeHash = crypto
     .createHash("sha256")
@@ -119,10 +184,8 @@ export async function processPushEvent({
 
   const pushData: PushData = {
     push: {
-      ai_summary: "",
-      contributors: payload.commits
-        .map((commit) => commit.author.username)
-        .filter((username): username is string => Boolean(username)),
+      ai_summary: completion.choices[0].message.content || "",
+      contributors,
       title: latestCommit.message,
       html_url: latestCommit.url,
       created_at: latestTimestamp,
