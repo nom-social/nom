@@ -5,17 +5,23 @@ export const githubUserSchema = z.object({
   id: z.number(),
 });
 
+export const githubOrgSchema = z.object({
+  login: z.string(),
+  id: z.number(),
+});
+
 export const githubRepositorySchema = z.object({
   id: z.number(),
   name: z.string(),
   full_name: z.string(),
   owner: githubUserSchema,
+  default_branch: z.string(),
 });
 
 // Base schema for all webhook payloads
 export const githubWebhookBaseSchema = z.object({
   action: z.string().optional(),
-  organization: githubUserSchema,
+  organization: githubOrgSchema,
   repository: githubRepositorySchema,
 });
 
@@ -49,6 +55,11 @@ export const githubWebhookPayloadSchema = z.discriminatedUnion("event_type", [
   }),
   z.object({
     event_type: z.literal("release"),
+    ...githubWebhookBaseSchema.shape,
+  }),
+  z.object({
+    event_type: z.literal("push"),
+    ref: z.string(),
     ...githubWebhookBaseSchema.shape,
   }),
 ]);

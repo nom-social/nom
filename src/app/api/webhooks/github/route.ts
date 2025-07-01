@@ -106,6 +106,18 @@ export async function POST(request: Request) {
       raw_payload: { event_type: eventType, ...rawBody } as Json,
     };
 
+    // Only store push events to the default branch
+    if (payload.event_type === "push") {
+      const pushedBranch = payload.ref.replace("refs/heads/", "");
+      const defaultBranch = payload.repository.default_branch;
+      if (pushedBranch !== defaultBranch) {
+        return NextResponse.json({
+          message: `Push event to non-default branch (${pushedBranch}), ignoring webhook`,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
+
     // Handle star events
     if (payload.event_type === "star") {
       const actorLogin = payload.sender.login;
