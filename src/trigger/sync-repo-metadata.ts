@@ -22,10 +22,13 @@ async function getReposList() {
   if (Array.isArray(data) || !("content" in data)) return [];
   // Decode base64 content
   const content = Buffer.from(data.content, "base64").toString("utf-8");
-  const repos = content.split("\n").map((line) => {
-    const [org, repo] = line.split("/");
-    return { org, repo };
-  });
+  const repos = content
+    .split("\n")
+    .map((line) => {
+      const [org, repo] = line.split("/");
+      return { org, repo };
+    })
+    .filter((repo) => repo.org && repo.repo);
 
   const { data: reposData } = await supabase
     .from("repositories")
