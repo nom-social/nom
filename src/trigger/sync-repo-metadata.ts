@@ -9,36 +9,6 @@ import { LANGUAGE_COLORS } from "./update-repo-metadata/constants";
 // Zod schema for template validation
 const templateSchema = z.string().max(1_000);
 
-async function getReposList() {
-  const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-  const supabase = createClient();
-
-  const { data } = await octokit.repos.getContent({
-    owner: "nom-social",
-    repo: "nom",
-    path: `.nom/repos.txt`,
-  });
-  // Handle both file and array (should be file)
-  if (Array.isArray(data) || !("content" in data)) return [];
-  // Decode base64 content
-  const content = Buffer.from(data.content, "base64").toString("utf-8");
-  const repos = content
-    .split("\n")
-    .map((line) => {
-      const [org, repo] = line.split("/");
-      return { org, repo };
-    })
-    .filter((repo) => repo.org && repo.repo);
-
-  const { data: reposData } = await supabase
-    .from("repositories")
-    .upsert(repos, { onConflict: "org, repo" })
-    .select(`id, org, repo, repositories_secure ( access_token )`)
-    .throwOnError();
-
-  return reposData;
-}
-
 async function fetchNomTemplate({
   filename,
   repo,
@@ -80,7 +50,10 @@ export const syncRepoMetadata = schedules.task({
     logger.info("Starting repository metadata update");
 
     // Fetch all repositories with metadata and access_token
-    const repos = await getReposList();
+    const { data: repos } = await supabase
+      .from("repositories")
+      .select("id, org, repo, repositories_secure ( access_token )")
+      .throwOnError();
 
     logger.info(`Fetched ${repos.length} repositories`);
 
