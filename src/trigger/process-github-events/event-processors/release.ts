@@ -4,6 +4,7 @@ import crypto from "crypto";
 import { Json, TablesInsert } from "@/types/supabase";
 import * as openai from "@/utils/openai/client";
 import { ReleaseData } from "@/components/shared/activity-cards/shared/schemas";
+import { createClient } from "@/utils/supabase/background";
 
 import { BASELINE_SCORE, RELEASE_MULTIPLIER } from "./shared/constants";
 import { RELEASE_SUMMARY_PROMPT } from "./release/prompts";
@@ -57,6 +58,7 @@ export async function processReleaseEvent({
   const { action, release } = validationResult;
 
   // LLM summarization of release notes
+  const supabase = createClient();
   const openaiClient = openai.createClient();
   const releaseSummaryTemplate = repo.settings
     ? releaseSummaryTemplateSchema.safeParse(repo.settings)
@@ -137,10 +139,18 @@ export async function processReleaseEvent({
   };
   const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
 
-  for (const subscriber of subscribers) {
+  // Batch query all subscriber users at once
+  const subscriberIds = subscribers.map((s) => s.user_id);
+  const { data: users } = await supabase
+    .from("users")
+    .select("*")
+    .in("id", subscriberIds)
+    .throwOnError();
+
+  for (const user of users ?? []) {
     userTimelineEntries.push({
       ...timelineEntry,
-      user_id: subscriber.user_id,
+      user_id: user.id,
       categories: ["releases"],
     });
   }

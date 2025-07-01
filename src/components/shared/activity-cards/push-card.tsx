@@ -1,5 +1,5 @@
 import React from "react";
-import { ShareIcon, TagIcon } from "lucide-react";
+import { ShareIcon, UploadIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 
@@ -25,15 +25,14 @@ import {
 } from "@/components/ui/tooltip";
 import { useShare } from "@/hooks/use-share";
 
-type Props = {
+export type Props = {
   title: string;
   contributors: Contributor[];
-  releaseUrl: string;
+  body: string;
+  pushUrl: string;
   repo: string;
   org: string;
-  tagName: string;
-  publishedAt: Date;
-  body: string;
+  createdAt: Date;
   likeCount: number | null;
   liked: boolean;
   onLike?: () => void;
@@ -41,15 +40,14 @@ type Props = {
   hash: string;
 };
 
-export default function ReleaseCard({
+export default function PushCard({
   title,
   contributors,
-  releaseUrl,
+  body,
+  pushUrl,
   repo,
   org,
-  tagName,
-  publishedAt,
-  body,
+  createdAt,
   likeCount,
   liked,
   onLike,
@@ -64,6 +62,7 @@ export default function ReleaseCard({
     }
   };
   const share = useShare();
+
   const formattedLikeCount =
     likeCount !== null
       ? new Intl.NumberFormat(undefined, {
@@ -76,7 +75,7 @@ export default function ReleaseCard({
       <CardHeader>
         <CardTitle className="leading-relaxed font-bold">
           <a
-            href={releaseUrl}
+            href={pushUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="hover:underline focus:underline outline-none"
@@ -85,9 +84,9 @@ export default function ReleaseCard({
           </a>
         </CardTitle>
         <CardAction>
-          <Badge className="bg-[var(--nom-blue)] border-transparent uppercase text-black">
-            <TagIcon />
-            {tagName}
+          <Badge className="bg-[var(--nom-green)] border-transparent uppercase text-black">
+            <UploadIcon />
+            pushed
           </Badge>
         </CardAction>
         <CardDescription>
@@ -103,13 +102,13 @@ export default function ReleaseCard({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span>
-                    {formatDistanceToNow(publishedAt, { addSuffix: false })}
+                    {formatDistanceToNow(createdAt, { addSuffix: false })}
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {publishedAt instanceof Date
-                    ? publishedAt.toLocaleString()
-                    : new Date(publishedAt).toLocaleString()}
+                  {createdAt instanceof Date
+                    ? createdAt.toLocaleString()
+                    : new Date(createdAt).toLocaleString()}
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -126,27 +125,29 @@ export default function ReleaseCard({
       </CardContent>
       <CardFooter>
         <div className="flex flex-row items-center gap-3 sm:gap-4 w-full justify-between">
-          <Button
-            variant="outline"
-            aria-label={liked ? "Unlike release" : "Like release"}
-            onClick={handleLikeClick}
-            size="sm"
-          >
-            <span
-              role="img"
-              aria-label={liked ? "Like release" : "Unlike release"}
-              style={{
-                opacity: liked ? 1 : 0.4,
-                fontSize: "1.25em",
-                transition: "opacity 0.2s",
-                marginRight: "0.25em",
-                verticalAlign: "middle",
-              }}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              aria-label={liked ? "Unlike Push" : "Like Push"}
+              onClick={handleLikeClick}
+              size="sm"
             >
-              🚀
-            </span>
-            {formattedLikeCount}
-          </Button>
+              <span
+                role="img"
+                aria-label={liked ? "Like Push" : "Unlike Push"}
+                style={{
+                  opacity: liked ? 1 : 0.4,
+                  fontSize: "1.25em",
+                  transition: "opacity 0.2s",
+                  marginRight: "0.25em",
+                  verticalAlign: "middle",
+                }}
+              >
+                🚀
+              </span>
+              {formattedLikeCount}
+            </Button>
+          </div>
           <Button
             variant="outline"
             size="sm"

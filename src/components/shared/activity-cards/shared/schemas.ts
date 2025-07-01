@@ -76,3 +76,15 @@ export const releaseDataSchema = z.object({
 });
 
 export type ReleaseData = z.infer<typeof releaseDataSchema>;
+
+export const pushDataSchema = z.object({
+  push: z.object({
+    ai_summary: z.string(),
+    contributors: z.array(z.string()),
+    title: z.string(),
+    html_url: z.string(),
+    created_at: z.string(),
+  }),
+});
+
+export type PushData = z.infer<typeof pushDataSchema>;

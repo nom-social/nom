@@ -1,24 +1,7 @@
 import { Octokit } from "@octokit/rest";
+import { minimatch } from "minimatch";
 
-const EXCLUDED_PATTERNS = [
-  "*.snap",
-  "*.lock",
-  "*.log",
-  "*.map",
-  "*.min.js",
-  "*.min.css",
-  "*.bundle.js",
-  "*.bundle.css",
-  "*.chunk.js",
-  "*.chunk.css",
-  "*.d.ts",
-  "*.tsbuildinfo",
-  "coverage/*",
-  "dist/*",
-  "build/*",
-  ".next/*",
-  "node_modules/*",
-];
+import { EXCLUDED_FILE_PATTERNS } from "@/trigger/process-github-events/event-processors/shared/constants";
 
 export async function getProcessedPullRequestDiff(
   octokit: Octokit,
@@ -33,12 +16,9 @@ export async function getProcessedPullRequestDiff(
 
   // Filter out files matching excluded patterns
   const filteredFiles = files.filter((file) => {
-    return !EXCLUDED_PATTERNS.some((pattern) => {
-      const regex = new RegExp(
-        pattern.replace(/\./g, "\\.").replace(/\*/g, ".*")
-      );
-      return regex.test(file.filename);
-    });
+    return !EXCLUDED_FILE_PATTERNS.some((pattern) =>
+      minimatch(file.filename, pattern)
+    );
   });
 
   // Combine diffs into a single text

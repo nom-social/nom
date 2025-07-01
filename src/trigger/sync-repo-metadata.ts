@@ -77,24 +77,33 @@ export const syncRepoMetadata = schedules.task({
           ]
         );
 
-        const [pullRequestTemplate, issueTemplate, releaseTemplate] =
-          await Promise.all([
-            fetchNomTemplate({
-              filename: "pull_request_summary_template.txt",
-              repo,
-              octokit,
-            }),
-            fetchNomTemplate({
-              filename: "issue_summary_template.txt",
-              repo,
-              octokit,
-            }),
-            fetchNomTemplate({
-              filename: "release_summary_template.txt",
-              repo,
-              octokit,
-            }),
-          ]);
+        const [
+          pullRequestTemplate,
+          issueTemplate,
+          releaseTemplate,
+          pushTemplate,
+        ] = await Promise.all([
+          fetchNomTemplate({
+            filename: "pull_request_summary_template.txt",
+            repo,
+            octokit,
+          }),
+          fetchNomTemplate({
+            filename: "issue_summary_template.txt",
+            repo,
+            octokit,
+          }),
+          fetchNomTemplate({
+            filename: "release_summary_template.txt",
+            repo,
+            octokit,
+          }),
+          fetchNomTemplate({
+            filename: "push_summary_template.txt",
+            repo,
+            octokit,
+          }),
+        ]);
 
         // Convert to array with color
         const languages = Object.entries(languagesData)
@@ -130,6 +139,7 @@ export const syncRepoMetadata = schedules.task({
                 pull_request_summary_template: pullRequestTemplate,
                 issue_summary_template: issueTemplate,
                 release_summary_template: releaseTemplate,
+                push_summary_template: pushTemplate,
               },
               id: repo.id,
             },
