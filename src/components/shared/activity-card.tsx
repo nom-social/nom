@@ -8,10 +8,12 @@ import { useEffect, useState } from "react";
 import PRCard from "@/components/shared/activity-cards/pr-card";
 import IssueCard from "@/components/shared/activity-cards/issue-card";
 import ReleaseCard from "@/components/shared/activity-cards/release-card";
+import PushCard from "@/components/shared/activity-cards/push-card";
 import { Tables } from "@/types/supabase";
 import { issueDataSchema } from "@/components/shared/activity-cards/shared/schemas";
 import { prDataSchema } from "@/components/shared/activity-cards/shared/schemas";
 import { releaseDataSchema } from "@/components/shared/activity-cards/shared/schemas";
+import { pushDataSchema } from "@/components/shared/activity-cards/shared/schemas";
 import {
   isLiked,
   createLike,
@@ -163,6 +165,33 @@ export default function ActivityCard({
             : new Date(release.created_at)
         }
         body={release.ai_summary}
+        likeCount={likeCount}
+        liked={liked}
+        onLike={() => likeMutation.mutate({ hash: item.dedupe_hash })}
+        onUnlike={() => unlikeMutation.mutate({ hash: item.dedupe_hash })}
+        hash={item.dedupe_hash}
+      />
+    );
+  }
+  if (item.type === "push") {
+    const parseResult = pushDataSchema.safeParse(item.data);
+    if (!parseResult.success) {
+      return null;
+    }
+    const push = parseResult.data.push;
+    return (
+      <PushCard
+        key={item.id}
+        title={push.title}
+        contributors={push.contributors.map((login: string) => ({
+          name: login,
+          avatar: `https://github.com/${login}.png`,
+        }))}
+        body={push.ai_summary}
+        pushUrl={push.html_url}
+        repo={repo}
+        org={org}
+        createdAt={new Date(push.created_at)}
         likeCount={likeCount}
         liked={liked}
         onLike={() => likeMutation.mutate({ hash: item.dedupe_hash })}
