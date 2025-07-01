@@ -9,6 +9,64 @@ import { LANGUAGE_COLORS } from "./update-repo-metadata/constants";
 // Zod schema for template validation
 const templateSchema = z.string().max(1_000);
 
+async function getReposList() {
+  const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+  const supabase = createClient();
+
+  const { data } = await octokit.repos.getContent({
+    owner: "nom-social",
+    repo: "nom",
+    path: `.nom/repos.txt`,
+  });
+  // Handle both file and array (should be file)
+  if (Array.isArray(data) || !("content" in data)) return [];
+  // Decode base64 content
+  const content = Buffer.from(data.content, "base64").toString("utf-8");
+  const repos = content.split("\n").map((line) => {
+    const [org, repo] = line.split("/");
+    return { org, repo };
+  });
+
+  const { data: reposData } = await supabase
+    .from("repositories")
+    .upsert(repos, { onConflict: "org, repo" })
+    .select(`id, org, repo, repositories_secure ( access_token )`)
+    .throwOnError();
+
+  return reposData;
+}
+
+async function fetchNomTemplate({
+  filename,
+  repo,
+  octokit,
+}: {
+  filename: string;
+  repo: {
+    org: string;
+    repo: string;
+  };
+  octokit: Octokit;
+}): Promise<string | null> {
+  try {
+    const { data } = await octokit.repos.getContent({
+      owner: repo.org,
+      repo: repo.repo,
+      path: `.nom/${filename}`,
+    });
+    // Handle both file and array (should be file)
+    if (Array.isArray(data) || !("content" in data)) return null;
+    // Decode base64 content
+    const content = Buffer.from(data.content, "base64").toString("utf-8");
+    // Validate with Zod
+    const parsed = templateSchema.safeParse(content);
+    return parsed.success ? content : null;
+  } catch {
+    // Not found or error
+    return null;
+  }
+}
+
 export const syncRepoMetadata = schedules.task({
   id: "sync-repo-metadata",
   // Run every 10 minutes
@@ -19,10 +77,7 @@ export const syncRepoMetadata = schedules.task({
     logger.info("Starting repository metadata update");
 
     // Fetch all repositories with metadata and access_token
-    const { data: repos } = await supabase
-      .from("repositories")
-      .select(`id, org, repo, repositories_secure ( access_token )`)
-      .throwOnError();
+    const repos = await getReposList();
 
     logger.info(`Fetched ${repos.length} repositories`);
 
@@ -46,36 +101,23 @@ export const syncRepoMetadata = schedules.task({
           ]
         );
 
-        // Fetch .nom templates from the root if present
-        async function fetchNomTemplate(
-          filename: string
-        ): Promise<string | null> {
-          try {
-            const { data } = await octokit.repos.getContent({
-              owner: repo.org,
-              repo: repo.repo,
-              path: `.nom/${filename}`,
-            });
-            // Handle both file and array (should be file)
-            if (Array.isArray(data) || !("content" in data)) return null;
-            // Decode base64 content
-            const content = Buffer.from(data.content, "base64").toString(
-              "utf-8"
-            );
-            // Validate with Zod
-            const parsed = templateSchema.safeParse(content);
-            return parsed.success ? content : null;
-          } catch {
-            // Not found or error
-            return null;
-          }
-        }
-
         const [pullRequestTemplate, issueTemplate, releaseTemplate] =
           await Promise.all([
-            fetchNomTemplate("pull_request_summary_template.txt"),
-            fetchNomTemplate("issue_summary_template.txt"),
-            fetchNomTemplate("release_summary_template.txt"),
+            fetchNomTemplate({
+              filename: "pull_request_summary_template.txt",
+              repo,
+              octokit,
+            }),
+            fetchNomTemplate({
+              filename: "issue_summary_template.txt",
+              repo,
+              octokit,
+            }),
+            fetchNomTemplate({
+              filename: "release_summary_template.txt",
+              repo,
+              octokit,
+            }),
           ]);
 
         // Convert to array with color
