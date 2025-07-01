@@ -1,4 +1,5 @@
 import { Octokit } from "@octokit/rest";
+import { minimatch } from "minimatch";
 
 const EXCLUDED_PATTERNS = [
   "*.snap",
@@ -33,12 +34,9 @@ export async function getProcessedPullRequestDiff(
 
   // Filter out files matching excluded patterns
   const filteredFiles = files.filter((file) => {
-    return !EXCLUDED_PATTERNS.some((pattern) => {
-      const regex = new RegExp(
-        pattern.replace(/\./g, "\\.").replace(/\*/g, ".*")
-      );
-      return regex.test(file.filename);
-    });
+    return !EXCLUDED_PATTERNS.some((pattern) =>
+      minimatch(file.filename, pattern)
+    );
   });
 
   // Combine diffs into a single text

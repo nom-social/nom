@@ -9,6 +9,7 @@ import { PushData } from "@/components/shared/activity-cards/shared/schemas";
 
 import { BASELINE_SCORE } from "./shared/constants";
 import { PUSH_SUMMARY_PROMPT } from "./push/prompts";
+import { getCommitDiff } from "./push/utils";
 
 // Define the schema for push events
 const pushEventSchema = z.object({
@@ -54,6 +55,10 @@ const pushEventSchema = z.object({
   }),
 });
 
+const pushSummaryTemplateSchema = z.object({
+  push_summary_template: z.string().max(1_000),
+});
+
 // Helper: Detect if a commit message is a merge or squash merge of a PR
 function isMergeOrSquashPRCommit(message: string): boolean {
   // Standard merge commit: "Merge pull request #123 from ..."
@@ -87,10 +92,9 @@ export async function processPushEvent({
   const octokit = new Octokit({ auth: repo.access_token });
 
   // Check if any commit is a merge or squash merge of a PR
-  const hasMergedPRCommit = payload.commits.some((commit) =>
-    isMergeOrSquashPRCommit(commit.message)
-  );
-  if (hasMergedPRCommit) {
+  if (
+    payload.commits.some((commit) => isMergeOrSquashPRCommit(commit.message))
+  ) {
     // Skip posting this push event
     return {
       userTimelineEntries: [],
@@ -107,26 +111,7 @@ export async function processPushEvent({
     };
   }
 
-  // Fetch the diff for the latest commit
-  let commitDiff = "";
-  try {
-    const commitResp = await octokit.repos.getCommit({
-      owner: repo.org,
-      repo: repo.repo,
-      ref: latestCommit.id,
-    });
-    if (commitResp.data.files) {
-      commitDiff = commitResp.data.files
-        .map((file) => {
-          if (!file.patch) return null;
-          return `=== File: ${file.filename} ===\n${file.patch}`;
-        })
-        .filter(Boolean)
-        .join("\n\n");
-    }
-  } catch (err) {
-    commitDiff = "";
-  }
+  const commitDiff = await getCommitDiff(octokit, repo, latestCommit.id);
 
   // Format commit messages (latest first)
   const commitMessages = [...payload.commits]
@@ -146,11 +131,18 @@ export async function processPushEvent({
 
   const branch = payload.ref.replace("refs/heads/", "");
   const pusher = payload.pusher.username || payload.pusher.name;
-  const prompt = PUSH_SUMMARY_PROMPT.replace("{branch}", branch)
+  const pushSummaryTemplate = repo.settings
+    ? pushSummaryTemplateSchema.safeParse(repo.settings)
+    : null;
+
+  const prompt = (
+    pushSummaryTemplate?.data?.push_summary_template || PUSH_SUMMARY_PROMPT
+  )
+    .replace("{branch}", branch)
     .replace("{pusher}", pusher)
     .replace("{contributors}", contributors.join(", "))
     .replace("{commit_messages}", commitMessages)
-    .replace("{commit_diff}", commitDiff);
+    .replace("{commit_diff}", commitDiff || "No changes");
 
   // Generate AI summary
   const completion = await openaiClient.chat.completions.create({
