@@ -11,6 +11,7 @@ import {
   prDataSchema,
   issueDataSchema,
   releaseDataSchema,
+  pushDataSchema,
 } from "@/components/shared/activity-cards/shared/schemas";
 
 import { fetchFeedItem } from "./page/actions";
@@ -70,36 +71,33 @@ export async function generateMetadata({
     str.length > 200 ? str.slice(0, 200) + "..." : str;
   let description = truncate(`View status update for ${org}/${repo} on Nom.`);
 
-  if (
-    statusItem.type === "pull_request" &&
-    statusItem.data &&
-    typeof statusItem.data === "object"
-  ) {
+  if (statusItem.type === "pull_request") {
     const parseResult = prDataSchema.safeParse(statusItem.data);
     if (!parseResult.success) return {};
     const pr = parseResult.data.pull_request;
     title = pr.title ? `${pr.title} - ${org}/${repo}` : title;
     description = truncate(pr.ai_summary || pr.body || description);
-  } else if (
-    statusItem.type === "issue" &&
-    statusItem.data &&
-    typeof statusItem.data === "object"
-  ) {
+  }
+  if (statusItem.type === "issue") {
     const parseResult = issueDataSchema.safeParse(statusItem.data);
     if (!parseResult.success) return {};
     const issue = parseResult.data.issue;
     title = issue.title ? `${issue.title} - ${org}/${repo}` : title;
     description = truncate(issue.ai_summary || issue.body || description);
-  } else if (
-    statusItem.type === "release" &&
-    statusItem.data &&
-    typeof statusItem.data === "object"
-  ) {
+  }
+  if (statusItem.type === "release") {
     const parseResult = releaseDataSchema.safeParse(statusItem.data);
     if (!parseResult.success) return {};
     const release = parseResult.data.release;
     title = release.name ? `${release.name} - ${org}/${repo}` : title;
     description = truncate(release.ai_summary || release.body || description);
+  }
+  if (statusItem.type === "push") {
+    const parseResult = pushDataSchema.safeParse(statusItem.data);
+    if (!parseResult.success) return {};
+    const push = parseResult.data.push;
+    title = push.title ? `${push.title} - ${org}/${repo}` : title;
+    description = truncate(push.ai_summary || description);
   }
 
   return {
