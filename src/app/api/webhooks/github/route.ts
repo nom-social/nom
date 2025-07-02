@@ -61,12 +61,29 @@ export async function POST(request: Request) {
       .eq("repo", repo)
       .single();
 
-    if (!repoData)
-      return NextResponse.json({
-        message: "Repository not tracked, ignoring webhook",
-        timestamp: new Date().toISOString(),
-      });
-    if (!repoData.repositories_secure?.secret)
+    let finalRepoData = repoData;
+    if (!repoData) {
+      // Create the repository and repositories_secure entries
+      const secret = process.env.GITHUB_WEBHOOK_SECRET;
+      const { data: newRepo } = await supabase
+        .from("repositories")
+        .insert({ org, repo })
+        .select("id")
+        .single()
+        .throwOnError();
+      await supabase
+        .from("repositories_secure")
+        .insert({ repo_id: newRepo.id, secret })
+        .throwOnError();
+      const { data: fetchedRepo } = await supabase
+        .from("repositories")
+        .select("id, repositories_secure ( secret )")
+        .eq("id", newRepo.id)
+        .single();
+      finalRepoData = fetchedRepo;
+    }
+
+    if (!finalRepoData?.repositories_secure?.secret)
       return NextResponse.json({
         message: "Repository not tracked, ignoring webhook",
         timestamp: new Date().toISOString(),
@@ -84,7 +101,7 @@ export async function POST(request: Request) {
     const rawBodyString = JSON.stringify(rawBody);
     const hmac = crypto.createHmac(
       "sha256",
-      repoData.repositories_secure.secret
+      finalRepoData.repositories_secure.secret
     );
     hmac.update(rawBodyString);
     const digest = `sha256=${hmac.digest("hex")}`;
@@ -132,7 +149,7 @@ export async function POST(request: Request) {
         await supabase
           .from("subscriptions")
           .upsert(
-            { user_id: user.id, repo_id: repoData.id },
+            { user_id: user.id, repo_id: finalRepoData.id },
             { onConflict: "user_id,repo_id" }
           )
           .throwOnError();
@@ -142,7 +159,7 @@ export async function POST(request: Request) {
           .from("subscriptions")
           .delete()
           .eq("user_id", user.id)
-          .eq("repo_id", repoData.id)
+          .eq("repo_id", finalRepoData.id)
           .throwOnError();
     }
 

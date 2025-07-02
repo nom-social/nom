@@ -4,7 +4,7 @@ import { Octokit } from "@octokit/rest";
 
 import { createClient } from "@/utils/supabase/background";
 
-import { LANGUAGE_COLORS } from "./update-repo-metadata/constants";
+import { LANGUAGE_COLORS } from "./sync-repo-metadata/constants";
 
 // Zod schema for template validation
 const templateSchema = z.string().max(1_000);
