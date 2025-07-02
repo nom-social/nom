@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 
 import RepoProfileCard from "@/components/[org]/[repo]/repo-profile-card";
 import { Separator } from "@/components/ui/separator";
+import ClaimRepoButton from "@/components/shared/claim-repo-button";
 
 import { fetchRepoProfile } from "./actions";
 import Feed from "./page/feed";
@@ -35,6 +36,8 @@ export default async function RepoPage({
         <p className="text-muted-foreground text-xs">Recent activities</p>
         <Separator className="flex-1" />
       </div>
+
+      <ClaimRepoButton />
 
       <Feed repoId={repoProfile.id} repo={repo} org={org} />
     </main>

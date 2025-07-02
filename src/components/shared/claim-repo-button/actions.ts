@@ -1,7 +1,8 @@
-import { createClient } from "@/utils/supabase/client";
+import { cookies } from "next/headers";
 
+import { createClient } from "@/utils/supabase/server";
 export async function fetchRepoCount() {
-  const supabase = createClient();
+  const supabase = createClient(cookies());
   const {
     data: { session },
   } = await supabase.auth.getSession();

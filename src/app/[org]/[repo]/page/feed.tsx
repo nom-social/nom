@@ -5,7 +5,6 @@ import { Loader } from "lucide-react";
 import React, { useRef, useCallback } from "react";
 
 import ActivityCard from "@/components/shared/activity-card";
-import ClaimRepoButton from "@/components/shared/claim-repo-button";
 
 import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
 
@@ -68,7 +67,6 @@ export default function Feed({
 
   return (
     <div className="flex flex-col gap-4">
-      <ClaimRepoButton />
       {items.length === 0 && !isLoading && (
         <div className="text-muted-foreground">No activity yet.</div>
       )}

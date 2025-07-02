@@ -1,44 +1,7 @@
-import { z } from "zod";
 import { logger, schedules } from "@trigger.dev/sdk/v3";
-import { Octokit } from "@octokit/rest";
 
 import { createClient } from "@/utils/supabase/background";
-
-import { LANGUAGE_COLORS } from "./update-repo-metadata/constants";
-
-// Zod schema for template validation
-const templateSchema = z.string().max(1_000);
-
-async function fetchNomTemplate({
-  filename,
-  repo,
-  octokit,
-}: {
-  filename: string;
-  repo: {
-    org: string;
-    repo: string;
-  };
-  octokit: Octokit;
-}): Promise<string | null> {
-  try {
-    const { data } = await octokit.repos.getContent({
-      owner: repo.org,
-      repo: repo.repo,
-      path: `.nom/${filename}`,
-    });
-    // Handle both file and array (should be file)
-    if (Array.isArray(data) || !("content" in data)) return null;
-    // Decode base64 content
-    const content = Buffer.from(data.content, "base64").toString("utf-8");
-    // Validate with Zod
-    const parsed = templateSchema.safeParse(content);
-    return parsed.success ? content : null;
-  } catch {
-    // Not found or error
-    return null;
-  }
-}
+import { syncSingleRepoMetadataTask } from "./sync-single-repo-metadata";
 
 export const syncRepoMetadata = schedules.task({
   id: "sync-repo-metadata",
@@ -59,93 +22,10 @@ export const syncRepoMetadata = schedules.task({
 
     for (const repo of repos) {
       try {
-        const access_token =
-          repo.repositories_secure?.access_token || undefined;
-        const octokit = new Octokit({ auth: access_token });
-
-        // Fetch repo details
-        const [{ data: repoData }, { data: languagesData }] = await Promise.all(
-          [
-            octokit.repos.get({
-              owner: repo.org,
-              repo: repo.repo,
-            }),
-            octokit.repos.listLanguages({
-              owner: repo.org,
-              repo: repo.repo,
-            }),
-          ]
-        );
-
-        const [
-          pullRequestTemplate,
-          issueTemplate,
-          releaseTemplate,
-          pushTemplate,
-        ] = await Promise.all([
-          fetchNomTemplate({
-            filename: "pull_request_summary_template.txt",
-            repo,
-            octokit,
-          }),
-          fetchNomTemplate({
-            filename: "issue_summary_template.txt",
-            repo,
-            octokit,
-          }),
-          fetchNomTemplate({
-            filename: "release_summary_template.txt",
-            repo,
-            octokit,
-          }),
-          fetchNomTemplate({
-            filename: "push_summary_template.txt",
-            repo,
-            octokit,
-          }),
-        ]);
-
-        // Convert to array with color
-        const languages = Object.entries(languagesData)
-          .map(([name, bytes]) => ({
-            name,
-            bytes,
-            color: LANGUAGE_COLORS[name] || null,
-          }))
-          .sort((a, b) => b.bytes - a.bytes);
-
-        // Prepare metadata
-        const metadata = {
-          avatar_url: `https://github.com/${repo.org}.png`,
-          description: repoData.description || null,
-          created_at: repoData.created_at || null,
-          homepage_url: repoData.homepage || null,
-          languages,
-          license: repoData.license?.spdx_id || repoData.license?.name || null,
-        };
-
-        // Update metadata in repositories
-        await supabase
-          .from("repositories")
-          .update({ metadata })
-          .eq("id", repo.id)
-          .throwOnError();
-
-        await supabase
-          .from("repositories_secure")
-          .upsert(
-            {
-              settings: {
-                pull_request_summary_template: pullRequestTemplate,
-                issue_summary_template: issueTemplate,
-                release_summary_template: releaseTemplate,
-                push_summary_template: pushTemplate,
-              },
-              id: repo.id,
-            },
-            { onConflict: "id" }
-          )
-          .throwOnError();
+        await syncSingleRepoMetadataTask.triggerAndWait({
+          org: repo.org,
+          repo: repo.repo,
+        });
 
         logger.info("Updated metadata for repo", {
           repo: repo.repo,
