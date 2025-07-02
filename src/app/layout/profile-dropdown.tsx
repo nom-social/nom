@@ -16,10 +16,7 @@ export default async function ProfileDropdown() {
   if (!user)
     return (
       <Link href="/auth/login">
-        <Button
-          asChild
-          className="bg-[var(--nom-green)] text-black hover:bg-[var(--nom-green)]/90"
-        >
+        <Button className="bg-[var(--nom-green)] text-black hover:bg-[var(--nom-green)]/90">
           Login
         </Button>
       </Link>
