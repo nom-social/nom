@@ -14,7 +14,7 @@ export default async function ClaimRepoButton() {
   if (!user) {
     return (
       <Button size="sm" className="w-full bg-[var(--nom-yellow)] text-black">
-        <Link href="/auth/login">Claim your repo 🎉</Link>
+        <Link href="/auth/login">Connect your repo 🎉</Link>
       </Button>
     );
   }
@@ -25,7 +25,7 @@ export default async function ClaimRepoButton() {
       target="_blank"
     >
       <Button size="sm" className="w-full bg-[var(--nom-yellow)] text-black">
-        Claim your repo 🎉
+        Connect your repo 🎉
       </Button>
     </a>
   );
