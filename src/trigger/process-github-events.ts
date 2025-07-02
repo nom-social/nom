@@ -1,4 +1,4 @@
-import { logger, schedules, wait } from "@trigger.dev/sdk/v3";
+import { logger, task, wait } from "@trigger.dev/sdk/v3";
 
 import { createClient } from "@/utils/supabase/background";
 
@@ -7,18 +7,12 @@ import { processEvent } from "./process-github-events/event-processors";
 // Initialize Supabase client
 const supabase = createClient();
 
-export const processGithubEvents = schedules.task({
+export const processGithubEvents = task({
   id: "process-github-events",
-  // Run every 5 minutes
-  cron: "*/5 * * * *",
-  maxDuration: 300, // 5 minutes max runtime
-  run: async (payload) => {
+  maxDuration: 300,
+  queue: { concurrencyLimit: 1 },
+  run: async () => {
     const currentTimestamp = new Date().toISOString();
-
-    logger.info("Starting GitHub event processing", {
-      timestamp: payload.timestamp,
-      timezone: payload.timezone,
-    });
 
     // Get unprocessed events
     const { data: events } = await supabase

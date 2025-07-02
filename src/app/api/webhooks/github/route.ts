@@ -5,6 +5,7 @@ import crypto from "crypto";
 
 import { createClient } from "@/utils/supabase/server";
 import { Json, TablesInsert } from "@/types/supabase";
+import { processGithubEvents } from "@/trigger/process-github-events";
 
 import * as schemas from "./schemas";
 import { createNewRepo } from "./route/utils";
@@ -150,6 +151,7 @@ export async function POST(request: Request) {
 
     // Store in Supabase
     await supabase.from("github_event_log").insert(eventData).throwOnError();
+    await processGithubEvents.trigger();
 
     // Return a success response
     return NextResponse.json({
