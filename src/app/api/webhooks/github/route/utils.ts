@@ -11,19 +11,23 @@ export async function createNewRepo({
   supabase: ReturnType<typeof createClient>;
 }) {
   const secret = process.env.GITHUB_WEBHOOK_SECRET;
+  const accessToken = process.env.GITHUB_TOKEN;
   const { data: newRepo } = await supabase
     .from("repositories")
-    .insert({ org, repo })
+    .upsert({ org, repo }, { onConflict: "org,repo" })
     .select("id")
     .single()
     .throwOnError();
   await supabase
     .from("repositories_secure")
-    .insert({ repo_id: newRepo.id, secret })
+    .upsert(
+      { id: newRepo.id, secret, access_token: accessToken },
+      { onConflict: "id" }
+    )
     .throwOnError();
   const { data: fetchedRepo } = await supabase
     .from("repositories")
-    .select("id, repositories_secure ( secret )")
+    .select("*, repositories_secure ( secret )")
     .eq("id", newRepo.id)
     .single();
 
