@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import {
   DropdownMenuContent,
@@ -10,7 +11,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tables } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/client";
-import Link from "next/link";
 
 type Props = {
   user: Tables<"users">;
@@ -42,6 +42,13 @@ export default function DropdownContent({ user }: Props) {
       <Link href="/">
         <DropdownMenuItem>Home</DropdownMenuItem>
       </Link>
+
+      <a
+        href="https://github.com/apps/nom-social-club/installations/new"
+        target="_blank"
+      >
+        <DropdownMenuItem>Connect more repos 🎉</DropdownMenuItem>
+      </a>
 
       <DropdownMenuItem variant="destructive" onClick={handleLogout}>
         Logout
