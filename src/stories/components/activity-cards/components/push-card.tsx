@@ -1,20 +1,18 @@
 import React from "react";
-import { TagIcon } from "lucide-react";
+import { GitCommitVertical } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 import { Contributor } from "@/components/shared/contributor-avatar-group";
-
-import ActivityCardBase from "./shared/activity-card-base";
+import ActivityCardBase from "@/components/shared/activity-card/shared/activity-card-base";
 
 export type Props = {
   title: string;
   contributors: Contributor[];
-  releaseUrl: string;
+  body: string;
+  pushUrl: string;
   repo: string;
   org: string;
-  tagName: string;
-  publishedAt: Date;
-  body: string;
+  createdAt: Date;
   likeCount: number | null;
   liked: boolean;
   onLike?: () => void;
@@ -23,15 +21,14 @@ export type Props = {
   children?: React.ReactNode;
 };
 
-export default function ReleaseCard({
+export default function PushCard({
   title,
   contributors,
-  releaseUrl,
+  body,
+  pushUrl,
   repo,
   org,
-  tagName,
-  publishedAt,
-  body,
+  createdAt,
   likeCount,
   liked,
   onLike,
@@ -41,22 +38,21 @@ export default function ReleaseCard({
   return (
     <ActivityCardBase
       title={title}
-      titleUrl={releaseUrl}
-      badgeIcon={<TagIcon />}
-      badgeLabel={tagName}
-      badgeClassName="bg-[var(--nom-blue)] border-transparent uppercase text-black"
+      titleUrl={pushUrl}
+      badgeIcon={<GitCommitVertical />}
+      badgeLabel="pushed"
+      badgeClassName="bg-[var(--nom-green)] border-transparent uppercase text-black"
       repo={repo}
       org={org}
       repoUrl={`/${org}/${repo}`}
-      timestamp={publishedAt}
-      timestampLabel={formatDistanceToNow(publishedAt, { addSuffix: false })}
+      timestamp={createdAt}
+      timestampLabel={formatDistanceToNow(createdAt, { addSuffix: false })}
       contributors={contributors}
       body={body}
       likeCount={likeCount}
       liked={liked}
       onLike={onLike}
       onUnlike={onUnlike}
-      likeAriaLabel={liked ? "Unlike release" : "Like release"}
       hash={hash}
     />
   );

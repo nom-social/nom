@@ -1,18 +1,19 @@
 import React from "react";
-import { GitCommitVertical } from "lucide-react";
+import { CircleDot, CircleCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 import { Contributor } from "@/components/shared/contributor-avatar-group";
-
-import ActivityCardBase from "./shared/activity-card-base";
+import ActivityCardBase from "@/components/shared/activity-card/shared/activity-card-base";
+import { cn } from "@/lib/utils";
 
 export type Props = {
   title: string;
   contributors: Contributor[];
   body: string;
-  pushUrl: string;
+  issueUrl: string;
   repo: string;
   org: string;
+  state: "open" | "closed";
   createdAt: Date;
   likeCount: number | null;
   liked: boolean;
@@ -22,13 +23,14 @@ export type Props = {
   children?: React.ReactNode;
 };
 
-export default function PushCard({
+export default function IssueCard({
   title,
   contributors,
   body,
-  pushUrl,
+  issueUrl,
   repo,
   org,
+  state,
   createdAt,
   likeCount,
   liked,
@@ -39,10 +41,13 @@ export default function PushCard({
   return (
     <ActivityCardBase
       title={title}
-      titleUrl={pushUrl}
-      badgeIcon={<GitCommitVertical />}
-      badgeLabel="pushed"
-      badgeClassName="bg-[var(--nom-green)] border-transparent uppercase text-black"
+      titleUrl={issueUrl}
+      badgeIcon={state === "open" ? <CircleDot /> : <CircleCheck />}
+      badgeLabel={state}
+      badgeClassName={cn(
+        "border-transparent uppercase text-black",
+        state === "open" ? "bg-[var(--nom-green)]" : "bg-[var(--nom-purple)]"
+      )}
       repo={repo}
       org={org}
       repoUrl={`/${org}/${repo}`}
@@ -54,7 +59,6 @@ export default function PushCard({
       liked={liked}
       onLike={onLike}
       onUnlike={onUnlike}
-      likeAriaLabel={liked ? "Unlike Push" : "Like Push"}
       hash={hash}
     />
   );

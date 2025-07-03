@@ -1,34 +1,31 @@
 import React from "react";
-import { CircleDot, CircleCheck } from "lucide-react";
+import { GitMergeIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 import { Contributor } from "@/components/shared/contributor-avatar-group";
-import { cn } from "@/lib/utils";
-
-import ActivityCardBase from "./shared/activity-card-base";
+import ActivityCardBase from "@/components/shared/activity-card/shared/activity-card-base";
 
 export type Props = {
   title: string;
   contributors: Contributor[];
   body: string;
-  issueUrl: string;
+  prUrl: string;
   repo: string;
   org: string;
-  state: "open" | "closed";
+  state: string;
   createdAt: Date;
   likeCount: number | null;
   liked: boolean;
   onLike?: () => void;
   onUnlike?: () => void;
   hash: string;
-  children?: React.ReactNode;
 };
 
-export default function IssueCard({
+export default function PRCard({
   title,
   contributors,
   body,
-  issueUrl,
+  prUrl,
   repo,
   org,
   state,
@@ -42,13 +39,10 @@ export default function IssueCard({
   return (
     <ActivityCardBase
       title={title}
-      titleUrl={issueUrl}
-      badgeIcon={state === "open" ? <CircleDot /> : <CircleCheck />}
+      titleUrl={prUrl}
+      badgeIcon={<GitMergeIcon />}
       badgeLabel={state}
-      badgeClassName={cn(
-        "border-transparent uppercase text-black",
-        state === "open" ? "bg-[var(--nom-green)]" : "bg-[var(--nom-purple)]"
-      )}
+      badgeClassName="bg-[var(--nom-purple)] border-transparent uppercase text-black"
       repo={repo}
       org={org}
       repoUrl={`/${org}/${repo}`}
@@ -60,7 +54,6 @@ export default function IssueCard({
       liked={liked}
       onLike={onLike}
       onUnlike={onUnlike}
-      likeAriaLabel={liked ? "Unlike Issue" : "Like Issue"}
       hash={hash}
     />
   );

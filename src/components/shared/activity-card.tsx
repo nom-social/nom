@@ -4,11 +4,15 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import {
+  CircleCheck,
+  CircleDot,
+  GitCommitVertical,
+  GitMergeIcon,
+  TagIcon,
+} from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
-import PRCard from "@/components/shared/activity-card/pr-card";
-import IssueCard from "@/components/shared/activity-card/issue-card";
-import ReleaseCard from "@/components/shared/activity-card/release-card";
-import PushCard from "@/components/shared/activity-card/push-card";
 import { Tables } from "@/types/supabase";
 import {
   issueDataSchema,
@@ -16,6 +20,8 @@ import {
   releaseDataSchema,
   pushDataSchema,
 } from "@/components/shared/activity-card/shared/schemas";
+import { cn } from "@/lib/utils";
+
 import {
   isLiked,
   createLike,
@@ -23,8 +29,8 @@ import {
   NotAuthenticatedError,
   getLikeCount,
 } from "./activity-card/actions";
+import ActivityCardBase from "./activity-card/shared/activity-card-base";
 
-// TODO: Simplify the components here.
 export default function ActivityCard({
   item,
   repo,
@@ -85,6 +91,9 @@ export default function ActivityCard({
 
   const liked = likeData?.liked ?? false;
 
+  const handleLike = () => likeMutation.mutate({ hash: item.dedupe_hash });
+  const handleUnlike = () => unlikeMutation.mutate({ hash: item.dedupe_hash });
+
   if (item.type === "pull_request") {
     const parseResult = prDataSchema.safeParse(item.data);
     if (!parseResult.success) {
@@ -92,25 +101,31 @@ export default function ActivityCard({
     }
 
     return (
-      <PRCard
-        key={item.id}
+      <ActivityCardBase
         title={parseResult.data.pull_request.title}
+        titleUrl={parseResult.data.pull_request.html_url}
+        badgeIcon={<GitMergeIcon />}
+        badgeLabel={parseResult.data.pull_request.merged ? "merged" : "open"}
+        badgeClassName="bg-[var(--nom-purple)] border-transparent uppercase text-black"
+        repo={repo}
+        org={org}
+        repoUrl={`/${org}/${repo}`}
+        timestamp={new Date(parseResult.data.pull_request.created_at)}
+        timestampLabel={formatDistanceToNow(
+          new Date(parseResult.data.pull_request.created_at),
+          { addSuffix: false }
+        )}
         contributors={parseResult.data.pull_request.contributors.map(
           (login) => ({
             name: login,
             avatar: `https://github.com/${login}.png`,
           })
         )}
-        body={parseResult.data.pull_request.ai_summary}
-        prUrl={parseResult.data.pull_request.html_url}
-        repo={repo}
-        org={org}
-        state={parseResult.data.pull_request.merged ? "merged" : "open"}
-        createdAt={new Date(parseResult.data.pull_request.updated_at)}
+        body={parseResult.data.pull_request.body ?? undefined}
         likeCount={likeCount}
         liked={liked}
-        onLike={() => likeMutation.mutate({ hash: item.dedupe_hash })}
-        onUnlike={() => unlikeMutation.mutate({ hash: item.dedupe_hash })}
+        onLike={handleLike}
+        onUnlike={handleUnlike}
         hash={item.dedupe_hash}
       />
     );
@@ -122,23 +137,40 @@ export default function ActivityCard({
     }
 
     return (
-      <IssueCard
-        key={item.id}
+      <ActivityCardBase
         title={parseResult.data.issue.title}
+        titleUrl={parseResult.data.issue.html_url}
+        badgeIcon={
+          parseResult.data.issue.state === "open" ? (
+            <CircleDot />
+          ) : (
+            <CircleCheck />
+          )
+        }
+        badgeLabel={parseResult.data.issue.state}
+        badgeClassName={cn(
+          "border-transparent uppercase text-black",
+          parseResult.data.issue.state === "open"
+            ? "bg-[var(--nom-green)]"
+            : "bg-[var(--nom-purple)]"
+        )}
+        repo={repo}
+        org={org}
+        repoUrl={`/${org}/${repo}`}
+        timestamp={new Date(parseResult.data.issue.created_at)}
+        timestampLabel={formatDistanceToNow(
+          new Date(parseResult.data.issue.created_at),
+          { addSuffix: false }
+        )}
         contributors={parseResult.data.issue.contributors.map((login) => ({
           name: login,
           avatar: `https://github.com/${login}.png`,
         }))}
-        body={parseResult.data.issue.ai_summary}
-        issueUrl={parseResult.data.issue.html_url}
-        repo={repo}
-        org={org}
-        state={parseResult.data.issue.state}
-        createdAt={new Date(parseResult.data.issue.updated_at)}
+        body={parseResult.data.issue.body ?? undefined}
         likeCount={likeCount}
         liked={liked}
-        onLike={() => likeMutation.mutate({ hash: item.dedupe_hash })}
-        onUnlike={() => unlikeMutation.mutate({ hash: item.dedupe_hash })}
+        onLike={handleLike}
+        onUnlike={handleUnlike}
         hash={item.dedupe_hash}
       />
     );
@@ -151,27 +183,29 @@ export default function ActivityCard({
     const release = parseResult.data.release;
 
     return (
-      <ReleaseCard
-        key={item.id}
-        title={release.name || release.tag_name}
-        contributors={parseResult.data.release.contributors.map((login) => ({
+      <ActivityCardBase
+        title={release.name ?? release.tag_name}
+        titleUrl={release.html_url}
+        badgeIcon={<TagIcon />}
+        badgeLabel={release.tag_name}
+        badgeClassName="bg-[var(--nom-blue)] border-transparent uppercase text-black"
+        repo={repo}
+        org={org}
+        repoUrl={`/${org}/${repo}`}
+        timestamp={new Date(release.published_at ?? release.created_at)}
+        timestampLabel={formatDistanceToNow(
+          new Date(release.published_at ?? release.created_at),
+          { addSuffix: false }
+        )}
+        contributors={release.contributors.map((login) => ({
           name: login,
           avatar: `https://github.com/${login}.png`,
         }))}
-        releaseUrl={release.html_url}
-        repo={repo}
-        org={org}
-        tagName={release.tag_name}
-        publishedAt={
-          release.published_at
-            ? new Date(release.published_at)
-            : new Date(release.created_at)
-        }
-        body={release.ai_summary}
+        body={release.body ?? undefined}
         likeCount={likeCount}
         liked={liked}
-        onLike={() => likeMutation.mutate({ hash: item.dedupe_hash })}
-        onUnlike={() => unlikeMutation.mutate({ hash: item.dedupe_hash })}
+        onLike={handleLike}
+        onUnlike={handleUnlike}
         hash={item.dedupe_hash}
       />
     );
@@ -183,22 +217,28 @@ export default function ActivityCard({
     }
     const push = parseResult.data.push;
     return (
-      <PushCard
-        key={item.id}
+      <ActivityCardBase
         title={push.title}
-        contributors={push.contributors.map((login: string) => ({
+        titleUrl={push.html_url}
+        badgeIcon={<GitCommitVertical />}
+        badgeLabel="pushed"
+        badgeClassName="bg-[var(--nom-green)] border-transparent uppercase text-black"
+        repo={repo}
+        org={org}
+        repoUrl={`/${org}/${repo}`}
+        timestamp={new Date(push.created_at)}
+        timestampLabel={formatDistanceToNow(new Date(push.created_at), {
+          addSuffix: false,
+        })}
+        contributors={push.contributors.map((login) => ({
           name: login,
           avatar: `https://github.com/${login}.png`,
         }))}
         body={push.ai_summary}
-        pushUrl={push.html_url}
-        repo={repo}
-        org={org}
-        createdAt={new Date(push.created_at)}
         likeCount={likeCount}
         liked={liked}
-        onLike={() => likeMutation.mutate({ hash: item.dedupe_hash })}
-        onUnlike={() => unlikeMutation.mutate({ hash: item.dedupe_hash })}
+        onLike={handleLike}
+        onUnlike={handleUnlike}
         hash={item.dedupe_hash}
       />
     );

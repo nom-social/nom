@@ -40,7 +40,6 @@ export type Props = {
   liked: boolean;
   onLike?: () => void;
   onUnlike?: () => void;
-  likeAriaLabel: string;
   hash: string;
 };
 
@@ -61,7 +60,6 @@ export default function ActivityCardBase({
   liked,
   onLike,
   onUnlike,
-  likeAriaLabel,
   hash,
 }: Props) {
   const share = useShare();
@@ -138,13 +136,13 @@ export default function ActivityCardBase({
         <div className="flex flex-row items-center gap-3 sm:gap-4 w-full justify-between">
           <Button
             variant="outline"
-            aria-label={likeAriaLabel}
+            aria-label={liked ? "Unlike" : "Like"}
             onClick={handleLikeClick}
             size="sm"
           >
             <span
               role="img"
-              aria-label={likeAriaLabel}
+              aria-label={liked ? "Unlike" : "Like"}
               style={{
                 opacity: liked ? 1 : 0.4,
                 fontSize: "1.25em",

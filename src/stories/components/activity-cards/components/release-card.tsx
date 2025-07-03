@@ -1,36 +1,36 @@
 import React from "react";
-import { GitMergeIcon } from "lucide-react";
+import { TagIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 import { Contributor } from "@/components/shared/contributor-avatar-group";
-
-import ActivityCardBase from "./shared/activity-card-base";
+import ActivityCardBase from "@/components/shared/activity-card/shared/activity-card-base";
 
 export type Props = {
   title: string;
   contributors: Contributor[];
-  body: string;
-  prUrl: string;
+  releaseUrl: string;
   repo: string;
   org: string;
-  state: string;
-  createdAt: Date;
+  tagName: string;
+  publishedAt: Date;
+  body: string;
   likeCount: number | null;
   liked: boolean;
   onLike?: () => void;
   onUnlike?: () => void;
   hash: string;
+  children?: React.ReactNode;
 };
 
-export default function PRCard({
+export default function ReleaseCard({
   title,
   contributors,
-  body,
-  prUrl,
+  releaseUrl,
   repo,
   org,
-  state,
-  createdAt,
+  tagName,
+  publishedAt,
+  body,
   likeCount,
   liked,
   onLike,
@@ -40,22 +40,21 @@ export default function PRCard({
   return (
     <ActivityCardBase
       title={title}
-      titleUrl={prUrl}
-      badgeIcon={<GitMergeIcon />}
-      badgeLabel={state}
-      badgeClassName="bg-[var(--nom-purple)] border-transparent uppercase text-black"
+      titleUrl={releaseUrl}
+      badgeIcon={<TagIcon />}
+      badgeLabel={tagName}
+      badgeClassName="bg-[var(--nom-blue)] border-transparent uppercase text-black"
       repo={repo}
       org={org}
       repoUrl={`/${org}/${repo}`}
-      timestamp={createdAt}
-      timestampLabel={formatDistanceToNow(createdAt, { addSuffix: false })}
+      timestamp={publishedAt}
+      timestampLabel={formatDistanceToNow(publishedAt, { addSuffix: false })}
       contributors={contributors}
       body={body}
       likeCount={likeCount}
       liked={liked}
       onLike={onLike}
       onUnlike={onUnlike}
-      likeAriaLabel={liked ? "Unlike PR" : "Like PR"}
       hash={hash}
     />
   );
