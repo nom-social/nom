@@ -1,6 +1,7 @@
 import { syncSingleRepoMetadataTask } from "@/trigger/sync-single-repo-metadata";
 import { createClient } from "@/utils/supabase/server";
 
+// TODO: Make this a batch operation
 export async function createNewRepo({
   supabase,
   org,
@@ -12,7 +13,6 @@ export async function createNewRepo({
   supabase: ReturnType<typeof createClient>;
   senderLogin: string;
 }) {
-  const secret = process.env.GITHUB_WEBHOOK_SECRET;
   const accessToken = process.env.GITHUB_TOKEN;
   const { data: user } = await supabase
     .from("users")
@@ -34,7 +34,6 @@ export async function createNewRepo({
     .upsert(
       {
         id: newRepo.id,
-        secret,
         access_token: accessToken,
       },
       { onConflict: "id" }
@@ -57,6 +56,7 @@ export async function createNewRepo({
     .eq("id", newRepo.id)
     .single();
 
+  // TODO: Make this a batch operation
   await syncSingleRepoMetadataTask.trigger({
     org,
     repo,

@@ -93,7 +93,7 @@ export async function POST(request: Request) {
 
     const { data: repoData } = await supabase
       .from("repositories")
-      .select("id, repositories_secure ( secret )")
+      .select("id")
       .eq("org", org)
       .eq("repo", repo)
       .single();
@@ -104,12 +104,6 @@ export async function POST(request: Request) {
         timestamp: new Date().toISOString(),
       });
     }
-
-    if (!repoData?.repositories_secure?.secret)
-      return NextResponse.json({
-        message: "Repository not tracked, ignoring webhook",
-        timestamp: new Date().toISOString(),
-      });
 
     // Secret validation for GitHub webhook
     const signature = request.headers.get("x-hub-signature-256");
@@ -123,7 +117,7 @@ export async function POST(request: Request) {
     const rawBodyString = JSON.stringify(rawBody);
     const hmac = crypto.createHmac(
       "sha256",
-      repoData.repositories_secure.secret
+      process.env.GITHUB_WEBHOOK_SECRET!
     );
     hmac.update(rawBodyString);
     const digest = `sha256=${hmac.digest("hex")}`;
