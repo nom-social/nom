@@ -49,7 +49,7 @@ export async function createNewRepo({
 
   const { data: fetchedRepos } = await supabase
     .from("repositories")
-    .select("*, repositories_secure ( secret )")
+    .select("*")
     .in(
       "id",
       newRepos.map(({ id }) => id)
