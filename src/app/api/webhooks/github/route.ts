@@ -36,6 +36,41 @@ export async function POST(request: Request) {
 
     const payload = validationResult.data;
 
+    if (payload.event_type === "installation") {
+      if (payload.action === "created") {
+        await createNewRepo({
+          supabase,
+          repos: payload.repositories.map((repo) => ({
+            org: repo.owner.login,
+            repo: repo.name,
+          })),
+          senderLogin: payload.sender.login,
+        });
+        return NextResponse.json({
+          message: "Installation event, creating repositories",
+          timestamp: new Date().toISOString(),
+        });
+      }
+      return NextResponse.json({
+        message: "Installation event, ignoring webhook",
+        timestamp: new Date().toISOString(),
+      });
+    }
+    if (payload.event_type === "installation_repositories") {
+      await createNewRepo({
+        supabase,
+        repos: payload.repositories_added.map((repo) => ({
+          org: repo.owner.login,
+          repo: repo.name,
+        })),
+        senderLogin: payload.sender.login,
+      });
+      return NextResponse.json({
+        message: "Installation repositories event, creating repositories",
+        timestamp: new Date().toISOString(),
+      });
+    }
+
     const org =
       payload.organization?.login ||
       payload.repository?.owner?.login ||
@@ -58,22 +93,17 @@ export async function POST(request: Request) {
 
     const { data: repoData } = await supabase
       .from("repositories")
-      .select("id, repositories_secure ( secret )")
+      .select("id")
       .eq("org", org)
       .eq("repo", repo)
       .single();
 
-    let finalRepoData = repoData;
     if (!repoData) {
-      // Create the repository and repositories_secure entries
-      finalRepoData = await createNewRepo({ supabase, org, repo });
-    }
-
-    if (!finalRepoData?.repositories_secure?.secret)
       return NextResponse.json({
-        message: "Repository not tracked, ignoring webhook",
+        message: "Repository not found, ignoring webhook",
         timestamp: new Date().toISOString(),
       });
+    }
 
     // Secret validation for GitHub webhook
     const signature = request.headers.get("x-hub-signature-256");
@@ -87,7 +117,7 @@ export async function POST(request: Request) {
     const rawBodyString = JSON.stringify(rawBody);
     const hmac = crypto.createHmac(
       "sha256",
-      finalRepoData.repositories_secure.secret
+      process.env.GITHUB_WEBHOOK_SECRET!
     );
     hmac.update(rawBodyString);
     const digest = `sha256=${hmac.digest("hex")}`;
@@ -135,7 +165,7 @@ export async function POST(request: Request) {
         await supabase
           .from("subscriptions")
           .upsert(
-            { user_id: user.id, repo_id: finalRepoData.id },
+            { user_id: user.id, repo_id: repoData.id },
             { onConflict: "user_id,repo_id" }
           )
           .throwOnError();
@@ -145,7 +175,7 @@ export async function POST(request: Request) {
           .from("subscriptions")
           .delete()
           .eq("user_id", user.id)
-          .eq("repo_id", finalRepoData.id)
+          .eq("repo_id", repoData.id)
           .throwOnError();
     }
 

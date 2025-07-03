@@ -62,6 +62,19 @@ export const githubWebhookPayloadSchema = z.discriminatedUnion("event_type", [
     ref: z.string(),
     ...githubWebhookBaseSchema.shape,
   }),
+  z.object({
+    event_type: z.literal("installation"),
+    action: z.string().optional(),
+    repositories: z.array(githubRepositorySchema),
+    sender: githubUserSchema,
+  }),
+  z.object({
+    event_type: z.literal("installation_repositories"),
+    action: z.string().optional(),
+    repositories_added: z.array(githubRepositorySchema),
+    repositories_removed: z.array(githubRepositorySchema),
+    sender: githubUserSchema,
+  }),
 ]);
 
 // Infer types from Zod schemas

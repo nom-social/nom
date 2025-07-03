@@ -1,39 +1,62 @@
-import { syncSingleRepoMetadataTask } from "@/trigger/sync-single-repo-metadata";
+import { syncBatchReposMetadataTask } from "@/trigger/sync-batch-repos-metadata";
 import { createClient } from "@/utils/supabase/server";
 
 export async function createNewRepo({
   supabase,
-  org,
-  repo,
+  repos,
+  senderLogin,
 }: {
-  org: string;
-  repo: string;
+  repos: { org: string; repo: string }[];
   supabase: ReturnType<typeof createClient>;
+  senderLogin: string;
 }) {
-  const secret = process.env.GITHUB_WEBHOOK_SECRET;
   const accessToken = process.env.GITHUB_TOKEN;
-  const { data: newRepo } = await supabase
+  const { data: user } = await supabase
+    .from("users")
+    .select("id, github_username")
+    .eq("github_username", senderLogin)
+    .single();
+
+  const { data: newRepos } = await supabase
     .from("repositories")
-    .upsert({ org, repo }, { onConflict: "org,repo" })
+    .upsert(
+      repos.map(({ org, repo }) => ({
+        org,
+        repo,
+        champion_github_username: user ? null : senderLogin,
+      })),
+      { onConflict: "org,repo" }
+    )
     .select("id")
-    .single()
     .throwOnError();
   await supabase
     .from("repositories_secure")
     .upsert(
-      { id: newRepo.id, secret, access_token: accessToken },
+      newRepos.map(({ id }) => ({ id, access_token: accessToken })),
       { onConflict: "id" }
     )
     .throwOnError();
-  const { data: fetchedRepo } = await supabase
-    .from("repositories")
-    .select("*, repositories_secure ( secret )")
-    .eq("id", newRepo.id)
-    .single();
 
-  await syncSingleRepoMetadataTask.trigger({
-    org,
-    repo,
+  if (user) {
+    await supabase
+      .from("repositories_users")
+      .upsert(
+        newRepos.map(({ id }) => ({ user_id: user.id, repo_id: id })),
+        { onConflict: "user_id,repo_id" }
+      )
+      .throwOnError();
+  }
+
+  const { data: fetchedRepos } = await supabase
+    .from("repositories")
+    .select("*")
+    .in(
+      "id",
+      newRepos.map(({ id }) => id)
+    )
+    .throwOnError();
+
+  await syncBatchReposMetadataTask.trigger({
+    repos: fetchedRepos.map(({ org, repo }) => ({ org, repo })),
   });
-  return fetchedRepo;
 }
