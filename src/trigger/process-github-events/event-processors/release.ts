@@ -75,7 +75,7 @@ export async function processReleaseEvent({
     .replace("{body}", release.body || "No release notes provided");
 
   const completion = await openaiClient.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-4o",
     messages: [
       {
         role: "system",
