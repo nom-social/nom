@@ -1,6 +1,5 @@
 import React from "react";
 import { TagIcon } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 
 import { Contributor } from "@/components/shared/contributor-avatar-group";
 import ActivityCardBase from "@/components/shared/activity-card/shared/activity-card-base";
@@ -48,7 +47,6 @@ export default function ReleaseCard({
       org={org}
       repoUrl={`/${org}/${repo}`}
       timestamp={publishedAt}
-      timestampLabel={formatDistanceToNow(publishedAt, { addSuffix: false })}
       contributors={contributors}
       body={body}
       likeCount={likeCount}

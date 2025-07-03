@@ -1,6 +1,5 @@
 import React from "react";
 import { GitCommitVertical } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 
 import { Contributor } from "@/components/shared/contributor-avatar-group";
 import ActivityCardBase from "@/components/shared/activity-card/shared/activity-card-base";
@@ -46,7 +45,6 @@ export default function PushCard({
       org={org}
       repoUrl={`/${org}/${repo}`}
       timestamp={createdAt}
-      timestampLabel={formatDistanceToNow(createdAt, { addSuffix: false })}
       contributors={contributors}
       body={body}
       likeCount={likeCount}

@@ -11,7 +11,6 @@ import {
   GitMergeIcon,
   TagIcon,
 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 
 import { Tables } from "@/types/supabase";
 import {
@@ -111,10 +110,6 @@ export default function ActivityCard({
         org={org}
         repoUrl={`/${org}/${repo}`}
         timestamp={new Date(parseResult.data.pull_request.created_at)}
-        timestampLabel={formatDistanceToNow(
-          new Date(parseResult.data.pull_request.created_at),
-          { addSuffix: false }
-        )}
         contributors={parseResult.data.pull_request.contributors.map(
           (login) => ({
             name: login,
@@ -158,10 +153,6 @@ export default function ActivityCard({
         org={org}
         repoUrl={`/${org}/${repo}`}
         timestamp={new Date(parseResult.data.issue.created_at)}
-        timestampLabel={formatDistanceToNow(
-          new Date(parseResult.data.issue.created_at),
-          { addSuffix: false }
-        )}
         contributors={parseResult.data.issue.contributors.map((login) => ({
           name: login,
           avatar: `https://github.com/${login}.png`,
@@ -193,10 +184,6 @@ export default function ActivityCard({
         org={org}
         repoUrl={`/${org}/${repo}`}
         timestamp={new Date(release.published_at ?? release.created_at)}
-        timestampLabel={formatDistanceToNow(
-          new Date(release.published_at ?? release.created_at),
-          { addSuffix: false }
-        )}
         contributors={release.contributors.map((login) => ({
           name: login,
           avatar: `https://github.com/${login}.png`,
@@ -227,9 +214,6 @@ export default function ActivityCard({
         org={org}
         repoUrl={`/${org}/${repo}`}
         timestamp={new Date(push.created_at)}
-        timestampLabel={formatDistanceToNow(new Date(push.created_at), {
-          addSuffix: false,
-        })}
         contributors={push.contributors.map((login) => ({
           name: login,
           avatar: `https://github.com/${login}.png`,

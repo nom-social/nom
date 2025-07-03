@@ -1,5 +1,8 @@
 import React from "react";
 import Link from "next/link";
+import { formatDistanceToNow } from "date-fns";
+import { ShareIcon } from "lucide-react";
+
 import {
   Card,
   CardAction,
@@ -21,7 +24,6 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { useShare } from "@/hooks/use-share";
-import { ShareIcon } from "lucide-react";
 
 export type Props = {
   title: string;
@@ -33,7 +35,6 @@ export type Props = {
   org: string;
   repoUrl: string;
   timestamp: Date;
-  timestampLabel?: string;
   contributors: Contributor[];
   body?: string;
   likeCount: number | null;
@@ -53,7 +54,6 @@ export default function ActivityCardBase({
   org,
   repoUrl,
   timestamp,
-  timestampLabel,
   contributors,
   body,
   likeCount,
@@ -110,7 +110,11 @@ export default function ActivityCardBase({
               {" • "}
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span>{timestampLabel}</span>
+                  <span>
+                    {formatDistanceToNow(new Date(timestamp), {
+                      addSuffix: false,
+                    })}
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent>
                   {timestamp instanceof Date
