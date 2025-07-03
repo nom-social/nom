@@ -116,7 +116,7 @@ export default function ActivityCard({
             avatar: `https://github.com/${login}.png`,
           })
         )}
-        body={parseResult.data.pull_request.body ?? undefined}
+        body={parseResult.data.pull_request.ai_summary}
         likeCount={likeCount}
         liked={liked}
         onLike={handleLike}
@@ -157,7 +157,7 @@ export default function ActivityCard({
           name: login,
           avatar: `https://github.com/${login}.png`,
         }))}
-        body={parseResult.data.issue.body ?? undefined}
+        body={parseResult.data.issue.ai_summary}
         likeCount={likeCount}
         liked={liked}
         onLike={handleLike}
@@ -188,7 +188,7 @@ export default function ActivityCard({
           name: login,
           avatar: `https://github.com/${login}.png`,
         }))}
-        body={release.body ?? undefined}
+        body={release.ai_summary}
         likeCount={likeCount}
         liked={liked}
         onLike={handleLike}
