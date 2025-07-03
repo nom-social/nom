@@ -1,14 +1,13 @@
 "use client";
 
-import { Session } from "@supabase/supabase-js";
-
+import { User } from "@supabase/supabase-js";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 import FeedPrivate from "./feed/feed-private";
 import FeedPublic from "./feed/feed-public";
 
-export default function Feed({ session }: { session: Session | null }) {
-  if (!session) {
+export default function Feed({ user }: { user: User | null }) {
+  if (!user) {
     return <FeedPublic />;
   }
 

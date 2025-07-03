@@ -9,12 +9,12 @@ export class NotAuthenticatedError extends Error {
 export async function isLiked(dedupe_hash: string) {
   const supabase = createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session?.user) {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
     return { liked: false };
   }
-  const userId = session.user.id;
+  const userId = user.id;
 
   const { data: likeData } = await supabase
     .from("timeline_likes")
@@ -31,10 +31,10 @@ isLiked.key = "src/components/shared/activity-card/actions/isLiked";
 export async function createLike(dedupe_hash: string) {
   const supabase = createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session?.user) throw new NotAuthenticatedError();
-  const userId = session.user.id;
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new NotAuthenticatedError();
+  const userId = user.id;
 
   await supabase
     .from("timeline_likes")
@@ -45,10 +45,10 @@ export async function createLike(dedupe_hash: string) {
 export async function deleteLike(dedupe_hash: string) {
   const supabase = createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session?.user) throw new NotAuthenticatedError();
-  const userId = session.user.id;
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new NotAuthenticatedError();
+  const userId = user.id;
 
   await supabase
     .from("timeline_likes")
