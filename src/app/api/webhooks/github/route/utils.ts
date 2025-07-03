@@ -5,10 +5,12 @@ export async function createNewRepo({
   supabase,
   org,
   repo,
+  senderLogin,
 }: {
   org: string;
   repo: string;
   supabase: ReturnType<typeof createClient>;
+  senderLogin: string;
 }) {
   const secret = process.env.GITHUB_WEBHOOK_SECRET;
   const accessToken = process.env.GITHUB_TOKEN;
@@ -21,7 +23,12 @@ export async function createNewRepo({
   await supabase
     .from("repositories_secure")
     .upsert(
-      { id: newRepo.id, secret, access_token: accessToken },
+      {
+        id: newRepo.id,
+        secret,
+        access_token: accessToken,
+        champion_github_username: senderLogin,
+      },
       { onConflict: "id" }
     )
     .throwOnError();
