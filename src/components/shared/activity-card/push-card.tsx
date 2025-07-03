@@ -4,7 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 
 import { Contributor } from "@/components/shared/contributor-avatar-group";
 
-import ActivityCardBase from "./shared/ActivityCardBase";
+import ActivityCardBase from "./shared/activity-card-base";
 
 export type Props = {
   title: string;
