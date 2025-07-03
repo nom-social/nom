@@ -1,7 +1,6 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import Image from "next/image";
 
 interface MarkdownProps {
   children: string;
@@ -14,11 +13,18 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
       components={{
         img: ({ src, alt }) => (
           <div className="relative aspect-video w-full overflow-hidden rounded-md border my-4">
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={src as string}
               alt={alt || "Unlabeled image"}
-              fill
-              className="object-cover"
+              style={{
+                objectFit: "cover",
+                width: "100%",
+                height: "100%",
+                position: "absolute",
+                top: 0,
+                left: 0,
+              }}
             />
           </div>
         ),
