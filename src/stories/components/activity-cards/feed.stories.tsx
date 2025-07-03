@@ -1,9 +1,9 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import IssueCard from "@/components/shared/activity-cards/issue-card";
-import PRCard from "@/components/shared/activity-cards/pr-card";
-import ReleaseCard from "@/components/shared/activity-cards/release-card";
+import IssueCard from "@/components/shared/activity-card/issue-card";
+import PRCard from "@/components/shared/activity-card/pr-card";
+import ReleaseCard from "@/components/shared/activity-card/release-card";
 
 const meta: Meta = {
   title: "Components/ActivityCards/Feed",

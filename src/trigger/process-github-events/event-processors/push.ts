@@ -5,7 +5,7 @@ import { Octokit } from "@octokit/rest";
 import * as openai from "@/utils/openai/client";
 import { createClient } from "@/utils/supabase/background";
 import { Json, TablesInsert } from "@/types/supabase";
-import { PushData } from "@/components/shared/activity-cards/shared/schemas";
+import { PushData } from "@/components/shared/activity-card/shared/schemas";
 
 import { BASELINE_SCORE } from "./shared/constants";
 import { PUSH_SUMMARY_PROMPT } from "./push/prompts";

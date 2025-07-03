@@ -5,15 +5,17 @@ import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-import PRCard from "@/components/shared/activity-cards/pr-card";
-import IssueCard from "@/components/shared/activity-cards/issue-card";
-import ReleaseCard from "@/components/shared/activity-cards/release-card";
-import PushCard from "@/components/shared/activity-cards/push-card";
+import PRCard from "@/components/shared/activity-card/pr-card";
+import IssueCard from "@/components/shared/activity-card/issue-card";
+import ReleaseCard from "@/components/shared/activity-card/release-card";
+import PushCard from "@/components/shared/activity-card/push-card";
 import { Tables } from "@/types/supabase";
-import { issueDataSchema } from "@/components/shared/activity-cards/shared/schemas";
-import { prDataSchema } from "@/components/shared/activity-cards/shared/schemas";
-import { releaseDataSchema } from "@/components/shared/activity-cards/shared/schemas";
-import { pushDataSchema } from "@/components/shared/activity-cards/shared/schemas";
+import {
+  issueDataSchema,
+  prDataSchema,
+  releaseDataSchema,
+  pushDataSchema,
+} from "@/components/shared/activity-card/shared/schemas";
 import {
   isLiked,
   createLike,
