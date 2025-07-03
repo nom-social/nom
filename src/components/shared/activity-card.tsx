@@ -24,6 +24,7 @@ import {
   getLikeCount,
 } from "./activity-card/actions";
 
+// TODO: Simplify the components here.
 export default function ActivityCard({
   item,
   repo,
