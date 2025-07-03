@@ -40,10 +40,10 @@ export async function POST(request: Request) {
       if (payload.action === "created") {
         await createNewRepo({
           supabase,
-          repos: payload.repositories.map((repo) => ({
-            org: repo.owner.login,
-            repo: repo.name,
-          })),
+          repos: payload.repositories.map(({ full_name }) => {
+            const [org, repo] = full_name.split("/");
+            return { org, repo };
+          }),
           senderLogin: payload.sender.login,
         });
         return NextResponse.json({
@@ -59,10 +59,10 @@ export async function POST(request: Request) {
     if (payload.event_type === "installation_repositories") {
       await createNewRepo({
         supabase,
-        repos: payload.repositories_added.map((repo) => ({
-          org: repo.owner.login,
-          repo: repo.name,
-        })),
+        repos: payload.repositories_added.map(({ full_name }) => {
+          const [org, repo] = full_name.split("/");
+          return { org, repo };
+        }),
         senderLogin: payload.sender.login,
       });
       return NextResponse.json({
