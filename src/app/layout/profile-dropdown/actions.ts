@@ -6,18 +6,18 @@ import type { Tables } from "@/types/supabase";
 export async function getCurrentUser(): Promise<Tables<"users"> | null> {
   const supabase = createClient(cookies());
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session?.user) return null;
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
 
-  const userId = session.user.id;
-  const { data: user } = await supabase
+  const userId = user.id;
+  const { data: userData } = await supabase
     .from("users")
     .select("*")
     .eq("id", userId)
     .single();
 
-  return user ?? null;
+  return userData ?? null;
 }
 
 getCurrentUser.key = "src/app/layout/profile-dropdown/actions/getCurrentUser";

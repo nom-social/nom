@@ -18,15 +18,15 @@ export async function fetchFeed({
 }) {
   const supabase = createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session?.user) throw new NotAuthenticatedError();
+  if (!user) throw new NotAuthenticatedError();
 
   const { data } = await supabase
     .from("user_timeline")
     .select("*, repositories ( org, repo )")
-    .eq("user_id", session.user.id)
+    .eq("user_id", user.id)
     .order("updated_at", { ascending: false })
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1)

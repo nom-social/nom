@@ -4,12 +4,12 @@ import { createClient } from "@/utils/supabase/server";
 export async function fetchRepoCount() {
   const supabase = createClient(cookies());
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session?.user) return 0;
+  if (!user) return 0;
 
-  const userId = session.user.id;
+  const userId = user.id;
 
   const { count } = await supabase
     .from("repositories_users")

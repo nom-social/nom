@@ -12,12 +12,12 @@ export class NotAuthenticatedError extends Error {
 export async function createSubscription(org: string, repo: string) {
   const supabase = createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session?.user) throw new NotAuthenticatedError();
+  if (!user) throw new NotAuthenticatedError();
 
-  const userId = session.user.id;
+  const userId = user.id;
 
   // Get repo id from org/repo
   const { data: repoData } = await supabase
@@ -71,11 +71,11 @@ export async function createSubscription(org: string, repo: string) {
 export async function removeSubscription(org: string, repo: string) {
   const supabase = createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session?.user) throw new NotAuthenticatedError();
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new NotAuthenticatedError();
 
-  const userId = session.user.id;
+  const userId = user.id;
 
   // Get repo id from org/repo
   const { data: repoData } = await supabase
@@ -98,12 +98,12 @@ export async function removeSubscription(org: string, repo: string) {
 export async function isSubscribed(org: string, repo: string) {
   const supabase = createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session?.user) {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
     return { subscribed: false };
   }
-  const userId = session.user.id;
+  const userId = user.id;
 
   // Get repo id from org/repo
   const { data: repoData } = await supabase
