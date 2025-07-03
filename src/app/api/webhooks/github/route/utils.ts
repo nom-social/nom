@@ -14,9 +14,18 @@ export async function createNewRepo({
 }) {
   const secret = process.env.GITHUB_WEBHOOK_SECRET;
   const accessToken = process.env.GITHUB_TOKEN;
+  const { data: user } = await supabase
+    .from("users")
+    .select("id, github_username")
+    .eq("github_username", senderLogin)
+    .single();
+
   const { data: newRepo } = await supabase
     .from("repositories")
-    .upsert({ org, repo }, { onConflict: "org,repo" })
+    .upsert(
+      { org, repo, champion_github_username: user ? null : senderLogin },
+      { onConflict: "org,repo" }
+    )
     .select("id")
     .single()
     .throwOnError();
@@ -27,11 +36,21 @@ export async function createNewRepo({
         id: newRepo.id,
         secret,
         access_token: accessToken,
-        champion_github_username: senderLogin,
       },
       { onConflict: "id" }
     )
     .throwOnError();
+
+  if (user) {
+    await supabase
+      .from("repositories_users")
+      .upsert(
+        { user_id: user.id, repo_id: newRepo.id },
+        { onConflict: "user_id,repo_id" }
+      )
+      .throwOnError();
+  }
+
   const { data: fetchedRepo } = await supabase
     .from("repositories")
     .select("*, repositories_secure ( secret )")

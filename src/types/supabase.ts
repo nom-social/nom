@@ -97,6 +97,7 @@ export type Database = {
       };
       repositories: {
         Row: {
+          champion_github_username: string | null;
           created_at: string;
           id: string;
           metadata: Json | null;
@@ -104,6 +105,7 @@ export type Database = {
           repo: string;
         };
         Insert: {
+          champion_github_username?: string | null;
           created_at?: string;
           id?: string;
           metadata?: Json | null;
@@ -111,6 +113,7 @@ export type Database = {
           repo: string;
         };
         Update: {
+          champion_github_username?: string | null;
           created_at?: string;
           id?: string;
           metadata?: Json | null;
@@ -122,7 +125,6 @@ export type Database = {
       repositories_secure: {
         Row: {
           access_token: string | null;
-          champion_github_username: string | null;
           created_at: string;
           id: string;
           secret: string | null;
@@ -130,7 +132,6 @@ export type Database = {
         };
         Insert: {
           access_token?: string | null;
-          champion_github_username?: string | null;
           created_at?: string;
           id?: string;
           secret?: string | null;
@@ -138,7 +139,6 @@ export type Database = {
         };
         Update: {
           access_token?: string | null;
-          champion_github_username?: string | null;
           created_at?: string;
           id?: string;
           secret?: string | null;
