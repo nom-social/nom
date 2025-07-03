@@ -38,14 +38,14 @@ export async function POST(request: Request) {
 
     if (payload.event_type === "installation") {
       if (payload.action === "created") {
-        for (const repo of payload.repositories) {
-          await createNewRepo({
-            supabase,
+        await createNewRepo({
+          supabase,
+          repos: payload.repositories.map((repo) => ({
             org: repo.owner.login,
             repo: repo.name,
-            senderLogin: payload.sender.login,
-          });
-        }
+          })),
+          senderLogin: payload.sender.login,
+        });
         return NextResponse.json({
           message: "Installation event, creating repositories",
           timestamp: new Date().toISOString(),
@@ -57,14 +57,14 @@ export async function POST(request: Request) {
       });
     }
     if (payload.event_type === "installation_repositories") {
-      for (const repo of payload.repositories_added) {
-        await createNewRepo({
-          supabase,
+      await createNewRepo({
+        supabase,
+        repos: payload.repositories_added.map((repo) => ({
           org: repo.owner.login,
           repo: repo.name,
-          senderLogin: payload.sender.login,
-        });
-      }
+        })),
+        senderLogin: payload.sender.login,
+      });
       return NextResponse.json({
         message: "Installation repositories event, creating repositories",
         timestamp: new Date().toISOString(),

@@ -1,7 +1,7 @@
 import { logger, schedules } from "@trigger.dev/sdk/v3";
 
 import { createClient } from "@/utils/supabase/background";
-import { syncSingleRepoMetadataTask } from "./sync-single-repo-metadata";
+import { syncBatchReposMetadataTask } from "./sync-batch-repos-metadata";
 
 export const syncRepoMetadata = schedules.task({
   id: "sync-repo-metadata",
@@ -20,25 +20,9 @@ export const syncRepoMetadata = schedules.task({
 
     logger.info(`Fetched ${repos.length} repositories`);
 
-    for (const repo of repos) {
-      try {
-        await syncSingleRepoMetadataTask.triggerAndWait({
-          org: repo.org,
-          repo: repo.repo,
-        });
-
-        logger.info("Updated metadata for repo", {
-          repo: repo.repo,
-          org: repo.org,
-        });
-      } catch (error) {
-        logger.error("Error updating repo metadata", {
-          error,
-          repo: repo.repo,
-          org: repo.org,
-        });
-      }
-    }
+    await syncBatchReposMetadataTask.triggerAndWait({
+      repos: repos.map((repo) => ({ org: repo.org, repo: repo.repo })),
+    });
 
     logger.info("Finished updating repository metadata");
   },

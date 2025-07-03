@@ -1,15 +1,12 @@
-import { syncSingleRepoMetadataTask } from "@/trigger/sync-single-repo-metadata";
+import { syncBatchReposMetadataTask } from "@/trigger/sync-batch-repos-metadata";
 import { createClient } from "@/utils/supabase/server";
 
-// TODO: Make this a batch operation
 export async function createNewRepo({
   supabase,
-  org,
-  repo,
+  repos,
   senderLogin,
 }: {
-  org: string;
-  repo: string;
+  repos: { org: string; repo: string }[];
   supabase: ReturnType<typeof createClient>;
   senderLogin: string;
 }) {
@@ -20,22 +17,22 @@ export async function createNewRepo({
     .eq("github_username", senderLogin)
     .single();
 
-  const { data: newRepo } = await supabase
+  const { data: newRepos } = await supabase
     .from("repositories")
     .upsert(
-      { org, repo, champion_github_username: user ? null : senderLogin },
+      repos.map(({ org, repo }) => ({
+        org,
+        repo,
+        champion_github_username: user ? null : senderLogin,
+      })),
       { onConflict: "org,repo" }
     )
     .select("id")
-    .single()
     .throwOnError();
   await supabase
     .from("repositories_secure")
     .upsert(
-      {
-        id: newRepo.id,
-        access_token: accessToken,
-      },
+      newRepos.map(({ id }) => ({ id, access_token: accessToken })),
       { onConflict: "id" }
     )
     .throwOnError();
@@ -44,22 +41,22 @@ export async function createNewRepo({
     await supabase
       .from("repositories_users")
       .upsert(
-        { user_id: user.id, repo_id: newRepo.id },
+        newRepos.map(({ id }) => ({ user_id: user.id, repo_id: id })),
         { onConflict: "user_id,repo_id" }
       )
       .throwOnError();
   }
 
-  const { data: fetchedRepo } = await supabase
+  const { data: fetchedRepos } = await supabase
     .from("repositories")
     .select("*, repositories_secure ( secret )")
-    .eq("id", newRepo.id)
-    .single();
+    .in(
+      "id",
+      newRepos.map(({ id }) => id)
+    )
+    .throwOnError();
 
-  // TODO: Make this a batch operation
-  await syncSingleRepoMetadataTask.trigger({
-    org,
-    repo,
+  await syncBatchReposMetadataTask.trigger({
+    repos: fetchedRepos.map(({ org, repo }) => ({ org, repo })),
   });
-  return fetchedRepo;
 }
