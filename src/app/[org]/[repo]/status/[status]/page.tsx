@@ -12,7 +12,7 @@ import {
   issueDataSchema,
   releaseDataSchema,
   pushDataSchema,
-} from "@/components/shared/activity-cards/shared/schemas";
+} from "@/components/shared/activity-card/shared/schemas";
 
 import { fetchFeedItem } from "./page/actions";
 

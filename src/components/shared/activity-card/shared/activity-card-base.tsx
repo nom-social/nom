@@ -1,7 +1,7 @@
 import React from "react";
-import { ShareIcon, TagIcon } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
+import { formatDistanceToNow } from "date-fns";
+import { ShareIcon } from "lucide-react";
 
 import {
   Card,
@@ -12,12 +12,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import ContributorAvatarGroup, {
-  Contributor,
-} from "@/components/shared/contributor-avatar-group";
 import { Badge } from "@/components/ui/badge";
 import { Markdown } from "@/components/ui/markdown";
 import { Button } from "@/components/ui/button";
+import ContributorAvatarGroup, {
+  Contributor,
+} from "@/components/shared/contributor-avatar-group";
 import {
   Tooltip,
   TooltipTrigger,
@@ -25,15 +25,18 @@ import {
 } from "@/components/ui/tooltip";
 import { useShare } from "@/hooks/use-share";
 
-type Props = {
+export type Props = {
   title: string;
-  contributors: Contributor[];
-  releaseUrl: string;
+  titleUrl: string;
+  badgeIcon: React.ReactNode;
+  badgeLabel: string;
+  badgeClassName: string;
   repo: string;
   org: string;
-  tagName: string;
-  publishedAt: Date;
-  body: string;
+  repoUrl: string;
+  timestamp: Date;
+  contributors: Contributor[];
+  body?: string;
   likeCount: number | null;
   liked: boolean;
   onLike?: () => void;
@@ -41,14 +44,17 @@ type Props = {
   hash: string;
 };
 
-export default function ReleaseCard({
+export default function ActivityCardBase({
   title,
-  contributors,
-  releaseUrl,
+  titleUrl,
+  badgeIcon,
+  badgeLabel,
+  badgeClassName,
   repo,
   org,
-  tagName,
-  publishedAt,
+  repoUrl,
+  timestamp,
+  contributors,
   body,
   likeCount,
   liked,
@@ -56,6 +62,8 @@ export default function ReleaseCard({
   onUnlike,
   hash,
 }: Props) {
+  const share = useShare();
+
   const handleLikeClick = () => {
     if (liked) {
       onUnlike?.();
@@ -63,12 +71,12 @@ export default function ReleaseCard({
       onLike?.();
     }
   };
-  const share = useShare();
+
   const formattedLikeCount =
     likeCount !== null
-      ? new Intl.NumberFormat(undefined, {
-          notation: "compact",
-        }).format(likeCount)
+      ? new Intl.NumberFormat(undefined, { notation: "compact" }).format(
+          likeCount
+        )
       : "--";
 
   return (
@@ -76,7 +84,7 @@ export default function ReleaseCard({
       <CardHeader>
         <CardTitle className="leading-relaxed font-bold">
           <a
-            href={releaseUrl}
+            href={titleUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="hover:underline focus:underline outline-none"
@@ -85,16 +93,16 @@ export default function ReleaseCard({
           </a>
         </CardTitle>
         <CardAction>
-          <Badge className="bg-[var(--nom-blue)] border-transparent uppercase text-black">
-            <TagIcon />
-            {tagName}
+          <Badge className={badgeClassName}>
+            {badgeIcon}
+            {badgeLabel}
           </Badge>
         </CardAction>
         <CardDescription>
           <div className="flex gap-2 flex-col">
             <div className="text-muted-foreground text-xs">
               <Link
-                href={`/${org}/${repo}`}
+                href={repoUrl}
                 className="hover:underline focus:underline outline-none"
               >
                 {org}/{repo}
@@ -103,13 +111,15 @@ export default function ReleaseCard({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span>
-                    {formatDistanceToNow(publishedAt, { addSuffix: false })}
+                    {formatDistanceToNow(new Date(timestamp), {
+                      addSuffix: false,
+                    })}
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {publishedAt instanceof Date
-                    ? publishedAt.toLocaleString()
-                    : new Date(publishedAt).toLocaleString()}
+                  {timestamp instanceof Date
+                    ? timestamp.toLocaleString()
+                    : new Date(timestamp).toLocaleString()}
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -120,21 +130,23 @@ export default function ReleaseCard({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none font-normal text-sm">
-          <Markdown>{body}</Markdown>
-        </div>
+        {body && (
+          <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none font-normal text-sm">
+            <Markdown>{body}</Markdown>
+          </div>
+        )}
       </CardContent>
       <CardFooter>
         <div className="flex flex-row items-center gap-3 sm:gap-4 w-full justify-between">
           <Button
             variant="outline"
-            aria-label={liked ? "Unlike release" : "Like release"}
+            aria-label={liked ? "Unlike" : "Like"}
             onClick={handleLikeClick}
             size="sm"
           >
             <span
               role="img"
-              aria-label={liked ? "Like release" : "Unlike release"}
+              aria-label={liked ? "Unlike" : "Like"}
               style={{
                 opacity: liked ? 1 : 0.4,
                 fontSize: "1.25em",

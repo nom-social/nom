@@ -2,7 +2,7 @@ import z from "zod";
 import { Octokit } from "@octokit/rest";
 
 import * as openai from "@/utils/openai/client";
-import { IssueData } from "@/components/shared/activity-cards/shared/schemas";
+import { IssueData } from "@/components/shared/activity-card/shared/schemas";
 import { Json } from "@/types/supabase";
 
 import { ISSUE_SUMMARY_PROMPT } from "./prompts";
