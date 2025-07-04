@@ -10,7 +10,7 @@ export async function createNewRepo({
   repos: { org: string; repo: string }[];
   supabase: ReturnType<typeof createClient>;
   senderLogin: string;
-  installationId: string;
+  installationId: number;
 }) {
   const accessToken = process.env.GITHUB_TOKEN;
   const { data: user } = await supabase

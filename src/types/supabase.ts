@@ -127,21 +127,21 @@ export type Database = {
           access_token: string | null;
           created_at: string;
           id: string;
-          installation_id: string | null;
+          installation_id: number;
           settings: Json | null;
         };
         Insert: {
           access_token?: string | null;
           created_at?: string;
           id?: string;
-          installation_id?: string | null;
+          installation_id: number;
           settings?: Json | null;
         };
         Update: {
           access_token?: string | null;
           created_at?: string;
           id?: string;
-          installation_id?: string | null;
+          installation_id?: number;
           settings?: Json | null;
         };
         Relationships: [
