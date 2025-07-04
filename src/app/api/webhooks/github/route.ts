@@ -131,10 +131,7 @@ export async function POST(request: Request) {
     const eventData: TablesInsert<"github_event_log"> = {
       event_type: payload.event_type,
       action: payload.action || null,
-      org:
-        payload.organization.login ||
-        payload.repository.owner.login ||
-        "unknown",
+      org: payload.organization?.login || payload.repository.owner.login,
       repo: payload.repository.name,
       raw_payload: { event_type: eventType, ...rawBody } as Json,
     };

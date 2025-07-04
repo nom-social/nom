@@ -21,7 +21,7 @@ export const githubRepositorySchema = z.object({
 // Base schema for all webhook payloads
 export const githubWebhookBaseSchema = z.object({
   action: z.string().optional(),
-  organization: githubOrgSchema,
+  organization: githubOrgSchema.optional(),
   repository: githubRepositorySchema,
 });
 
