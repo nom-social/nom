@@ -7,11 +7,11 @@ import { createClient } from "@/utils/supabase/background";
 import { Json, TablesInsert } from "@/types/supabase";
 import { PushData } from "@/components/shared/activity-card/shared/schemas";
 import fetchNomTemplate from "@/trigger/shared/fetch-nom-template";
+import propagateLicenseChange from "@/trigger/shared/propagate-license-changes";
 
 import { BASELINE_SCORE } from "./shared/constants";
 import { PUSH_SUMMARY_PROMPT } from "./push/prompts";
 import { getCommitDiff } from "./push/utils";
-import { propagateLicenseChange } from "./shared/utils";
 
 // Define the schema for push events
 const pushEventSchema = z.object({

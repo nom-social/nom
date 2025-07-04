@@ -7,11 +7,11 @@ import * as openai from "@/utils/openai/client";
 import { createClient } from "@/utils/supabase/background";
 import { PrData } from "@/components/shared/activity-card/shared/schemas";
 import fetchNomTemplate from "@/trigger/shared/fetch-nom-template";
+import propagateLicenseChange from "@/trigger/shared/propagate-license-changes";
 
 import { getProcessedPullRequestDiff } from "./pull-request/utils";
 import { PR_SUMMARY_ONLY_PROMPT } from "./pull-request/prompts";
 import { BASELINE_SCORE, PULL_REQUEST_MULTIPLIER } from "./shared/constants";
-import { propagateLicenseChange } from "./shared/utils";
 
 const pullRequestSchema = z.object({
   action: z.enum(["closed"]),

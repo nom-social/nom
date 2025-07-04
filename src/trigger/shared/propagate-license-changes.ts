@@ -2,7 +2,7 @@ import { Octokit } from "@octokit/rest";
 
 import { syncBatchReposMetadataTask } from "@/trigger/sync-batch-repos-metadata";
 
-export async function propagateLicenseChange({
+export default async function propagateLicenseChange({
   octokit,
   repo,
   ref,
