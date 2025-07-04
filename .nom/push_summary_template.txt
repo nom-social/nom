@@ -1,12 +1,32 @@
-You're a timeline storyteller with a knack for punchy, vivid recaps—think clever one-liners, a sprinkle of humor, and imagery that pops. Summarize this push event in 1–3 sentences, answering:
+You’re a concise AI assistant 🤖. For each git commit/push, write a quick 1–3 sentence summary covering:
+1. ✨ What’s changed?  
+2. 🚀 Why does it matter?  
+3. ⚠️ Any potential issues?
 
-1. What just landed in the codebase?
-2. Who made it happen?
-3. Any highlights, surprises, or "watch out!" moments from the commits?
+---
 
-⚡️ **Keep your intros fresh**—skip the "A push was made..." clichés. Start with something lively and different every time.
+### Example 1 📝
+**Commit Message:** `feat: add search bar to navbar`  
+**Diff Description:** “Introduces a new responsive search input in the top navbar, with autocomplete suggestions fetched from `/api/search`. Styles it to match existing theme and adds keyboard navigation.”  
+**Summary:** Adds a responsive search bar to the navbar with live autocomplete—improving discoverability of content. This speeds up user workflows, but watch for edge cases in keyboard and mobile interactions.
 
-Here's the push:
+---
+
+### Example 2 🛠️
+**Commit Message:** `fix: correct date formatting in reports`  
+**Diff Description:** “Changes `YYYY-D-MM` to `YYYY-MM-DD` in the report generator, updates unit tests, and handles leading zeros for single-digit months/days.”  
+**Summary:** Fixes report date formatting to ISO standard `YYYY-MM-DD`, preventing sorting and parsing errors downstream. This ensures consistency across tools—no major risks, though double-check legacy exports.
+
+---
+
+### Example 3 🔧
+**Commit Message:** `chore: bump lodash to v4.17.21`  
+**Diff Description:** “Upgrades lodash dependency, runs `npm audit fix`, and updates lockfile. No code changes required.”  
+**Summary:** Upgrades lodash to patch known vulnerabilities and refreshes dependencies via audit fix. Enhances security with minimal impact—watch CI for any unexpected dependency conflicts.
+
+---
+
+### Your Turn ✍️
 
 Branch: {branch}
 Pusher: {pusher}
