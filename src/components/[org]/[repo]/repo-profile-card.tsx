@@ -131,26 +131,6 @@ export default function RepoProfileCard({
                 )}{" "}
                 subscriber{subscriptionCount === 1 ? "" : "s"}
               </div>
-              <div className="flex flex-row flex-wrap gap-1 sm:gap-2 items-center">
-                <Badge variant="outline">Public</Badge>
-                {topLanguages.map((language) => (
-                  <Badge
-                    key={language.name}
-                    variant="outline"
-                    className="border"
-                    style={
-                      language.color
-                        ? {
-                            borderColor: language.color,
-                            color: language.color,
-                          }
-                        : {}
-                    }
-                  >
-                    {language.name}
-                  </Badge>
-                ))}
-              </div>
             </div>
           </div>
         </CardTitle>
@@ -179,6 +159,27 @@ export default function RepoProfileCard({
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-3">
+          <div className="flex flex-row flex-wrap gap-1 sm:gap-2 items-center">
+            <Badge variant="outline">Public</Badge>
+            {topLanguages.map((language) => (
+              <Badge
+                key={language.name}
+                variant="outline"
+                className="border"
+                style={
+                  language.color
+                    ? {
+                        borderColor: language.color,
+                        color: language.color,
+                      }
+                    : {}
+                }
+              >
+                {language.name}
+              </Badge>
+            ))}
+          </div>
+
           <p className="text-sm">{description}</p>
           <div className="flex flex-col items-start gap-2 md:gap-4 md:flex-row md:items-center">
             <div className="flex flex-row gap-1 items-center">

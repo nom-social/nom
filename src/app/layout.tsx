@@ -29,8 +29,7 @@ const jersey15 = Jersey_15({
 
 export const metadata: Metadata = {
   title: "Nom",
-  description:
-    "Grow your audience with every commit, Nom is your social media for code.",
+  description: "Update your users in real-time.",
 };
 
 export default function RootLayout({
@@ -52,9 +51,9 @@ export default function RootLayout({
                   <NavigationMenuItem>
                     <NavigationMenuLink
                       href="/"
-                      className="font-jersey-15 text-lg"
+                      className="font-jersey-15 text-lg uppercase"
                     >
-                      NOM
+                      Nom
                     </NavigationMenuLink>
                   </NavigationMenuItem>
 
