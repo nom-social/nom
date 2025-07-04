@@ -12,7 +12,6 @@ export async function createNewRepo({
   senderLogin: string;
   installationId: number;
 }) {
-  const accessToken = process.env.GITHUB_TOKEN;
   const { data: user } = await supabase
     .from("users")
     .select("id, github_username")
@@ -36,7 +35,6 @@ export async function createNewRepo({
     .upsert(
       newRepos.map(({ id }) => ({
         id,
-        access_token: accessToken,
         installation_id: installationId,
       })),
       { onConflict: "id" }
