@@ -10,7 +10,7 @@ export async function createNewRepo({
   repos: { org: string; repo: string }[];
   supabase: ReturnType<typeof createClient>;
   senderLogin: string;
-  installationId: number;
+  installationId: string;
 }) {
   const accessToken = process.env.GITHUB_TOKEN;
   const { data: user } = await supabase
@@ -26,7 +26,6 @@ export async function createNewRepo({
         org,
         repo,
         champion_github_username: user ? null : senderLogin,
-        installation_id: installationId,
       })),
       { onConflict: "org,repo" }
     )
@@ -35,7 +34,11 @@ export async function createNewRepo({
   await supabase
     .from("repositories_secure")
     .upsert(
-      newRepos.map(({ id }) => ({ id, access_token: accessToken })),
+      newRepos.map(({ id }) => ({
+        id,
+        access_token: accessToken,
+        installation_id: installationId,
+      })),
       { onConflict: "id" }
     )
     .throwOnError();
