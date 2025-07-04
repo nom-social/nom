@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import httpStatus from "http-status";
 import crypto from "crypto";
+import * as Sentry from "@sentry/nextjs";
 
 import { createClient } from "@/utils/supabase/server";
 import { Json, TablesInsert } from "@/types/supabase";
@@ -199,7 +200,8 @@ export async function POST(request: Request) {
       message: "Webhook received and stored successfully",
       timestamp: new Date().toISOString(),
     });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return NextResponse.json(
       { error: "Failed to process webhook" },
       { status: httpStatus.INTERNAL_SERVER_ERROR }
