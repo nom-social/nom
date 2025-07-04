@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import ActivityCard from "@/components/shared/activity-card";
 
 import { fetchFeed } from "./actions";
+import { cn } from "@/lib/utils";
 
 const LIMIT = 10;
 
@@ -20,6 +21,8 @@ export default function FeedPrivate() {
     isLoading,
     isError,
     error,
+    refetch,
+    isRefetching,
   } = useInfiniteQuery({
     queryKey: [fetchFeed.key],
     queryFn: ({ pageParam }) => fetchFeed({ limit: LIMIT, offset: pageParam }),
@@ -80,7 +83,8 @@ export default function FeedPrivate() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleScrollToTop = () => {
+  const handleScrollToTop = async () => {
+    await refetch();
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -89,15 +93,23 @@ export default function FeedPrivate() {
       <Button
         aria-label="Scroll to top"
         onClick={handleScrollToTop}
-        className={`fixed left-1/2 -translate-x-1/2 top-8 z-50 bg-background border border-border shadow-lg p-2 transition-all duration-300 flex items-center justify-center hover:bg-accent hover:scale-105 active:scale-95 ${
+        className={cn(
+          "fixed left-1/2 -translate-x-1/2 top-10 z-50 border",
+          "shadow-lg p-2 hover:bg-background/90",
+          "active:scale-95 border-[var(--nom-yellow)] bg-background text-white",
+          "transition-all duration-300 flex items-center justify-center hover:scale-105",
           showScrollTop
             ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none -translate-y-8"
-        }`}
-        variant="outline"
+            : "opacity-0 pointer-events-none -translate-y-8 -translate-x-1/2"
+        )}
         size="icon"
+        disabled={isRefetching}
       >
-        <ArrowUp className="w-5 h-5" />
+        {isRefetching ? (
+          <Loader className="animate-spin w-5 h-5" />
+        ) : (
+          <ArrowUp className="w-5 h-5" />
+        )}
       </Button>
 
       <div className="flex flex-col gap-4">
