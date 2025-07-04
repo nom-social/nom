@@ -179,7 +179,7 @@ export async function processPullRequestEvent({
       .replace("{pr_reviews}", reviewsText);
 
     const completion = await openaiClient.chat.completions.create({
-      model: "gpt-4o",
+      model: "o4-mini",
       messages: [
         {
           role: "system",

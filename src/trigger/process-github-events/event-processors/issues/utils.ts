@@ -57,12 +57,13 @@ export async function generateIssueData({
     .replace("{comments}", commentsText || "No comments");
 
   const completion = await openaiClient.chat.completions.create({
-    model: "gpt-4o",
+    model: "o4-mini",
     messages: [
       {
         role: "system",
         content:
-          "You are a helpful assistant that summarizes GitHub issues and their discussions for a timeline feed.",
+          "You are a helpful assistant that summarizes GitHub issues and their " +
+          "discussions for a timeline feed.",
       },
       { role: "user", content: prompt },
     ],
