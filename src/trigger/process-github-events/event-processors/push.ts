@@ -133,9 +133,13 @@ export async function processPushEvent({
     .join("\n");
 
   // Compose prompt
-  const contributors = payload.commits
-    .map((commit) => commit.author.username)
-    .filter((username): username is string => Boolean(username));
+  const contributors = Array.from(
+    new Set(
+      payload.commits
+        .map((commit) => commit.author.username)
+        .filter((username): username is string => Boolean(username))
+    )
+  );
 
   const branch = payload.ref.replace("refs/heads/", "");
   const pusher = payload.pusher.username || payload.pusher.name;

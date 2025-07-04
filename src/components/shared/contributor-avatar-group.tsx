@@ -19,7 +19,7 @@ export default function ContributorAvatarGroup({
 }) {
   return (
     <div className={`flex -space-x-2 ${className}`}>
-      {contributors.map((contributor, idx) => (
+      {Array.from(new Set(contributors)).map((contributor, idx) => (
         <div className="relative group" key={contributor.name + idx}>
           <a
             href={`https://github.com/${contributor.name}`}
