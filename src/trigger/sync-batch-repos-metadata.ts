@@ -4,8 +4,6 @@ import { Octokit } from "@octokit/rest";
 
 import { createClient } from "@/utils/supabase/background";
 
-import { LANGUAGE_COLORS } from "./sync-batch-repos-metadata/constants";
-
 // Zod schema for template validation
 const templateSchema = z.string().max(1_000);
 
@@ -95,7 +93,6 @@ export const syncBatchReposMetadataTask = schemaTask({
           .map(([name, bytes]) => ({
             name,
             bytes,
-            color: LANGUAGE_COLORS[name] || null,
           }))
           .sort((a, b) => b.bytes - a.bytes);
         const metadata = {

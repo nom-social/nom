@@ -26,6 +26,7 @@ import {
 import ShareButton from "./repo-profile-card/share-button";
 import ShareButtonMobile from "./repo-profile-card/share-button-mobile";
 import SubscribeButton from "./repo-profile-card/subscribe-button";
+import { LANGUAGE_COLORS } from "./repo-profile-card/constants";
 
 type Props = {
   org: string;
@@ -34,10 +35,7 @@ type Props = {
   description: string | null;
   websiteUrl: string | null;
   avatarUrl: string;
-  topLanguages: {
-    name: string;
-    color: string | null;
-  }[];
+  topLanguages: { name: string }[];
   license: string | null;
   initialSubscriptionCount: number;
 };
@@ -160,27 +158,19 @@ export default function RepoProfileCard({
       <CardContent>
         <div className="flex flex-col gap-3">
           <div className="flex flex-row flex-wrap gap-1 sm:gap-2 items-center">
-            <Badge variant="outline">Public</Badge>
             {topLanguages.map((language) => (
               <Badge
                 key={language.name}
                 variant="outline"
                 className="border"
-                style={
-                  language.color
-                    ? {
-                        borderColor: language.color,
-                        color: language.color,
-                      }
-                    : {}
-                }
+                style={{ borderColor: LANGUAGE_COLORS[language.name] }}
               >
                 {language.name}
               </Badge>
             ))}
           </div>
 
-          <p className="text-sm">{description}</p>
+          {description && <p className="text-sm">{description}</p>}
           <div className="flex flex-col items-start gap-2 md:gap-4 md:flex-row md:items-center">
             {websiteUrl && (
               <div className="flex flex-row gap-1 items-center">
@@ -202,10 +192,14 @@ export default function RepoProfileCard({
               </p>
             </div>
 
-            <div className="flex flex-row gap-1 items-center">
-              <Scale className="w-3 h-3 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">{license} license</p>
-            </div>
+            {license && (
+              <div className="flex flex-row gap-1 items-center">
+                <Scale className="w-3 h-3 text-muted-foreground" />
+                <p className="text-xs text-muted-foreground">
+                  {license} license
+                </p>
+              </div>
+            )}
 
             <div className="flex flex-row gap-1 items-center">
               <Github className="w-3 h-3 text-muted-foreground" />
