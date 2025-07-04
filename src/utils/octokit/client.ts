@@ -28,7 +28,10 @@ export async function createAuthenticatedOctokitClient(
   // If installationId found, exchange for access token
   if (installationId) {
     const appId = process.env.GITHUB_APP_ID;
-    const privateKey = process.env.GITHUB_APP_PRIVATE_KEY;
+    const privateKey = process.env.GITHUB_APP_PRIVATE_KEY?.replace(
+      /\\n/g,
+      "\n"
+    );
     const octokit = new Octokit({
       authStrategy: createAppAuth,
       auth: {
