@@ -31,14 +31,14 @@ type Props = {
   org: string;
   repo: string;
   createdAt: Date;
-  description: string;
-  websiteUrl: string;
+  description: string | null;
+  websiteUrl: string | null;
   avatarUrl: string;
   topLanguages: {
     name: string;
     color: string | null;
   }[];
-  license: string;
+  license: string | null;
   initialSubscriptionCount: number;
 };
 
@@ -182,18 +182,19 @@ export default function RepoProfileCard({
 
           <p className="text-sm">{description}</p>
           <div className="flex flex-col items-start gap-2 md:gap-4 md:flex-row md:items-center">
-            <div className="flex flex-row gap-1 items-center">
-              <Globe className="w-3 h-3 text-muted-foreground" />
-              <a
-                href={websiteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline focus:underline outline-none text-xs text-[var(--nom-purple)]"
-              >
-                {new URL(websiteUrl).hostname.replace(/^www\./, "")}
-              </a>
-            </div>
-
+            {websiteUrl && (
+              <div className="flex flex-row gap-1 items-center">
+                <Globe className="w-3 h-3 text-muted-foreground" />
+                <a
+                  href={websiteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline focus:underline outline-none text-xs text-[var(--nom-purple)]"
+                >
+                  {new URL(websiteUrl).hostname.replace(/^www\./, "")}
+                </a>
+              </div>
+            )}
             <div className="flex flex-row gap-1 items-center">
               <Calendar className="w-3 h-3 text-muted-foreground" />
               <p className="text-xs text-muted-foreground">

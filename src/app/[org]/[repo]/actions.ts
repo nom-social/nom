@@ -5,7 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 
 const metadataSchema = z.object({
   avatar_url: z.string().url(),
-  description: z.string(),
+  description: z.string().nullable(),
   created_at: z.string(),
   languages: z.array(
     z.object({
@@ -14,8 +14,8 @@ const metadataSchema = z.object({
       bytes: z.number(),
     })
   ),
-  homepage_url: z.string().url(),
-  license: z.string(),
+  homepage_url: z.string().url().nullable(),
+  license: z.string().nullable(),
 });
 
 export async function fetchRepoProfile(org: string, repo: string) {
