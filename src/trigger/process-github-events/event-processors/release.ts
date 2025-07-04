@@ -33,7 +33,7 @@ const releaseSchema = z.object({
 });
 
 const releaseSummaryTemplateSchema = z.object({
-  release_summary_template: z.string().max(1_000),
+  release_summary_template: z.string(),
 });
 
 export async function processReleaseEvent({

@@ -56,7 +56,7 @@ const pushEventSchema = z.object({
 });
 
 const pushSummaryTemplateSchema = z.object({
-  push_summary_template: z.string().max(1_000),
+  push_summary_template: z.string(),
 });
 
 // Helper: Detect if a commit message is a merge or squash merge of a PR

@@ -8,7 +8,7 @@ import { Json } from "@/types/supabase";
 import { ISSUE_SUMMARY_PROMPT } from "./prompts";
 
 const issueSummaryTemplateSchema = z.object({
-  issue_summary_template: z.string().max(1_000),
+  issue_summary_template: z.string(),
 });
 
 export async function generateIssueData({

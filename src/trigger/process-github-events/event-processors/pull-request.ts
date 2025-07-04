@@ -47,7 +47,7 @@ const pullRequestSchema = z.object({
 });
 
 const pullRequestSummaryTemplateSchema = z.object({
-  pull_request_summary_template: z.string().max(1_000),
+  pull_request_summary_template: z.string(),
 });
 
 export async function processPullRequestEvent({
