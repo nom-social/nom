@@ -179,7 +179,7 @@ export default function RepoProfileCard({
                   href={websiteUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:underline focus:underline outline-none text-xs text-[var(--nom-purple)]"
+                  className="hover:underline focus:underline outline-none text-xs text-nom-purple"
                 >
                   {new URL(websiteUrl).hostname.replace(/^www\./, "")}
                 </a>

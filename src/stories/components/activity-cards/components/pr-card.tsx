@@ -41,7 +41,7 @@ export default function PRCard({
       titleUrl={prUrl}
       badgeIcon={<GitMergeIcon />}
       badgeLabel={state}
-      badgeClassName="bg-[var(--nom-purple)] border-transparent uppercase text-black"
+      badgeClassName="bg-nom-purple border-transparent uppercase text-black"
       repo={repo}
       org={org}
       repoUrl={`/${org}/${repo}`}

@@ -40,7 +40,7 @@ export default function PushCard({
       titleUrl={pushUrl}
       badgeIcon={<GitCommitVertical />}
       badgeLabel="pushed"
-      badgeClassName="bg-[var(--nom-green)] border-transparent uppercase text-black"
+      badgeClassName="bg-nom-green border-transparent uppercase text-black"
       repo={repo}
       org={org}
       repoUrl={`/${org}/${repo}`}

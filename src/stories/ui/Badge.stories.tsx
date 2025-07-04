@@ -77,16 +77,16 @@ export const AsLink: Story = {
 export const CustomColors: Story = {
   render: () => (
     <div className="flex gap-4">
-      <Badge className="bg-[var(--nom-green)] text-black hover:opacity-90 border-transparent">
+      <Badge className="bg-nom-green text-black hover:opacity-90 border-transparent">
         Green
       </Badge>
-      <Badge className="bg-[var(--nom-blue)] text-black hover:opacity-90 border-transparent">
+      <Badge className="bg-nom-blue text-black hover:opacity-90 border-transparent">
         Blue
       </Badge>
-      <Badge className="bg-[var(--nom-yellow)] text-black hover:opacity-90 border-transparent">
+      <Badge className="bg-nom-yellow text-black hover:opacity-90 border-transparent">
         Yellow
       </Badge>
-      <Badge className="bg-[var(--nom-purple)] text-white hover:opacity-90 border-transparent">
+      <Badge className="bg-nom-purple text-white hover:opacity-90 border-transparent">
         Purple
       </Badge>
     </div>

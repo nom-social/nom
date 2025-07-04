@@ -16,7 +16,7 @@ export default function ShareButtonMobile({
 
   return (
     <Button
-      className="flex md:hidden bg-[var(--nom-blue)] hover:bg-[var(--nom-blue)]/90"
+      className="flex md:hidden bg-nom-blue hover:bg-nom-blue/90"
       onClick={() => share(`${window.location.origin}/${org}/${repo}`, repo)}
     >
       <Share />

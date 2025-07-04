@@ -96,7 +96,7 @@ export default function FeedPrivate() {
         className={cn(
           "fixed left-1/2 -translate-x-1/2 top-10 z-50 border",
           "shadow-lg p-2 hover:bg-background/90",
-          "active:scale-95 border-[var(--nom-yellow)] bg-background text-white",
+          "active:scale-95 border-nom-yellow bg-background text-white",
           "transition-all duration-300 flex items-center justify-center hover:scale-105",
           showScrollTop
             ? "opacity-100 pointer-events-auto"

@@ -42,6 +42,10 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --color-nom-green: var(--nom-green);
+  --color-nom-blue: var(--nom-blue);
+  --color-nom-yellow: var(--nom-yellow);
+  --color-nom-purple: var(--nom-purple);
 }
 
 :root {
@@ -128,7 +132,8 @@
 }
 
 /* Force styles on Sonner toasts */
-.toaster, .toaster * {
+.toaster,
+.toaster * {
   font-family: var(--font-jetbrains-mono), monospace !important;
   border-radius: var(--radius-md) !important;
 }
