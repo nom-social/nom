@@ -1,4 +1,4 @@
-![Nom Banner](./images/header.png)
+![Nom Banner](./assets/header.png)
 
 # Nom
 

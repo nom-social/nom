@@ -1,15 +1,11 @@
-import z from "zod";
 import { Octokit } from "@octokit/rest";
 
 import * as openai from "@/utils/openai/client";
 import { IssueData } from "@/components/shared/activity-card/shared/schemas";
 import { Json } from "@/types/supabase";
+import fetchNomTemplate from "@/trigger/shared/fetch-nom-template";
 
 import { ISSUE_SUMMARY_PROMPT } from "./prompts";
-
-const issueSummaryTemplateSchema = z.object({
-  issue_summary_template: z.string(),
-});
 
 export async function generateIssueData({
   octokit,
@@ -45,12 +41,13 @@ export async function generateIssueData({
     .map((c) => `- ${c.user?.login}: ${c.body}`)
     .join("\n");
 
-  const issueSummaryTemplate = repo.settings
-    ? issueSummaryTemplateSchema.safeParse(repo.settings)
-    : null;
-  const prompt = (
-    issueSummaryTemplate?.data?.issue_summary_template || ISSUE_SUMMARY_PROMPT
-  )
+  const customizedPrompt = await fetchNomTemplate({
+    filename: "issue_summary_template.txt",
+    repo,
+    octokit,
+  });
+
+  const prompt = (customizedPrompt || ISSUE_SUMMARY_PROMPT)
     .replace("{title}", issue.title)
     .replace("{author}", issue.user.login)
     .replace("{body}", issue.body || "No description provided")

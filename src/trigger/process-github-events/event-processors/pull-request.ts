@@ -6,6 +6,7 @@ import { Json, TablesInsert } from "@/types/supabase";
 import * as openai from "@/utils/openai/client";
 import { createClient } from "@/utils/supabase/background";
 import { PrData } from "@/components/shared/activity-card/shared/schemas";
+import fetchNomTemplate from "@/trigger/shared/fetch-nom-template";
 
 import { getProcessedPullRequestDiff } from "./pull-request/utils";
 import { PR_SUMMARY_ONLY_PROMPT } from "./pull-request/prompts";
@@ -44,10 +45,6 @@ const pullRequestSchema = z.object({
     review_comments: z.number(),
     labels: z.array(z.object({ name: z.string() })),
   }),
-});
-
-const pullRequestSummaryTemplateSchema = z.object({
-  pull_request_summary_template: z.string(),
 });
 
 export async function processPullRequestEvent({
@@ -158,13 +155,12 @@ export async function processPullRequestEvent({
         .map((c) => "- " + c.name)
         .join("\n");
 
-    const pullRequestSummaryTemplate = repo.settings
-      ? pullRequestSummaryTemplateSchema.safeParse(repo.settings)
-      : null;
-    const prompt = (
-      pullRequestSummaryTemplate?.data?.pull_request_summary_template ||
-      PR_SUMMARY_ONLY_PROMPT
-    )
+    const customizedPrompt = await fetchNomTemplate({
+      filename: "pull_request_summary_template.txt",
+      repo,
+      octokit,
+    });
+    const prompt = (customizedPrompt || PR_SUMMARY_ONLY_PROMPT)
       .replace("{title}", pull_request.title)
       .replace("{author}", pull_request.user.login)
       .replace("{author_association}", pull_request.author_association)
