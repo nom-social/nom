@@ -75,6 +75,21 @@ export const githubWebhookPayloadSchema = z.discriminatedUnion("event_type", [
     repositories_removed: z.array(z.object({ full_name: z.string() })),
     sender: githubUserSchema,
   }),
+  z.object({
+    event_type: z.literal("repository"),
+    ...githubWebhookBaseSchema.shape,
+    action: z
+      .enum([
+        "edited",
+        "deleted",
+        "archived",
+        "unarchived",
+        "publicized",
+        "privatized",
+      ])
+      .optional(),
+    sender: githubUserSchema,
+  }),
 ]);
 
 // Infer types from Zod schemas

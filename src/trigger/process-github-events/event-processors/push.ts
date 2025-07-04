@@ -11,6 +11,7 @@ import fetchNomTemplate from "@/trigger/shared/fetch-nom-template";
 import { BASELINE_SCORE } from "./shared/constants";
 import { PUSH_SUMMARY_PROMPT } from "./push/prompts";
 import { getCommitDiff } from "./push/utils";
+import { propagateLicenseChange } from "./shared/utils";
 
 // Define the schema for push events
 const pushEventSchema = z.object({
@@ -109,6 +110,13 @@ export async function processPushEvent({
   }
 
   const commitDiff = await getCommitDiff(octokit, repo, latestCommit.id);
+
+  // Propagate license change if LICENSE file was changed in this push event
+  await propagateLicenseChange({
+    octokit,
+    repo,
+    ref: latestCommit.id,
+  });
 
   // Format commit messages (latest first)
   const commitMessages = [...payload.commits]

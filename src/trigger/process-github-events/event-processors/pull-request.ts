@@ -11,6 +11,7 @@ import fetchNomTemplate from "@/trigger/shared/fetch-nom-template";
 import { getProcessedPullRequestDiff } from "./pull-request/utils";
 import { PR_SUMMARY_ONLY_PROMPT } from "./pull-request/prompts";
 import { BASELINE_SCORE, PULL_REQUEST_MULTIPLIER } from "./shared/constants";
+import { propagateLicenseChange } from "./shared/utils";
 
 const pullRequestSchema = z.object({
   action: z.enum(["closed"]),
@@ -257,6 +258,13 @@ export async function processPullRequestEvent({
       userTimelineEntries: [],
       publicTimelineEntries: [],
     };
+
+  // Propagate license change if LICENSE file was changed in this PR's merge commit
+  await propagateLicenseChange({
+    octokit,
+    repo: { org: repo.org, repo: repo.repo },
+    ref: pull_request.head.sha,
+  });
 
   const prData = await constructPRData();
 

@@ -6,6 +6,7 @@ import crypto from "crypto";
 import { createClient } from "@/utils/supabase/server";
 import { Json, TablesInsert } from "@/types/supabase";
 import { processGithubEvents } from "@/trigger/process-github-events";
+import { syncBatchReposMetadataTask } from "@/trigger/sync-batch-repos-metadata";
 
 import * as schemas from "./schemas";
 import { createNewRepo } from "./route/utils";
@@ -174,6 +175,17 @@ export async function POST(request: Request) {
           .eq("user_id", user.id)
           .eq("repo_id", repoData.id)
           .throwOnError();
+    }
+
+    // Handle repository edited events
+    if (payload.event_type === "repository" && payload.action === "edited") {
+      await syncBatchReposMetadataTask.trigger({
+        repos: [{ org, repo }],
+      });
+      return NextResponse.json({
+        message: "Repository edited event, triggered metadata sync",
+        timestamp: new Date().toISOString(),
+      });
     }
 
     // Store in Supabase
