@@ -6,6 +6,8 @@ import * as openai from "@/utils/openai/client";
 import { createClient } from "@/utils/supabase/background";
 import { Json, TablesInsert } from "@/types/supabase";
 import { PushData } from "@/components/shared/activity-card/shared/schemas";
+import fetchNomTemplate from "@/trigger/shared/fetch-nom-template";
+import propagateLicenseChange from "@/trigger/shared/propagate-license-changes";
 
 import { BASELINE_SCORE } from "./shared/constants";
 import { PUSH_SUMMARY_PROMPT } from "./push/prompts";
@@ -53,10 +55,6 @@ const pushEventSchema = z.object({
     email: z.string(),
     username: z.string().optional(),
   }),
-});
-
-const pushSummaryTemplateSchema = z.object({
-  push_summary_template: z.string(),
 });
 
 // Helper: Detect if a commit message is a merge or squash merge of a PR
@@ -113,6 +111,13 @@ export async function processPushEvent({
 
   const commitDiff = await getCommitDiff(octokit, repo, latestCommit.id);
 
+  // Propagate license change if LICENSE file was changed in this push event
+  await propagateLicenseChange({
+    octokit,
+    repo,
+    ref: latestCommit.id,
+  });
+
   // Format commit messages (latest first)
   const commitMessages = [...payload.commits]
     .reverse()
@@ -131,13 +136,14 @@ export async function processPushEvent({
 
   const branch = payload.ref.replace("refs/heads/", "");
   const pusher = payload.pusher.username || payload.pusher.name;
-  const pushSummaryTemplate = repo.settings
-    ? pushSummaryTemplateSchema.safeParse(repo.settings)
-    : null;
 
-  const prompt = (
-    pushSummaryTemplate?.data?.push_summary_template || PUSH_SUMMARY_PROMPT
-  )
+  const customizedPrompt = await fetchNomTemplate({
+    filename: "push_summary_template.txt",
+    repo,
+    octokit,
+  });
+
+  const prompt = (customizedPrompt || PUSH_SUMMARY_PROMPT)
     .replace("{branch}", branch)
     .replace("{pusher}", pusher)
     .replace("{contributors}", contributors.join(", "))

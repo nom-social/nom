@@ -1,10 +1,12 @@
 import { z } from "zod";
 import crypto from "crypto";
+import { Octokit } from "@octokit/rest";
 
 import { Json, TablesInsert } from "@/types/supabase";
 import * as openai from "@/utils/openai/client";
 import { ReleaseData } from "@/components/shared/activity-card/shared/schemas";
 import { createClient } from "@/utils/supabase/background";
+import fetchNomTemplate from "@/trigger/shared/fetch-nom-template";
 
 import { BASELINE_SCORE, RELEASE_MULTIPLIER } from "./shared/constants";
 import { RELEASE_SUMMARY_PROMPT } from "./release/prompts";
@@ -32,10 +34,6 @@ const releaseSchema = z.object({
   }),
 });
 
-const releaseSummaryTemplateSchema = z.object({
-  release_summary_template: z.string(),
-});
-
 export async function processReleaseEvent({
   event,
   repo,
@@ -55,19 +53,20 @@ export async function processReleaseEvent({
   publicTimelineEntries: TablesInsert<"public_timeline">[];
 }> {
   const validationResult = releaseSchema.parse(event.raw_payload);
+  const octokit = new Octokit({ auth: repo.access_token || undefined });
   const { action, release } = validationResult;
 
   // LLM summarization of release notes
   const supabase = createClient();
   const openaiClient = openai.createClient();
-  const releaseSummaryTemplate = repo.settings
-    ? releaseSummaryTemplateSchema.safeParse(repo.settings)
-    : null;
 
-  const prompt = (
-    releaseSummaryTemplate?.data?.release_summary_template ||
-    RELEASE_SUMMARY_PROMPT
-  )
+  const customizedPrompt = await fetchNomTemplate({
+    filename: "release_summary_template.txt",
+    repo,
+    octokit,
+  });
+
+  const prompt = (customizedPrompt || RELEASE_SUMMARY_PROMPT)
     .replace("{tag_name}", release.tag_name)
     .replace("{name}", release.name || "(no name)")
     .replace("{author}", release.author.login)

@@ -4,36 +4,6 @@ import { Octokit } from "@octokit/rest";
 
 import { createClient } from "@/utils/supabase/background";
 
-// Zod schema for template validation
-const templateSchema = z.string().max(2_000);
-
-async function fetchNomTemplate({
-  filename,
-  repo,
-  octokit,
-}: {
-  filename: string;
-  repo: {
-    org: string;
-    repo: string;
-  };
-  octokit: Octokit;
-}): Promise<string | null> {
-  try {
-    const { data } = await octokit.repos.getContent({
-      owner: repo.org,
-      repo: repo.repo,
-      path: `.nom/${filename}`,
-    });
-    if (Array.isArray(data) || !("content" in data)) return null;
-    const content = Buffer.from(data.content, "base64").toString("utf-8");
-    const parsed = templateSchema.safeParse(content);
-    return parsed.success ? content : null;
-  } catch {
-    return null;
-  }
-}
-
 export const syncBatchReposMetadataTask = schemaTask({
   id: "sync-batch-repos-metadata",
   schema: z.object({
@@ -62,33 +32,7 @@ export const syncBatchReposMetadataTask = schemaTask({
             octokit.repos.listLanguages({ owner: org, repo }),
           ]
         );
-        const [
-          pullRequestTemplate,
-          issueTemplate,
-          releaseTemplate,
-          pushTemplate,
-        ] = await Promise.all([
-          fetchNomTemplate({
-            filename: "pull_request_summary_template.txt",
-            repo: { org, repo },
-            octokit,
-          }),
-          fetchNomTemplate({
-            filename: "issue_summary_template.txt",
-            repo: { org, repo },
-            octokit,
-          }),
-          fetchNomTemplate({
-            filename: "release_summary_template.txt",
-            repo: { org, repo },
-            octokit,
-          }),
-          fetchNomTemplate({
-            filename: "push_summary_template.txt",
-            repo: { org, repo },
-            octokit,
-          }),
-        ]);
+
         const languages = Object.entries(languagesData)
           .map(([name, bytes]) => ({
             name,
@@ -109,21 +53,7 @@ export const syncBatchReposMetadataTask = schemaTask({
           .update({ metadata })
           .eq("id", repoInfo.id)
           .throwOnError();
-        await supabase
-          .from("repositories_secure")
-          .upsert(
-            {
-              settings: {
-                pull_request_summary_template: pullRequestTemplate,
-                issue_summary_template: issueTemplate,
-                release_summary_template: releaseTemplate,
-                push_summary_template: pushTemplate,
-              },
-              id: repoInfo.id,
-            },
-            { onConflict: "id" }
-          )
-          .throwOnError();
+
         logger.info("Successfully updated metadata for repo", { org, repo });
       } catch (error) {
         logger.error("Error updating repo metadata", { org, repo, error });

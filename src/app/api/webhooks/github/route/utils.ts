@@ -5,10 +5,12 @@ export async function createNewRepo({
   supabase,
   repos,
   senderLogin,
+  installationId,
 }: {
   repos: { org: string; repo: string }[];
   supabase: ReturnType<typeof createClient>;
   senderLogin: string;
+  installationId: number;
 }) {
   const accessToken = process.env.GITHUB_TOKEN;
   const { data: user } = await supabase
@@ -24,6 +26,7 @@ export async function createNewRepo({
         org,
         repo,
         champion_github_username: user ? null : senderLogin,
+        installation_id: installationId,
       })),
       { onConflict: "org,repo" }
     )

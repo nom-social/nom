@@ -67,12 +67,20 @@ export const githubWebhookPayloadSchema = z.discriminatedUnion("event_type", [
     action: z.string().optional(),
     repositories: z.array(z.object({ full_name: z.string() })),
     sender: githubUserSchema,
+    installation: z.object({ id: z.number() }),
   }),
   z.object({
     event_type: z.literal("installation_repositories"),
     action: z.string().optional(),
     repositories_added: z.array(z.object({ full_name: z.string() })),
     repositories_removed: z.array(z.object({ full_name: z.string() })),
+    sender: githubUserSchema,
+    installation: z.object({ id: z.number() }),
+  }),
+  z.object({
+    event_type: z.literal("repository"),
+    ...githubWebhookBaseSchema.shape,
+    action: z.string(),
     sender: githubUserSchema,
   }),
 ]);
