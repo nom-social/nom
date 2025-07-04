@@ -1,12 +1,12 @@
 import z from "zod";
 import crypto from "crypto";
-import { Octokit } from "@octokit/rest";
 
 import { Json, TablesInsert } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/background";
 
 import { BASELINE_SCORE, ISSUE_MULTIPLIER } from "./shared/constants";
 import { generateIssueData } from "./issues/utils";
+import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
 
 const issueSchema = z.object({
   action: z.enum(["opened", "closed", "reopened", "assigned", "edited"]),
@@ -59,7 +59,10 @@ export async function processIssueEvent({
   const validationResult = issueSchema.parse(event.raw_payload);
   const { issue } = validationResult;
 
-  const octokit = new Octokit({ auth: repo.access_token || undefined });
+  const octokit = await createAuthenticatedOctokitClient({
+    org: repo.org,
+    repo: repo.repo,
+  });
 
   const issueData = await generateIssueData({
     octokit,

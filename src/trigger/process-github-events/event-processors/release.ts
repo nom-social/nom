@@ -1,12 +1,12 @@
 import { z } from "zod";
 import crypto from "crypto";
-import { Octokit } from "@octokit/rest";
 
 import { Json, TablesInsert } from "@/types/supabase";
 import * as openai from "@/utils/openai/client";
 import { ReleaseData } from "@/components/shared/activity-card/shared/schemas";
 import { createClient } from "@/utils/supabase/background";
 import fetchNomTemplate from "@/trigger/shared/fetch-nom-template";
+import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
 
 import { BASELINE_SCORE, RELEASE_MULTIPLIER } from "./shared/constants";
 import { RELEASE_SUMMARY_PROMPT } from "./release/prompts";
@@ -53,7 +53,10 @@ export async function processReleaseEvent({
   publicTimelineEntries: TablesInsert<"public_timeline">[];
 }> {
   const validationResult = releaseSchema.parse(event.raw_payload);
-  const octokit = new Octokit({ auth: repo.access_token || undefined });
+  const octokit = await createAuthenticatedOctokitClient({
+    org: repo.org,
+    repo: repo.repo,
+  });
   const { action, release } = validationResult;
 
   // LLM summarization of release notes

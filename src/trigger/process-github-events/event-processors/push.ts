@@ -1,6 +1,5 @@
 import { z } from "zod";
 import crypto from "crypto";
-import { Octokit } from "@octokit/rest";
 
 import * as openai from "@/utils/openai/client";
 import { createClient } from "@/utils/supabase/background";
@@ -8,6 +7,7 @@ import { Json, TablesInsert } from "@/types/supabase";
 import { PushData } from "@/components/shared/activity-card/shared/schemas";
 import fetchNomTemplate from "@/trigger/shared/fetch-nom-template";
 import propagateLicenseChange from "@/trigger/shared/propagate-license-changes";
+import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
 
 import { BASELINE_SCORE } from "./shared/constants";
 import { PUSH_SUMMARY_PROMPT } from "./push/prompts";
@@ -87,7 +87,10 @@ export async function processPushEvent({
   const openaiClient = openai.createClient();
   const supabase = createClient();
   const payload = pushEventSchema.parse(event.raw_payload);
-  const octokit = new Octokit({ auth: repo.access_token });
+  const octokit = await createAuthenticatedOctokitClient({
+    org: repo.org,
+    repo: repo.repo,
+  });
 
   // Check if any commit is a merge or squash merge of a PR
   if (

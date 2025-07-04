@@ -8,8 +8,9 @@ interface OctokitClientOptions {
   repo: string;
 }
 
-// TODO: Find a way to store the private key
-export async function getOctokitClient(options?: OctokitClientOptions) {
+export async function createAuthenticatedOctokitClient(
+  options?: OctokitClientOptions
+) {
   let installationId: number | undefined;
   if (options) {
     const supabase = createClient();
@@ -19,22 +20,15 @@ export async function getOctokitClient(options?: OctokitClientOptions) {
       .select("id, repositories_secure(installation_id)")
       .eq("org", options.org)
       .eq("repo", options.repo)
-      .single();
-    installationId = repoRow?.repositories_secure?.installation_id
-      ? Number(repoRow.repositories_secure.installation_id)
-      : undefined;
+      .single()
+      .throwOnError();
+    installationId = repoRow.repositories_secure?.installation_id;
   }
 
   // If installationId found, exchange for access token
   if (installationId) {
     const appId = process.env.GITHUB_APP_ID;
     const privateKey = process.env.GITHUB_APP_PRIVATE_KEY;
-    if (!appId || !privateKey) {
-      throw new Error(
-        "Missing GITHUB_APP_ID or GITHUB_APP_PRIVATE_KEY env vars"
-      );
-    }
-    // Use Octokit with app auth strategy
     const octokit = new Octokit({
       authStrategy: createAppAuth,
       auth: {
