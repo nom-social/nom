@@ -12,4 +12,7 @@ export const LANGUAGE_COLORS: Record<string, string> = {
   Shell: "#89e051",
   Rust: "#dea584",
   CSS: "#563d7c",
+  HTML: "#e34c26",
+  Lua: "#000080",
+  SQL: "#000000",
 };

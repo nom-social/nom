@@ -43,9 +43,9 @@ export const Default: Story = {
     websiteUrl: "https://ui.shadcn.com/",
     avatarUrl: "https://github.com/shadcn.png",
     topLanguages: [
-      { name: "TypeScript", color: "#2b7489" },
-      { name: "JavaScript", color: "#f1e05a" },
-      { name: "CSS", color: "#563d7c" },
+      { name: "TypeScript" },
+      { name: "JavaScript" },
+      { name: "CSS" },
     ],
     license: "MIT",
     initialSubscriptionCount: 1_200,
