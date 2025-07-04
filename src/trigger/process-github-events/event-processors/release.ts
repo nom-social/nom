@@ -44,8 +44,6 @@ export async function processReleaseEvent({
     repo: string;
     org: string;
     id: string;
-    access_token?: string | null;
-    settings: Json | null;
   };
   subscribers: { user_id: string }[];
 }): Promise<{

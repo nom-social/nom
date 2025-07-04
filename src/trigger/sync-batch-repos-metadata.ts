@@ -16,7 +16,7 @@ export const syncBatchReposMetadataTask = schemaTask({
       try {
         const { data: repoInfo } = await supabase
           .from("repositories")
-          .select("id, org, repo, repositories_secure ( access_token )")
+          .select("id, org, repo")
           .eq("org", org)
           .eq("repo", repo)
           .single()

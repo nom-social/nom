@@ -124,25 +124,19 @@ export type Database = {
       };
       repositories_secure: {
         Row: {
-          access_token: string | null;
           created_at: string;
           id: string;
           installation_id: number;
-          settings: Json | null;
         };
         Insert: {
-          access_token?: string | null;
           created_at?: string;
           id?: string;
           installation_id: number;
-          settings?: Json | null;
         };
         Update: {
-          access_token?: string | null;
           created_at?: string;
           id?: string;
           installation_id?: number;
-          settings?: Json | null;
         };
         Relationships: [
           {

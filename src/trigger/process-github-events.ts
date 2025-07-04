@@ -44,9 +44,7 @@ export const processGithubEvents = task({
       try {
         const { data: repo } = await supabase
           .from("repositories")
-          .select(
-            "id, repo, org, repositories_secure ( access_token, settings )"
-          )
+          .select("id, repo, org")
           .eq("repo", event.repo)
           .eq("org", event.org)
           .single()
@@ -61,11 +59,7 @@ export const processGithubEvents = task({
 
         const processedEventsPerSubscriber = await processEvent({
           event,
-          repo: {
-            ...repo,
-            access_token: repo.repositories_secure?.access_token,
-            settings: repo.repositories_secure?.settings || null,
-          },
+          repo,
           subscribers,
         });
 
