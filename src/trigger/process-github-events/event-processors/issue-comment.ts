@@ -1,12 +1,12 @@
 import crypto from "crypto";
 import z from "zod";
-import { Octokit } from "@octokit/rest";
 
 import { createClient } from "@/utils/supabase/background";
 import { Json, TablesInsert } from "@/types/supabase";
+import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
 
-import { generateIssueData } from "./issues/utils";
 import { BASELINE_SCORE, ISSUE_MULTIPLIER } from "./shared/constants";
+import { generateIssueData } from "./issues/utils";
 
 const issueCommentSchema = z.object({
   action: z.enum(["created", "edited"]),
@@ -74,7 +74,10 @@ export async function processIssueCommentEvent({
   const validationResult = issueCommentSchema.parse(event.raw_payload);
   const { action, issue, comment } = validationResult;
 
-  const octokit = new Octokit({ auth: repo.access_token || undefined });
+  const octokit = await createAuthenticatedOctokitClient({
+    org: repo.org,
+    repo: repo.repo,
+  });
 
   const issueData = await generateIssueData({
     octokit,

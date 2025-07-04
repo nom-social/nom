@@ -1,8 +1,8 @@
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
-import { Octokit } from "@octokit/rest";
 
 import { createClient } from "@/utils/supabase/background";
+import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
 
 export const syncBatchReposMetadataTask = schemaTask({
   id: "sync-batch-repos-metadata",
@@ -23,8 +23,9 @@ export const syncBatchReposMetadataTask = schemaTask({
           .throwOnError();
 
         logger.info("Starting metadata sync for repo", { org, repo });
-        const octokit = new Octokit({
-          auth: repoInfo.repositories_secure?.access_token,
+        const octokit = await createAuthenticatedOctokitClient({
+          org,
+          repo,
         });
         const [{ data: repoData }, { data: languagesData }] = await Promise.all(
           [

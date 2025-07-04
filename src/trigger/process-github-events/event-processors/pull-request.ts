@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { Octokit } from "@octokit/rest";
 import crypto from "crypto";
 
 import { Json, TablesInsert } from "@/types/supabase";
@@ -8,6 +7,7 @@ import { createClient } from "@/utils/supabase/background";
 import { PrData } from "@/components/shared/activity-card/shared/schemas";
 import fetchNomTemplate from "@/trigger/shared/fetch-nom-template";
 import propagateLicenseChange from "@/trigger/shared/propagate-license-changes";
+import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
 
 import { getProcessedPullRequestDiff } from "./pull-request/utils";
 import { PR_SUMMARY_ONLY_PROMPT } from "./pull-request/prompts";
@@ -66,7 +66,10 @@ export async function processPullRequestEvent({
   userTimelineEntries: TablesInsert<"user_timeline">[];
   publicTimelineEntries: TablesInsert<"public_timeline">[];
 }> {
-  const octokit = new Octokit({ auth: repo.access_token || undefined });
+  const octokit = await createAuthenticatedOctokitClient({
+    org: repo.org,
+    repo: repo.repo,
+  });
   const openaiClient = openai.createClient();
   const supabase = createClient();
 
