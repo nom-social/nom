@@ -48,14 +48,19 @@ export default function RootLayout({
             <NavigationMenu className="w-full min-w-full bg-background fixed top-0 left-0 z-50 border-b border-border shadow-sm p-2">
               <div className="max-w-3xl mx-auto w-full">
                 <NavigationMenuList className="justify-between items-center">
-                  <NavigationMenuItem>
-                    <NavigationMenuLink
-                      href="/"
-                      className="font-jersey-15 text-lg uppercase"
-                    >
-                      Nom
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
+                  <div className="flex flex-row gap-2 items-center">
+                    <NavigationMenuItem>
+                      <NavigationMenuLink
+                        href="/"
+                        className="font-jersey-15 text-lg uppercase"
+                      >
+                        Nom
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+                    <span className="text-xs text-muted-foreground font-normal normal-case">
+                      Update your users in real-time
+                    </span>
+                  </div>
 
                   <ProfileDropdown />
                 </NavigationMenuList>
