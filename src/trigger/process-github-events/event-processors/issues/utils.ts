@@ -2,7 +2,6 @@ import { Octokit } from "@octokit/rest";
 
 import * as openai from "@/utils/openai/client";
 import { IssueData } from "@/components/shared/activity-card/shared/schemas";
-import { Json } from "@/types/supabase";
 import fetchNomTemplate from "@/trigger/shared/fetch-nom-template";
 
 import { ISSUE_SUMMARY_PROMPT } from "./prompts";
@@ -14,7 +13,7 @@ export async function generateIssueData({
   issue,
 }: {
   octokit: Octokit;
-  repo: { org: string; repo: string; settings: Json | null };
+  repo: { org: string; repo: string };
   action: string;
   issue: {
     number: number;

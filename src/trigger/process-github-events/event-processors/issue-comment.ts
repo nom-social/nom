@@ -61,8 +61,6 @@ export async function processIssueCommentEvent({
     repo: string;
     org: string;
     id: string;
-    settings: Json | null;
-    access_token?: string | null;
   };
   subscribers: { user_id: string }[];
 }): Promise<{
