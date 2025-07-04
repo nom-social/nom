@@ -2,6 +2,8 @@
 
 # Nom
 
+[![Nom Badge](./assets/nom-badge.svg)](https://beta.nomit.dev/nom-social/nom)
+
 A social feed for your project's activities on Github.
 
 ## Features
@@ -10,8 +12,8 @@ A social feed for your project's activities on Github.
 - Share and subscribe repositories
 - Highly customizable AI prompt for feed generation ([see example](.nom/pull_request_summary_template.txt))
 
-
 ## Built with
+
 - [Next.js](https://nextjs.org/) - Highly performant React framework
 - [shadcn/ui](https://ui.shadcn.com/) - UI component library
 - [Supabase](https://supabase.com/) - Open source BaaS
@@ -21,6 +23,7 @@ A social feed for your project's activities on Github.
 - [OpenAI](https://openai.com/) - Summarize context for feed content
 
 ## Local development
+
 See [CONTRIBUTING.md](CONTRIBUTING.md) for more information about setting up locally.
 
 ## Contributing
