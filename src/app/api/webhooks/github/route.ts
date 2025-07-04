@@ -66,7 +66,7 @@ export async function POST(request: Request) {
           return { org, repo };
         }),
         senderLogin: payload.sender.login,
-        installationId: payload.installation?.id, // Pass installationId
+        installationId: payload.installation.id,
       });
       return NextResponse.json({
         message: "Installation repositories event, creating repositories",
