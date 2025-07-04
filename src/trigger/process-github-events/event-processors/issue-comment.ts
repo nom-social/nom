@@ -3,10 +3,10 @@ import z from "zod";
 
 import { createClient } from "@/utils/supabase/background";
 import { Json, TablesInsert } from "@/types/supabase";
-import { BASELINE_SCORE, ISSUE_MULTIPLIER } from "./shared/constants";
-
-import { generateIssueData } from "./issues/utils";
 import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
+
+import { BASELINE_SCORE, ISSUE_MULTIPLIER } from "./shared/constants";
+import { generateIssueData } from "./issues/utils";
 
 const issueCommentSchema = z.object({
   action: z.enum(["created", "edited"]),
