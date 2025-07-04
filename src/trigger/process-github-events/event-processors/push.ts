@@ -156,7 +156,6 @@ export async function processPushEvent({
       },
       { role: "user", content: prompt },
     ],
-    temperature: 0.7,
   });
 
   // Generate dedupe hash similar to pull-request.ts

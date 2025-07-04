@@ -67,7 +67,6 @@ export async function generateIssueData({
       },
       { role: "user", content: prompt },
     ],
-    temperature: 0.7,
   });
   const ai_summary = completion.choices[0].message.content;
   if (!ai_summary) {

@@ -59,13 +59,6 @@ export const processGithubEvents = task({
           .eq("repo_id", repo.id)
           .throwOnError();
 
-        if (subscribers.length === 0) {
-          logger.info("No subscribers found for repository", {
-            repoId: repo.id,
-          });
-          continue;
-        }
-
         const processedEventsPerSubscriber = await processEvent({
           event,
           repo: {
