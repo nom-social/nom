@@ -5,7 +5,7 @@ import { Octokit } from "@octokit/rest";
 import { createClient } from "@/utils/supabase/background";
 
 // Zod schema for template validation
-const templateSchema = z.string().max(1_000);
+const templateSchema = z.string().max(2_000);
 
 async function fetchNomTemplate({
   filename,
@@ -95,6 +95,7 @@ export const syncBatchReposMetadataTask = schemaTask({
             bytes,
           }))
           .sort((a, b) => b.bytes - a.bytes);
+
         const metadata = {
           avatar_url: `https://github.com/${org}.png`,
           description: repoData.description || null,
