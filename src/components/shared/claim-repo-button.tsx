@@ -12,7 +12,7 @@ export default async function ClaimRepoButton() {
       href="https://github.com/apps/nom-social-club/installations/new"
       target="_blank"
     >
-      <Button size="sm" className="w-full bg-[var(--nom-yellow)] text-black">
+      <Button size="sm" className="w-full bg-nom-yellow text-black">
         Connect your repo 🎉
       </Button>
     </a>

@@ -105,7 +105,7 @@ export default function ActivityCard({
         titleUrl={parseResult.data.pull_request.html_url}
         badgeIcon={<GitMergeIcon />}
         badgeLabel={parseResult.data.pull_request.merged ? "merged" : "open"}
-        badgeClassName="bg-[var(--nom-purple)] border-transparent uppercase text-black"
+        badgeClassName="bg-nom-purple border-transparent uppercase text-black"
         repo={repo}
         org={org}
         repoUrl={`/${org}/${repo}`}
@@ -146,8 +146,8 @@ export default function ActivityCard({
         badgeClassName={cn(
           "border-transparent uppercase text-black",
           parseResult.data.issue.state === "open"
-            ? "bg-[var(--nom-green)]"
-            : "bg-[var(--nom-purple)]"
+            ? "bg-nom-green"
+            : "bg-nom-purple"
         )}
         repo={repo}
         org={org}
@@ -179,7 +179,7 @@ export default function ActivityCard({
         titleUrl={release.html_url}
         badgeIcon={<TagIcon />}
         badgeLabel={release.tag_name}
-        badgeClassName="bg-[var(--nom-blue)] border-transparent uppercase text-black"
+        badgeClassName="bg-nom-blue border-transparent uppercase text-black"
         repo={repo}
         org={org}
         repoUrl={`/${org}/${repo}`}
@@ -209,7 +209,7 @@ export default function ActivityCard({
         titleUrl={push.html_url}
         badgeIcon={<GitCommitVertical />}
         badgeLabel="pushed"
-        badgeClassName="bg-[var(--nom-green)] border-transparent uppercase text-black"
+        badgeClassName="bg-nom-green border-transparent uppercase text-black"
         repo={repo}
         org={org}
         repoUrl={`/${org}/${repo}`}

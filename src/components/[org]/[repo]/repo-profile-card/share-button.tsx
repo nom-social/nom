@@ -17,7 +17,7 @@ export default function ShareButton({
   return (
     <Button
       size="icon"
-      className="hidden md:flex bg-[var(--nom-blue)] hover:bg-[var(--nom-blue)]/90"
+      className="hidden md:flex bg-nom-blue hover:bg-nom-blue/90"
       onClick={() => share(`${window.location.origin}/${org}/${repo}`, repo)}
     >
       <Share />

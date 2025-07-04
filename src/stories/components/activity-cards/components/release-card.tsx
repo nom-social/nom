@@ -42,7 +42,7 @@ export default function ReleaseCard({
       titleUrl={releaseUrl}
       badgeIcon={<TagIcon />}
       badgeLabel={tagName}
-      badgeClassName="bg-[var(--nom-blue)] border-transparent uppercase text-black"
+      badgeClassName="bg-nom-blue border-transparent uppercase text-black"
       repo={repo}
       org={org}
       repoUrl={`/${org}/${repo}`}

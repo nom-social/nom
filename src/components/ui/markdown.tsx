@@ -55,7 +55,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary underline hover:text-[var(--nom-blue)]"
+            className="text-primary underline hover:text-nom-blue"
           >
             {children}
           </a>

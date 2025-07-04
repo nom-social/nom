@@ -45,7 +45,7 @@ export default function IssueCard({
       badgeLabel={state}
       badgeClassName={cn(
         "border-transparent uppercase text-black",
-        state === "open" ? "bg-[var(--nom-green)]" : "bg-[var(--nom-purple)]"
+        state === "open" ? "bg-nom-green" : "bg-nom-purple"
       )}
       repo={repo}
       org={org}

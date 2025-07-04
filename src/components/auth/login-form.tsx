@@ -28,8 +28,8 @@ export default function LoginForm({ onLogin }: Props) {
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-destructive border border-destructive" />
-              <div className="w-3 h-3 bg-[var(--nom-yellow)] border border-[var(--nom-yellow)]" />
-              <div className="w-3 h-3 bg-[var(--nom-green)] border border-[var(--nom-green)]" />
+              <div className="w-3 h-3 bg-nom-yellow border border-nom-yellow" />
+              <div className="w-3 h-3 bg-nom-green border border-nom-green" />
             </div>
             <span>{"> user.authenticate()"}</span>
           </div>
