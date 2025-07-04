@@ -3,10 +3,10 @@ import crypto from "crypto";
 
 import { Json, TablesInsert } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/background";
+import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
 
 import { BASELINE_SCORE, ISSUE_MULTIPLIER } from "./shared/constants";
 import { generateIssueData } from "./issues/utils";
-import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
 
 const issueSchema = z.object({
   action: z.enum(["opened", "closed", "reopened", "assigned", "edited"]),
