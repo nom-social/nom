@@ -49,18 +49,36 @@ export default function Feed({
   const items = data?.pages.flatMap((page) => page.items) ?? [];
 
   // Intersection Observer logic
-  const observer = useRef<IntersectionObserver | null>(null);
-  const sentinelIndex = items.length > 0 ? Math.floor(items.length / 2) : -1;
-  const sentinelRef = useCallback(
+  const observerMiddle = useRef<IntersectionObserver | null>(null);
+  const observerLast = useRef<IntersectionObserver | null>(null);
+  const sentinelMiddleIndex =
+    items.length > 0 ? Math.floor(items.length / 2) : -1;
+  const sentinelLastIndex = items.length > 0 ? items.length - 1 : -1;
+
+  const sentinelMiddleRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (isFetchingNextPage) return;
-      if (observer.current) observer.current.disconnect();
-      observer.current = new window.IntersectionObserver((entries) => {
+      if (observerMiddle.current) observerMiddle.current.disconnect();
+      observerMiddle.current = new window.IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && hasNextPage) {
           fetchNextPage();
         }
       });
-      if (node) observer.current.observe(node);
+      if (node) observerMiddle.current.observe(node);
+    },
+    [isFetchingNextPage, fetchNextPage, hasNextPage]
+  );
+
+  const sentinelLastRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (isFetchingNextPage) return;
+      if (observerLast.current) observerLast.current.disconnect();
+      observerLast.current = new window.IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasNextPage) {
+          fetchNextPage();
+        }
+      });
+      if (node) observerLast.current.observe(node);
     },
     [isFetchingNextPage, fetchNextPage, hasNextPage]
   );
@@ -81,9 +99,13 @@ export default function Feed({
         </div>
       )}
       {items.map((item, idx) => {
-        const isSentinel = idx === sentinelIndex && hasNextPage;
+        let ref;
+        if (hasNextPage) {
+          if (idx === sentinelMiddleIndex) ref = sentinelMiddleRef;
+          if (idx === sentinelLastIndex) ref = sentinelLastRef;
+        }
         return (
-          <div key={item.id} ref={isSentinel ? sentinelRef : undefined}>
+          <div key={item.id} ref={ref}>
             <ActivityCard item={item} repo={repo} org={org} />
           </div>
         );
