@@ -103,7 +103,7 @@ export default function FeedPrivate() {
             : "opacity-0 pointer-events-none -translate-y-8 -translate-x-1/2"
         )}
         size="icon"
-        disabled={isRefetching}
+        disabled={isRefetching && showScrollTop}
       >
         {isRefetching ? (
           <Loader className="animate-spin w-5 h-5" />
