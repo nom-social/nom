@@ -10,7 +10,6 @@ const metadataSchema = z.object({
   languages: z.array(
     z.object({
       name: z.string(),
-      color: z.string().nullable(),
       bytes: z.number(),
     })
   ),
