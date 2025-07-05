@@ -30,7 +30,6 @@ export default function Feed({
     isError,
     error,
     refetch,
-    isRefetching,
   } = useInfiniteQuery<FetchFeedPageResult, Error>({
     queryKey: [fetchFeedPage.key, repoId],
     queryFn: ({ pageParam }) => {
@@ -98,8 +97,8 @@ export default function Feed({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleScrollToTop = async () => {
-    await refetch();
+  const handleScrollToTop = () => {
+    refetch();
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -118,13 +117,8 @@ export default function Feed({
             : "opacity-0 pointer-events-none -translate-y-8 -translate-x-1/2"
         )}
         size="icon"
-        disabled={isRefetching && showScrollTop}
       >
-        {isRefetching ? (
-          <Loader className="animate-spin w-5 h-5" />
-        ) : (
-          <ArrowUp className="w-5 h-5" />
-        )}
+        <ArrowUp className="w-5 h-5" />
       </Button>
 
       <div className="flex flex-col gap-4">
