@@ -109,7 +109,7 @@ export default function ActivityCard({
         repo={repo}
         org={org}
         repoUrl={`/${org}/${repo}`}
-        timestamp={new Date(parseResult.data.pull_request.created_at)}
+        timestamp={new Date(parseResult.data.pull_request.updated_at)}
         contributors={parseResult.data.pull_request.contributors.map(
           (login) => ({
             name: login,
@@ -152,7 +152,7 @@ export default function ActivityCard({
         repo={repo}
         org={org}
         repoUrl={`/${org}/${repo}`}
-        timestamp={new Date(parseResult.data.issue.created_at)}
+        timestamp={new Date(parseResult.data.issue.updated_at)}
         contributors={parseResult.data.issue.contributors.map((login) => ({
           name: login,
           avatar: `https://github.com/${login}.png`,
