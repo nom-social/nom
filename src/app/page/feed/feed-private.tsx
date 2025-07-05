@@ -22,7 +22,6 @@ export default function FeedPrivate() {
     isError,
     error,
     refetch,
-    isRefetching,
   } = useInfiniteQuery({
     queryKey: [fetchFeed.key],
     queryFn: ({ pageParam }) => fetchFeed({ limit: LIMIT, offset: pageParam }),
@@ -83,8 +82,8 @@ export default function FeedPrivate() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleScrollToTop = async () => {
-    await refetch();
+  const handleScrollToTop = () => {
+    refetch();
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -103,13 +102,8 @@ export default function FeedPrivate() {
             : "opacity-0 pointer-events-none -translate-y-8 -translate-x-1/2"
         )}
         size="icon"
-        disabled={isRefetching && showScrollTop}
       >
-        {isRefetching ? (
-          <Loader className="animate-spin w-5 h-5" />
-        ) : (
-          <ArrowUp className="w-5 h-5" />
-        )}
+        <ArrowUp className="w-5 h-5" />
       </Button>
 
       <div className="flex flex-col gap-4">
