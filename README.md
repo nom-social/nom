@@ -12,6 +12,14 @@ A social feed for your project's activities on Github.
 - Share and subscribe repositories
 - Highly customizable AI prompt for feed generation ([see example](.nom/pull_request_summary_template.txt))
 
+## Connect your repositories
+
+To get started, connect your GitHub repositories to Nom:
+
+[Install the Nom Social Club GitHub App](https://github.com/apps/nom-social-club/installations/new)
+
+Once installed, your project's activities will appear in your Nom feed.
+
 ## Built with
 
 - [Next.js](https://nextjs.org/) - Highly performant React framework
