@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
-import { ShareIcon } from "lucide-react";
+import { LinkIcon, ShareIcon } from "lucide-react";
 
 import {
   Card,
@@ -24,6 +24,13 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { useShare } from "@/hooks/use-share";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import X from "@/components/ui/icons/x";
 
 export type Props = {
   title: string;
@@ -36,7 +43,7 @@ export type Props = {
   repoUrl: string;
   timestamp: Date;
   contributors: Contributor[];
-  body?: string;
+  body: string;
   likeCount: number | null;
   liked: boolean;
   onLike?: () => void;
@@ -130,11 +137,9 @@ export default function ActivityCardBase({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {body && (
-          <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none font-normal text-sm">
-            <Markdown>{body}</Markdown>
-          </div>
-        )}
+        <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none font-normal text-sm">
+          <Markdown>{body}</Markdown>
+        </div>
       </CardContent>
       <CardFooter>
         <div className="flex flex-row items-center gap-3 sm:gap-4 w-full justify-between">
@@ -159,19 +164,39 @@ export default function ActivityCardBase({
             </span>
             {formattedLikeCount}
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              share(
-                `${window.location.origin}/${org}/${repo}/status/${hash}`,
-                title
-              )
-            }
-          >
-            <ShareIcon className="size-4" />
-            Share
-          </Button>
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <ShareIcon className="size-4" />
+                Share
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() =>
+                  share(
+                    `${window.location.origin}/${org}/${repo}/status/${hash}`,
+                    title
+                  )
+                }
+              >
+                <LinkIcon />
+                Copy link
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  const shareUrl = `${window.location.origin}/${org}/${repo}/status/${hash}`;
+                  const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                    body
+                  )}&url=${encodeURIComponent(shareUrl)}`;
+                  window.open(tweetUrl, "_blank");
+                }}
+              >
+                <X />
+                Post on X
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </CardFooter>
     </Card>
