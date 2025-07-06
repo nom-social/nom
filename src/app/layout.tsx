@@ -10,6 +10,7 @@ import {
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
 import { Toaster } from "@/components/ui/sonner";
+import UserIdentificationManager from "@/components/analytics/user-identification-manager";
 
 import "./globals.css";
 import ProfileDropdown from "./layout/profile-dropdown";
@@ -43,6 +44,7 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="dark">
           <ReactQueryProvider>
+            <UserIdentificationManager />
             <Toaster />
             <NavigationMenu className="w-full min-w-full bg-background fixed top-0 left-0 z-50 border-b border-border shadow-sm p-2">
               <div className="max-w-3xl mx-auto w-full">
