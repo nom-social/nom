@@ -6,12 +6,13 @@ import * as supabase from "@/utils/supabase/background";
 import * as resend from "@/utils/resend/client";
 import * as openai from "@/utils/openai/client";
 
-import { prompt } from "./send-user-repo-highlights/prompts";
+import { EMAIL_PROMPT } from "./send-user-repo-highlights/prompts";
 
 const prSchema = z.object({
   pull_request: z.object({
     ai_summary: z.string(),
     title: z.string(),
+    html_url: z.string(),
   }),
   action: z.string(),
 });
@@ -20,6 +21,7 @@ const issueSchema = z.object({
   issue: z.object({
     ai_summary: z.string(),
     title: z.string(),
+    html_url: z.string(),
   }),
   action: z.string(),
 });
@@ -28,6 +30,7 @@ const pushSchema = z.object({
   push: z.object({
     ai_summary: z.string(),
     title: z.string(),
+    html_url: z.string(),
   }),
 });
 
@@ -70,22 +73,26 @@ export const sendUserRepoHighlights = schemaTask({
         const pr = prSchema.parse(event.data);
         combinedEvents +=
           `- [pull_request] ${pr.pull_request.title} (${pr.action})\n` +
-          `${pr.pull_request.ai_summary}\n\n`;
+          `${pr.pull_request.ai_summary}\n` +
+          `[View on GitHub](${pr.pull_request.html_url})\n\n`;
       }
       if (event.type === "issue") {
         const issue = issueSchema.parse(event.data);
         combinedEvents +=
           `- [issue] ${issue.issue.title} (${issue.action})\n` +
-          `${issue.issue.ai_summary}\n\n`;
+          `${issue.issue.ai_summary}\n` +
+          `[View on GitHub](${issue.issue.html_url})\n\n`;
       }
       if (event.type === "push") {
         const push = pushSchema.parse(event.data);
-        combinedEvents += `- [push] ${push.push.title}\n${push.push.ai_summary}\n\n`;
+        combinedEvents +=
+          `- [push] ${push.push.title}\n` +
+          `${push.push.ai_summary}\n` +
+          `[View on GitHub](${push.push.html_url})\n\n`;
       }
     });
 
-    const combinedPrompt = prompt
-      .replace("{events}", combinedEvents)
+    const combinedPrompt = EMAIL_PROMPT.replace("{events}", combinedEvents)
       .replace("{org}", org)
       .replace("{repo}", repo);
 
@@ -94,11 +101,10 @@ export const sendUserRepoHighlights = schemaTask({
       messages: [{ role: "user", content: combinedPrompt }],
     });
 
-    // TODO: See if we can use the email template from the email.tsx file
     await resendClient.emails.send({
-      from: "Nom <onboarding@resend.dev>",
+      from: "Nom <hello@nomit.dev>",
       to: user_email,
-      subject: "Your repo highlights",
+      subject: `${org}/${repo} highlights`,
       html: await marked.parse(response.choices[0].message.content ?? ""),
     });
   },
