@@ -131,7 +131,13 @@ export default function FeedPublic() {
           }
           return (
             <div key={item.id} ref={ref}>
-              <ActivityCard item={item} repo={repo} org={org} />
+              <ActivityCard 
+                item={item} 
+                repo={repo} 
+                org={org} 
+                initialLikeCount={item.likeCount}
+                initialIsLiked={item.isLiked}
+              />
             </div>
           );
         })}

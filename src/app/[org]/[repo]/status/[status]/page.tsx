@@ -47,7 +47,13 @@ export default async function StatusPage({
           <p className="text-foreground text-lg uppercase break-all">{repo}</p>
         </Button>
       </Link>
-      <ActivityCard item={statusItem} repo={repo} org={org} />
+      <ActivityCard 
+        item={statusItem} 
+        repo={repo} 
+        org={org} 
+        initialLikeCount={statusItem?.likeCount || 0}
+        initialIsLiked={statusItem?.isLiked || false}
+      />
     </main>
   );
 }
