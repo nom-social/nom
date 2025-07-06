@@ -6,7 +6,6 @@ import * as supabase from "@/utils/supabase/background";
 import * as resend from "@/utils/resend/client";
 import * as openai from "@/utils/openai/client";
 
-import { render as renderEmail } from "./send-user-repo-highlights/email";
 import { prompt } from "./send-user-repo-highlights/prompts";
 
 const prSchema = z.object({
@@ -95,17 +94,12 @@ export const sendUserRepoHighlights = schemaTask({
       messages: [{ role: "user", content: combinedPrompt }],
     });
 
+    // TODO: See if we can use the email template from the email.tsx file
     await resendClient.emails.send({
       from: "Nom <onboarding@resend.dev>",
       to: user_email,
       subject: "Your repo highlights",
-      html: await renderEmail({
-        org,
-        repo,
-        htmlContent: await marked.parse(
-          response.choices[0].message.content ?? ""
-        ),
-      }),
+      html: await marked.parse(response.choices[0].message.content ?? ""),
     });
   },
 });
