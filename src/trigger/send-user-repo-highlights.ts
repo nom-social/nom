@@ -105,7 +105,10 @@ export const sendUserRepoHighlights = schemaTask({
       from: "Nom <hello@nomit.dev>",
       to: user_email,
       subject: `${org}/${repo} highlights`,
-      html: await marked.parse(response.choices[0].message.content ?? ""),
+      html: await marked.parse(response.choices[0].message.content ?? "", {
+        breaks: true,
+        gfm: true,
+      }),
     });
   },
 });
