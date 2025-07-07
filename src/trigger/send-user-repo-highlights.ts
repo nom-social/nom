@@ -1,6 +1,7 @@
 import { schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
 import { marked } from "marked";
+import { format } from "date-fns";
 
 import * as supabase from "@/utils/supabase/background";
 import * as resend from "@/utils/resend/client";
@@ -34,7 +35,6 @@ const pushSchema = z.object({
   }),
 });
 
-// Manual dev job: Accepts a repositories_users id, finds the repo and user, then fetches all public_timeline events for that repo
 export const sendUserRepoHighlights = schemaTask({
   id: "send-user-repo-highlights",
   schema: z.object({
@@ -104,7 +104,7 @@ export const sendUserRepoHighlights = schemaTask({
     await resendClient.emails.send({
       from: "Nom <hello@nomit.dev>",
       to: user_email,
-      subject: `${org}/${repo} highlights`,
+      subject: `${org}/${repo} highlights: ${format(start, "PPP")} - ${format(end, "PPP")}`,
       html: await marked.parse(response.choices[0].message.content ?? "", {
         breaks: true,
         gfm: true,
