@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import {
   CircleCheck,
@@ -22,42 +22,48 @@ import {
 import { cn } from "@/lib/utils";
 
 import {
-  isLiked,
   createLike,
   deleteLike,
   NotAuthenticatedError,
-  getLikeCount,
 } from "./activity-card/actions";
 import ActivityCardBase from "./activity-card/shared/activity-card-base";
+
+type FeedItemWithLikes = (
+  | Tables<"public_timeline">
+  | Tables<"user_timeline">
+) & {
+  likeCount: number;
+  isLiked: boolean;
+  repositories?: {
+    org: string;
+    repo: string;
+  };
+};
 
 export default function ActivityCard({
   item,
   repo,
   org,
 }: {
-  item: Tables<"public_timeline"> | Tables<"user_timeline">;
+  item: FeedItemWithLikes;
   repo: string;
   org: string;
 }) {
   const router = useRouter();
-  const [likeCount, setLikeCount] = useState<number | null>(null);
+  const [likeCount, setLikeCount] = useState<number>(item.likeCount);
+  const [liked, setLiked] = useState<boolean>(item.isLiked);
 
-  const { data: likeData, refetch: refetchLike } = useQuery({
-    queryKey: [isLiked.key, item.dedupe_hash],
-    queryFn: () => isLiked(item.dedupe_hash),
-    refetchOnWindowFocus: false,
-  });
-  const getLikeCountQuery = useQuery({
-    queryKey: [getLikeCount.key, item.dedupe_hash],
-    queryFn: () => getLikeCount(item.dedupe_hash),
-    refetchOnWindowFocus: false,
-  });
+  // Update local state when props change (useful for refetching)
+  useEffect(() => {
+    setLikeCount(item.likeCount);
+    setLiked(item.isLiked);
+  }, [item.likeCount, item.isLiked]);
 
   const likeMutation = useMutation({
     mutationFn: ({ hash }: { hash: string }) => createLike(hash),
     onSuccess: async () => {
-      await refetchLike();
-      setLikeCount((prev) => (prev ?? 0) + 1);
+      setLiked(true);
+      setLikeCount((prev) => prev + 1);
       toast.success("🔥 Liked!", { icon: null });
     },
     onError: (error) => {
@@ -71,8 +77,8 @@ export default function ActivityCard({
   const unlikeMutation = useMutation({
     mutationFn: ({ hash }: { hash: string }) => deleteLike(hash),
     onSuccess: async () => {
-      await refetchLike();
-      setLikeCount((prev) => (prev ?? 0) - 1);
+      setLiked(false);
+      setLikeCount((prev) => prev - 1);
       toast("💔 Un-liked!");
     },
     onError: (error) => {
@@ -82,13 +88,6 @@ export default function ActivityCard({
         );
     },
   });
-
-  useEffect(() => {
-    if (getLikeCountQuery.data !== undefined)
-      setLikeCount(getLikeCountQuery.data);
-  }, [getLikeCountQuery.data]);
-
-  const liked = likeData?.liked ?? false;
 
   const handleLike = () => likeMutation.mutate({ hash: item.dedupe_hash });
   const handleUnlike = () => unlikeMutation.mutate({ hash: item.dedupe_hash });

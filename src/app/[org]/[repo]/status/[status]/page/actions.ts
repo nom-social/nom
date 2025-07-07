@@ -5,17 +5,43 @@ import type { Tables } from "@/types/supabase";
 
 export type FeedItem = Tables<"public_timeline">;
 
+export type FeedItemWithLikes = FeedItem & {
+  likeCount: number;
+  isLiked: boolean;
+};
+
 export type FetchFeedItemParams = {
   statusId: string;
   repo: string;
   org: string;
 };
 
+// Helper function to batch fetch like data for a single item
+async function fetchLikeData(
+  supabase: ReturnType<typeof createClient>,
+  dedupeHash: string,
+  userId?: string
+) {
+  // Use database function to efficiently get like count and user like status
+  const { data: likeData } = await supabase
+    .rpc("get_batch_like_data", {
+      dedupe_hashes: [dedupeHash],
+      user_id_param: userId,
+    })
+    .throwOnError();
+
+  const result = likeData[0];
+  return {
+    likeCount: result?.like_count || 0,
+    isLiked: result?.user_liked || false,
+  };
+}
+
 export async function fetchFeedItem({
   statusId,
   repo,
   org,
-}: FetchFeedItemParams): Promise<FeedItem | null> {
+}: FetchFeedItemParams): Promise<FeedItemWithLikes | null> {
   const supabase = createClient(cookies());
 
   const { data: repoData } = await supabase
@@ -36,5 +62,21 @@ export async function fetchFeedItem({
 
   if (!data) return null;
 
-  return data;
+  // Get current user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Fetch like data for the item
+  const { likeCount, isLiked } = await fetchLikeData(
+    supabase,
+    data.dedupe_hash,
+    user?.id
+  );
+
+  return {
+    ...data,
+    likeCount,
+    isLiked,
+  };
 }
