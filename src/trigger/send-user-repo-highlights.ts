@@ -67,6 +67,10 @@ export const sendUserRepoHighlights = schemaTask({
       .lte("updated_at", end.toISOString())
       .throwOnError();
 
+    if (!publicEvents.length) {
+      throw new Error("No events found for the specified repo and time range.");
+    }
+
     let combinedEvents = "";
     publicEvents.forEach((event) => {
       if (event.type === "pull_request") {
