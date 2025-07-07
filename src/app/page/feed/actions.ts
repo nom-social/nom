@@ -37,22 +37,17 @@ async function batchFetchLikeData(supabase: ReturnType<typeof createClient>, ded
     return { likeCountMap: {}, userLikesMap: {} };
   }
 
-  // Query 1: Get like counts efficiently using count queries per dedupe_hash
-  const likeCountPromises = dedupeHashes.map(async (hash) => {
-    const { count } = await supabase
-      .from("timeline_likes")
-      .select("*", { count: "exact", head: true })
-      .eq("dedupe_hash", hash)
-      .throwOnError();
-    return { dedupe_hash: hash, count: count || 0 };
-  });
+  // Query 1: Get aggregated like counts per dedupe_hash using GROUP BY
+  const { data: likeCountsData } = await supabase
+    .from("timeline_likes")
+    .select("dedupe_hash, count()")
+    .in("dedupe_hash", dedupeHashes)
+    .throwOnError();
 
-  const likeCountResults = await Promise.all(likeCountPromises);
-  
-  // Convert to map for easy lookup
+  // Convert aggregated results to map
   const likeCountMap: Record<string, number> = {};
-  likeCountResults.forEach((result) => {
-    likeCountMap[result.dedupe_hash] = result.count;
+  likeCountsData?.forEach((item: { dedupe_hash: string; count: number }) => {
+    likeCountMap[item.dedupe_hash] = item.count;
   });
 
   // Query 2: Get user's liked posts (only if user is authenticated)
@@ -72,6 +67,9 @@ async function batchFetchLikeData(supabase: ReturnType<typeof createClient>, ded
 
   // Ensure all dedupe_hashes have entries (even if 0 likes)
   dedupeHashes.forEach((hash) => {
+    if (!(hash in likeCountMap)) {
+      likeCountMap[hash] = 0;
+    }
     if (!(hash in userLikesMap)) {
       userLikesMap[hash] = false;
     }
