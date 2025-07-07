@@ -32,12 +32,16 @@ export class NotAuthenticatedError extends Error {
 }
 
 // Helper function to batch fetch like data for multiple items
-async function batchFetchLikeData(supabase: ReturnType<typeof createClient>, dedupeHashes: string[], userId?: string) {
+async function batchFetchLikeData(
+  supabase: ReturnType<typeof createClient>,
+  dedupeHashes: string[],
+  userId?: string
+) {
   // Use database function to efficiently aggregate like counts and user likes
-  const { data: likeData } = await (supabase as any)
-    .rpc('get_batch_like_data', {
+  const { data: likeData } = await supabase
+    .rpc("get_batch_like_data", {
       dedupe_hashes: dedupeHashes,
-      user_id_param: userId || null
+      user_id_param: userId,
     })
     .throwOnError();
 
@@ -45,7 +49,7 @@ async function batchFetchLikeData(supabase: ReturnType<typeof createClient>, ded
   const likeCountMap: Record<string, number> = {};
   const userLikesMap: Record<string, boolean> = {};
 
-  (likeData as Array<{ dedupe_hash: string; like_count: number; user_liked: boolean }> | null)?.forEach((row) => {
+  likeData.forEach((row) => {
     likeCountMap[row.dedupe_hash] = row.like_count;
     userLikesMap[row.dedupe_hash] = row.user_liked;
   });
@@ -77,10 +81,14 @@ export async function fetchFeed({
     .throwOnError();
 
   const items = data || [];
-  
+
   // Batch fetch like data for all items
   const dedupeHashes = items.map((item) => item.dedupe_hash);
-  const { likeCountMap, userLikesMap } = await batchFetchLikeData(supabase, dedupeHashes, user.id);
+  const { likeCountMap, userLikesMap } = await batchFetchLikeData(
+    supabase,
+    dedupeHashes,
+    user.id
+  );
 
   // Enhance items with like data
   const itemsWithLikes: FeedItemWithLikes[] = items.map((item) => ({
@@ -118,10 +126,14 @@ export async function fetchPublicFeed({
     .throwOnError();
 
   const items = data || [];
-  
+
   // Batch fetch like data for all items
   const dedupeHashes = items.map((item) => item.dedupe_hash);
-  const { likeCountMap, userLikesMap } = await batchFetchLikeData(supabase, dedupeHashes, user?.id);
+  const { likeCountMap, userLikesMap } = await batchFetchLikeData(
+    supabase,
+    dedupeHashes,
+    user?.id
+  );
 
   // Enhance items with like data
   const itemsWithLikes: PublicFeedItemWithLikes[] = items.map((item) => ({

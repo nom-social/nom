@@ -28,7 +28,10 @@ import {
 } from "./activity-card/actions";
 import ActivityCardBase from "./activity-card/shared/activity-card-base";
 
-type FeedItemWithLikes = (Tables<"public_timeline"> | Tables<"user_timeline">) & {
+type FeedItemWithLikes = (
+  | Tables<"public_timeline">
+  | Tables<"user_timeline">
+) & {
   likeCount: number;
   isLiked: boolean;
   repositories?: {

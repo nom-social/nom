@@ -143,11 +143,7 @@ export default function Feed({
           }
           return (
             <div key={item.id} ref={ref}>
-              <ActivityCard 
-                item={item} 
-                repo={repo} 
-                org={org} 
-              />
+              <ActivityCard item={item} repo={repo} org={org} />
             </div>
           );
         })}
