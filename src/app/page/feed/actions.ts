@@ -33,34 +33,22 @@ export class NotAuthenticatedError extends Error {
 
 // Helper function to batch fetch like data for multiple items
 async function batchFetchLikeData(supabase: ReturnType<typeof createClient>, dedupeHashes: string[], userId?: string) {
-  // Batch fetch like counts for all items
-  const { data: likeCounts } = await supabase
-    .from("timeline_likes")
-    .select("dedupe_hash")
-    .in("dedupe_hash", dedupeHashes)
+  // Use database function to efficiently aggregate like counts and user likes
+  const { data: likeData } = await (supabase as any)
+    .rpc('get_batch_like_data', {
+      dedupe_hashes: dedupeHashes,
+      user_id_param: userId || null
+    })
     .throwOnError();
 
-  // Count likes per dedupe_hash
-  const likeCountMap = likeCounts?.reduce((acc: Record<string, number>, like: { dedupe_hash: string }) => {
-    acc[like.dedupe_hash] = (acc[like.dedupe_hash] || 0) + 1;
-    return acc;
-  }, {}) || {};
+  // Convert the result to maps for easy lookup
+  const likeCountMap: Record<string, number> = {};
+  const userLikesMap: Record<string, boolean> = {};
 
-  // Batch fetch user's liked status if authenticated
-  let userLikesMap: Record<string, boolean> = {};
-  if (userId) {
-    const { data: userLikes } = await supabase
-      .from("timeline_likes")
-      .select("dedupe_hash")
-      .eq("user_id", userId)
-      .in("dedupe_hash", dedupeHashes)
-      .throwOnError();
-
-    userLikesMap = userLikes?.reduce((acc: Record<string, boolean>, like: { dedupe_hash: string }) => {
-      acc[like.dedupe_hash] = true;
-      return acc;
-    }, {}) || {};
-  }
+  (likeData as Array<{ dedupe_hash: string; like_count: number; user_liked: boolean }> | null)?.forEach((row) => {
+    likeCountMap[row.dedupe_hash] = row.like_count;
+    userLikesMap[row.dedupe_hash] = row.user_liked;
+  });
 
   return { likeCountMap, userLikesMap };
 }

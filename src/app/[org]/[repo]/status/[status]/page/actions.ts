@@ -18,30 +18,19 @@ export type FetchFeedItemParams = {
 
 // Helper function to batch fetch like data for a single item
 async function fetchLikeData(supabase: ReturnType<typeof createClient>, dedupeHash: string, userId?: string) {
-  // Fetch like count for the item
-  const { data: likeCounts } = await supabase
-    .from("timeline_likes")
-    .select("dedupe_hash")
-    .eq("dedupe_hash", dedupeHash)
+  // Use database function to efficiently get like count and user like status
+  const { data: likeData } = await (supabase as any)
+    .rpc('get_batch_like_data', {
+      dedupe_hashes: [dedupeHash],
+      user_id_param: userId || null
+    })
     .throwOnError();
 
-  const likeCount = likeCounts?.length || 0;
-
-  // Fetch user's liked status if authenticated
-  let isLiked = false;
-  if (userId) {
-    const { data: userLike } = await supabase
-      .from("timeline_likes")
-      .select("dedupe_hash")
-      .eq("user_id", userId)
-      .eq("dedupe_hash", dedupeHash)
-      .maybeSingle()
-      .throwOnError();
-
-    isLiked = !!userLike;
-  }
-
-  return { likeCount, isLiked };
+  const result = (likeData as Array<{ dedupe_hash: string; like_count: number; user_liked: boolean }> | null)?.[0];
+  return {
+    likeCount: result?.like_count || 0,
+    isLiked: result?.user_liked || false,
+  };
 }
 
 export async function fetchFeedItem({
