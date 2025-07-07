@@ -47,11 +47,7 @@ export default async function StatusPage({
           <p className="text-foreground text-lg uppercase break-all">{repo}</p>
         </Button>
       </Link>
-      <ActivityCard 
-        item={statusItem} 
-        repo={repo} 
-        org={org} 
-      />
+      <ActivityCard item={statusItem} repo={repo} org={org} />
     </main>
   );
 }
