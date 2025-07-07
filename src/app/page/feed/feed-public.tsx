@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 import { fetchPublicFeed } from "./actions";
 
-const LIMIT = 10;
+const LIMIT = 20;
 
 export default function FeedPublic() {
   const {

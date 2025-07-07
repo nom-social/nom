@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
 
-const LIMIT = 10;
+const LIMIT = 20;
 
 export default function Feed({
   repoId,

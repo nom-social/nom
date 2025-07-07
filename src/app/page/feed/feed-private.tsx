@@ -10,7 +10,7 @@ import ActivityCard from "@/components/shared/activity-card";
 import { fetchFeed } from "./actions";
 import { cn } from "@/lib/utils";
 
-const LIMIT = 10;
+const LIMIT = 20;
 
 export default function FeedPrivate() {
   const {
