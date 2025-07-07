@@ -33,46 +33,21 @@ export class NotAuthenticatedError extends Error {
 
 // Helper function to batch fetch like data for multiple items
 async function batchFetchLikeData(supabase: ReturnType<typeof createClient>, dedupeHashes: string[], userId?: string) {
-  if (dedupeHashes.length === 0) {
-    return { likeCountMap: {}, userLikesMap: {} };
-  }
-
-  // Query 1: Get aggregated like counts per dedupe_hash using GROUP BY
-  const { data: likeCountsData } = await supabase
-    .from("timeline_likes")
-    .select("dedupe_hash, count()")
-    .in("dedupe_hash", dedupeHashes)
+  // Use database function to efficiently aggregate like counts and user likes
+  const { data: likeData } = await (supabase as any)
+    .rpc('get_batch_like_data', {
+      dedupe_hashes: dedupeHashes,
+      user_id_param: userId || null
+    })
     .throwOnError();
 
-  // Convert aggregated results to map
+  // Convert the result to maps for easy lookup
   const likeCountMap: Record<string, number> = {};
-  likeCountsData?.forEach((item: { dedupe_hash: string; count: number }) => {
-    likeCountMap[item.dedupe_hash] = item.count;
-  });
+  const userLikesMap: Record<string, boolean> = {};
 
-  // Query 2: Get user's liked posts (only if user is authenticated)
-  let userLikesMap: Record<string, boolean> = {};
-  if (userId) {
-    const { data: userLikesData } = await supabase
-      .from("timeline_likes")
-      .select("dedupe_hash")
-      .in("dedupe_hash", dedupeHashes)
-      .eq("user_id", userId)
-      .throwOnError();
-
-    userLikesData?.forEach((like: { dedupe_hash: string }) => {
-      userLikesMap[like.dedupe_hash] = true;
-    });
-  }
-
-  // Ensure all dedupe_hashes have entries (even if 0 likes)
-  dedupeHashes.forEach((hash) => {
-    if (!(hash in likeCountMap)) {
-      likeCountMap[hash] = 0;
-    }
-    if (!(hash in userLikesMap)) {
-      userLikesMap[hash] = false;
-    }
+  (likeData as Array<{ dedupe_hash: string; like_count: number; user_liked: boolean }> | null)?.forEach((row) => {
+    likeCountMap[row.dedupe_hash] = row.like_count;
+    userLikesMap[row.dedupe_hash] = row.user_liked;
   });
 
   return { likeCountMap, userLikesMap };
