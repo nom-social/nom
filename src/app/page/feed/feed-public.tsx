@@ -135,8 +135,6 @@ export default function FeedPublic() {
                 item={item} 
                 repo={repo} 
                 org={org} 
-                initialLikeCount={item.likeCount}
-                initialIsLiked={item.isLiked}
               />
             </div>
           );

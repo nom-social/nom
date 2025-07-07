@@ -3,6 +3,11 @@ import type { Tables } from "@/types/supabase";
 
 export type FeedItem = Tables<"public_timeline">;
 
+export type FeedItemWithLikes = FeedItem & {
+  likeCount: number;
+  isLiked: boolean;
+};
+
 export type FetchFeedPageParams = {
   repoId: string;
   limit: number;
@@ -10,7 +15,7 @@ export type FetchFeedPageParams = {
 };
 
 export type FetchFeedPageResult = {
-  items: (FeedItem & { likeCount: number; isLiked: boolean })[];
+  items: FeedItemWithLikes[];
   hasMore: boolean;
 };
 
@@ -74,7 +79,7 @@ export async function fetchFeedPage({
   const { likeCountMap, userLikesMap } = await batchFetchLikeData(supabase, dedupeHashes, user?.id);
 
   // Enhance items with like data
-  const itemsWithLikes = items.map((item) => ({
+  const itemsWithLikes: FeedItemWithLikes[] = items.map((item) => ({
     ...item,
     likeCount: likeCountMap[item.dedupe_hash] || 0,
     isLiked: userLikesMap[item.dedupe_hash] || false,

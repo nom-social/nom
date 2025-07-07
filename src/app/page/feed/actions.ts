@@ -1,7 +1,29 @@
 import { Tables } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/client";
 
-export type FeedItem = Tables<"user_timeline">;
+export type FeedItem = Tables<"user_timeline"> & {
+  repositories: {
+    org: string;
+    repo: string;
+  };
+};
+
+export type FeedItemWithLikes = FeedItem & {
+  likeCount: number;
+  isLiked: boolean;
+};
+
+export type PublicFeedItem = Tables<"public_timeline"> & {
+  repositories: {
+    org: string;
+    repo: string;
+  };
+};
+
+export type PublicFeedItemWithLikes = PublicFeedItem & {
+  likeCount: number;
+  isLiked: boolean;
+};
 
 export class NotAuthenticatedError extends Error {
   constructor() {
@@ -49,7 +71,7 @@ export async function fetchFeed({
 }: {
   limit: number;
   offset: number;
-}) {
+}): Promise<{ items: FeedItemWithLikes[]; hasMore: boolean }> {
   const supabase = createClient();
   const {
     data: { user },
@@ -73,7 +95,7 @@ export async function fetchFeed({
   const { likeCountMap, userLikesMap } = await batchFetchLikeData(supabase, dedupeHashes, user.id);
 
   // Enhance items with like data
-  const itemsWithLikes = items.map((item) => ({
+  const itemsWithLikes: FeedItemWithLikes[] = items.map((item) => ({
     ...item,
     likeCount: likeCountMap[item.dedupe_hash] || 0,
     isLiked: userLikesMap[item.dedupe_hash] || false,
@@ -93,7 +115,7 @@ export async function fetchPublicFeed({
 }: {
   limit: number;
   offset: number;
-}) {
+}): Promise<{ items: PublicFeedItemWithLikes[]; hasMore: boolean }> {
   const supabase = createClient();
   const {
     data: { user },
@@ -114,7 +136,7 @@ export async function fetchPublicFeed({
   const { likeCountMap, userLikesMap } = await batchFetchLikeData(supabase, dedupeHashes, user?.id);
 
   // Enhance items with like data
-  const itemsWithLikes = items.map((item) => ({
+  const itemsWithLikes: PublicFeedItemWithLikes[] = items.map((item) => ({
     ...item,
     likeCount: likeCountMap[item.dedupe_hash] || 0,
     isLiked: userLikesMap[item.dedupe_hash] || false,

@@ -28,28 +28,33 @@ import {
 } from "./activity-card/actions";
 import ActivityCardBase from "./activity-card/shared/activity-card-base";
 
+type FeedItemWithLikes = (Tables<"public_timeline"> | Tables<"user_timeline">) & {
+  likeCount: number;
+  isLiked: boolean;
+  repositories?: {
+    org: string;
+    repo: string;
+  };
+};
+
 export default function ActivityCard({
   item,
   repo,
   org,
-  initialLikeCount,
-  initialIsLiked,
 }: {
-  item: Tables<"public_timeline"> | Tables<"user_timeline">;
+  item: FeedItemWithLikes;
   repo: string;
   org: string;
-  initialLikeCount: number;
-  initialIsLiked: boolean;
 }) {
   const router = useRouter();
-  const [likeCount, setLikeCount] = useState<number>(initialLikeCount);
-  const [liked, setLiked] = useState<boolean>(initialIsLiked);
+  const [likeCount, setLikeCount] = useState<number>(item.likeCount);
+  const [liked, setLiked] = useState<boolean>(item.isLiked);
 
   // Update local state when props change (useful for refetching)
   useEffect(() => {
-    setLikeCount(initialLikeCount);
-    setLiked(initialIsLiked);
-  }, [initialLikeCount, initialIsLiked]);
+    setLikeCount(item.likeCount);
+    setLiked(item.isLiked);
+  }, [item.likeCount, item.isLiked]);
 
   const likeMutation = useMutation({
     mutationFn: ({ hash }: { hash: string }) => createLike(hash),

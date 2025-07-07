@@ -5,6 +5,11 @@ import type { Tables } from "@/types/supabase";
 
 export type FeedItem = Tables<"public_timeline">;
 
+export type FeedItemWithLikes = FeedItem & {
+  likeCount: number;
+  isLiked: boolean;
+};
+
 export type FetchFeedItemParams = {
   statusId: string;
   repo: string;
@@ -43,7 +48,7 @@ export async function fetchFeedItem({
   statusId,
   repo,
   org,
-}: FetchFeedItemParams): Promise<(FeedItem & { likeCount: number; isLiked: boolean }) | null> {
+}: FetchFeedItemParams): Promise<FeedItemWithLikes | null> {
   const supabase = createClient(cookies());
 
   const { data: repoData } = await supabase
