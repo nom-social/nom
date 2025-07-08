@@ -1,10 +1,18 @@
 -- Add full text search support to timeline tables
 
--- Add search_vector column to public_timeline table
+-- Add search_text column to public_timeline table (plain text for searchable content)
+ALTER TABLE "public"."public_timeline" 
+ADD COLUMN "search_text" text;
+
+-- Add search_vector column to public_timeline table (generated from search_text)
 ALTER TABLE "public"."public_timeline" 
 ADD COLUMN "search_vector" tsvector;
 
--- Add search_vector column to user_timeline table  
+-- Add search_text column to user_timeline table (plain text for searchable content)
+ALTER TABLE "public"."user_timeline"
+ADD COLUMN "search_text" text;
+
+-- Add search_vector column to user_timeline table (generated from search_text)
 ALTER TABLE "public"."user_timeline"
 ADD COLUMN "search_vector" tsvector;
 
@@ -44,24 +52,23 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
--- Create function to update search vector
+-- Create function to update search vector from search_text column
 CREATE OR REPLACE FUNCTION update_timeline_search_vector()
 RETURNS trigger AS $$
 BEGIN
-    NEW.search_vector := to_tsvector('english', 
-        extract_timeline_search_text(NEW.data, NEW.type)
-    );
+    -- Generate search vector from search_text column
+    NEW.search_vector := to_tsvector('english', COALESCE(NEW.search_text, ''));
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
 -- Create triggers to automatically update search_vector on insert/update
 CREATE TRIGGER update_public_timeline_search_vector
-    BEFORE INSERT OR UPDATE OF data, type ON "public"."public_timeline"
+    BEFORE INSERT OR UPDATE OF search_text ON "public"."public_timeline"
     FOR EACH ROW EXECUTE FUNCTION update_timeline_search_vector();
 
 CREATE TRIGGER update_user_timeline_search_vector  
-    BEFORE INSERT OR UPDATE OF data, type ON "public"."user_timeline"
+    BEFORE INSERT OR UPDATE OF search_text ON "public"."user_timeline"
     FOR EACH ROW EXECUTE FUNCTION update_timeline_search_vector();
 
 -- Create GIN indexes for fast full text search
@@ -71,19 +78,24 @@ ON "public"."public_timeline" USING gin(search_vector);
 CREATE INDEX CONCURRENTLY IF NOT EXISTS user_timeline_search_vector_idx
 ON "public"."user_timeline" USING gin(search_vector);
 
--- Update existing rows to populate search_vector
+-- Update existing rows to populate search_text and search_vector
 UPDATE "public"."public_timeline" 
-SET search_vector = to_tsvector('english', 
-    extract_timeline_search_text(data, type)
-);
+SET search_text = extract_timeline_search_text(data, type);
 
 UPDATE "public"."user_timeline"
-SET search_vector = to_tsvector('english',
-    extract_timeline_search_text(data, type)
-);
+SET search_text = extract_timeline_search_text(data, type);
+
+-- Manually update search_vector for existing rows (triggers will handle new ones)
+UPDATE "public"."public_timeline" 
+SET search_vector = to_tsvector('english', COALESCE(search_text, ''));
+
+UPDATE "public"."user_timeline"
+SET search_vector = to_tsvector('english', COALESCE(search_text, ''));
 
 -- Add comments for documentation
-COMMENT ON COLUMN "public"."public_timeline"."search_vector" IS 'Full text search vector for title and summary content';
-COMMENT ON COLUMN "public"."user_timeline"."search_vector" IS 'Full text search vector for title and summary content';
-COMMENT ON FUNCTION extract_timeline_search_text(jsonb, text) IS 'Extracts searchable text from timeline activity data based on type';
-COMMENT ON FUNCTION update_timeline_search_vector() IS 'Trigger function to automatically update search vector when data changes';
+COMMENT ON COLUMN "public"."public_timeline"."search_text" IS 'Plain text content for full text search (populated by event processors)';
+COMMENT ON COLUMN "public"."public_timeline"."search_vector" IS 'Full text search vector generated from search_text column';
+COMMENT ON COLUMN "public"."user_timeline"."search_text" IS 'Plain text content for full text search (populated by event processors)';
+COMMENT ON COLUMN "public"."user_timeline"."search_vector" IS 'Full text search vector generated from search_text column';
+COMMENT ON FUNCTION extract_timeline_search_text(jsonb, text) IS 'Extracts searchable text from timeline activity data based on type (for migration only)';
+COMMENT ON FUNCTION update_timeline_search_vector() IS 'Trigger function to automatically update search vector when search_text changes';

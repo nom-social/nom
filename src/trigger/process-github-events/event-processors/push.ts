@@ -203,6 +203,12 @@ export async function processPushEvent({
     updated_at: latestTimestamp,
     event_ids: [event.id],
     is_read: false,
+    search_text: [
+      latestCommit.message,
+      completion.choices[0].message.content || "",
+    ]
+      .filter(text => text.trim().length > 0)
+      .join(" "),
   };
 
   // Find involved users: pusher or commit author

@@ -53,6 +53,7 @@ export type Database = {
           is_read: boolean;
           repo_id: string;
           score: number;
+          search_text: string | null;
           search_vector: string | null;
           snooze_to: string | null;
           type: string;
@@ -68,6 +69,7 @@ export type Database = {
           is_read?: boolean;
           repo_id: string;
           score: number;
+          search_text?: string | null;
           search_vector?: string | null;
           snooze_to?: string | null;
           type: string;
@@ -83,6 +85,7 @@ export type Database = {
           is_read?: boolean;
           repo_id?: string;
           score?: number;
+          search_text?: string | null;
           search_vector?: string | null;
           snooze_to?: string | null;
           type?: string;
@@ -249,6 +252,7 @@ export type Database = {
           is_read: boolean;
           repo_id: string;
           score: number;
+          search_text: string | null;
           search_vector: string | null;
           snooze_to: string | null;
           type: string;
@@ -265,6 +269,7 @@ export type Database = {
           is_read?: boolean;
           repo_id: string;
           score: number;
+          search_text?: string | null;
           search_vector?: string | null;
           snooze_to?: string | null;
           type: string;
@@ -281,6 +286,7 @@ export type Database = {
           is_read?: boolean;
           repo_id?: string;
           score?: number;
+          search_text?: string | null;
           search_vector?: string | null;
           snooze_to?: string | null;
           type?: string;
