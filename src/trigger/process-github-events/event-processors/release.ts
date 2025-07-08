@@ -135,6 +135,12 @@ export async function processReleaseEvent({
       release.published_at?.toISOString() || release.created_at.toISOString(),
     event_ids: [event.id],
     is_read: false,
+    search_text: [
+      releaseData.release.name || releaseData.release.tag_name,
+      releaseData.release.ai_summary,
+    ]
+      .filter(text => text.trim().length > 0)
+      .join(" "),
   };
   const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
 
