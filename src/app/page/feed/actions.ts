@@ -31,6 +31,55 @@ export class NotAuthenticatedError extends Error {
   }
 }
 
+// Types for parsed search filters
+interface SearchFilters {
+  org?: string;
+  repo?: string;
+  type?: string;
+  from?: string;
+  to?: string;
+  textQuery: string;
+  owner?: string;
+}
+
+// Function to parse special filters from search query
+function parseSearchFilters(query?: string): SearchFilters {
+  if (!query || !query.trim()) {
+    return { textQuery: "" };
+  }
+
+  const filters: SearchFilters = { textQuery: "" };
+  let remainingText = query;
+
+  // Define regex patterns for each filter type
+  const filterPatterns = {
+    org: /\borg:(\S+)/g,
+    repo: /\brepo:(\S+)/g,
+    type: /\btype:(\S+)/g,
+    from: /\bfrom:(\S+)/g,
+    to: /\bto:(\S+)/g,
+    owner: /\bowner:(\S+)/g,
+  };
+
+  // Extract each filter type
+  Object.entries(filterPatterns).forEach(([key, pattern]) => {
+    const matches = [...remainingText.matchAll(pattern)];
+    if (matches.length > 0) {
+      // Take the last match if multiple exist
+      const lastMatch = matches[matches.length - 1];
+      filters[key as keyof SearchFilters] = lastMatch[1];
+
+      // Remove all instances of this filter from the remaining text
+      remainingText = remainingText.replace(pattern, "");
+    }
+  });
+
+  // Clean up the remaining text (remove extra spaces)
+  filters.textQuery = remainingText.replace(/\s+/g, " ").trim();
+
+  return filters;
+}
+
 // Helper function to batch fetch like data for multiple items
 async function batchFetchLikeData(
   supabase: ReturnType<typeof createClient>,
@@ -73,24 +122,52 @@ export async function fetchFeed({
 
   if (!user) throw new NotAuthenticatedError();
 
+  // Parse the search filters
+  const filters = parseSearchFilters(query);
+
   let queryBuilder = supabase
     .from("user_timeline")
-    .select("*, repositories ( org, repo )")
+    .select("*, repositories!inner ( org, repo )")
     .eq("user_id", user.id);
 
-  if (query && query.trim()) {
-    const tsquery = query
+  // Apply special filters
+  if (filters.org || filters.owner) {
+    queryBuilder = queryBuilder.eq(
+      "repositories.org",
+      filters.org || filters.owner || ""
+    );
+  }
+
+  if (filters.repo) {
+    queryBuilder = queryBuilder.eq("repositories.repo", filters.repo);
+  }
+
+  if (filters.type) {
+    queryBuilder = queryBuilder.eq("type", filters.type);
+  }
+
+  if (filters.from) {
+    const fromDate = new Date(filters.from).toISOString();
+    queryBuilder = queryBuilder.gte("updated_at", fromDate);
+  }
+
+  if (filters.to) {
+    const toDate = new Date(filters.to).toISOString();
+    queryBuilder = queryBuilder.lte("updated_at", toDate);
+  }
+
+  // Apply text search only if there's remaining text after parsing filters
+  if (filters.textQuery && filters.textQuery.trim()) {
+    const tsquery = filters.textQuery
       .trim()
       .split(/\s+/)
       .map((word) => word.replace(/[^\w]/g, ""))
       .filter((word) => word.length > 0)
       .join(" & ");
 
-    if (!tsquery) {
-      return { items: [], hasMore: false };
+    if (tsquery) {
+      queryBuilder = queryBuilder.textSearch("search_vector", tsquery);
     }
-
-    queryBuilder = queryBuilder.textSearch("search_vector", tsquery);
   }
 
   const { data } = await queryBuilder
@@ -138,23 +215,51 @@ export async function fetchPublicFeed({
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Parse the search filters
+  const filters = parseSearchFilters(query);
+
   let queryBuilder = supabase
     .from("public_timeline")
-    .select("*, repositories ( org, repo )");
+    .select("*, repositories!inner ( org, repo )");
 
-  if (query && query.trim()) {
-    const tsquery = query
+  // Apply special filters
+  if (filters.org || filters.owner) {
+    queryBuilder = queryBuilder.eq(
+      "repositories.org",
+      filters.org || filters.owner || ""
+    );
+  }
+
+  if (filters.repo) {
+    queryBuilder = queryBuilder.eq("repositories.repo", filters.repo);
+  }
+
+  if (filters.type) {
+    queryBuilder = queryBuilder.eq("type", filters.type);
+  }
+
+  if (filters.from) {
+    const fromDate = new Date(filters.from).toISOString();
+    queryBuilder = queryBuilder.gte("updated_at", fromDate);
+  }
+
+  if (filters.to) {
+    const toDate = new Date(filters.to).toISOString();
+    queryBuilder = queryBuilder.lte("updated_at", toDate);
+  }
+
+  // Apply text search only if there's remaining text after parsing filters
+  if (filters.textQuery && filters.textQuery.trim()) {
+    const tsquery = filters.textQuery
       .trim()
       .split(/\s+/)
       .map((word) => word.replace(/[^\w]/g, ""))
       .filter((word) => word.length > 0)
       .join(" & ");
 
-    if (!tsquery) {
-      return { items: [], hasMore: false };
+    if (tsquery) {
+      queryBuilder = queryBuilder.textSearch("search_vector", tsquery);
     }
-
-    queryBuilder = queryBuilder.textSearch("search_vector", tsquery);
   }
 
   const { data } = await queryBuilder

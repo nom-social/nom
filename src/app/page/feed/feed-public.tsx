@@ -12,7 +12,7 @@ import { fetchPublicFeed } from "./actions";
 
 const LIMIT = 20;
 
-export default function FeedPublic() {
+export default function FeedPublic({ searchQuery }: { searchQuery?: string }) {
   const {
     data,
     fetchNextPage,
@@ -23,9 +23,13 @@ export default function FeedPublic() {
     error,
     refetch,
   } = useInfiniteQuery({
-    queryKey: [fetchPublicFeed.key],
+    queryKey: [fetchPublicFeed.key, searchQuery],
     queryFn: ({ pageParam }) =>
-      fetchPublicFeed({ limit: LIMIT, offset: pageParam }),
+      fetchPublicFeed({
+        limit: LIMIT,
+        offset: pageParam,
+        query: searchQuery,
+      }),
     getNextPageParam: (lastPage, allPages) => {
       if (lastPage.hasMore) {
         return allPages.reduce((acc, page) => acc + page.items.length, 0);
@@ -141,7 +145,7 @@ export default function FeedPublic() {
           </div>
         )}
         {items.length > 0 && !hasNextPage && !isLoading && (
-          <div className="text-muted-foreground text-center pb-4">
+          <div className="text-muted-foreground text-center pb-4 text-sm">
             - End of feed -
           </div>
         )}

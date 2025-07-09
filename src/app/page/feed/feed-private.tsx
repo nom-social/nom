@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 
 const LIMIT = 20;
 
-export default function FeedPrivate() {
+export default function FeedPrivate({ searchQuery }: { searchQuery?: string }) {
   const {
     data,
     fetchNextPage,
@@ -23,8 +23,13 @@ export default function FeedPrivate() {
     error,
     refetch,
   } = useInfiniteQuery({
-    queryKey: [fetchFeed.key],
-    queryFn: ({ pageParam }) => fetchFeed({ limit: LIMIT, offset: pageParam }),
+    queryKey: [fetchFeed.key, searchQuery],
+    queryFn: ({ pageParam }) =>
+      fetchFeed({
+        limit: LIMIT,
+        offset: pageParam,
+        query: searchQuery,
+      }),
     getNextPageParam: (lastPage, allPages) => {
       if (lastPage.hasMore) {
         return allPages.reduce((acc, page) => acc + page.items.length, 0);
@@ -140,7 +145,7 @@ export default function FeedPrivate() {
           </div>
         )}
         {items.length > 0 && !hasNextPage && !isLoading && (
-          <div className="text-muted-foreground text-center pb-4">
+          <div className="text-muted-foreground text-center pb-4 text-sm">
             - End of feed -
           </div>
         )}
