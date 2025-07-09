@@ -60,9 +60,11 @@ async function batchFetchLikeData(
 export async function fetchFeed({
   limit,
   offset,
+  query,
 }: {
   limit: number;
   offset: number;
+  query?: string;
 }): Promise<{ items: FeedItemWithLikes[]; hasMore: boolean }> {
   const supabase = createClient();
   const {
@@ -71,10 +73,27 @@ export async function fetchFeed({
 
   if (!user) throw new NotAuthenticatedError();
 
-  const { data } = await supabase
+  let queryBuilder = supabase
     .from("user_timeline")
     .select("*, repositories ( org, repo )")
-    .eq("user_id", user.id)
+    .eq("user_id", user.id);
+
+  if (query && query.trim()) {
+    const tsquery = query
+      .trim()
+      .split(/\s+/)
+      .map((word) => word.replace(/[^\w]/g, ""))
+      .filter((word) => word.length > 0)
+      .join(" & ");
+
+    if (!tsquery) {
+      return { items: [], hasMore: false };
+    }
+
+    queryBuilder = queryBuilder.textSearch("search_vector", tsquery);
+  }
+
+  const { data } = await queryBuilder
     .order("updated_at", { ascending: false })
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1)
@@ -108,18 +127,37 @@ fetchFeed.key = "src/app/page/feed/actions/fetchFeed";
 export async function fetchPublicFeed({
   limit,
   offset,
+  query,
 }: {
   limit: number;
   offset: number;
+  query?: string;
 }): Promise<{ items: PublicFeedItemWithLikes[]; hasMore: boolean }> {
   const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data } = await supabase
+  let queryBuilder = supabase
     .from("public_timeline")
-    .select("*, repositories ( org, repo )")
+    .select("*, repositories ( org, repo )");
+
+  if (query && query.trim()) {
+    const tsquery = query
+      .trim()
+      .split(/\s+/)
+      .map((word) => word.replace(/[^\w]/g, ""))
+      .filter((word) => word.length > 0)
+      .join(" & ");
+
+    if (!tsquery) {
+      return { items: [], hasMore: false };
+    }
+
+    queryBuilder = queryBuilder.textSearch("search_vector", tsquery);
+  }
+
+  const { data } = await queryBuilder
     .order("updated_at", { ascending: false })
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1)
@@ -149,128 +187,3 @@ export async function fetchPublicFeed({
 }
 
 fetchPublicFeed.key = "src/app/page/feed/actions/fetchPublicFeed";
-
-export async function searchFeed({
-  query,
-  limit,
-  offset,
-}: {
-  query: string;
-  limit: number;
-  offset: number;
-}): Promise<{ items: FeedItemWithLikes[]; hasMore: boolean }> {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) throw new NotAuthenticatedError();
-
-  // Convert search query to tsquery format (handle multiple words and special characters)
-  const tsquery = query
-    .trim()
-    .split(/\s+/)
-    .map(word => word.replace(/[^\w]/g, ''))
-    .filter(word => word.length > 0)
-    .join(' & ');
-
-  if (!tsquery) {
-    // If no valid search terms, return empty results
-    return { items: [], hasMore: false };
-  }
-
-  const { data } = await supabase
-    .from("user_timeline")
-    .select("*, repositories ( org, repo )")
-    .eq("user_id", user.id)
-    .textSearch("search_vector", tsquery)
-    .order("updated_at", { ascending: false })
-    .order("created_at", { ascending: false })
-    .range(offset, offset + limit - 1)
-    .throwOnError();
-
-  const items = data || [];
-
-  // Batch fetch like data for all items
-  const dedupeHashes = items.map((item) => item.dedupe_hash);
-  const { likeCountMap, userLikesMap } = await batchFetchLikeData(
-    supabase,
-    dedupeHashes,
-    user.id
-  );
-
-  // Enhance items with like data
-  const itemsWithLikes: FeedItemWithLikes[] = items.map((item) => ({
-    ...item,
-    likeCount: likeCountMap[item.dedupe_hash] || 0,
-    isLiked: userLikesMap[item.dedupe_hash] || false,
-  }));
-
-  // If we got less than limit, there are no more items
-  const hasMore = items.length === limit;
-
-  return { items: itemsWithLikes, hasMore };
-}
-
-searchFeed.key = "src/app/page/feed/actions/searchFeed";
-
-export async function searchPublicFeed({
-  query,
-  limit,
-  offset,
-}: {
-  query: string;
-  limit: number;
-  offset: number;
-}): Promise<{ items: PublicFeedItemWithLikes[]; hasMore: boolean }> {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  // Convert search query to tsquery format (handle multiple words and special characters)
-  const tsquery = query
-    .trim()
-    .split(/\s+/)
-    .map(word => word.replace(/[^\w]/g, ''))
-    .filter(word => word.length > 0)
-    .join(' & ');
-
-  if (!tsquery) {
-    // If no valid search terms, return empty results
-    return { items: [], hasMore: false };
-  }
-
-  const { data } = await supabase
-    .from("public_timeline")
-    .select("*, repositories ( org, repo )")
-    .textSearch("search_vector", tsquery)
-    .order("updated_at", { ascending: false })
-    .order("created_at", { ascending: false })
-    .range(offset, offset + limit - 1)
-    .throwOnError();
-
-  const items = data || [];
-
-  // Batch fetch like data for all items
-  const dedupeHashes = items.map((item) => item.dedupe_hash);
-  const { likeCountMap, userLikesMap } = await batchFetchLikeData(
-    supabase,
-    dedupeHashes,
-    user?.id
-  );
-
-  // Enhance items with like data
-  const itemsWithLikes: PublicFeedItemWithLikes[] = items.map((item) => ({
-    ...item,
-    likeCount: likeCountMap[item.dedupe_hash] || 0,
-    isLiked: userLikesMap[item.dedupe_hash] || false,
-  }));
-
-  // If we got less than limit, there are no more items
-  const hasMore = items.length === limit;
-
-  return { items: itemsWithLikes, hasMore };
-}
-
-searchPublicFeed.key = "src/app/page/feed/actions/searchPublicFeed";
