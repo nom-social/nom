@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import FloatingChatButton from "@/components/shared/floating-chat-button";
 
 import FeedPrivate from "./feed/feed-private";
 import FeedPublic from "./feed/feed-public";
@@ -37,40 +38,43 @@ export default function Feed({ user }: { user: User | null }) {
   }
 
   return (
-    <Tabs defaultValue="general" className="w-full">
-      <div className="flex justify-between items-center mb-4 gap-4">
-        <TabsList>
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="following">Following</TabsTrigger>
-        </TabsList>
-        <form className="relative" onSubmit={handleSubmit(onSubmit)}>
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search activities..."
-            className="pl-10 pr-10 w-full"
-            {...register("search")}
-          />
-          {searchValue && (
-            <Button
-              type="button"
-              onClick={handleClear}
-              size="icon"
-              variant="ghost"
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 text-muted-foreground hover:text-foreground focus:outline-none"
-              tabIndex={-1}
-            >
-              <X />
-            </Button>
-          )}
-        </form>
-      </div>
-      <TabsContent value="general">
-        <FeedPublic searchQuery={activeQuery} />
-      </TabsContent>
-      <TabsContent value="following">
-        <FeedPrivate searchQuery={activeQuery} />
-      </TabsContent>
-    </Tabs>
+    <>
+      <Tabs defaultValue="general" className="w-full">
+        <div className="flex justify-between items-center mb-4 gap-4">
+          <TabsList>
+            <TabsTrigger value="general">General</TabsTrigger>
+            <TabsTrigger value="following">Following</TabsTrigger>
+          </TabsList>
+          <form className="relative" onSubmit={handleSubmit(onSubmit)}>
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search activities..."
+              className="pl-10 pr-10 w-full"
+              {...register("search")}
+            />
+            {searchValue && (
+              <Button
+                type="button"
+                onClick={handleClear}
+                size="icon"
+                variant="ghost"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 text-muted-foreground hover:text-foreground focus:outline-none"
+                tabIndex={-1}
+              >
+                <X />
+              </Button>
+            )}
+          </form>
+        </div>
+        <TabsContent value="general">
+          <FeedPublic searchQuery={activeQuery} />
+        </TabsContent>
+        <TabsContent value="following">
+          <FeedPrivate searchQuery={activeQuery} />
+        </TabsContent>
+      </Tabs>
+      <FloatingChatButton />
+    </>
   );
 }
