@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Send, Wand, X } from "lucide-react";
+import { useChat } from "ai/react";
+import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,63 +23,87 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
-interface Message {
-  id: string;
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
+interface ChatContext {
+  feedType: "personal" | "public" | "repo";
+  org?: string;
+  repo?: string;
 }
 
 export default function FloatingChatButton() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      text: "Hello! I'm your AI assistant. How can I help you today?",
-      isUser: false,
-      timestamp: new Date(),
-    },
-  ]);
-  const [inputValue, setInputValue] = useState("");
+  const [context, setContext] = useState<ChatContext>({ feedType: "personal" });
+  const pathname = usePathname();
   const isMobile = useIsMobile();
 
-  const handleSendMessage = () => {
-    if (!inputValue.trim()) return;
-
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      text: inputValue,
-      isUser: true,
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, newMessage]);
-    setInputValue("");
-
-    // Simulate AI response (placeholder)
-    setTimeout(() => {
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        text: "Thanks for your message! This is a placeholder response.",
-        isUser: false,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, aiResponse]);
-    }, 1000);
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+  // Detect current context based on pathname
+  useEffect(() => {
+    if (pathname.includes("/page/feed")) {
+      setContext({ feedType: "personal" });
+    } else if (pathname.includes("/public")) {
+      setContext({ feedType: "public" });
+    } else if (pathname.match(/^\/[^/]+\/[^/]+/)) {
+      // Repository page pattern: /org/repo
+      const pathParts = pathname.split("/").filter(Boolean);
+      if (pathParts.length >= 2) {
+        setContext({
+          feedType: "repo",
+          org: pathParts[0],
+          repo: pathParts[1],
+        });
+      }
+    } else {
+      setContext({ feedType: "personal" });
     }
+  }, [pathname]);
+
+  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+    api: "/api/chat",
+    body: {
+      context,
+    },
+    initialMessages: [
+      {
+        id: "welcome",
+        role: "assistant",
+        content: `Hello! I'm your AI assistant for the GitHub activity feed. I can help you search and query your ${
+          context.feedType === "personal"
+            ? "personal feed"
+            : context.feedType === "public"
+            ? "public feed"
+            : `repository feed for ${context.org}/${context.repo}`
+        }.
+
+You can ask me to:
+- Search for specific activities (e.g., "show me recent PRs")
+- Filter by organization, repository, type, or date
+- Use special filters like \`org:microsoft type:pr\` or \`from:2024-01-01\`
+- Explain feed items and activity
+
+What would you like to know?`,
+      },
+    ],
+  });
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    handleSubmit(e);
   };
 
   const renderChatContent = () => (
     <div className="flex flex-col h-full">
       {/* Chat Header */}
       <div className="flex items-center justify-between p-4 border-b">
-        <h3 className="font-semibold text-sm">AI Assistant</h3>
+        <div className="flex flex-col">
+          <h3 className="font-semibold text-sm">AI Assistant</h3>
+          <p className="text-xs text-muted-foreground">
+            {context.feedType === "personal"
+              ? "Personal Feed"
+              : context.feedType === "public"
+              ? "Public Feed"
+              : `${context.org}/${context.repo}`}
+          </p>
+        </div>
         <Button
           variant="ghost"
           size="icon"
@@ -96,43 +122,56 @@ export default function FloatingChatButton() {
               key={message.id}
               className={cn(
                 "flex",
-                message.isUser ? "justify-end" : "justify-start"
+                message.role === "user" ? "justify-end" : "justify-start"
               )}
             >
               <div
                 className={cn(
-                  "max-w-[70%] rounded-lg px-3 py-2 text-sm",
-                  message.isUser
+                  "max-w-[80%] rounded-lg px-3 py-2 text-sm",
+                  message.role === "user"
                     ? "bg-nom-blue text-black"
                     : "bg-muted text-muted-foreground"
                 )}
               >
-                {message.text}
+                <div className="whitespace-pre-wrap">
+                  {message.content}
+                </div>
               </div>
             </div>
           ))}
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="bg-muted text-muted-foreground max-w-[80%] rounded-lg px-3 py-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce [animation-delay:0.1s]"></div>
+                  <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </ScrollArea>
 
       {/* Chat Input */}
       <div className="p-4 border-t">
-        <div className="flex gap-2">
+        <form onSubmit={onSubmit} className="flex gap-2">
           <Input
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Type your message..."
+            value={input}
+            onChange={handleInputChange}
+            placeholder="Ask about your feed..."
             className="flex-1"
+            disabled={isLoading}
           />
           <Button
-            onClick={handleSendMessage}
+            type="submit"
             size="icon"
             className="shrink-0"
-            disabled={!inputValue.trim()}
+            disabled={!input.trim() || isLoading}
           >
             <Send className="w-4 h-4" />
           </Button>
-        </div>
+        </form>
       </div>
     </div>
   );
