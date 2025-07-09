@@ -4,6 +4,13 @@ import React, { useState } from "react";
 import { Send, Wand, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
@@ -11,6 +18,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -31,6 +39,7 @@ export default function FloatingChatButton() {
     },
   ]);
   const [inputValue, setInputValue] = useState("");
+  const isMobile = useIsMobile();
 
   const handleSendMessage = () => {
     if (!inputValue.trim()) return;
@@ -64,6 +73,98 @@ export default function FloatingChatButton() {
     }
   };
 
+  const renderChatContent = () => (
+    <div className="flex flex-col h-full">
+      {/* Chat Header */}
+      <div className="flex items-center justify-between p-4 border-b">
+        <h3 className="font-semibold text-sm">AI Assistant</h3>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 p-0"
+          onClick={() => setIsOpen(false)}
+        >
+          <X className="w-4 h-4" />
+        </Button>
+      </div>
+
+      {/* Chat Messages */}
+      <ScrollArea className="flex-1 p-4">
+        <div className="space-y-4">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={cn(
+                "flex",
+                message.isUser ? "justify-end" : "justify-start"
+              )}
+            >
+              <div
+                className={cn(
+                  "max-w-[70%] rounded-lg px-3 py-2 text-sm",
+                  message.isUser
+                    ? "bg-nom-blue text-black"
+                    : "bg-muted text-muted-foreground"
+                )}
+              >
+                {message.text}
+              </div>
+            </div>
+          ))}
+        </div>
+      </ScrollArea>
+
+      {/* Chat Input */}
+      <div className="p-4 border-t">
+        <div className="flex gap-2">
+          <Input
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Type your message..."
+            className="flex-1"
+          />
+          <Button
+            onClick={handleSendMessage}
+            size="icon"
+            className="shrink-0"
+            disabled={!inputValue.trim()}
+          >
+            <Send className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={isOpen} onOpenChange={setIsOpen}>
+        <DrawerTrigger asChild>
+          <Button
+            aria-label="Open chat assistant"
+            className={cn(
+              "fixed bottom-6 right-6 z-50 border",
+              "shadow-lg p-3 hover:bg-background/90",
+              "active:scale-95 border-nom-blue bg-background text-white",
+              "transition-all duration-300 flex items-center justify-center hover:scale-105",
+              "h-14 w-14"
+            )}
+            size="icon"
+          >
+            <Wand className="w-8 h-8" />
+          </Button>
+        </DrawerTrigger>
+        <DrawerContent className="h-[80vh]">
+          <DrawerHeader className="sr-only">
+            <DrawerTitle>AI Assistant</DrawerTitle>
+          </DrawerHeader>
+          {renderChatContent()}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
@@ -86,67 +187,7 @@ export default function FloatingChatButton() {
         align="end"
         side="top"
       >
-        <div className="flex flex-col h-full">
-          {/* Chat Header */}
-          <div className="flex items-center justify-between p-4 border-b">
-            <h3 className="font-semibold text-sm">AI Assistant</h3>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 p-0"
-              onClick={() => setIsOpen(false)}
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-
-          {/* Chat Messages */}
-          <ScrollArea className="flex-1 p-4">
-            <div className="space-y-4">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cn(
-                    "flex",
-                    message.isUser ? "justify-end" : "justify-start"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "max-w-[70%] rounded-lg px-3 py-2 text-sm",
-                      message.isUser
-                        ? "bg-nom-blue text-black"
-                        : "bg-muted text-muted-foreground"
-                    )}
-                  >
-                    {message.text}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
-
-          {/* Chat Input */}
-          <div className="p-4 border-t">
-            <div className="flex gap-2">
-              <Input
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type your message..."
-                className="flex-1"
-              />
-              <Button
-                onClick={handleSendMessage}
-                size="icon"
-                className="shrink-0"
-                disabled={!inputValue.trim()}
-              >
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
+        {renderChatContent()}
       </PopoverContent>
     </Popover>
   );
