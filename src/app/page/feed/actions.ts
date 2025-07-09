@@ -66,14 +66,14 @@ function parseSearchFilters(query?: string): SearchFilters {
       // Take the last match if multiple exist
       const lastMatch = matches[matches.length - 1];
       filters[key as keyof SearchFilters] = lastMatch[1];
-      
+
       // Remove all instances of this filter from the remaining text
-      remainingText = remainingText.replace(pattern, '');
+      remainingText = remainingText.replace(pattern, "");
     }
   });
 
   // Clean up the remaining text (remove extra spaces)
-  filters.textQuery = remainingText.replace(/\s+/g, ' ').trim();
+  filters.textQuery = remainingText.replace(/\s+/g, " ").trim();
 
   return filters;
 }
@@ -142,21 +142,13 @@ export async function fetchFeed({
   }
 
   if (filters.from) {
-    try {
-      const fromDate = new Date(filters.from).toISOString();
-      queryBuilder = queryBuilder.gte("updated_at", fromDate);
-    } catch (error) {
-      console.warn("Invalid from date format:", filters.from);
-    }
+    const fromDate = new Date(filters.from).toISOString();
+    queryBuilder = queryBuilder.gte("updated_at", fromDate);
   }
 
   if (filters.to) {
-    try {
-      const toDate = new Date(filters.to).toISOString();
-      queryBuilder = queryBuilder.lte("updated_at", toDate);
-    } catch (error) {
-      console.warn("Invalid to date format:", filters.to);
-    }
+    const toDate = new Date(filters.to).toISOString();
+    queryBuilder = queryBuilder.lte("updated_at", toDate);
   }
 
   // Apply text search only if there's remaining text after parsing filters
@@ -239,21 +231,13 @@ export async function fetchPublicFeed({
   }
 
   if (filters.from) {
-    try {
-      const fromDate = new Date(filters.from).toISOString();
-      queryBuilder = queryBuilder.gte("updated_at", fromDate);
-    } catch (error) {
-      console.warn("Invalid from date format:", filters.from);
-    }
+    const fromDate = new Date(filters.from).toISOString();
+    queryBuilder = queryBuilder.gte("updated_at", fromDate);
   }
 
   if (filters.to) {
-    try {
-      const toDate = new Date(filters.to).toISOString();
-      queryBuilder = queryBuilder.lte("updated_at", toDate);
-    } catch (error) {
-      console.warn("Invalid to date format:", filters.to);
-    }
+    const toDate = new Date(filters.to).toISOString();
+    queryBuilder = queryBuilder.lte("updated_at", toDate);
   }
 
   // Apply text search only if there's remaining text after parsing filters

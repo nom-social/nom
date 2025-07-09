@@ -25,10 +25,10 @@ export default function FeedPublic({ searchQuery }: { searchQuery?: string }) {
   } = useInfiniteQuery({
     queryKey: [fetchPublicFeed.key, searchQuery],
     queryFn: ({ pageParam }) =>
-      fetchPublicFeed({ 
-        limit: LIMIT, 
+      fetchPublicFeed({
+        limit: LIMIT,
         offset: pageParam,
-        query: searchQuery 
+        query: searchQuery,
       }),
     getNextPageParam: (lastPage, allPages) => {
       if (lastPage.hasMore) {

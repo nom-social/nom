@@ -24,11 +24,12 @@ export default function FeedPrivate({ searchQuery }: { searchQuery?: string }) {
     refetch,
   } = useInfiniteQuery({
     queryKey: [fetchFeed.key, searchQuery],
-    queryFn: ({ pageParam }) => fetchFeed({ 
-      limit: LIMIT, 
-      offset: pageParam,
-      query: searchQuery 
-    }),
+    queryFn: ({ pageParam }) =>
+      fetchFeed({
+        limit: LIMIT,
+        offset: pageParam,
+        query: searchQuery,
+      }),
     getNextPageParam: (lastPage, allPages) => {
       if (lastPage.hasMore) {
         return allPages.reduce((acc, page) => acc + page.items.length, 0);
