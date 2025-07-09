@@ -139,7 +139,7 @@ export async function processReleaseEvent({
       releaseData.release.name || releaseData.release.tag_name,
       releaseData.release.ai_summary,
     ]
-      .filter(text => text.trim().length > 0)
+      .filter((text) => text.trim().length > 0)
       .join(" "),
   };
   const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
