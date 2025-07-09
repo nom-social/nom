@@ -23,6 +23,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
+// TODO: Fix the AI assistant here
 interface ChatContext {
   feedType: "personal" | "public" | "repo";
   org?: string;
@@ -56,22 +57,23 @@ export default function FloatingChatButton() {
     }
   }, [pathname]);
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
-    api: "/api/chat",
-    body: {
-      context,
-    },
-    initialMessages: [
-      {
-        id: "welcome",
-        role: "assistant",
-        content: `Hello! I'm your AI assistant for the GitHub activity feed. I can help you search and query your ${
-          context.feedType === "personal"
-            ? "personal feed"
-            : context.feedType === "public"
-            ? "public feed"
-            : `repository feed for ${context.org}/${context.repo}`
-        }.
+  const { messages, input, handleInputChange, handleSubmit, isLoading } =
+    useChat({
+      api: "/api/chat",
+      body: {
+        context,
+      },
+      initialMessages: [
+        {
+          id: "welcome",
+          role: "assistant",
+          content: `Hello! I'm your AI assistant for the GitHub activity feed. I can help you search and query your ${
+            context.feedType === "personal"
+              ? "personal feed"
+              : context.feedType === "public"
+                ? "public feed"
+                : `repository feed for ${context.org}/${context.repo}`
+          }.
 
 You can ask me to:
 - Search for specific activities (e.g., "show me recent PRs")
@@ -80,9 +82,9 @@ You can ask me to:
 - Explain feed items and activity
 
 What would you like to know?`,
-      },
-    ],
-  });
+        },
+      ],
+    });
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,17 +93,17 @@ What would you like to know?`,
   };
 
   const renderChatContent = () => (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full max-h-full">
       {/* Chat Header */}
-      <div className="flex items-center justify-between p-4 border-b">
+      <div className="flex items-center justify-between p-4 border-b shrink-0">
         <div className="flex flex-col">
           <h3 className="font-semibold text-sm">AI Assistant</h3>
           <p className="text-xs text-muted-foreground">
             {context.feedType === "personal"
               ? "Personal Feed"
               : context.feedType === "public"
-              ? "Public Feed"
-              : `${context.org}/${context.repo}`}
+                ? "Public Feed"
+                : `${context.org}/${context.repo}`}
           </p>
         </div>
         <Button
@@ -115,7 +117,7 @@ What would you like to know?`,
       </div>
 
       {/* Chat Messages */}
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="flex-1 min-h-0 p-4">
         <div className="space-y-4">
           {messages.map((message) => (
             <div
@@ -133,9 +135,7 @@ What would you like to know?`,
                     : "bg-muted text-muted-foreground"
                 )}
               >
-                <div className="whitespace-pre-wrap">
-                  {message.content}
-                </div>
+                <div className="whitespace-pre-wrap">{message.content}</div>
               </div>
             </div>
           ))}
@@ -154,7 +154,7 @@ What would you like to know?`,
       </ScrollArea>
 
       {/* Chat Input */}
-      <div className="p-4 border-t">
+      <div className="p-4 border-t shrink-0">
         <form onSubmit={onSubmit} className="flex gap-2">
           <Input
             value={input}

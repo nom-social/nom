@@ -2,11 +2,12 @@ import { openai } from "@ai-sdk/openai";
 import { streamText, tool } from "ai";
 import { z } from "zod";
 import { NextRequest } from "next/server";
+
 import { createClient } from "@/utils/supabase/client";
 import { fetchFeed, fetchPublicFeed } from "@/app/page/feed/actions";
 import { fetchFeedPage } from "@/app/[org]/[repo]/page/feed/actions";
 
-export const maxDuration = 30;
+export const runtime = "edge";
 
 // Helper function to get repository ID from org/repo
 async function getRepoId(org: string, repo: string): Promise<string | null> {
@@ -17,7 +18,7 @@ async function getRepoId(org: string, repo: string): Promise<string | null> {
     .eq("org", org)
     .eq("repo", repo)
     .single();
-  
+
   return data?.id || null;
 }
 
@@ -25,16 +26,30 @@ export async function POST(req: NextRequest) {
   try {
     const { messages, context } = await req.json();
 
-    const result = await streamText({
-      model: openai("gpt-4o"),
+    const result = streamText({
+      model: openai("gpt-4o-mini"),
       messages,
       tools: {
         queryFeed: tool({
-          description: "Query the user's personal feed with optional search filters like org:, repo:, type:, from:, to:, owner: and text search",
+          description:
+            "Query the user's personal feed with optional search filters like org:, repo:, type:, from:, to:, owner: and text search",
           parameters: z.object({
-            query: z.string().optional().describe("Search query with optional filters like 'org:microsoft type:pr' or just plain text"),
-            limit: z.number().optional().default(10).describe("Number of items to fetch (default 10)"),
-            offset: z.number().optional().default(0).describe("Number of items to skip (default 0)"),
+            query: z
+              .string()
+              .optional()
+              .describe(
+                "Search query with optional filters like 'org:microsoft type:pr' or just plain text"
+              ),
+            limit: z
+              .number()
+              .optional()
+              .default(10)
+              .describe("Number of items to fetch (default 10)"),
+            offset: z
+              .number()
+              .optional()
+              .default(0)
+              .describe("Number of items to skip (default 0)"),
           }),
           execute: async ({ query, limit = 10, offset = 0 }) => {
             try {
@@ -51,17 +66,34 @@ export async function POST(req: NextRequest) {
             } catch (error) {
               return {
                 success: false,
-                error: error instanceof Error ? error.message : "Failed to fetch personal feed",
+                error:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to fetch personal feed",
               };
             }
           },
         }),
         queryPublicFeed: tool({
-          description: "Query the public feed with optional search filters like org:, repo:, type:, from:, to:, owner: and text search",
+          description:
+            "Query the public feed with optional search filters like org:, repo:, type:, from:, to:, owner: and text search",
           parameters: z.object({
-            query: z.string().optional().describe("Search query with optional filters like 'org:microsoft type:pr' or just plain text"),
-            limit: z.number().optional().default(10).describe("Number of items to fetch (default 10)"),
-            offset: z.number().optional().default(0).describe("Number of items to skip (default 0)"),
+            query: z
+              .string()
+              .optional()
+              .describe(
+                "Search query with optional filters like 'org:microsoft type:pr' or just plain text"
+              ),
+            limit: z
+              .number()
+              .optional()
+              .default(10)
+              .describe("Number of items to fetch (default 10)"),
+            offset: z
+              .number()
+              .optional()
+              .default(0)
+              .describe("Number of items to skip (default 0)"),
           }),
           execute: async ({ query, limit = 10, offset = 0 }) => {
             try {
@@ -78,19 +110,34 @@ export async function POST(req: NextRequest) {
             } catch (error) {
               return {
                 success: false,
-                error: error instanceof Error ? error.message : "Failed to fetch public feed",
+                error:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to fetch public feed",
               };
             }
           },
         }),
         queryRepoFeed: tool({
-          description: "Query a specific repository's feed with optional search filters",
+          description:
+            "Query a specific repository's feed with optional search filters",
           parameters: z.object({
             org: z.string().describe("Organization name"),
             repo: z.string().describe("Repository name"),
-            query: z.string().optional().describe("Search query for repository feed"),
-            limit: z.number().optional().default(10).describe("Number of items to fetch (default 10)"),
-            offset: z.number().optional().default(0).describe("Number of items to skip (default 0)"),
+            query: z
+              .string()
+              .optional()
+              .describe("Search query for repository feed"),
+            limit: z
+              .number()
+              .optional()
+              .default(10)
+              .describe("Number of items to fetch (default 10)"),
+            offset: z
+              .number()
+              .optional()
+              .default(0)
+              .describe("Number of items to skip (default 0)"),
           }),
           execute: async ({ org, repo, query, limit = 10, offset = 0 }) => {
             try {
@@ -116,7 +163,10 @@ export async function POST(req: NextRequest) {
             } catch (error) {
               return {
                 success: false,
-                error: error instanceof Error ? error.message : "Failed to fetch repository feed",
+                error:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to fetch repository feed",
               };
             }
           },
