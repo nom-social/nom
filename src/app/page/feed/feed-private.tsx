@@ -145,7 +145,7 @@ export default function FeedPrivate({ searchQuery }: { searchQuery?: string }) {
           </div>
         )}
         {items.length > 0 && !hasNextPage && !isLoading && (
-          <div className="text-muted-foreground text-center pb-4">
+          <div className="text-muted-foreground text-center pb-4 text-sm">
             - End of feed -
           </div>
         )}

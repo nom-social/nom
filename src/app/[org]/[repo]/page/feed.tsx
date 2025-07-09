@@ -153,7 +153,7 @@ export default function Feed({
           </div>
         )}
         {items.length > 0 && !hasNextPage && !isLoading && (
-          <div className="text-muted-foreground text-center pb-4">
+          <div className="text-muted-foreground text-center pb-4 text-sm">
             - End of feed -
           </div>
         )}
