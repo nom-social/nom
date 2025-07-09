@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { Search } from "lucide-react";
+
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 

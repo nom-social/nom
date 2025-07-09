@@ -39,6 +39,7 @@ interface SearchFilters {
   from?: string;
   to?: string;
   textQuery: string;
+  owner?: string;
 }
 
 // Function to parse special filters from search query
@@ -57,6 +58,7 @@ function parseSearchFilters(query?: string): SearchFilters {
     type: /\btype:(\S+)/g,
     from: /\bfrom:(\S+)/g,
     to: /\bto:(\S+)/g,
+    owner: /\bowner:(\S+)/g,
   };
 
   // Extract each filter type
@@ -129,8 +131,11 @@ export async function fetchFeed({
     .eq("user_id", user.id);
 
   // Apply special filters
-  if (filters.org) {
-    queryBuilder = queryBuilder.eq("repositories.org", filters.org);
+  if (filters.org || filters.owner) {
+    queryBuilder = queryBuilder.eq(
+      "repositories.org",
+      filters.org || filters.owner || ""
+    );
   }
 
   if (filters.repo) {
@@ -218,8 +223,11 @@ export async function fetchPublicFeed({
     .select("*, repositories ( org, repo )");
 
   // Apply special filters
-  if (filters.org) {
-    queryBuilder = queryBuilder.eq("repositories.org", filters.org);
+  if (filters.org || filters.owner) {
+    queryBuilder = queryBuilder.eq(
+      "repositories.org",
+      filters.org || filters.owner || ""
+    );
   }
 
   if (filters.repo) {
