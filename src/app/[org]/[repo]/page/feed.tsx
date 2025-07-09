@@ -1,12 +1,14 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Loader, ArrowUp } from "lucide-react";
+import { Loader, ArrowUp, Search, X } from "lucide-react";
 import React, { useRef, useCallback, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 
 import ActivityCard from "@/components/shared/activity-card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
 
 import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
 
@@ -16,13 +18,30 @@ export default function Feed({
   repoId,
   repo,
   org,
-  searchQuery = "",
 }: {
   repoId: string;
   repo: string;
   org: string;
   searchQuery?: string;
 }) {
+  const { register, handleSubmit, setValue, getValues } = useForm<{
+    search: string;
+  }>({
+    defaultValues: { search: "" },
+  });
+
+  const [activeQuery, setActiveQuery] = useState("");
+  const searchValue = getValues("search");
+
+  const onSubmit = (data: { search: string }) => {
+    setActiveQuery(data.search);
+  };
+
+  const handleClear = () => {
+    setValue("search", "");
+    setActiveQuery("");
+  };
+
   const {
     data,
     fetchNextPage,
@@ -33,14 +52,14 @@ export default function Feed({
     error,
     refetch,
   } = useInfiniteQuery<FetchFeedPageResult, Error>({
-    queryKey: [fetchFeedPage.key, repoId, searchQuery],
+    queryKey: [fetchFeedPage.key, repoId, activeQuery],
     queryFn: ({ pageParam }) => {
       const offset = typeof pageParam === "number" ? pageParam : 0;
       return fetchFeedPage({
         repoId,
         limit: LIMIT,
         offset,
-        query: searchQuery,
+        query: activeQuery,
       });
     },
     getNextPageParam: (lastPage, allPages) => {
@@ -125,6 +144,28 @@ export default function Feed({
       </Button>
 
       <div className="flex flex-col gap-4">
+        <form className="relative" onSubmit={handleSubmit(onSubmit)}>
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search activities..."
+            className="pl-10 pr-10 w-full"
+            {...register("search")}
+          />
+          {searchValue && (
+            <Button
+              type="button"
+              onClick={handleClear}
+              size="icon"
+              variant="ghost"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 text-muted-foreground hover:text-foreground focus:outline-none"
+              tabIndex={-1}
+            >
+              <X />
+            </Button>
+          )}
+        </form>
+
         {items.length === 0 && !isLoading && (
           <div className="text-muted-foreground">No activity yet.</div>
         )}

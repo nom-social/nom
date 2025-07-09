@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import RepoProfileCard from "@/components/[org]/[repo]/repo-profile-card";
-import { Separator } from "@/components/ui/separator";
 
 import { fetchRepoProfile } from "./actions";
 import Feed from "./page/feed";
@@ -30,11 +29,6 @@ export default async function RepoPage({
         license={repoProfile.license}
         initialSubscriptionCount={repoProfile.subscriptionCount}
       />
-
-      <div className="flex flex-row gap-2 items-center">
-        <p className="text-muted-foreground text-xs">Recent activities</p>
-        <Separator className="flex-1" />
-      </div>
 
       <Feed repoId={repoProfile.id} repo={repo} org={org} />
     </main>

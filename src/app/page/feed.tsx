@@ -38,7 +38,7 @@ export default function Feed({ user }: { user: User | null }) {
 
   return (
     <Tabs defaultValue="general" className="w-full">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-4 gap-4">
         <TabsList>
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="following">Following</TabsTrigger>
@@ -48,7 +48,7 @@ export default function Feed({ user }: { user: User | null }) {
           <Input
             type="text"
             placeholder="Search activities..."
-            className="pl-10 pr-10 w-64"
+            className="pl-10 pr-10 w-full"
             {...register("search")}
           />
           {searchValue && (
