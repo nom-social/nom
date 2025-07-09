@@ -16,10 +16,12 @@ export default function Feed({
   repoId,
   repo,
   org,
+  searchQuery = "",
 }: {
   repoId: string;
   repo: string;
   org: string;
+  searchQuery?: string;
 }) {
   const {
     data,
@@ -31,13 +33,14 @@ export default function Feed({
     error,
     refetch,
   } = useInfiniteQuery<FetchFeedPageResult, Error>({
-    queryKey: [fetchFeedPage.key, repoId],
+    queryKey: [fetchFeedPage.key, repoId, searchQuery],
     queryFn: ({ pageParam }) => {
       const offset = typeof pageParam === "number" ? pageParam : 0;
       return fetchFeedPage({
         repoId,
         limit: LIMIT,
         offset,
+        query: searchQuery,
       });
     },
     getNextPageParam: (lastPage, allPages) => {
