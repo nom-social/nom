@@ -12,6 +12,7 @@ export type FetchFeedPageParams = {
   repoId: string;
   limit: number;
   offset: number;
+  query?: string;
 };
 
 export type FetchFeedPageResult = {
@@ -49,16 +50,34 @@ export async function fetchFeedPage({
   repoId,
   limit,
   offset,
+  query,
 }: FetchFeedPageParams): Promise<FetchFeedPageResult> {
   const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data } = await supabase
+  let queryBuilder = supabase
     .from("public_timeline")
     .select("*")
-    .eq("repo_id", repoId)
+    .eq("repo_id", repoId);
+
+  if (query && query.trim()) {
+    const tsquery = query
+      .trim()
+      .split(/\s+/)
+      .map((word) => word.replace(/[^\w]/g, ""))
+      .filter((word) => word.length > 0)
+      .join(" & ");
+
+    if (!tsquery) {
+      return { items: [], hasMore: false };
+    }
+
+    queryBuilder = queryBuilder.textSearch("search_vector", tsquery);
+  }
+
+  const { data } = await queryBuilder
     .order("updated_at", { ascending: false })
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1)
@@ -74,14 +93,12 @@ export async function fetchFeedPage({
     user?.id
   );
 
-  // Enhance items with like data
   const itemsWithLikes: FeedItemWithLikes[] = items.map((item) => ({
     ...item,
     likeCount: likeCountMap[item.dedupe_hash] || 0,
     isLiked: userLikesMap[item.dedupe_hash] || false,
   }));
 
-  // If we got less than limit, there are no more items
   const hasMore = items.length === limit;
 
   return { items: itemsWithLikes, hasMore };

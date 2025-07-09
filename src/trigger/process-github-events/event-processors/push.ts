@@ -184,9 +184,11 @@ export async function processPushEvent({
 
   const latestTimestamp = new Date(latestCommit.timestamp).toISOString();
 
+  const aiSummary = completion.choices[0].message.content || "";
+
   const pushData: PushData = {
     push: {
-      ai_summary: completion.choices[0].message.content || "",
+      ai_summary: aiSummary,
       contributors,
       title: latestCommit.message,
       html_url: latestCommit.url,
@@ -203,6 +205,9 @@ export async function processPushEvent({
     updated_at: latestTimestamp,
     event_ids: [event.id],
     is_read: false,
+    search_text: [latestCommit.message, aiSummary]
+      .filter((text) => text.trim().length > 0)
+      .join(" "),
   };
 
   // Find involved users: pusher or commit author

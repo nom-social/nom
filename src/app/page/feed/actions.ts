@@ -60,9 +60,11 @@ async function batchFetchLikeData(
 export async function fetchFeed({
   limit,
   offset,
+  query,
 }: {
   limit: number;
   offset: number;
+  query?: string;
 }): Promise<{ items: FeedItemWithLikes[]; hasMore: boolean }> {
   const supabase = createClient();
   const {
@@ -71,10 +73,27 @@ export async function fetchFeed({
 
   if (!user) throw new NotAuthenticatedError();
 
-  const { data } = await supabase
+  let queryBuilder = supabase
     .from("user_timeline")
     .select("*, repositories ( org, repo )")
-    .eq("user_id", user.id)
+    .eq("user_id", user.id);
+
+  if (query && query.trim()) {
+    const tsquery = query
+      .trim()
+      .split(/\s+/)
+      .map((word) => word.replace(/[^\w]/g, ""))
+      .filter((word) => word.length > 0)
+      .join(" & ");
+
+    if (!tsquery) {
+      return { items: [], hasMore: false };
+    }
+
+    queryBuilder = queryBuilder.textSearch("search_vector", tsquery);
+  }
+
+  const { data } = await queryBuilder
     .order("updated_at", { ascending: false })
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1)
@@ -108,18 +127,37 @@ fetchFeed.key = "src/app/page/feed/actions/fetchFeed";
 export async function fetchPublicFeed({
   limit,
   offset,
+  query,
 }: {
   limit: number;
   offset: number;
+  query?: string;
 }): Promise<{ items: PublicFeedItemWithLikes[]; hasMore: boolean }> {
   const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data } = await supabase
+  let queryBuilder = supabase
     .from("public_timeline")
-    .select("*, repositories ( org, repo )")
+    .select("*, repositories ( org, repo )");
+
+  if (query && query.trim()) {
+    const tsquery = query
+      .trim()
+      .split(/\s+/)
+      .map((word) => word.replace(/[^\w]/g, ""))
+      .filter((word) => word.length > 0)
+      .join(" & ");
+
+    if (!tsquery) {
+      return { items: [], hasMore: false };
+    }
+
+    queryBuilder = queryBuilder.textSearch("search_vector", tsquery);
+  }
+
+  const { data } = await queryBuilder
     .order("updated_at", { ascending: false })
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1)

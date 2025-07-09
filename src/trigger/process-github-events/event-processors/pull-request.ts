@@ -278,6 +278,9 @@ export async function processPullRequestEvent({
     updated_at: pull_request.updated_at.toISOString(),
     event_ids: [event.id],
     is_read: false,
+    search_text: [prData.pull_request.title, prData.pull_request.ai_summary]
+      .filter((text) => text.trim().length > 0)
+      .join(" "),
   };
   const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
 

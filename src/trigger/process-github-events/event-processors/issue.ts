@@ -90,6 +90,9 @@ export async function processIssueEvent({
     updated_at: issue.updated_at.toISOString(),
     event_ids: [event.id],
     is_read: false,
+    search_text: [issueData.issue.title, issueData.issue.ai_summary]
+      .filter((text) => text.trim().length > 0)
+      .join(" "),
   };
   const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
 
