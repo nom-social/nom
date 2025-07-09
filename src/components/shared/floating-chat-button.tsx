@@ -1,18 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Send, Wand, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-  DrawerClose,
-} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +22,6 @@ interface Message {
 
 export default function FloatingChatButton() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -35,17 +31,6 @@ export default function FloatingChatButton() {
     },
   ]);
   const [inputValue, setInputValue] = useState("");
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 640);
-    };
-
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
 
   const handleSendMessage = () => {
     if (!inputValue.trim()) return;
@@ -80,12 +65,8 @@ export default function FloatingChatButton() {
   };
 
   return (
-    <Drawer
-      open={isOpen}
-      onOpenChange={setIsOpen}
-      direction={isMobile ? "bottom" : "right"}
-    >
-      <DrawerTrigger asChild>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
         <Button
           aria-label="Open chat assistant"
           className={cn(
@@ -99,25 +80,25 @@ export default function FloatingChatButton() {
         >
           <Wand className="w-8 h-8" />
         </Button>
-      </DrawerTrigger>
-      <DrawerContent
-        className={cn(
-          "w-full max-w-none p-0",
-          isMobile ? "h-[80vh]" : "h-full sm:w-[400px]"
-        )}
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-screen max-w-sm sm:w-[400px] h-[500px] p-0"
+        align="end"
+        side="top"
       >
         <div className="flex flex-col h-full">
           {/* Chat Header */}
-          <DrawerHeader className="flex-row items-center justify-between p-4 border-b">
-            <DrawerTitle className="font-semibold text-sm">
-              AI Assistant
-            </DrawerTitle>
-            <DrawerClose asChild>
-              <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
-                <X className="w-4 h-4" />
-              </Button>
-            </DrawerClose>
-          </DrawerHeader>
+          <div className="flex items-center justify-between p-4 border-b">
+            <h3 className="font-semibold text-sm">AI Assistant</h3>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 p-0"
+              onClick={() => setIsOpen(false)}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
 
           {/* Chat Messages */}
           <ScrollArea className="flex-1 p-4">
@@ -166,7 +147,7 @@ export default function FloatingChatButton() {
             </div>
           </div>
         </div>
-      </DrawerContent>
-    </Drawer>
+      </PopoverContent>
+    </Popover>
   );
 }
