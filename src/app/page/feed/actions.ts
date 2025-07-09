@@ -127,7 +127,7 @@ export async function fetchFeed({
 
   let queryBuilder = supabase
     .from("user_timeline")
-    .select("*, repositories ( org, repo )")
+    .select("*, repositories!inner ( org, repo )")
     .eq("user_id", user.id);
 
   // Apply special filters
@@ -220,7 +220,7 @@ export async function fetchPublicFeed({
 
   let queryBuilder = supabase
     .from("public_timeline")
-    .select("*, repositories ( org, repo )");
+    .select("*, repositories!inner ( org, repo )");
 
   // Apply special filters
   if (filters.org || filters.owner) {
