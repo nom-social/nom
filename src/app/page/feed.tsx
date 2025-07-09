@@ -38,6 +38,8 @@ export default function Feed({ user }: { user: User | null }) {
         </TabsList>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          {/* TODO: Make this less laggy when typing, maybe use react hook forms */}
+          {/* TODO: Also add a clear button */}
           <Input
             type="text"
             placeholder="Search activities..."
