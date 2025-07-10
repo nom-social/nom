@@ -22,7 +22,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { fetchFeed } from "@/app/page/feed/actions";
+import { fetchPublicFeed } from "@/app/page/feed/actions";
 import { Markdown } from "@/components/ui/markdown";
 
 const queryFeedSchema = z.object({
@@ -43,11 +43,13 @@ export default function FloatingChatButton() {
     onToolCall: async ({ toolCall }) => {
       if (toolCall.toolName === "queryFeed") {
         const { args } = queryFeedSchema.parse(toolCall);
-        const result = await fetchFeed(args);
+        const result = await fetchPublicFeed(args);
 
         return result.items.map((item) => ({
-          ...item,
-          feed_url:
+          text: item.search_text,
+          type: item.type,
+          updated_at: item.updated_at,
+          url:
             `${window.location.origin}/${item.repositories.org}/` +
             `${item.repositories.repo}/status/${item.dedupe_hash}`,
         }));
