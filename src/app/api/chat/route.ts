@@ -1,38 +1,37 @@
 import { openai } from "@ai-sdk/openai";
-import { streamText, tool } from "ai";
+import { streamText } from "ai";
 import { z } from "zod";
 import { NextRequest } from "next/server";
+import { cookies } from "next/headers";
 
-import { createClient } from "@/utils/supabase/client";
-import { fetchFeed, fetchPublicFeed } from "@/app/page/feed/actions";
-import { fetchFeedPage } from "@/app/[org]/[repo]/page/feed/actions";
+import { createClient } from "@/utils/supabase/server";
 
 export const runtime = "edge";
 
-// Helper function to get repository ID from org/repo
-async function getRepoId(org: string, repo: string): Promise<string | null> {
-  const supabase = createClient();
-  const { data } = await supabase
-    .from("repositories")
-    .select("id")
-    .eq("org", org)
-    .eq("repo", repo)
-    .single();
-
-  return data?.id || null;
+class NotAuthenticatedError extends Error {
+  constructor() {
+    super("User is not authenticated");
+  }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, context } = await req.json();
+    const supabase = createClient(cookies());
+
+    const { messages } = await req.json();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) throw new NotAuthenticatedError();
 
     const result = streamText({
       model: openai("gpt-4o-mini"),
       messages,
       tools: {
-        queryFeed: tool({
+        queryFeed: {
           description:
-            "Query the user's personal feed with optional search filters like org:, repo:, type:, from:, to:, owner: and text search",
+            "Query the feed with optional search filters like org:, repo:, type:, from:, to:, owner: and text search",
           parameters: z.object({
             query: z
               .string()
@@ -51,127 +50,9 @@ export async function POST(req: NextRequest) {
               .default(0)
               .describe("Number of items to skip (default 0)"),
           }),
-          execute: async ({ query, limit = 10, offset = 0 }) => {
-            try {
-              const result = await fetchFeed({
-                query,
-                limit,
-                offset,
-              });
-              return {
-                success: true,
-                data: result,
-                message: `Found ${result.items.length} items in your personal feed${query ? ` for query: "${query}"` : ""}`,
-              };
-            } catch (error) {
-              return {
-                success: false,
-                error:
-                  error instanceof Error
-                    ? error.message
-                    : "Failed to fetch personal feed",
-              };
-            }
-          },
-        }),
-        queryPublicFeed: tool({
-          description:
-            "Query the public feed with optional search filters like org:, repo:, type:, from:, to:, owner: and text search",
-          parameters: z.object({
-            query: z
-              .string()
-              .optional()
-              .describe(
-                "Search query with optional filters like 'org:microsoft type:pr' or just plain text"
-              ),
-            limit: z
-              .number()
-              .optional()
-              .default(10)
-              .describe("Number of items to fetch (default 10)"),
-            offset: z
-              .number()
-              .optional()
-              .default(0)
-              .describe("Number of items to skip (default 0)"),
-          }),
-          execute: async ({ query, limit = 10, offset = 0 }) => {
-            try {
-              const result = await fetchPublicFeed({
-                query,
-                limit,
-                offset,
-              });
-              return {
-                success: true,
-                data: result,
-                message: `Found ${result.items.length} items in the public feed${query ? ` for query: "${query}"` : ""}`,
-              };
-            } catch (error) {
-              return {
-                success: false,
-                error:
-                  error instanceof Error
-                    ? error.message
-                    : "Failed to fetch public feed",
-              };
-            }
-          },
-        }),
-        queryRepoFeed: tool({
-          description:
-            "Query a specific repository's feed with optional search filters",
-          parameters: z.object({
-            org: z.string().describe("Organization name"),
-            repo: z.string().describe("Repository name"),
-            query: z
-              .string()
-              .optional()
-              .describe("Search query for repository feed"),
-            limit: z
-              .number()
-              .optional()
-              .default(10)
-              .describe("Number of items to fetch (default 10)"),
-            offset: z
-              .number()
-              .optional()
-              .default(0)
-              .describe("Number of items to skip (default 0)"),
-          }),
-          execute: async ({ org, repo, query, limit = 10, offset = 0 }) => {
-            try {
-              const repoId = await getRepoId(org, repo);
-              if (!repoId) {
-                return {
-                  success: false,
-                  error: `Repository ${org}/${repo} not found`,
-                };
-              }
-
-              const result = await fetchFeedPage({
-                repoId,
-                query,
-                limit,
-                offset,
-              });
-              return {
-                success: true,
-                data: result,
-                message: `Found ${result.items.length} items in ${org}/${repo} repository feed${query ? ` for query: "${query}"` : ""}`,
-              };
-            } catch (error) {
-              return {
-                success: false,
-                error:
-                  error instanceof Error
-                    ? error.message
-                    : "Failed to fetch repository feed",
-              };
-            }
-          },
-        }),
+        },
       },
+      // TODO: Move this to a prompt file
       system: `You are a helpful AI assistant for a GitHub activity feed application. You can help users:
 
 1. Search and query their personal feed
@@ -186,12 +67,11 @@ export async function POST(req: NextRequest) {
    - to:date - filter items to date
    - owner:name - filter by owner (same as org:)
 
-Current context: ${context?.feedType || "unknown"} ${context?.org ? `org: ${context.org}` : ""} ${context?.repo ? `repo: ${context.repo}` : ""}
+Current user: ${user.email || user.id}
+Current date time: ${new Date().toLocaleString()}
 
 When using tools:
-- Use queryFeed for personal feed queries
-- Use queryPublicFeed for public feed queries  
-- Use queryRepoFeed when context includes org and repo (pass org and repo parameters)
+- Use queryFeed for all feed queries
 - Always provide helpful explanations of the results
 - Format feed items in a readable way with links when possible
 - When showing feed items, include relevant details like title, type, updated_at, and repository info
@@ -201,7 +81,13 @@ Be concise but helpful. If a query fails, suggest alternative approaches.`,
 
     return result.toDataStreamResponse();
   } catch (error) {
-    console.error("Chat API error:", error);
+    if (error instanceof NotAuthenticatedError) {
+      return new Response(
+        JSON.stringify({ error: "Authentication required" }),
+        { status: 401, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     return new Response(
       JSON.stringify({ error: "Failed to process chat request" }),
       { status: 500, headers: { "Content-Type": "application/json" } }
