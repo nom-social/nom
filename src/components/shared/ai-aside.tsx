@@ -98,6 +98,7 @@ export default function AIAside() {
             </div>
           </ScrollArea>
           <div className="p-4 border-t shrink-0">
+            {/* TODO: On submitting, we should scroll to the bottom of the chat */}
             <form onSubmit={onSubmit} className="flex gap-2">
               <Input
                 value={input}
