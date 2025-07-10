@@ -28,7 +28,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
             />
           </div>
         ),
-        p: ({ children }) => <p>{children}</p>,
+        p: ({ children }) => <p className="mb-2">{children}</p>,
         code: ({ children }) => (
           <code className="bg-muted px-1.5 py-0.5 font-mono text-sm text-muted-foreground">
             {children}
@@ -50,6 +50,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
         ol: ({ children }) => (
           <ol className="list-decimal pl-7 mb-2">{children}</ol>
         ),
+        li: ({ children }) => <li className="mb-1">{children}</li>,
         a: ({ href, children }) => (
           <a
             href={href}
