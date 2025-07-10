@@ -23,6 +23,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { fetchFeed } from "@/app/page/feed/actions";
+import { Markdown } from "@/components/ui/markdown";
 
 const queryFeedSchema = z.object({
   args: z.object({
@@ -41,16 +42,14 @@ export default function FloatingChatButton() {
     maxSteps: 5,
     onToolCall: async ({ toolCall }) => {
       if (toolCall.toolName === "queryFeed") {
-        console.log(
-          "🚀 ~ onToolCall: ~ result:",
-          queryFeedSchema.safeParse(toolCall)
-        );
         const { args } = queryFeedSchema.parse(toolCall);
         const result = await fetchFeed(args);
 
         return result.items.map((item) => ({
-          text: item.search_text,
-          type: item.type,
+          ...item,
+          feed_url:
+            `${window.location.origin}/${item.repositories.org}/` +
+            `${item.repositories.repo}/status/${item.dedupe_hash}`,
         }));
       }
     },
@@ -98,7 +97,11 @@ export default function FloatingChatButton() {
                     : "bg-muted text-muted-foreground"
                 )}
               >
-                <div className="whitespace-pre-wrap">{message.content}</div>
+                {message.role === "user" ? (
+                  <div className="whitespace-pre-wrap">{message.content}</div>
+                ) : (
+                  <Markdown>{message.content}</Markdown>
+                )}
               </div>
             </div>
           ))}
@@ -173,7 +176,7 @@ export default function FloatingChatButton() {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-screen max-w-sm sm:w-[400px] h-[500px] p-0"
+        className="w-screen max-w-md sm:w-[400px] h-[500px] p-0"
         align="end"
         side="top"
       >
