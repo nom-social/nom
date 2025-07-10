@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import FloatingChatButton from "@/components/shared/floating-chat-button";
+import AIAside from "@/components/shared/ai-aside";
 
 import FeedPrivate from "./feed/feed-private";
 import FeedPublic from "./feed/feed-public";
@@ -38,7 +39,8 @@ export default function Feed({ user }: { user: User | null }) {
   }
 
   return (
-    <>
+    <div>
+      <AIAside />
       <Tabs defaultValue="general" className="w-full">
         <div className="flex justify-between items-center mb-4 gap-4">
           <TabsList>
@@ -75,6 +77,6 @@ export default function Feed({ user }: { user: User | null }) {
         </TabsContent>
       </Tabs>
       <FloatingChatButton />
-    </>
+    </div>
   );
 }

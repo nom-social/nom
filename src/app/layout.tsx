@@ -13,6 +13,7 @@ import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
 import ProfileDropdown from "./layout/profile-dropdown";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
@@ -65,7 +66,10 @@ export default function RootLayout({
                 </NavigationMenuList>
               </div>
             </NavigationMenu>
-            <div className="max-w-3xl mx-auto pt-18">{children}</div>
+
+            <div className="max-w-3xl mx-auto pt-18">
+              <SidebarProvider>{children}</SidebarProvider>
+            </div>
           </ReactQueryProvider>
         </ThemeProvider>
       </body>
