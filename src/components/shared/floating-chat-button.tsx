@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Send, Wand, X } from "lucide-react";
+import { Send, Sparkles, X } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { z } from "zod";
 
@@ -14,11 +14,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -125,44 +121,20 @@ export default function FloatingChatButton() {
             className="shrink-0"
             disabled={!input.trim()}
           >
-            <Send className="w-4 h-4" />
+            <Send />
           </Button>
         </form>
       </div>
     </div>
   );
 
-  if (isMobile) {
-    return (
-      <Drawer open={isOpen} onOpenChange={setIsOpen}>
-        <DrawerTrigger asChild>
-          <Button
-            aria-label="Open chat assistant"
-            className={cn(
-              "fixed bottom-6 right-6 z-50 border",
-              "shadow-lg p-3 hover:bg-background/90",
-              "border-nom-blue bg-background text-white",
-              "flex items-center justify-center",
-              "h-14 w-14"
-            )}
-            size="icon"
-          >
-            <Wand className="w-8 h-8" />
-          </Button>
-        </DrawerTrigger>
-        <DrawerContent className="h-[80vh]">
-          <DrawerHeader className="sr-only">
-            <DrawerTitle>AI Assistant</DrawerTitle>
-          </DrawerHeader>
-          {renderChatContent()}
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
+    <Drawer
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      direction={isMobile ? "bottom" : "right"}
+    >
+      <DrawerTrigger asChild>
         <Button
           aria-label="Open chat assistant"
           className={cn(
@@ -174,16 +146,20 @@ export default function FloatingChatButton() {
           )}
           size="icon"
         >
-          <Wand className="w-8 h-8" />
+          <Sparkles className="w-8 h-8" />
         </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        className="w-screen max-w-md sm:w-[400px] h-[500px] p-0"
-        align="end"
-        side="top"
+      </DrawerTrigger>
+      <DrawerContent
+        className={cn(
+          isMobile ? "h-[80vh]" : "h-full max-h-screen",
+          isMobile ? "w-full" : "!w-[40vw] !max-w-none"
+        )}
       >
+        <DrawerHeader className="sr-only">
+          <DrawerTitle>AI Assistant</DrawerTitle>
+        </DrawerHeader>
         {renderChatContent()}
-      </PopoverContent>
-    </Popover>
+      </DrawerContent>
+    </Drawer>
   );
 }
