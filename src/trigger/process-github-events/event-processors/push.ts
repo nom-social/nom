@@ -157,7 +157,7 @@ export async function processPushEvent({
 
   // Generate AI summary
   const completion = await openaiClient.chat.completions.create({
-    model: "o4-mini",
+    model: "gpt-5.2",
     messages: [
       {
         role: "system",

@@ -101,7 +101,7 @@ export const sendUserRepoHighlights = schemaTask({
       .replace("{repo}", repo);
 
     const response = await openAIClient.chat.completions.create({
-      model: "o4-mini",
+      model: "gpt-5.2",
       messages: [{ role: "user", content: combinedPrompt }],
     });
 

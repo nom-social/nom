@@ -127,16 +127,6 @@ npm run dev
 
 The app will be available at [http://localhost:3000](http://localhost:3000).
 
-### (Optional) Run Storybook
-
-You can also run Storybook to view and develop UI components in isolation:
-
-```sh
-npm run storybook
-```
-
-Storybook will be available at [http://localhost:6006](http://localhost:6006).
-
 ---
 
 ## Useful Links

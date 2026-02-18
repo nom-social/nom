@@ -53,7 +53,7 @@ export async function generateIssueData({
     .replace("{comments}", commentsText || "No comments");
 
   const completion = await openaiClient.chat.completions.create({
-    model: "o4-mini",
+    model: "gpt-5.2",
     messages: [
       {
         role: "system",
