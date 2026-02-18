@@ -89,7 +89,7 @@ export default function ActivityCardBase({
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="leading-relaxed font-bold">
+        <CardTitle className="leading-relaxed font-bold break-all">
           <a
             href={titleUrl}
             target="_blank"

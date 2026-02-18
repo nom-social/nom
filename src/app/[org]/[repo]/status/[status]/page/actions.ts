@@ -1,5 +1,3 @@
-import { cookies } from "next/headers";
-
 import { createClient } from "@/utils/supabase/server";
 import type { Tables } from "@/types/supabase";
 
@@ -18,7 +16,7 @@ export type FetchFeedItemParams = {
 
 // Helper function to batch fetch like data for a single item
 async function fetchLikeData(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Awaited<ReturnType<typeof createClient>>,
   dedupeHash: string,
   userId?: string
 ) {
@@ -42,7 +40,7 @@ export async function fetchFeedItem({
   repo,
   org,
 }: FetchFeedItemParams): Promise<FeedItemWithLikes | null> {
-  const supabase = createClient(cookies());
+  const supabase = await createClient();
 
   const { data: repoData } = await supabase
     .from("repositories")

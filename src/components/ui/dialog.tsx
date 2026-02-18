@@ -3,14 +3,9 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { XIcon } from "lucide-react";
-import { JetBrains_Mono } from "next/font/google";
+import { GeistPixelSquare } from "geist/font/pixel";
 
 import { cn } from "@/lib/utils";
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
 
 function Dialog({
   ...props
@@ -63,7 +58,7 @@ function DialogContent({
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
-      <div className={cn("dark antialiased", jetbrainsMono.className)}>
+      <div className={cn("dark antialiased", GeistPixelSquare.className)}>
         <DialogPrimitive.Content
           data-slot="dialog-content"
           className={cn(

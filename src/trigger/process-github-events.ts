@@ -1,4 +1,4 @@
-import { logger, task, wait } from "@trigger.dev/sdk/v3";
+import { logger, task, wait } from "@trigger.dev/sdk";
 
 import { createClient } from "@/utils/supabase/background";
 
@@ -10,7 +10,7 @@ const supabase = createClient();
 export const processGithubEvents = task({
   id: "process-github-events",
   maxDuration: 300,
-  queue: { concurrencyLimit: 1 },
+  queue: { name: "process-github-events", concurrencyLimit: 1 },
   run: async () => {
     const currentTimestamp = new Date().toISOString();
 

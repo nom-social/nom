@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 
 import { createClient } from "@/utils/supabase/server";
-import { createClient as createBackgroundClient } from "@/utils/supabase/background";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -14,9 +13,8 @@ export async function GET(request: Request) {
   }
 
   if (code) {
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
-    const backgroundSupabase = createBackgroundClient();
+    const supabase = await createClient();
+    const adminSupabase = createAdminClient();
 
     // Exchange code for session
     const {
@@ -46,13 +44,13 @@ export async function GET(request: Request) {
           .throwOnError();
 
         // Link user to repos where they are champion_github_username
-        const { data: championedRepos } = await backgroundSupabase
+        const { data: championedRepos } = await adminSupabase
           .from("repositories")
           .update({ champion_github_username: null })
           .eq("champion_github_username", session.user.user_metadata.user_name)
           .select("id")
           .throwOnError();
-        await backgroundSupabase
+        await adminSupabase
           .from("repositories_users")
           .upsert(
             championedRepos.map((repo: { id: string }) => ({

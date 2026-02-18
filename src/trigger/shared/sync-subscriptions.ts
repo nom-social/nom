@@ -1,4 +1,4 @@
-import { logger, wait } from "@trigger.dev/sdk/v3";
+import { logger, wait } from "@trigger.dev/sdk";
 import { Octokit } from "@octokit/rest";
 
 import { createClient } from "@/utils/supabase/background";

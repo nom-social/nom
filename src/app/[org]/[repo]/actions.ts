@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { z } from "zod";
 
 import { createClient } from "@/utils/supabase/server";
@@ -18,7 +17,7 @@ const metadataSchema = z.object({
 });
 
 export async function fetchRepoProfile(org: string, repo: string) {
-  const supabase = createClient(cookies());
+  const supabase = await createClient();
   const { data } = await supabase
     .from("repositories")
     .select("metadata, org, repo, id")

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Jersey_15 } from "next/font/google";
+import { GeistPixelSquare } from "geist/font/pixel";
+import { Jersey_15 } from "next/font/google";
 
 import ReactQueryProvider from "@/components/layout/react-query-provider";
 import { ThemeProvider } from "@/components/layout/theme-provider";
@@ -13,12 +14,6 @@ import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
 import ProfileDropdown from "./layout/profile-dropdown";
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
 
 const jersey15 = Jersey_15({
   variable: "--font-jersey-15",
@@ -39,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${jetbrainsMono.variable} ${jersey15.variable} font-mono antialiased min-h-screen overflow-y-scroll`}
+        className={`${GeistPixelSquare.variable} ${jersey15.variable} font-sans antialiased min-h-screen overflow-y-scroll`}
       >
         <ThemeProvider attribute="class" defaultTheme="dark">
           <ReactQueryProvider>

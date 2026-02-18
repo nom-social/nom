@@ -1,4 +1,4 @@
-import { defineConfig } from "@trigger.dev/sdk/v3";
+import { defineConfig } from "@trigger.dev/sdk";
 import { esbuildPlugin } from "@trigger.dev/build/extensions";
 import { sentryEsbuildPlugin } from "@sentry/esbuild-plugin";
 import * as Sentry from "@sentry/node";
@@ -42,7 +42,7 @@ export default defineConfig({
         process.env.NODE_ENV === "production" ? "production" : "development",
     });
   },
-  onFailure: async (payload, error, { ctx }) => {
+  onFailure: async ({ payload, error, ctx }) => {
     Sentry.captureException(error, {
       extra: {
         payload,

@@ -1,4 +1,4 @@
-import { schemaTask } from "@trigger.dev/sdk/v3";
+import { schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { marked } from "marked";
 import { format } from "date-fns";

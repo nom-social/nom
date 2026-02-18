@@ -1,12 +1,10 @@
-import { cookies } from "next/headers";
-
 import { createClient } from "@/utils/supabase/server";
 import ClaimRepoButton from "@/components/shared/claim-repo-button";
 
 import Feed from "./page/feed";
 
 export default async function Home() {
-  const supabase = createClient(cookies());
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

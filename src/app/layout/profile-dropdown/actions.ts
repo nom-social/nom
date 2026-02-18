@@ -1,10 +1,8 @@
-import { cookies } from "next/headers";
-
 import { createClient } from "@/utils/supabase/server";
 import type { Tables } from "@/types/supabase";
 
 export async function getCurrentUser(): Promise<Tables<"users"> | null> {
-  const supabase = createClient(cookies());
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

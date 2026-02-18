@@ -1,5 +1,5 @@
 import { syncBatchReposMetadataTask } from "@/trigger/sync-batch-repos-metadata";
-import { createClient } from "@/utils/supabase/server";
+import type { createAdminClient } from "@/utils/supabase/admin";
 
 export async function createNewRepo({
   supabase,
@@ -8,7 +8,7 @@ export async function createNewRepo({
   installationId,
 }: {
   repos: { org: string; repo: string }[];
-  supabase: ReturnType<typeof createClient>;
+  supabase: ReturnType<typeof createAdminClient>;
   senderLogin: string;
   installationId: number;
 }) {

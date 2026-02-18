@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import httpStatus from "http-status";
 import crypto from "crypto";
 import * as Sentry from "@sentry/nextjs";
 
-import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { Json, TablesInsert } from "@/types/supabase";
 import { processGithubEvents } from "@/trigger/process-github-events";
 import { syncBatchReposMetadataTask } from "@/trigger/sync-batch-repos-metadata";
@@ -13,8 +12,7 @@ import * as schemas from "./schemas";
 import { createNewRepo } from "./route/utils";
 
 export async function POST(request: Request) {
-  const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   try {
     // Get the raw request body

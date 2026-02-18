@@ -1,9 +1,4 @@
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-import { Database } from "@/types/supabase";
+import { createAdminClient } from "./admin";
 
-export const createClient = () =>
-  createSupabaseClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY! ||
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+/** @deprecated Use createAdminClient from @/utils/supabase/admin for new code */
+export const createClient = createAdminClient;

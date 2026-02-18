@@ -2,14 +2,9 @@
 
 import * as React from "react";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-import { JetBrains_Mono } from "next/font/google";
+import { GeistPixelSquare } from "geist/font/pixel";
 
 import { cn } from "@/lib/utils";
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
 
 function TooltipProvider({
   delayDuration = 0,
@@ -48,7 +43,7 @@ function TooltipContent({
 }: React.ComponentProps<typeof TooltipPrimitive.Content>) {
   return (
     <TooltipPrimitive.Portal>
-      <div className={cn("dark antialiased", jetbrainsMono.className)}>
+      <div className={cn("dark antialiased", GeistPixelSquare.className)}>
         <TooltipPrimitive.Content
           data-slot="tooltip-content"
           sideOffset={sideOffset}
