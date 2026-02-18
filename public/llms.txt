@@ -10,7 +10,7 @@
 
 ## Public API
 
-Base URL: https://nom.dev
+Base URL: https://nomit.dev
 
 ### GET /api/feed
 
@@ -82,7 +82,7 @@ Event types: `pull_request`, `issue`, `release`, `push`
 
 ## Key Pages
 
-- https://nom.dev — Home / global public feed
-- https://nom.dev/{org}/{repo} — Repository-specific feed (e.g. https://nom.dev/vercel/next.js)
-- https://nom.dev/api/feed — Global feed API
-- https://nom.dev/api/feed/{org}/{repo} — Repo feed API
+- https://nomit.dev — Home / global public feed
+- https://nomit.dev/{org}/{repo} — Repository-specific feed (e.g. https://nomit.dev/vercel/next.js)
+- https://nomit.dev/api/feed — Global feed API
+- https://nomit.dev/api/feed/{org}/{repo} — Repo feed API
