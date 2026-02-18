@@ -9,10 +9,12 @@ import ActivityCard from "@/components/shared/activity-card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
 import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
 
 const LIMIT = 20;
+const SEARCH_DEBOUNCE_MS = 300;
 
 export default function Feed({
   repoId,
@@ -24,22 +26,17 @@ export default function Feed({
   org: string;
   searchQuery?: string;
 }) {
-  const { register, handleSubmit, setValue, getValues } = useForm<{
+  const { register, setValue, watch } = useForm<{
     search: string;
   }>({
     defaultValues: { search: "" },
   });
 
-  const [activeQuery, setActiveQuery] = useState("");
-  const searchValue = getValues("search");
-
-  const onSubmit = (data: { search: string }) => {
-    setActiveQuery(data.search);
-  };
+  const searchValue = watch("search");
+  const activeQuery = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
 
   const handleClear = () => {
     setValue("search", "");
-    setActiveQuery("");
   };
 
   const {
@@ -144,7 +141,7 @@ export default function Feed({
       </Button>
 
       <div className="flex flex-col gap-4">
-        <form className="relative" onSubmit={handleSubmit(onSubmit)}>
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
@@ -164,7 +161,7 @@ export default function Feed({
               <X />
             </Button>
           )}
-        </form>
+        </div>
 
         {items.length === 0 && !isLoading && (
           <div className="text-muted-foreground">No activity yet.</div>

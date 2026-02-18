@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { User } from "@supabase/supabase-js";
 import { Search, X } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -8,28 +8,24 @@ import { useForm } from "react-hook-form";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
 import FeedPrivate from "./feed/feed-private";
 import FeedPublic from "./feed/feed-public";
 
+const SEARCH_DEBOUNCE_MS = 300;
+
 export default function Feed({ user }: { user: User | null }) {
-  const { register, handleSubmit, setValue, getValues } = useForm<{
+  const { register, setValue, watch } = useForm<{
     search: string;
   }>({
     defaultValues: { search: "" },
   });
-  const [activeQuery, setActiveQuery] = useState("");
-
-  // Watch the search input value to conditionally show the clear button
-  const searchValue = getValues("search");
-
-  const onSubmit = (data: { search: string }) => {
-    setActiveQuery(data.search);
-  };
+  const searchValue = watch("search");
+  const activeQuery = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
 
   const handleClear = () => {
     setValue("search", "");
-    setActiveQuery("");
   };
 
   if (!user) {
@@ -43,7 +39,7 @@ export default function Feed({ user }: { user: User | null }) {
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="following">Following</TabsTrigger>
         </TabsList>
-        <form className="relative" onSubmit={handleSubmit(onSubmit)}>
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
@@ -63,7 +59,7 @@ export default function Feed({ user }: { user: User | null }) {
               <X />
             </Button>
           )}
-        </form>
+        </div>
       </div>
       <TabsContent value="general">
         <FeedPublic searchQuery={activeQuery} />
