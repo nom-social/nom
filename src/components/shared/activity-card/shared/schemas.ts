@@ -88,3 +88,12 @@ export const pushDataSchema = z.object({
 });
 
 export type PushData = z.infer<typeof pushDataSchema>;
+
+export const timelineItemDataSchema = z.union([
+  prDataSchema,
+  issueDataSchema,
+  releaseDataSchema,
+  pushDataSchema,
+]);
+
+export type TimelineItemData = z.infer<typeof timelineItemDataSchema>;

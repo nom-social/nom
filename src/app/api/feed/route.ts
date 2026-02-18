@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { normalizeTimelineItem } from "@/app/api/feed/normalize";
 import { createClient } from "@/utils/supabase/server";
 
 interface SearchFilters {
@@ -40,63 +41,6 @@ function parseSearchFilters(query?: string): SearchFilters {
 
   filters.textQuery = remainingText.replace(/\s+/g, " ").trim();
   return filters;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function normalizeItem(item: any) {
-  const org = item.repositories?.org ?? "";
-  const repo = item.repositories?.repo ?? "";
-  const data = item.data ?? {};
-  const type: string = item.type ?? "";
-
-  let title = "";
-  let url = "";
-  let author = "";
-  let summary = "";
-  let contributors: string[] = [];
-
-  if (type === "pull_request" && data.pull_request) {
-    const pr = data.pull_request;
-    title = pr.title ?? "";
-    url = pr.html_url ?? "";
-    author = pr.user?.login ?? "";
-    summary = pr.ai_summary ?? "";
-    contributors = pr.contributors ?? [];
-  } else if (type === "issue" && data.issue) {
-    const issue = data.issue;
-    title = issue.title ?? "";
-    url = issue.html_url ?? "";
-    author = issue.user?.login ?? "";
-    summary = issue.ai_summary ?? "";
-    contributors = issue.contributors ?? [];
-  } else if (type === "release" && data.release) {
-    const release = data.release;
-    title = release.name || release.tag_name || "";
-    url = release.html_url ?? "";
-    author = release.author?.login ?? "";
-    summary = release.ai_summary ?? "";
-    contributors = release.contributors ?? [];
-  } else if (type === "push" && data.push) {
-    const push = data.push;
-    title = push.title ?? "";
-    url = push.html_url ?? "";
-    author = push.contributors?.[0] ?? "";
-    summary = push.ai_summary ?? "";
-    contributors = push.contributors ?? [];
-  }
-
-  return {
-    id: item.id,
-    type,
-    org,
-    repo,
-    title,
-    summary,
-    url,
-    author,
-    contributors,
-    updated_at: item.updated_at,
-  };
 }
 
 export async function GET(request: NextRequest) {
@@ -163,7 +107,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const items = (data ?? []).map(normalizeItem);
+  const items = (data ?? []).map(normalizeTimelineItem);
   const has_more = items.length === limit;
 
   return NextResponse.json({
