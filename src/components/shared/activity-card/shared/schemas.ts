@@ -88,3 +88,12 @@ export const pushDataSchema = z.object({
 });
 
 export type PushData = z.infer<typeof pushDataSchema>;
+
+export const timelineItemDataSchema = z.discriminatedUnion("type", [
+  prDataSchema.extend({ type: z.literal("pull_request") }),
+  issueDataSchema.extend({ type: z.literal("issue") }),
+  releaseDataSchema.extend({ type: z.literal("release") }),
+  pushDataSchema.extend({ type: z.literal("push") }),
+]);
+
+export type TimelineItemData = z.infer<typeof timelineItemDataSchema>;

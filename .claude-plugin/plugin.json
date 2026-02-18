@@ -1,0 +1,7 @@
+{
+  "name": "nom",
+  "version": "1.0.0",
+  "description": "Query the Nom GitHub activity feed from Claude Code",
+  "author": { "name": "nom" },
+  "skills": "./skills/"
+}
