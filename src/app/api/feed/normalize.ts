@@ -23,35 +23,44 @@ export function normalizeTimelineItem(item: RawTimelineItem) {
   let contributors: string[] = [];
 
   try {
-    const data = timelineItemDataSchema.parse(rawData);
-    if ("pull_request" in data) {
-      const pr = data.pull_request;
-      title = pr.title ?? "";
-      url = pr.html_url ?? "";
-      author = pr.user?.login ?? "";
-      summary = pr.ai_summary ?? "";
-      contributors = pr.contributors ?? [];
-    } else if ("issue" in data) {
-      const issue = data.issue;
-      title = issue.title ?? "";
-      url = issue.html_url ?? "";
-      author = issue.user?.login ?? "";
-      summary = issue.ai_summary ?? "";
-      contributors = issue.contributors ?? [];
-    } else if ("release" in data) {
-      const release = data.release;
-      title = release.name ?? release.tag_name ?? "";
-      url = release.html_url ?? "";
-      author = release.author?.login ?? "";
-      summary = release.ai_summary ?? "";
-      contributors = release.contributors ?? [];
-    } else if ("push" in data) {
-      const push = data.push;
-      title = push.title ?? "";
-      url = push.html_url ?? "";
-      author = push.contributors?.[0] ?? "";
-      summary = push.ai_summary ?? "";
-      contributors = push.contributors ?? [];
+    const data = timelineItemDataSchema.parse({ ...rawData, type });
+    switch (data.type) {
+      case "pull_request": {
+        const pr = data.pull_request;
+        title = pr.title ?? "";
+        url = pr.html_url ?? "";
+        author = pr.user?.login ?? "";
+        summary = pr.ai_summary ?? "";
+        contributors = pr.contributors ?? [];
+        break;
+      }
+      case "issue": {
+        const issue = data.issue;
+        title = issue.title ?? "";
+        url = issue.html_url ?? "";
+        author = issue.user?.login ?? "";
+        summary = issue.ai_summary ?? "";
+        contributors = issue.contributors ?? [];
+        break;
+      }
+      case "release": {
+        const release = data.release;
+        title = release.name ?? release.tag_name ?? "";
+        url = release.html_url ?? "";
+        author = release.author?.login ?? "";
+        summary = release.ai_summary ?? "";
+        contributors = release.contributors ?? [];
+        break;
+      }
+      case "push": {
+        const push = data.push;
+        title = push.title ?? "";
+        url = push.html_url ?? "";
+        author = push.contributors?.[0] ?? "";
+        summary = push.ai_summary ?? "";
+        contributors = push.contributors ?? [];
+        break;
+      }
     }
   } catch {
     // invalid or empty data - use default empty values
