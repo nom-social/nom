@@ -1,0 +1,88 @@
+# Nom
+
+> Nom is a GitHub activity feed platform. It aggregates pull requests, issues, releases, and pushes from public GitHub repositories into a unified, AI-summarised feed.
+
+## What Nom Does
+
+- Tracks activity across GitHub repositories (PRs, issues, releases, pushes)
+- Generates AI summaries for each event
+- Provides a public read API for programmatic access
+
+## Public API
+
+Base URL: https://nom.dev
+
+### GET /api/feed
+
+Fetch the global public activity feed.
+
+Query parameters:
+- `q` — Search string. Supports filter prefixes:
+  - `org:vercel` — filter by GitHub org
+  - `repo:next.js` — filter by repo name
+  - `type:pull_request` — filter by event type (`pull_request`, `issue`, `release`, `push`)
+  - `from:2026-01-01` — filter events updated on or after this date (ISO 8601)
+  - `to:2026-02-01` — filter events updated on or before this date (ISO 8601)
+  - Free text (after removing prefixes) is full-text searched
+- `limit` — Number of results to return (default: 20, max: 100)
+- `offset` — Pagination offset (default: 0)
+
+Example requests:
+- `GET /api/feed` — latest activity across all public repos
+- `GET /api/feed?q=org:vercel&limit=10` — latest 10 events from the Vercel org
+- `GET /api/feed?q=type:pull_request from:2026-01-01` — PRs since Jan 2026
+- `GET /api/feed?q=typescript&limit=5` — full-text search for "typescript"
+
+### GET /api/feed/{org}/{repo}
+
+Fetch the activity feed for a specific repository.
+
+Path parameters:
+- `org` — GitHub organisation or user (e.g. `vercel`)
+- `repo` — Repository name (e.g. `next.js`)
+
+Query parameters:
+- `q` — Free-text search string (no filter prefixes needed)
+- `limit` — default 20, max 100
+- `offset` — default 0
+
+Example requests:
+- `GET /api/feed/vercel/next.js` — latest activity for vercel/next.js
+- `GET /api/feed/vercel/next.js?q=typescript&limit=5` — searched activity
+
+### Response Shape
+
+Both endpoints return the same JSON structure:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "type": "pull_request",
+      "org": "vercel",
+      "repo": "next.js",
+      "title": "Add turbo support",
+      "summary": "AI-generated one-paragraph summary of this event",
+      "url": "https://github.com/vercel/next.js/pull/123",
+      "author": "timneutkens",
+      "contributors": ["timneutkens", "shuding"],
+      "updated_at": "2026-02-18T12:00:00Z"
+    }
+  ],
+  "pagination": {
+    "offset": 0,
+    "limit": 20,
+    "has_more": true
+  }
+}
+```
+
+Event types: `pull_request`, `issue`, `release`, `push`
+
+## Key Pages
+
+- https://nom.dev — Home / global public feed
+- https://nom.dev/{org}/{repo} — Repository-specific feed (e.g. https://nom.dev/vercel/next.js)
+- https://nom.dev/api/feed — Global feed API
+- https://nom.dev/api/feed/{org}/{repo} — Repo feed API
