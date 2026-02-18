@@ -10,7 +10,7 @@
 
 ## Public API
 
-Base URL: https://nomit.dev
+Base URL: https://beta.nomit.dev
 
 ### GET /api/feed
 
@@ -82,7 +82,7 @@ Event types: `pull_request`, `issue`, `release`, `push`
 
 ## Key Pages
 
-- https://nomit.dev — Home / global public feed
-- https://nomit.dev/{org}/{repo} — Repository-specific feed (e.g. https://nomit.dev/vercel/next.js)
-- https://nomit.dev/api/feed — Global feed API
-- https://nomit.dev/api/feed/{org}/{repo} — Repo feed API
+- https://beta.nomit.dev — Home / global public feed
+- https://beta.nomit.dev/{org}/{repo} — Repository-specific feed (e.g. https://beta.nomit.dev/vercel/next.js)
+- https://beta.nomit.dev/api/feed — Global feed API
+- https://beta.nomit.dev/api/feed/{org}/{repo} — Repo feed API
