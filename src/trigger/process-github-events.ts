@@ -4,14 +4,12 @@ import { createClient } from "@/utils/supabase/background";
 
 import { processEvent } from "./process-github-events/event-processors";
 
-// Initialize Supabase client
-const supabase = createClient();
-
 export const processGithubEvents = task({
   id: "process-github-events",
   maxDuration: 300,
   queue: { name: "process-github-events", concurrencyLimit: 1 },
   run: async () => {
+    const supabase = createClient();
     const currentTimestamp = new Date().toISOString();
 
     // Get unprocessed events
