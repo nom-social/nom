@@ -81,9 +81,7 @@ export async function processReleaseEvent({
     .replace("{published_at}", release.published_at?.toISOString() || "N/A")
     .replace("{body}", release.body || "No release notes provided");
 
-  const postCriteriaInstruction = postCriteria
-    ? `Apply these posting criteria:\n${postCriteria}`
-    : "No posting criteria configured; always set should_post to true.";
+  const postCriteriaInstruction = `Apply these posting criteria:\n${postCriteria}`;
 
   const response = await openaiClient.responses.parse({
     model: "gpt-5.2",

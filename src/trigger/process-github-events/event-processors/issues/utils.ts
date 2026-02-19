@@ -59,9 +59,7 @@ export async function generateIssueData({
     .replace("{body}", issue.body || "No description provided")
     .replace("{comments}", commentsText || "No comments");
 
-  const postCriteriaInstruction = postCriteria
-    ? `Apply these posting criteria:\n${postCriteria}`
-    : "No posting criteria configured; always set should_post to true.";
+  const postCriteriaInstruction = `Apply these posting criteria:\n${postCriteria}`;
 
   const response = await openaiClient.responses.parse({
     model: "gpt-5.2",

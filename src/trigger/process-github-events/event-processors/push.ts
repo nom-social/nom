@@ -159,9 +159,7 @@ export async function processPushEvent({
     .replace("{commit_messages}", commitMessages)
     .replace("{commit_diff}", commitDiff || "No changes");
 
-  const postCriteriaInstruction = postCriteria
-    ? `Apply these posting criteria:\n${postCriteria}`
-    : "No posting criteria configured; always set should_post to true.";
+  const postCriteriaInstruction = `Apply these posting criteria:\n${postCriteria}`;
 
   const response = await openaiClient.responses.parse({
     model: "gpt-5.2",
