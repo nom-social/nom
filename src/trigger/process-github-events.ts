@@ -1,4 +1,4 @@
-import { logger, task, wait } from "@trigger.dev/sdk";
+import { logger, task } from "@trigger.dev/sdk";
 
 import { createAdminClient } from "@/utils/supabase/admin";
 
@@ -76,9 +76,6 @@ export const processGithubEvents = task({
             })
             .throwOnError(),
         ]);
-
-        // Add a small delay between processing each event to avoid overwhelming the database
-        await wait.for({ seconds: 1 });
       } catch (error) {
         logger.error("Error processing event", { error, eventId: event.id });
       }
