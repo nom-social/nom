@@ -13,28 +13,24 @@ export interface NormalizedTimelineItem {
   updated_at: string;
 }
 
-function escapeXml(text: string): string {
-  return encodeXML(text);
-}
-
 function toRfc822(dateStr: string): string {
   const date = new Date(dateStr);
   return date.toUTCString();
 }
 
 function buildItemXml(item: NormalizedTimelineItem): string {
-  const title = escapeXml(item.title || "Untitled");
-  const link = escapeXml(item.url || "");
-  const guid = escapeXml(item.id);
+  const title = encodeXML(item.title || "Untitled");
+  const link = encodeXML(item.url || "");
+  const guid = encodeXML(item.id);
   const pubDate = toRfc822(item.updated_at);
 
-  let description = escapeXml(item.summary || "");
+  let description = encodeXML(item.summary || "");
   if (item.author) {
-    description = `By ${escapeXml(item.author)}. ${description}`;
+    description = `By ${encodeXML(item.author)}. ${description}`;
   }
   if (item.contributors.length > 1) {
     description += ` Contributors: ${item.contributors
-      .map((c) => escapeXml(c))
+      .map((c) => encodeXML(c))
       .join(", ")}.`;
   }
 
@@ -58,10 +54,10 @@ export function toRssXml(
   }
 ): string {
   const { title, link, description, feedUrl, language = "en" } = options;
-  const escapedTitle = escapeXml(title);
-  const escapedLink = escapeXml(link);
-  const escapedDescription = escapeXml(description);
-  const escapedFeedUrl = escapeXml(feedUrl);
+  const escapedTitle = encodeXML(title);
+  const escapedLink = encodeXML(link);
+  const escapedDescription = encodeXML(description);
+  const escapedFeedUrl = encodeXML(feedUrl);
 
   const itemsXml = items.map(buildItemXml).join("\n");
 
