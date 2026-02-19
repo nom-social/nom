@@ -167,7 +167,7 @@ export async function processPullRequestEvent({
         repo,
         octokit,
       }),
-      fetchPostCriteria({ repo, octokit }),
+      fetchPostCriteria({ repo, octokit, eventType: "pull_request" }),
     ]);
     const prompt = (customizedPrompt || PR_SUMMARY_ONLY_PROMPT)
       .replace("{title}", pull_request.title)
@@ -184,7 +184,7 @@ export async function processPullRequestEvent({
       .replace("{pr_reviews}", reviewsText);
 
     const postCriteriaInstruction = postCriteria
-      ? `Apply these posting criteria for PULL REQUEST events:\n${postCriteria}`
+      ? `Apply these posting criteria:\n${postCriteria}`
       : "No posting criteria configured; always set should_post to true.";
 
     const response = await openaiClient.responses.parse({

@@ -149,7 +149,7 @@ export async function processPushEvent({
 
   const [customizedPrompt, postCriteria] = await Promise.all([
     fetchNomTemplate({ filename: "push_summary_template.txt", repo, octokit }),
-    fetchPostCriteria({ repo, octokit }),
+    fetchPostCriteria({ repo, octokit, eventType: "push" }),
   ]);
 
   const prompt = (customizedPrompt || PUSH_SUMMARY_PROMPT)
@@ -160,7 +160,7 @@ export async function processPushEvent({
     .replace("{commit_diff}", commitDiff || "No changes");
 
   const postCriteriaInstruction = postCriteria
-    ? `Apply these posting criteria for PUSH events:\n${postCriteria}`
+    ? `Apply these posting criteria:\n${postCriteria}`
     : "No posting criteria configured; always set should_post to true.";
 
   const response = await openaiClient.responses.parse({
