@@ -10,10 +10,6 @@ export const summaryWithPostDecisionSchema = z.object({
   should_post: z
     .boolean()
     .describe("Whether this update should be posted to the feed"),
-  reasoning: z
-    .string()
-    .optional()
-    .describe("Brief rationale for the posting decision"),
 });
 
 export type SummaryWithPostDecision = z.infer<
