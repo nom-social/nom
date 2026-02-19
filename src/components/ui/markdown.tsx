@@ -28,7 +28,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
             />
           </div>
         ),
-        p: ({ children }) => <p>{children}</p>,
+        p: ({ children }) => <p className="break-words">{children}</p>,
         code: ({ children }) => (
           <code className="bg-muted px-1.5 py-0.5 font-mono text-sm text-muted-foreground">
             {children}
