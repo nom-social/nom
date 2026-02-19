@@ -3,7 +3,7 @@
  * Backfill script: fetch events from dedicated GitHub API endpoints for a public repo,
  * insert into github_event_log with correct timestamps, then trigger process-github-events.
  *
- * Uses commits, pulls, releases, issues, and issue-comments APIs directly (not the
+ * Uses commits, pulls, and releases APIs directly (not the
  * Events API), so you get the events you want even when a repo is flooded with stars/comments.
  *
  * Usage:
@@ -11,7 +11,7 @@
  *   npm run backfill:repo -- octocat/Hello-World --types push --limit 10 --dry-run
  *
  * Options:
- *   --types (required) push,pull_request,issues,issue_comment,release
+ *   --types (required) push,pull_request,release
  *     Comma-separated list of event types to backfill.
  *
  * Env:
@@ -21,6 +21,7 @@
  */
 
 import { Octokit } from "@octokit/rest";
+
 import { createAdminClient } from "@/utils/supabase/admin";
 import { processGithubEvents } from "@/trigger/process-github-events";
 

@@ -5,8 +5,6 @@ import { Json } from "@/types/supabase";
 export const FILTERABLE_EVENT_TYPES = [
   "push",
   "pull_request",
-  "issues",
-  "issue_comment",
   "release",
 ] as const;
 
@@ -41,8 +39,8 @@ const repoInfo = (org: string, repo: string, repoId = 0) => ({
 });
 
 /**
- * Fetches events from dedicated GitHub API endpoints (commits, pulls, releases,
- * issues, issue comments) and returns webhook-style payloads ready for insert.
+ * Fetches events from dedicated GitHub API endpoints (commits, pulls, releases)
+ * and returns webhook-style payloads ready for insert.
  * Avoids the Events API which mixes in stars/comments making useful events hard to find.
  *
  * @param types - Which event types to fetch (required)
@@ -245,141 +243,6 @@ export async function fetchAndEnrichRepoEvents(
         repo,
         raw_payload: rawPayload as Json,
         created_at: publishedAt ?? r.created_at,
-      });
-    }
-  }
-
-  if (typeSet.has("issues")) {
-    const { data: items } = await octokit.issues.listForRepo({
-      owner: org,
-      repo,
-      state: "all",
-      sort: "updated",
-      direction: "desc",
-      per_page: Math.min(limit, 100),
-    });
-    await maybeRateLimit();
-
-    for (const issue of (items ?? []).filter((i) => !i.pull_request)) {
-      const updatedAt =
-        issue.updated_at ?? issue.created_at ?? new Date().toISOString();
-      const rawPayload = {
-        action: issue.state === "closed" ? "closed" : "opened",
-        issue: {
-          number: issue.number,
-          title: issue.title ?? "",
-          body: issue.body,
-          html_url: issue.html_url ?? "",
-          created_at: issue.created_at,
-          updated_at: updatedAt,
-          state: issue.state as "open" | "closed",
-          user: issue.user ? { login: issue.user.login } : { login: "" },
-          author_association: issue.author_association ?? "NONE",
-          assignee: issue.assignee ? { login: issue.assignee.login } : null,
-          assignees: issue.assignees?.map((a) => ({ login: a.login })) ?? [],
-          labels:
-            issue.labels?.map((l) => ({
-              name:
-                typeof l === "object"
-                  ? ((l as { name?: string }).name ?? "")
-                  : String(l),
-            })) ?? [],
-          comments: issue.comments ?? 0,
-        },
-        repository: baseRepoInfo,
-      };
-      results.push({
-        event_type: "issues",
-        action: issue.state === "closed" ? "closed" : "opened",
-        org,
-        repo,
-        raw_payload: rawPayload as Json,
-        created_at: updatedAt,
-      });
-    }
-  }
-
-  if (typeSet.has("issue_comment")) {
-    const { data: comments } = await octokit.issues.listCommentsForRepo({
-      owner: org,
-      repo,
-      sort: "updated",
-      direction: "desc",
-      per_page: Math.min(limit, 100),
-    });
-    await maybeRateLimit();
-
-    const issueNumbers = [
-      ...new Set(
-        (comments ?? [])
-          .map((c) => {
-            const match = c.issue_url?.match(/\/issues\/(\d+)/);
-            return match ? parseInt(match[1]!, 10) : null;
-          })
-          .filter((n): n is number => n != null)
-      ),
-    ];
-
-    const issueMap = new Map<
-      number,
-      Awaited<ReturnType<typeof octokit.issues.get>>["data"]
-    >();
-    for (const num of issueNumbers) {
-      try {
-        const { data } = await octokit.issues.get({
-          owner: org,
-          repo,
-          issue_number: num,
-        });
-        await maybeRateLimit();
-        issueMap.set(num, data);
-      } catch {
-        // Skip if issue fetch fails
-      }
-    }
-
-    for (const c of comments ?? []) {
-      const match = c.issue_url?.match(/\/issues\/(\d+)/);
-      const issueNum = match ? parseInt(match[1]!, 10) : null;
-      if (!issueNum) continue;
-
-      const issue = issueMap.get(issueNum);
-      if (!issue) continue;
-
-      const updatedAt =
-        c.updated_at ?? c.created_at ?? new Date().toISOString();
-      const rawPayload = {
-        action: "created",
-        issue: {
-          number: issue.number,
-          title: issue.title ?? "",
-          user: issue.user ? { login: issue.user.login } : { login: "" },
-          state: issue.state as "open" | "closed",
-          html_url: issue.html_url ?? "",
-          body: issue.body,
-          created_at: issue.created_at,
-          assignees: issue.assignees?.map((a) => ({ login: a.login })) ?? [],
-          author_association: issue.author_association ?? "NONE",
-        },
-        comment: {
-          id: c.id,
-          user: c.user ? { login: c.user.login } : { login: "" },
-          body: c.body ?? "",
-          html_url: c.html_url ?? "",
-          created_at: c.created_at,
-          updated_at: updatedAt,
-          author_association: c.author_association ?? "NONE",
-        },
-        sender: { type: "User" as const },
-        repository: baseRepoInfo,
-      };
-      results.push({
-        event_type: "issue_comment",
-        action: "created",
-        org,
-        repo,
-        raw_payload: rawPayload as Json,
-        created_at: updatedAt,
       });
     }
   }
