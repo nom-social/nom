@@ -1,17 +1,6 @@
 import { encodeXML } from "entities";
 
-export interface NormalizedTimelineItem {
-  id: string;
-  type: string;
-  org: string;
-  repo: string;
-  title: string;
-  summary: string;
-  url: string;
-  author: string;
-  contributors: string[];
-  updated_at: string;
-}
+import type { NormalizedTimelineItem } from "@/app/api/feed/normalize";
 
 function toRfc822(dateStr: string): string {
   const date = new Date(dateStr);
