@@ -62,12 +62,19 @@ export async function processIssueEvent({
     repo: repo.repo,
   });
 
-  const issueData = await generateIssueData({
+  const { issueData, shouldPost } = await generateIssueData({
     octokit,
     repo,
     action: validationResult.action,
     issue,
   });
+
+  if (!shouldPost || !issueData) {
+    return {
+      userTimelineEntries: [],
+      publicTimelineEntries: [],
+    };
+  }
 
   const dedupeHash = crypto
     .createHash("sha256")

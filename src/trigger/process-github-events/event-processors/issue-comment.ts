@@ -77,7 +77,7 @@ export async function processIssueCommentEvent({
     repo: repo.repo,
   });
 
-  const issueData = await generateIssueData({
+  const { issueData, shouldPost } = await generateIssueData({
     octokit,
     repo,
     action,
@@ -85,7 +85,15 @@ export async function processIssueCommentEvent({
       ...issue,
       updated_at: new Date(comment.updated_at),
     },
+    eventType: "issue_comment",
   });
+
+  if (!shouldPost || !issueData) {
+    return {
+      userTimelineEntries: [],
+      publicTimelineEntries: [],
+    };
+  }
 
   const dedupeHash = crypto
     .createHash("sha256")
