@@ -24,6 +24,7 @@ import { Octokit } from "@octokit/rest";
 
 import { createAdminClient } from "@/utils/supabase/admin";
 import { processGithubEvents } from "@/trigger/process-github-events";
+import { syncBatchReposMetadataTask } from "@/trigger/sync-batch-repos-metadata";
 
 import { ensurePublicRepo } from "./utils/ensure-repo";
 import {
@@ -121,6 +122,10 @@ async function main() {
 
   console.log(`Ensuring repo ${org}/${repo} exists...`);
   await ensurePublicRepo({ org, repo });
+
+  console.log(`Syncing repo metadata (for repo page)...`);
+  await syncBatchReposMetadataTask.trigger({ repos: [{ org, repo }] });
+  // Metadata sync runs async; repo page may take a few seconds to load
 
   console.log(
     `Fetching up to ${limit} events (types: ${types.join(", ")}) from dedicated APIs...`
