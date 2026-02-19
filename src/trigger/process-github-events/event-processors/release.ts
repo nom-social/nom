@@ -5,7 +5,7 @@ import { logger } from "@trigger.dev/sdk";
 import { Json, TablesInsert } from "@/types/supabase";
 import * as openai from "@/utils/openai/client";
 import { ReleaseData } from "@/components/shared/activity-card/shared/schemas";
-import { createClient } from "@/utils/supabase/background";
+import { createAdminClient } from "@/utils/supabase/admin";
 import fetchNomTemplate, {
   fetchPostCriteria,
 } from "@/trigger/shared/fetch-nom-template";
@@ -62,7 +62,7 @@ export async function processReleaseEvent({
   const { action, release } = validationResult;
 
   // LLM summarization of release notes
-  const supabase = createClient();
+  const supabase = createAdminClient();
   const openaiClient = openai.createClient();
 
   const [customizedPrompt, postCriteria] = await Promise.all([

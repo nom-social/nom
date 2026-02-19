@@ -2,7 +2,7 @@ import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { subMonths } from "date-fns";
 
-import { createClient } from "@/utils/supabase/background";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { TablesInsert } from "@/types/supabase";
 
 import { syncUserStars } from "./shared/sync-subscriptions";
@@ -13,7 +13,7 @@ export const newUserSignUpTask = schemaTask({
   id: "new-user-signup-task",
   schema: z.object({ userId: z.string() }),
   run: async ({ userId }) => {
-    const supabase = createClient();
+    const supabase = createAdminClient();
     const oneMonthAgo = subMonths(new Date(), 1).toISOString();
 
     logger.info("Starting sync from public_timeline to user_timeline", {

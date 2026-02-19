@@ -1,6 +1,6 @@
 import { logger, task, wait } from "@trigger.dev/sdk";
 
-import { createClient } from "@/utils/supabase/background";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 import { processEvent } from "./process-github-events/event-processors";
 
@@ -9,7 +9,7 @@ export const processGithubEvents = task({
   maxDuration: 300,
   queue: { name: "process-github-events", concurrencyLimit: 1 },
   run: async () => {
-    const supabase = createClient();
+    const supabase = createAdminClient();
     const currentTimestamp = new Date().toISOString();
 
     // Get unprocessed events

@@ -3,7 +3,7 @@ import crypto from "crypto";
 import { logger } from "@trigger.dev/sdk";
 
 import { Json, TablesInsert } from "@/types/supabase";
-import { createClient } from "@/utils/supabase/background";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
 
 import { BASELINE_SCORE, ISSUE_MULTIPLIER } from "./shared/constants";
@@ -53,7 +53,7 @@ export async function processIssueEvent({
   userTimelineEntries: TablesInsert<"user_timeline">[];
   publicTimelineEntries: TablesInsert<"public_timeline">[];
 }> {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   const validationResult = issueSchema.parse(event.raw_payload);
   const { issue } = validationResult;

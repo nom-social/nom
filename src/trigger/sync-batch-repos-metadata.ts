@@ -1,8 +1,8 @@
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 
-import { createClient } from "@/utils/supabase/background";
 import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 export const syncBatchReposMetadataTask = schemaTask({
   id: "sync-batch-repos-metadata",
@@ -10,7 +10,7 @@ export const syncBatchReposMetadataTask = schemaTask({
     repos: z.array(z.object({ org: z.string(), repo: z.string() })),
   }),
   run: async ({ repos }) => {
-    const supabase = createClient();
+    const supabase = createAdminClient();
 
     for (const { org, repo } of repos) {
       try {

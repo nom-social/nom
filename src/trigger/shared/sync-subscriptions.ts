@@ -1,7 +1,7 @@
 import { logger, wait } from "@trigger.dev/sdk";
 import { Octokit } from "@octokit/rest";
 
-import { createClient } from "@/utils/supabase/background";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 import { starredRepoSchema } from "./sync-subscriptions/schema";
 
@@ -34,7 +34,7 @@ async function getAllStarredRepos(octokit: Octokit, username: string) {
 }
 
 export async function syncUserStars(userId: string) {
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   // Get users with GitHub provider tokens using auth API
   const {

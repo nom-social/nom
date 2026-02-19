@@ -3,7 +3,7 @@ import { z } from "zod";
 import { marked } from "marked";
 import { format } from "date-fns";
 
-import * as supabase from "@/utils/supabase/background";
+import * as supabase from "@/utils/supabase/admin";
 import * as resend from "@/utils/resend/client";
 import * as openai from "@/utils/openai/client";
 
@@ -45,7 +45,7 @@ export const sendUserRepoHighlights = schemaTask({
     end: z.coerce.date(),
   }),
   run: async ({ repo, org, user_email, start, end }) => {
-    const supabaseClient = supabase.createClient();
+    const supabaseClient = supabase.createAdminClient();
     const openAIClient = openai.createClient();
     const resendClient = resend.createClient();
 
