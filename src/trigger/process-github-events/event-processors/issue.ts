@@ -1,5 +1,6 @@
 import z from "zod";
 import crypto from "crypto";
+import { logger } from "@trigger.dev/sdk";
 
 import { Json, TablesInsert } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/background";
@@ -62,12 +63,25 @@ export async function processIssueEvent({
     repo: repo.repo,
   });
 
-  const issueData = await generateIssueData({
+  const { issueData, shouldPost } = await generateIssueData({
     octokit,
     repo,
     action: validationResult.action,
     issue,
   });
+
+  if (!shouldPost || !issueData) {
+    logger.info("Skipping post (AI decided low impact)", {
+      org: repo.org,
+      repo: repo.repo,
+      eventType: "issue",
+      issueNumber: issue.number,
+    });
+    return {
+      userTimelineEntries: [],
+      publicTimelineEntries: [],
+    };
+  }
 
   const dedupeHash = crypto
     .createHash("sha256")

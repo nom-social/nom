@@ -2,7 +2,10 @@ import { Octokit } from "@octokit/rest";
 
 import * as openai from "@/utils/openai/client";
 import { IssueData } from "@/components/shared/activity-card/shared/schemas";
-import fetchNomTemplate from "@/trigger/shared/fetch-nom-template";
+import fetchNomTemplate, {
+  fetchPostCriteria,
+} from "@/trigger/shared/fetch-nom-template";
+import { summaryWithPostDecisionTextFormat } from "@/trigger/shared/summary-with-post-decision";
 
 import { ISSUE_SUMMARY_PROMPT } from "./prompts";
 
@@ -11,6 +14,7 @@ export async function generateIssueData({
   repo,
   action,
   issue,
+  eventType = "issue",
 }: {
   octokit: Octokit;
   repo: { org: string; repo: string };
@@ -26,7 +30,8 @@ export async function generateIssueData({
     html_url: string;
     assignees: { login: string }[];
   };
-}) {
+  eventType?: "issue" | "issue_comment";
+}): Promise<{ issueData: IssueData | null; shouldPost: boolean }> {
   const comments = await octokit.paginate(octokit.issues.listComments, {
     owner: repo.org,
     repo: repo.repo,
@@ -34,17 +39,19 @@ export async function generateIssueData({
     per_page: 100,
   });
 
-  // Generate AI summary for the issue and its comments
   const openaiClient = openai.createClient();
   const commentsText = comments
     .map((c) => `- ${c.user?.login}: ${c.body}`)
     .join("\n");
 
-  const customizedPrompt = await fetchNomTemplate({
-    filename: "issue_summary_template.txt",
-    repo,
-    octokit,
-  });
+  const [customizedPrompt, postCriteria] = await Promise.all([
+    fetchNomTemplate({
+      filename: "issue_summary_template.txt",
+      repo,
+      octokit,
+    }),
+    fetchPostCriteria({ repo, octokit }),
+  ]);
 
   const prompt = (customizedPrompt || ISSUE_SUMMARY_PROMPT)
     .replace("{title}", issue.title)
@@ -52,21 +59,30 @@ export async function generateIssueData({
     .replace("{body}", issue.body || "No description provided")
     .replace("{comments}", commentsText || "No comments");
 
-  const completion = await openaiClient.chat.completions.create({
+  const eventTypeLabel =
+    eventType === "issue_comment" ? "ISSUE COMMENT" : "ISSUE";
+  const postCriteriaInstruction = postCriteria
+    ? `Apply these posting criteria for ${eventTypeLabel} events:\n${postCriteria}`
+    : "No posting criteria configured; always set should_post to true.";
+
+  const response = await openaiClient.responses.parse({
     model: "gpt-5.2",
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are a helpful assistant that summarizes GitHub issues and their " +
-          "discussions for a timeline feed.",
-      },
-      { role: "user", content: prompt },
-    ],
+    instructions:
+      "You summarize GitHub issues and their discussions and decide whether to post to the feed. " +
+      "Respond with JSON containing summary (concise 1-3 sentence feed summary) and should_post (boolean). " +
+      postCriteriaInstruction,
+    input: prompt,
+    text: { format: summaryWithPostDecisionTextFormat },
+    store: false,
   });
-  const ai_summary = completion.choices[0].message.content;
-  if (!ai_summary) {
-    throw new Error("Failed to generate AI summary for issue");
+
+  const result = response.output_parsed;
+  if (!result) {
+    throw new Error("Failed to parse AI response for issue");
+  }
+
+  if (!result.should_post) {
+    return { issueData: null, shouldPost: false };
   }
 
   const issueData: IssueData = {
@@ -90,9 +106,9 @@ export async function generateIssueData({
           ...issue.assignees.map((assignee) => assignee.login),
         ]),
       ],
-      ai_summary,
+      ai_summary: result.summary,
     },
   };
 
-  return issueData;
+  return { issueData, shouldPost: true };
 }

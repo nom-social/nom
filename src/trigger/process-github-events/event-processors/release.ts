@@ -1,11 +1,15 @@
 import { z } from "zod";
 import crypto from "crypto";
+import { logger } from "@trigger.dev/sdk";
 
 import { Json, TablesInsert } from "@/types/supabase";
 import * as openai from "@/utils/openai/client";
 import { ReleaseData } from "@/components/shared/activity-card/shared/schemas";
 import { createClient } from "@/utils/supabase/background";
-import fetchNomTemplate from "@/trigger/shared/fetch-nom-template";
+import fetchNomTemplate, {
+  fetchPostCriteria,
+} from "@/trigger/shared/fetch-nom-template";
+import { summaryWithPostDecisionTextFormat } from "@/trigger/shared/summary-with-post-decision";
 import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
 
 import { BASELINE_SCORE, RELEASE_MULTIPLIER } from "./shared/constants";
@@ -61,11 +65,14 @@ export async function processReleaseEvent({
   const supabase = createClient();
   const openaiClient = openai.createClient();
 
-  const customizedPrompt = await fetchNomTemplate({
-    filename: "release_summary_template.txt",
-    repo,
-    octokit,
-  });
+  const [customizedPrompt, postCriteria] = await Promise.all([
+    fetchNomTemplate({
+      filename: "release_summary_template.txt",
+      repo,
+      octokit,
+    }),
+    fetchPostCriteria({ repo, octokit }),
+  ]);
 
   const prompt = (customizedPrompt || RELEASE_SUMMARY_PROMPT)
     .replace("{tag_name}", release.tag_name)
@@ -74,22 +81,40 @@ export async function processReleaseEvent({
     .replace("{published_at}", release.published_at?.toISOString() || "N/A")
     .replace("{body}", release.body || "No release notes provided");
 
-  const completion = await openaiClient.chat.completions.create({
+  const postCriteriaInstruction = postCriteria
+    ? `Apply these posting criteria for RELEASE events:\n${postCriteria}`
+    : "No posting criteria configured; always set should_post to true.";
+
+  const response = await openaiClient.responses.parse({
     model: "gpt-5.2",
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are a helpful assistant that summarizes GitHub releases for " +
-          "repo consumers/integrators. Provide a concise summary as instructed.",
-      },
-      { role: "user", content: prompt },
-    ],
+    instructions:
+      "You summarize GitHub releases and decide whether to post to the feed. " +
+      "Respond with JSON containing summary (concise 1-3 sentence feed summary) and should_post (boolean). " +
+      postCriteriaInstruction,
+    input: prompt,
+    text: { format: summaryWithPostDecisionTextFormat },
+    store: false,
   });
-  const ai_summary = completion.choices[0].message.content;
-  if (!ai_summary) {
-    throw new Error("Failed to generate AI summary for release");
+
+  const result = response.output_parsed;
+  if (!result) {
+    throw new Error("Failed to parse AI response for release");
   }
+
+  if (!result.should_post) {
+    logger.info("Skipping post (AI decided low impact)", {
+      org: repo.org,
+      repo: repo.repo,
+      eventType: "release",
+      tagName: release.tag_name,
+    });
+    return {
+      userTimelineEntries: [],
+      publicTimelineEntries: [],
+    };
+  }
+
+  const ai_summary = result.summary;
 
   const releaseData: ReleaseData = {
     action,

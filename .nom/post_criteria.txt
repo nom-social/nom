@@ -1,0 +1,9 @@
+Only post to the feed when the update has meaningful impact.
+
+For pushes: Post when changes affect source code (src/, lib/) or add features. Do NOT post for dependency bumps, typo fixes, or formatting-only changes. Merge/squash commits are handled separately.
+
+For pull requests: Post merged PRs that change 3+ files or 50+ lines. Skip trivial documentation tweaks.
+
+For issues: Post when the issue is substantial (bug, feature request, discussion). Skip minor questions or housekeeping.
+
+For releases: Post all releases (they are always notable).

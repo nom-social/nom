@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import z from "zod";
+import { logger } from "@trigger.dev/sdk";
 
 import { createClient } from "@/utils/supabase/background";
 import { Json, TablesInsert } from "@/types/supabase";
@@ -77,7 +78,7 @@ export async function processIssueCommentEvent({
     repo: repo.repo,
   });
 
-  const issueData = await generateIssueData({
+  const { issueData, shouldPost } = await generateIssueData({
     octokit,
     repo,
     action,
@@ -85,7 +86,21 @@ export async function processIssueCommentEvent({
       ...issue,
       updated_at: new Date(comment.updated_at),
     },
+    eventType: "issue_comment",
   });
+
+  if (!shouldPost || !issueData) {
+    logger.info("Skipping post (AI decided low impact)", {
+      org: repo.org,
+      repo: repo.repo,
+      eventType: "issue_comment",
+      issueNumber: issue.number,
+    });
+    return {
+      userTimelineEntries: [],
+      publicTimelineEntries: [],
+    };
+  }
 
   const dedupeHash = crypto
     .createHash("sha256")
