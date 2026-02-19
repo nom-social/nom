@@ -9,7 +9,8 @@
     "lint": "next lint",
     "check-types": "tsc --noEmit",
     "tsc": "tsc --noEmit",
-    "trigger:dev": "npx trigger.dev@latest dev"
+    "trigger:dev": "npx trigger.dev@latest dev",
+    "backfill:repo": "npx tsx src/scripts/backfill/backfill-repo-events.ts"
   },
   "dependencies": {
     "@octokit/auth-app": "^8.0.1",
@@ -30,7 +31,7 @@
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.97.0",
     "@tanstack/react-query": "^5.81.5",
-    "@trigger.dev/sdk": "^4.3.3",
+    "@trigger.dev/sdk": "4.4.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -58,7 +59,7 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/typography": "^0.5.16",
-    "@trigger.dev/build": "^4.3.3",
+    "@trigger.dev/build": "4.4.0",
     "@types/node": "^22.19.11",
     "@types/react": "^19",
     "@types/react-dom": "^19",

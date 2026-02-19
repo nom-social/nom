@@ -2,9 +2,9 @@ import { z } from "zod";
 import crypto from "crypto";
 import { logger } from "@trigger.dev/sdk";
 
+import { createAdminClient } from "@/utils/supabase/admin";
 import { Json, TablesInsert } from "@/types/supabase";
 import * as openai from "@/utils/openai/client";
-import { createClient } from "@/utils/supabase/background";
 import { PrData } from "@/components/shared/activity-card/shared/schemas";
 import fetchNomTemplate, {
   fetchPostCriteria,
@@ -73,7 +73,7 @@ export async function processPullRequestEvent({
     repo: repo.repo,
   });
   const openaiClient = openai.createClient();
-  const supabase = createClient();
+  const supabase = createAdminClient();
 
   const validationResult = pullRequestSchema.parse(event.raw_payload);
   const { action, pull_request } = validationResult;

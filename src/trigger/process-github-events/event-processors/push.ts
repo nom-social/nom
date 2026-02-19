@@ -4,7 +4,7 @@ import crypto from "crypto";
 import { logger } from "@trigger.dev/sdk";
 
 import * as openai from "@/utils/openai/client";
-import { createClient } from "@/utils/supabase/background";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { Json, TablesInsert } from "@/types/supabase";
 import { PushData } from "@/components/shared/activity-card/shared/schemas";
 import fetchNomTemplate, {
@@ -88,7 +88,7 @@ export async function processPushEvent({
   publicTimelineEntries: TablesInsert<"public_timeline">[];
 }> {
   const openaiClient = openai.createClient();
-  const supabase = createClient();
+  const supabase = createAdminClient();
   const payload = pushEventSchema.parse(event.raw_payload);
   const octokit = await createAuthenticatedOctokitClient({
     org: repo.org,

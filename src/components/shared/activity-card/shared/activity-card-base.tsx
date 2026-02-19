@@ -31,6 +31,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import X from "@/components/ui/icons/x";
+import { cn } from "@/lib/utils";
 
 export type Props = {
   title: string;
@@ -100,9 +101,11 @@ export default function ActivityCardBase({
           </a>
         </CardTitle>
         <CardAction>
-          <Badge className={badgeClassName}>
-            {badgeIcon}
-            {badgeLabel}
+          <Badge className={cn(badgeClassName, "max-w-[120px]")}>
+            <span className="shrink-0 inline-flex size-3 [&>svg]:size-full">
+              {badgeIcon}
+            </span>
+            <span className="truncate min-w-0">{badgeLabel}</span>
           </Badge>
         </CardAction>
         <CardDescription>

@@ -1,7 +1,7 @@
 import { Octokit } from "@octokit/rest";
 import { createAppAuth } from "@octokit/auth-app";
 
-import { createClient } from "@/utils/supabase/background";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 interface OctokitClientOptions {
   org: string;
@@ -13,7 +13,7 @@ export async function createAuthenticatedOctokitClient(
 ) {
   let installationId: number | undefined;
   if (options) {
-    const supabase = createClient();
+    const supabase = createAdminClient();
     // repositories_secure is joined via id
     const { data: repoRow } = await supabase
       .from("repositories")
