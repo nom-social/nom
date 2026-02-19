@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       ? `https://${process.env.VERCEL_URL}`
       : "https://beta.nomit.dev");
 
-  const feedUrl = `${baseUrl}/api/feed/rss${request.nextUrl.search}`;
+  const feedUrl = `${baseUrl}${request.nextUrl.pathname}${request.nextUrl.search}`;
 
   const xml = toRssXml(items, {
     title: "Nom — GitHub Activity Feed",
