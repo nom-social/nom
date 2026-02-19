@@ -1,16 +1,18 @@
 #!/usr/bin/env node
 /**
- * Backfill script: fetch last N events from GitHub Events API for a public repo,
+ * Backfill script: fetch events from dedicated GitHub API endpoints for a public repo,
  * insert into github_event_log with correct timestamps, then trigger process-github-events.
  *
+ * Uses commits, pulls, releases, issues, and issue-comments APIs directly (not the
+ * Events API), so you get the events you want even when a repo is flooded with stars/comments.
+ *
  * Usage:
- *   npm run backfill:repo -- octocat/Hello-World
  *   npm run backfill:repo -- octocat/Hello-World --types push,pull_request,release
- *   npm run backfill:repo -- octocat/Hello-World --limit 10 --dry-run
+ *   npm run backfill:repo -- octocat/Hello-World --types push --limit 10 --dry-run
  *
  * Options:
- *   --types push,pull_request,issues,issue_comment,release
- *     Only include these event types (comma-separated). Default: all.
+ *   --types (required) push,pull_request,issues,issue_comment,release
+ *     Comma-separated list of event types to backfill.
  *
  * Env:
  *   GITHUB_TOKEN (optional) - PAT for higher rate limits (5000/hr vs 60/hr unauthenticated)
@@ -34,14 +36,14 @@ function parseArgs(): {
   repo: string;
   limit: number;
   dryRun: boolean;
-  types: string[] | undefined;
+  types: string[];
 } {
   const args = process.argv.slice(2);
   let org = "";
   let repo = "";
   let limit = 20;
   let dryRun = false;
-  let types: string[] | undefined;
+  let types: string[] = [];
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -78,7 +80,14 @@ function parseArgs(): {
 
   if (!org || !repo) {
     console.error(
-      "Usage: backfill-repo-events [--org ORG] [--repo REPO] | OWNER/REPO [--limit N] [--types push,pull_request,release] [--dry-run]"
+      "Usage: backfill-repo-events OWNER/REPO --types push,pull_request,release [--limit N] [--dry-run]"
+    );
+    process.exit(1);
+  }
+
+  if (types.length === 0) {
+    console.error(
+      "--types is required. Example: --types push,pull_request,release"
     );
     process.exit(1);
   }
@@ -112,11 +121,8 @@ async function main() {
   console.log(`Ensuring repo ${org}/${repo} exists...`);
   await ensurePublicRepo({ org, repo });
 
-  const typeFilterMsg = types?.length
-    ? ` (filtering: ${types.join(", ")})`
-    : "";
   console.log(
-    `Fetching up to ${limit} events from GitHub Events API${typeFilterMsg}...`
+    `Fetching up to ${limit} events (types: ${types.join(", ")}) from dedicated APIs...`
   );
   const enrichedEvents = await fetchAndEnrichRepoEvents(
     octokit,

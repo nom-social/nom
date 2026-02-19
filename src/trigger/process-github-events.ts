@@ -4,6 +4,8 @@ import { createClient } from "@/utils/supabase/background";
 
 import { processEvent } from "./process-github-events/event-processors";
 
+const SUPPORTED_EVENT_TYPES = ["push", "pull_request", "release"];
+
 export const processGithubEvents = task({
   id: "process-github-events",
   maxDuration: 300,
@@ -17,6 +19,7 @@ export const processGithubEvents = task({
       .from("github_event_log")
       .select("*")
       .is("last_processed", null)
+      .in("event_type", SUPPORTED_EVENT_TYPES)
       .order("created_at", { ascending: true })
       .throwOnError();
 
