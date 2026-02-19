@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { normalizeTimelineItem } from "@/app/api/feed/normalize";
-import { toRssXml } from "@/app/api/feed/to-rss";
+import { toErrorXml, toRssXml } from "@/app/api/feed/to-rss";
 import { createClient } from "@/utils/supabase/server";
 
 export async function GET(request: NextRequest) {
@@ -19,7 +19,10 @@ export async function GET(request: NextRequest) {
     .range(offset, offset + limit - 1);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return new NextResponse(toErrorXml(error.message), {
+      status: 500,
+      headers: { "Content-Type": "application/xml; charset=utf-8" },
+    });
   }
 
   const items = (data ?? []).map(normalizeTimelineItem);

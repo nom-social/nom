@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { normalizeTimelineItem } from "@/app/api/feed/normalize";
-import { toRssXml } from "@/app/api/feed/to-rss";
+import { toErrorXml, toRssXml } from "@/app/api/feed/to-rss";
 import { createClient } from "@/utils/supabase/server";
 
 export async function GET(
@@ -23,10 +23,10 @@ export async function GET(
     .single();
 
   if (repoError || !repoData) {
-    return NextResponse.json(
-      { error: "Repository not found" },
-      { status: 404 }
-    );
+    return new NextResponse(toErrorXml("Repository not found"), {
+      status: 404,
+      headers: { "Content-Type": "application/xml; charset=utf-8" },
+    });
   }
 
   const { data, error } = await supabase
@@ -38,7 +38,10 @@ export async function GET(
     .range(offset, offset + limit - 1);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return new NextResponse(toErrorXml(error.message), {
+      status: 500,
+      headers: { "Content-Type": "application/xml; charset=utf-8" },
+    });
   }
 
   const items = (data ?? []).map((item) =>

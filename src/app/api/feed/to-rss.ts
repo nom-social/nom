@@ -2,6 +2,14 @@ import { encodeXML } from "entities";
 
 import type { NormalizedTimelineItem } from "@/app/api/feed/normalize";
 
+export function toErrorXml(message: string): string {
+  const escaped = encodeXML(message);
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<error>
+  <message>${escaped}</message>
+</error>`;
+}
+
 function toRfc822(dateStr: string): string {
   const date = new Date(dateStr);
   return date.toUTCString();
