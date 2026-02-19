@@ -50,6 +50,38 @@ Example requests:
 - `GET /api/feed/vercel/next.js` — latest activity for vercel/next.js
 - `GET /api/feed/vercel/next.js?q=typescript&limit=5` — searched activity
 
+### GET /api/feed/rss
+
+RSS 2.0 feed for the global public activity feed. No search filters; pagination only.
+
+Query parameters:
+- `limit` — default 20, max 100
+- `offset` — default 0
+
+Example requests:
+- `GET /api/feed/rss` — latest activity across all public repos
+- `GET /api/feed/rss?limit=20` — latest 20 items
+
+Returns: `application/rss+xml`
+
+### GET /api/feed/{org}/{repo}/rss
+
+RSS 2.0 feed for a specific repository. No search filters; pagination only.
+
+Path parameters:
+- `org` — GitHub organisation or user
+- `repo` — Repository name
+
+Query parameters:
+- `limit` — default 20, max 100
+- `offset` — default 0
+
+Example requests:
+- `GET /api/feed/vercel/next.js/rss` — latest activity for vercel/next.js
+- `GET /api/feed/vercel/next.js/rss?limit=10` — latest 10 items
+
+Returns: `application/rss+xml`
+
 ### Response Shape
 
 Both endpoints return the same JSON structure:
@@ -86,3 +118,5 @@ Event types: `pull_request`, `issue`, `release`, `push`
 - https://beta.nomit.dev/{org}/{repo} — Repository-specific feed (e.g. https://beta.nomit.dev/vercel/next.js)
 - https://beta.nomit.dev/api/feed — Global feed API
 - https://beta.nomit.dev/api/feed/{org}/{repo} — Repo feed API
+- https://beta.nomit.dev/api/feed/rss — Global feed RSS
+- https://beta.nomit.dev/api/feed/{org}/{repo}/rss — Repo feed RSS

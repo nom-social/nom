@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import httpStatus from "http-status";
 import crypto from "crypto";
 import * as Sentry from "@sentry/nextjs";
 
@@ -31,7 +30,7 @@ export async function POST(request: Request) {
           error: "Invalid webhook payload",
           details: validationResult.error.format(),
         },
-        { status: httpStatus.BAD_REQUEST }
+        { status: 400 }
       );
 
     const payload = validationResult.data;
@@ -110,10 +109,7 @@ export async function POST(request: Request) {
     // Secret validation for GitHub webhook
     const signature = request.headers.get("x-hub-signature-256");
     if (!signature) {
-      return NextResponse.json(
-        { error: "Missing signature" },
-        { status: httpStatus.UNAUTHORIZED }
-      );
+      return NextResponse.json({ error: "Missing signature" }, { status: 401 });
     }
     // Reconstruct the raw body for HMAC validation
     const rawBodyString = JSON.stringify(rawBody);
@@ -124,10 +120,7 @@ export async function POST(request: Request) {
     hmac.update(rawBodyString);
     const digest = `sha256=${hmac.digest("hex")}`;
     if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest))) {
-      return NextResponse.json(
-        { error: "Invalid signature" },
-        { status: httpStatus.UNAUTHORIZED }
-      );
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
     const eventData: TablesInsert<"github_event_log"> = {
@@ -202,7 +195,7 @@ export async function POST(request: Request) {
     Sentry.captureException(error);
     return NextResponse.json(
       { error: "Failed to process webhook" },
-      { status: httpStatus.INTERNAL_SERVER_ERROR }
+      { status: 500 }
     );
   }
 }

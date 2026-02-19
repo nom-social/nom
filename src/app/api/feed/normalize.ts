@@ -10,6 +10,8 @@ export interface RawTimelineItem {
   repositories?: { org?: string; repo?: string };
 }
 
+export type NormalizedTimelineItem = ReturnType<typeof normalizeTimelineItem>;
+
 export function normalizeTimelineItem(item: RawTimelineItem) {
   const org = item.org ?? item.repositories?.org ?? "";
   const repo = item.repo ?? item.repositories?.repo ?? "";
