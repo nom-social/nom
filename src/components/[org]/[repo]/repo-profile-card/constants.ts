@@ -15,4 +15,6 @@ export const LANGUAGE_COLORS: Record<string, string> = {
   HTML: "#e34c26",
   Lua: "#000080",
   SQL: "#000000",
+  Swift: "#F05138",
+  Kotlin: "#7F52FF",
 };
