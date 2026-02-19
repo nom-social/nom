@@ -32,7 +32,7 @@ Once installed, your project's activities will appear in your Nom feed.
 
 ## Local development
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for more information about setting up locally.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for more information about setting up locally
 
 ## Contributing
 
