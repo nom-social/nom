@@ -1,6 +1,8 @@
 import { z } from "zod";
 import crypto from "crypto";
 
+import { logger } from "@trigger.dev/sdk";
+
 import * as openai from "@/utils/openai/client";
 import { createClient } from "@/utils/supabase/background";
 import { Json, TablesInsert } from "@/types/supabase";
@@ -178,6 +180,11 @@ export async function processPushEvent({
   }
 
   if (!result.should_post) {
+    logger.info("Skipping post (AI decided low impact)", {
+      org: repo.org,
+      repo: repo.repo,
+      eventType: "push",
+    });
     return {
       userTimelineEntries: [],
       publicTimelineEntries: [],

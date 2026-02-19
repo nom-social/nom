@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import z from "zod";
+import { logger } from "@trigger.dev/sdk";
 
 import { createClient } from "@/utils/supabase/background";
 import { Json, TablesInsert } from "@/types/supabase";
@@ -89,6 +90,12 @@ export async function processIssueCommentEvent({
   });
 
   if (!shouldPost || !issueData) {
+    logger.info("Skipping post (AI decided low impact)", {
+      org: repo.org,
+      repo: repo.repo,
+      eventType: "issue_comment",
+      issueNumber: issue.number,
+    });
     return {
       userTimelineEntries: [],
       publicTimelineEntries: [],

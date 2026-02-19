@@ -1,5 +1,6 @@
 import { z } from "zod";
 import crypto from "crypto";
+import { logger } from "@trigger.dev/sdk";
 
 import { Json, TablesInsert } from "@/types/supabase";
 import * as openai from "@/utils/openai/client";
@@ -101,6 +102,12 @@ export async function processReleaseEvent({
   }
 
   if (!result.should_post) {
+    logger.info("Skipping post (AI decided low impact)", {
+      org: repo.org,
+      repo: repo.repo,
+      eventType: "release",
+      tagName: release.tag_name,
+    });
     return {
       userTimelineEntries: [],
       publicTimelineEntries: [],
