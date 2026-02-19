@@ -183,9 +183,7 @@ export async function processPullRequestEvent({
       .replace("{commit_messages}", commitMessagesText)
       .replace("{pr_reviews}", reviewsText);
 
-    const postCriteriaInstruction = postCriteria
-      ? `Apply these posting criteria:\n${postCriteria}`
-      : "No posting criteria configured; always set should_post to true.";
+    const postCriteriaInstruction = `Apply these posting criteria:\n${postCriteria}`;
 
     const response = await openaiClient.responses.parse({
       model: "gpt-5.2",
