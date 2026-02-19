@@ -50,7 +50,7 @@ export async function generateIssueData({
       repo,
       octokit,
     }),
-    fetchPostCriteria({ repo, octokit }),
+    fetchPostCriteria({ repo, octokit, eventType }),
   ]);
 
   const prompt = (customizedPrompt || ISSUE_SUMMARY_PROMPT)
@@ -59,10 +59,8 @@ export async function generateIssueData({
     .replace("{body}", issue.body || "No description provided")
     .replace("{comments}", commentsText || "No comments");
 
-  const eventTypeLabel =
-    eventType === "issue_comment" ? "ISSUE COMMENT" : "ISSUE";
   const postCriteriaInstruction = postCriteria
-    ? `Apply these posting criteria for ${eventTypeLabel} events:\n${postCriteria}`
+    ? `Apply these posting criteria:\n${postCriteria}`
     : "No posting criteria configured; always set should_post to true.";
 
   const response = await openaiClient.responses.parse({

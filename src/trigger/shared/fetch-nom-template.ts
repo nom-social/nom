@@ -4,15 +4,24 @@ import { z } from "zod";
 const templateSchema = z.string().max(2_000);
 const postCriteriaSchema = z.string().max(4_000);
 
+export type PostCriteriaEventType =
+  | "push"
+  | "pull_request"
+  | "issue"
+  | "issue_comment"
+  | "release";
+
 export async function fetchPostCriteria({
   repo,
   octokit,
+  eventType,
 }: {
   repo: { org: string; repo: string };
   octokit: Octokit;
+  eventType: PostCriteriaEventType;
 }): Promise<string | null> {
   return fetchNomTemplate({
-    filename: "post_criteria.txt",
+    filename: `post_criteria_${eventType}.txt`,
     repo,
     octokit,
     schema: postCriteriaSchema,

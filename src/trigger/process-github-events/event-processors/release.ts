@@ -71,7 +71,7 @@ export async function processReleaseEvent({
       repo,
       octokit,
     }),
-    fetchPostCriteria({ repo, octokit }),
+    fetchPostCriteria({ repo, octokit, eventType: "release" }),
   ]);
 
   const prompt = (customizedPrompt || RELEASE_SUMMARY_PROMPT)
@@ -82,7 +82,7 @@ export async function processReleaseEvent({
     .replace("{body}", release.body || "No release notes provided");
 
   const postCriteriaInstruction = postCriteria
-    ? `Apply these posting criteria for RELEASE events:\n${postCriteria}`
+    ? `Apply these posting criteria:\n${postCriteria}`
     : "No posting criteria configured; always set should_post to true.";
 
   const response = await openaiClient.responses.parse({

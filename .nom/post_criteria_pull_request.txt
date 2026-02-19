@@ -1,0 +1,10 @@
+Only post when the merged PR has meaningful impact.
+
+Post when:
+- PR changes 3+ files or 50+ lines
+- Adds features, fixes bugs, or refactors significantly
+
+Do NOT post when:
+- Trivial documentation tweaks
+- Minor dependency bumps
+- Formatting or style-only changes
