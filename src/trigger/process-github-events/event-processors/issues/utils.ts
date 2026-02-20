@@ -2,12 +2,8 @@ import { Octokit } from "@octokit/rest";
 
 import * as openai from "@/utils/openai/client";
 import { IssueData } from "@/components/shared/activity-card/shared/schemas";
-import fetchNomTemplate, {
-  fetchPostCriteria,
-} from "@/trigger/shared/fetch-nom-template";
+import { fetchNomInstructions } from "@/trigger/shared/fetch-nom-template";
 import { summaryWithPostDecisionTextFormat } from "@/trigger/shared/summary-with-post-decision";
-
-import { ISSUE_SUMMARY_PROMPT } from "./prompts";
 
 export async function generateIssueData({
   octokit,
@@ -44,30 +40,27 @@ export async function generateIssueData({
     .map((c) => `- ${c.user?.login}: ${c.body}`)
     .join("\n");
 
-  const [customizedPrompt, postCriteria] = await Promise.all([
-    fetchNomTemplate({
-      filename: "issue_summary_template.txt",
-      repo,
-      octokit,
-    }),
-    fetchPostCriteria({ repo, octokit, eventType }),
-  ]);
+  const instructions = await fetchNomInstructions({
+    eventType,
+    repo,
+    octokit,
+  });
 
-  const prompt = (customizedPrompt || ISSUE_SUMMARY_PROMPT)
-    .replace("{title}", issue.title)
-    .replace("{author}", issue.user.login)
-    .replace("{body}", issue.body || "No description provided")
-    .replace("{comments}", commentsText || "No comments");
+  const context = `Here's the issue:
+Title: ${issue.title}
+Author: ${issue.user.login}
+Description: ${issue.body || "No description provided"}
 
-  const postCriteriaInstruction = `Apply these posting criteria:\n${postCriteria}`;
+Comments:
+${commentsText || "No comments"}`;
 
   const response = await openaiClient.responses.parse({
     model: "gpt-5.2",
     instructions:
       "You summarize GitHub issues and their discussions and decide whether to post to the feed. " +
-      "Respond with JSON containing summary (concise 1-3 sentence feed summary) and should_post (boolean). " +
-      postCriteriaInstruction,
-    input: prompt,
+      "Respond with JSON containing summary (concise 1-3 sentence feed summary) and should_post (boolean).\n\n---\n\n" +
+      instructions,
+    input: context,
     text: { format: summaryWithPostDecisionTextFormat },
     store: false,
   });

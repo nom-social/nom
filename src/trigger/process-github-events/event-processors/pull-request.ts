@@ -5,15 +5,12 @@ import { logger } from "@trigger.dev/sdk";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { Json, TablesInsert } from "@/types/supabase";
 import { PrData } from "@/components/shared/activity-card/shared/schemas";
-import fetchNomTemplate, {
-  fetchPostCriteria,
-} from "@/trigger/shared/fetch-nom-template";
+import { fetchNomInstructions } from "@/trigger/shared/fetch-nom-template";
 import propagateLicenseChange from "@/trigger/shared/propagate-license-changes";
 import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
 import { createEventTools } from "@/trigger/shared/agent-tools";
 import { runSummaryAgent } from "@/trigger/shared/run-summary-agent";
 
-import { PR_SUMMARY_ONLY_PROMPT } from "./pull-request/prompts";
 import { BASELINE_SCORE, PULL_REQUEST_MULTIPLIER } from "./shared/constants";
 
 const pullRequestSchema = z.object({
@@ -161,30 +158,35 @@ export async function processPullRequestEvent({
 
     const changedFileList = files.data.map((f) => f.filename).join("\n");
 
-    const [customizedPrompt, postCriteria] = await Promise.all([
-      fetchNomTemplate({
-        filename: "pull_request_summary_template.txt",
-        repo,
-        octokit,
-      }),
-      fetchPostCriteria({ repo, octokit, eventType: "pull_request" }),
-    ]);
-    const prompt = (customizedPrompt || PR_SUMMARY_ONLY_PROMPT)
-      .replace("{title}", pull_request.title)
-      .replace("{author}", pull_request.user.login)
-      .replace("{author_association}", pull_request.author_association)
-      .replace("{description}", pull_request.body || "No description provided")
-      .replace("{changed_files}", pull_request.changed_files.toString())
-      .replace("{additions}", pull_request.additions.toString())
-      .replace("{deletions}", pull_request.deletions.toString())
-      .replace("{labels}", pull_request.labels.map((l) => l.name).join(", "))
-      .replace("{checks_status}", checksStatusText)
-      .replace("{changed_file_list}", changedFileList || "(none)")
-      .replace("{head_ref}", pull_request.head.sha)
-      .replace("{pr_number}", pull_request.number.toString())
-      .replace("{commit_messages}", commitMessagesText)
-      .replace("{pr_reviews}", reviewsText)
-      .replace("{pr_diff}", "(use get_pull_request tool to fetch diff)");
+    const instructions = await fetchNomInstructions({
+      eventType: "pull_request",
+      repo,
+      octokit,
+    });
+
+    const context = `Here is the pull request information:
+Title: ${pull_request.title}
+Author: ${pull_request.user.login}
+Author Association: ${pull_request.author_association}
+Description: ${pull_request.body || "No description provided"}
+
+Stats:
+- Files changed: ${pull_request.changed_files}
+- Additions: ${pull_request.additions}
+- Deletions: ${pull_request.deletions}
+- Labels: ${pull_request.labels.map((l) => l.name).join(", ")}
+
+Checks status:
+${checksStatusText}
+
+Changed files:
+${changedFileList || "(none)"}
+
+${commitMessagesText}
+
+${reviewsText}
+
+You can use explore_file with ref=${pull_request.head.sha} to read specific file contents, or get_pull_request with pull_number=${pull_request.number} for full PR details including diff.`;
 
     const tools = createEventTools({
       octokit,
@@ -193,8 +195,8 @@ export async function processPullRequestEvent({
     });
 
     const result = await runSummaryAgent({
-      prompt,
-      postCriteria,
+      instructions,
+      context,
       tools,
     });
     if (!result) {

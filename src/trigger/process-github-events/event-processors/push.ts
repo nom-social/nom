@@ -6,16 +6,13 @@ import { logger } from "@trigger.dev/sdk";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { Json, TablesInsert } from "@/types/supabase";
 import { PushData } from "@/components/shared/activity-card/shared/schemas";
-import fetchNomTemplate, {
-  fetchPostCriteria,
-} from "@/trigger/shared/fetch-nom-template";
+import { fetchNomInstructions } from "@/trigger/shared/fetch-nom-template";
 import propagateLicenseChange from "@/trigger/shared/propagate-license-changes";
 import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
 import { createEventTools } from "@/trigger/shared/agent-tools";
 import { runSummaryAgent } from "@/trigger/shared/run-summary-agent";
 
 import { BASELINE_SCORE } from "./shared/constants";
-import { PUSH_SUMMARY_PROMPT } from "./push/prompts";
 
 // Define the schema for push events
 const pushEventSchema = z.object({
@@ -152,19 +149,24 @@ export async function processPushEvent({
   const branch = payload.ref.replace("refs/heads/", "");
   const pusher = payload.pusher.username || payload.pusher.name;
 
-  const [customizedPrompt, postCriteria] = await Promise.all([
-    fetchNomTemplate({ filename: "push_summary_template.txt", repo, octokit }),
-    fetchPostCriteria({ repo, octokit, eventType: "push" }),
-  ]);
+  const instructions = await fetchNomInstructions({
+    eventType: "push",
+    repo,
+    octokit,
+  });
 
-  const prompt = (customizedPrompt || PUSH_SUMMARY_PROMPT)
-    .replace("{branch}", branch)
-    .replace("{pusher}", pusher)
-    .replace("{contributors}", contributors.join(", "))
-    .replace("{commit_sha}", latestCommit.id)
-    .replace("{commit_messages}", commitMessages)
-    .replace("{changed_file_list}", changedFileList)
-    .replace("{commit_diff}", "(use explore_file or get_pull_request tools)");
+  const context = `Here are the details:
+Branch: ${branch}
+Pusher: ${pusher}
+Contributors: ${contributors.join(", ")}
+Commit SHA: ${latestCommit.id}
+Commit Messages (latest first):
+${commitMessages}
+
+Changed files:
+${changedFileList}
+
+You can use explore_file with ref=${latestCommit.id} to read specific file contents, or list_pull_requests_for_commit and get_pull_request for PR context.`;
 
   const tools = createEventTools({
     octokit,
@@ -173,8 +175,8 @@ export async function processPushEvent({
   });
 
   const result = await runSummaryAgent({
-    prompt,
-    postCriteria,
+    instructions,
+    context,
     tools,
   });
   if (!result) {

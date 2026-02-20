@@ -1,9 +1,0 @@
-Only post when the issue is substantial.
-
-Post when:
-- Bug reports, feature requests, or substantive discussions
-- Issues that affect the project or its users
-
-Do NOT post when:
-- Minor questions or housekeeping
-- Spam or off-topic content

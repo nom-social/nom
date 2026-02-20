@@ -1,9 +1,0 @@
-Only post when the comment adds meaningful value to the discussion.
-
-Post when:
-- Substantive replies, decisions, or technical discussion
-- Comments that resolve or progress the issue
-
-Do NOT post when:
-- "+1" or simple acknowledgments
-- Off-topic or spam comments

@@ -5,15 +5,12 @@ import { logger } from "@trigger.dev/sdk";
 import { Json, TablesInsert } from "@/types/supabase";
 import { ReleaseData } from "@/components/shared/activity-card/shared/schemas";
 import { createAdminClient } from "@/utils/supabase/admin";
-import fetchNomTemplate, {
-  fetchPostCriteria,
-} from "@/trigger/shared/fetch-nom-template";
+import { fetchNomInstructions } from "@/trigger/shared/fetch-nom-template";
 import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
 import { createEventTools } from "@/trigger/shared/agent-tools";
 import { runSummaryAgent } from "@/trigger/shared/run-summary-agent";
 
 import { BASELINE_SCORE, RELEASE_MULTIPLIER } from "./shared/constants";
-import { RELEASE_SUMMARY_PROMPT } from "./release/prompts";
 
 const releaseSchema = z.object({
   action: z.enum(["published", "edited"]),
@@ -63,21 +60,21 @@ export async function processReleaseEvent({
 
   const supabase = createAdminClient();
 
-  const [customizedPrompt, postCriteria] = await Promise.all([
-    fetchNomTemplate({
-      filename: "release_summary_template.txt",
-      repo,
-      octokit,
-    }),
-    fetchPostCriteria({ repo, octokit, eventType: "release" }),
-  ]);
+  const instructions = await fetchNomInstructions({
+    eventType: "release",
+    repo,
+    octokit,
+  });
 
-  const prompt = (customizedPrompt || RELEASE_SUMMARY_PROMPT)
-    .replace("{tag_name}", release.tag_name)
-    .replace("{name}", release.name || "(no name)")
-    .replace("{author}", release.author.login)
-    .replace("{published_at}", release.published_at?.toISOString() || "N/A")
-    .replace("{body}", release.body || "No release notes provided");
+  const context = `Here is the release info:
+Tag: ${release.tag_name}
+Name: ${release.name || "(no name)"}
+Author: ${release.author.login}
+Published at: ${release.published_at?.toISOString() || "N/A"}
+Release notes:
+${release.body || "No release notes provided"}
+
+You can use explore_file with ref=${release.tag_name} to read files at the release tag, or get_pull_request if you need PR context.`;
 
   const tools = createEventTools({
     octokit,
@@ -86,8 +83,8 @@ export async function processReleaseEvent({
   });
 
   const result = await runSummaryAgent({
-    prompt,
-    postCriteria,
+    instructions,
+    context,
     tools,
   });
 
