@@ -82,17 +82,16 @@ You can use explore_file with ref=${release.tag_name} to read files at the relea
     repo: repo.repo,
   });
 
-  const result = await runSummaryAgent({
-    instructions,
-    context,
-    tools,
-  });
-
   logger.info("Running summary agent", {
     org: repo.org,
     repo: repo.repo,
     eventType: "release",
     tagName: release.tag_name,
+  });
+  const result = await runSummaryAgent({
+    instructions,
+    context,
+    tools,
   });
 
   if (!result.should_post) {
