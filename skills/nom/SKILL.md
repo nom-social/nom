@@ -1,31 +1,44 @@
 ---
 description: "Fetch recent GitHub activity from the Nom feed"
-argument-hint: "[org/repo] [--search QUERY] [--type TYPE] [--limit N]"
+argument-hint: "[org/repo] [--search QUERY] [--type TYPE] [--org ORG] [--from DATE] [--to DATE] [--limit N] [--rss]"
 allowed-tools: ["Bash(curl:*)"]
 ---
 
-Fetch GitHub activity from nomit.dev and present it clearly.
+Fetch GitHub activity from Nom (beta.nomit.dev) and present it clearly.
+
+Base URL: `https://beta.nomit.dev`
 
 $ARGUMENTS parsing rules:
 
-- If the first argument looks like `org/repo` (contains `/`), fetch that repo's feed at `https://nomit.dev/api/feed/{org}/{repo}`
-- Otherwise use the global feed at `https://nomit.dev/api/feed`
-- `--search TEXT` maps to `q=TEXT` query param
-- `--type TYPE` maps to `q=type:TYPE` (valid types: pull_request, issue, release, push)
-- `--limit N` maps to `limit=N` (default 10)
-- Combine `--search` and `--type` by joining them: `q=type:TYPE TEXT`
+- If the first argument looks like `org/repo` (contains `/`), use the repo feed at `/api/feed/{org}/{repo}`
+- Otherwise use the global feed at `/api/feed`
+- `--search TEXT` — free-text search (full-text on title/summary)
+- `--type TYPE` — filter by event type: `pull_request`, `issue`, `release`, `push`
+- `--org ORG` — filter by GitHub org (global feed only)
+- `--from DATE` / `--to DATE` — date range (ISO 8601, e.g. 2026-01-01) (global feed only)
+- `--limit N` — results to return (default 20, max 100)
+- `--rss` — fetch RSS XML instead of JSON (repo feed: `/api/feed/{org}/{repo}/rss`; global: `/api/feed/rss`)
 
-API endpoints:
+Build `q` for global feed by joining filters: e.g. `type:pull_request org:vercel from:2026-01-01` plus any `--search` text.
 
-- Global feed: https://nomit.dev/api/feed
-- Repo feed: https://nomit.dev/api/feed/{org}/{repo}
+API endpoints (JSON):
 
-Use curl to fetch the JSON response, then present the results as a clean readable summary. For each item show:
+- Global feed: `GET /api/feed`
+- Repo feed: `GET /api/feed/{org}/{repo}`
+
+RSS endpoints (if `--rss`):
+
+- Global: `GET /api/feed/rss`
+- Repo: `GET /api/feed/{org}/{repo}/rss`
+
+Use curl to fetch the response. For JSON, present results as a clean readable summary. For each item show:
 
 - Event type label (PR / Issue / Release / Push)
 - Title as a markdown link to the URL
 - One-line AI summary
 - Author and timestamp (relative if possible)
+
+Response shape: `{ items: [...], pagination: { offset, limit, has_more } }`. Each item has `id`, `type`, `org`, `repo`, `title`, `summary`, `url`, `author`, `contributors`, `updated_at`.
 
 Example output format:
 
