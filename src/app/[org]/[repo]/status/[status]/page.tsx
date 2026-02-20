@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import ActivityCard from "@/components/shared/activity-card";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { BASE_URL } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import {
   prDataSchema,
@@ -98,7 +99,7 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      url: `https://nom.social/${org}/${repo}/status/${status}`,
+      url: `${BASE_URL}/${org}/${repo}/status/${status}`,
     },
     twitter: {
       card: "summary_large_image",
