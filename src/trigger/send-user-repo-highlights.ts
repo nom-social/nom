@@ -18,15 +18,6 @@ const prSchema = z.object({
   action: z.string(),
 });
 
-const issueSchema = z.object({
-  issue: z.object({
-    ai_summary: z.string(),
-    title: z.string(),
-    html_url: z.string(),
-  }),
-  action: z.string(),
-});
-
 const pushSchema = z.object({
   push: z.object({
     ai_summary: z.string(),
@@ -79,13 +70,6 @@ export const sendUserRepoHighlights = schemaTask({
           `- [pull_request] ${pr.pull_request.title} (${pr.action})\n` +
           `${pr.pull_request.ai_summary}\n` +
           `[View on GitHub](${pr.pull_request.html_url})\n\n`;
-      }
-      if (event.type === "issue") {
-        const issue = issueSchema.parse(event.data);
-        combinedEvents +=
-          `- [issue] ${issue.issue.title} (${issue.action})\n` +
-          `${issue.issue.ai_summary}\n` +
-          `[View on GitHub](${issue.issue.html_url})\n\n`;
       }
       if (event.type === "push") {
         const push = pushSchema.parse(event.data);

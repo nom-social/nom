@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     title: "Nom — GitHub Activity Feed",
     link: baseUrl,
     description:
-      "GitHub activity feed: pull requests, issues, releases, and pushes from public repositories with AI summaries.",
+      "GitHub activity feed: pull requests, releases, and pushes from public repositories with AI summaries.",
     feedUrl,
   });
 

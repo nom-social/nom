@@ -36,15 +36,6 @@ export function normalizeTimelineItem(item: RawTimelineItem) {
         contributors = pr.contributors ?? [];
         break;
       }
-      case "issue": {
-        const issue = data.issue;
-        title = issue.title ?? "";
-        url = issue.html_url ?? "";
-        author = issue.user?.login ?? "";
-        summary = issue.ai_summary ?? "";
-        contributors = issue.contributors ?? [];
-        break;
-      }
       case "release": {
         const release = data.release;
         title = release.name ?? release.tag_name ?? "";

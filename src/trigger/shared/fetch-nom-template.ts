@@ -3,12 +3,7 @@ import { z } from "zod";
 
 const instructionsSchema = z.string().max(6_000);
 
-export type InstructionsEventType =
-  | "push"
-  | "pull_request"
-  | "issue"
-  | "issue_comment"
-  | "release";
+export type InstructionsEventType = "push" | "pull_request" | "release";
 
 /** Default instructions (summary guidance + posting criteria) when not defined in the repo's .nom */
 export const DEFAULT_INSTRUCTIONS: Record<InstructionsEventType, string> = {
@@ -72,48 +67,6 @@ Do not include a heading or title in your response. Just write the summary in pl
 
 Apply these posting criteria:
 Post all releases. Releases are always notable.`,
-  issue: `Read this GitHub issue and its comments, and write a friendly, concise summary (1-3 sentences) that captures the main point, discussion, and any important context.
-
-Focus on:
-- What is the issue about?
-- How does this issue affect the project?
-- Any consensus, solutions, conclusions, or next steps?
-
-Keep it short, clear, and helpful for a timeline feed. Do not include a "Summary" heading or title in your response.
-
----
-
-Apply these posting criteria:
-Only post when the issue is substantial.
-
-Post when:
-- Bug reports, feature requests, or substantive discussions
-- Issues that affect the project or its users
-
-Do NOT post when:
-- Minor questions or housekeeping
-- Spam or off-topic content`,
-  issue_comment: `Read this GitHub issue and its comments, and write a friendly, concise summary (1-3 sentences) that captures the main point, discussion, and any important context.
-
-Focus on:
-- What is the issue about?
-- How does this issue affect the project?
-- Any consensus, solutions, conclusions, or next steps?
-
-Keep it short, clear, and helpful for a timeline feed. Do not include a "Summary" heading or title in your response.
-
----
-
-Apply these posting criteria:
-Only post when the comment adds meaningful value to the discussion.
-
-Post when:
-- Substantive replies, decisions, or technical discussion
-- Comments that resolve or progress the issue
-
-Do NOT post when:
-- "+1" or simple acknowledgments
-- Off-topic or spam comments`,
 };
 
 export async function fetchNomInstructions({

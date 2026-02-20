@@ -78,13 +78,6 @@ export async function POST(request: Request) {
       "unknown";
     const repo = payload.repository?.name || "unknown";
 
-    // Skip database operations for comments
-    if (payload.event_type === "issue_comment")
-      return NextResponse.json({
-        message: "Comment event, ignoring webhook",
-        timestamp: new Date().toISOString(),
-      });
-
     // Skip database operations for ping events
     if (payload.event_type === "ping")
       return NextResponse.json({
