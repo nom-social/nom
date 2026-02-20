@@ -1,12 +1,20 @@
 ---
 description: "Fetch recent GitHub activity from the Nom feed"
 argument-hint: "[org/repo] [--search QUERY] [--type TYPE] [--org ORG] [--from DATE] [--to DATE] [--limit N] [--rss]"
-allowed-tools: ["Bash(curl:*)"]
+allowed-tools: ["mcp_web_fetch"]
 ---
 
 Fetch GitHub activity from Nom (beta.nomit.dev) and present it clearly.
 
 Base URL: `https://beta.nomit.dev`
+
+**Fetch method**: Use `mcp_web_fetch` to fetch URLs. Do not use curl or shell commands.
+
+**Input validation** (always apply before building URLs):
+
+- `org` and `repo`: Must match `^[a-zA-Z0-9][\w.-]*$` (alphanumeric, hyphens, underscores, dots). Reject or sanitize invalid input.
+- Query params: Use proper URL encoding (e.g. encodeURIComponent) for search text and filter values.
+- `limit`: Clamp to 1–100. Default 20.
 
 $ARGUMENTS parsing rules:
 
@@ -31,7 +39,7 @@ RSS endpoints (if `--rss`):
 - Global: `GET /api/feed/rss`
 - Repo: `GET /api/feed/{org}/{repo}/rss`
 
-Use curl to fetch the response. For JSON, present results as a clean readable summary. For each item show:
+Use mcp_web_fetch with the constructed URL. For JSON, present results as a clean readable summary. For each item show:
 
 - Event type label (PR / Issue / Release / Push)
 - Title as a markdown link to the URL
