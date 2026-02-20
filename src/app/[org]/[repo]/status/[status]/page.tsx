@@ -9,7 +9,6 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   prDataSchema,
-  issueDataSchema,
   releaseDataSchema,
   pushDataSchema,
 } from "@/components/shared/activity-card/shared/schemas";
@@ -77,13 +76,6 @@ export async function generateMetadata({
     const pr = parseResult.data.pull_request;
     title = pr.title ? `${pr.title} - ${org}/${repo}` : title;
     description = truncate(pr.ai_summary || pr.body || description);
-  }
-  if (statusItem.type === "issue") {
-    const parseResult = issueDataSchema.safeParse(statusItem.data);
-    if (!parseResult.success) return {};
-    const issue = parseResult.data.issue;
-    title = issue.title ? `${issue.title} - ${org}/${repo}` : title;
-    description = truncate(issue.ai_summary || issue.body || description);
   }
   if (statusItem.type === "release") {
     const parseResult = releaseDataSchema.safeParse(statusItem.data);

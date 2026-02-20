@@ -1,1 +1,0 @@
-Post all releases. Releases are always notable.

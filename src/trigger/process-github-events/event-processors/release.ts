@@ -3,17 +3,14 @@ import crypto from "crypto";
 import { logger } from "@trigger.dev/sdk";
 
 import { Json, TablesInsert } from "@/types/supabase";
-import * as openai from "@/utils/openai/client";
 import { ReleaseData } from "@/components/shared/activity-card/shared/schemas";
 import { createAdminClient } from "@/utils/supabase/admin";
-import fetchNomTemplate, {
-  fetchPostCriteria,
-} from "@/trigger/shared/fetch-nom-template";
-import { summaryWithPostDecisionTextFormat } from "@/trigger/shared/summary-with-post-decision";
+import { fetchNomInstructions } from "@/trigger/shared/fetch-nom-template";
 import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
+import { createEventTools } from "@/trigger/shared/agent-tools";
+import { runSummaryAgent } from "@/trigger/shared/run-summary-agent";
 
 import { BASELINE_SCORE, RELEASE_MULTIPLIER } from "./shared/constants";
-import { RELEASE_SUMMARY_PROMPT } from "./release/prompts";
 
 const releaseSchema = z.object({
   action: z.enum(["published", "edited"]),
@@ -61,43 +58,41 @@ export async function processReleaseEvent({
   });
   const { action, release } = validationResult;
 
-  // LLM summarization of release notes
   const supabase = createAdminClient();
-  const openaiClient = openai.createClient();
 
-  const [customizedPrompt, postCriteria] = await Promise.all([
-    fetchNomTemplate({
-      filename: "release_summary_template.txt",
-      repo,
-      octokit,
-    }),
-    fetchPostCriteria({ repo, octokit, eventType: "release" }),
-  ]);
-
-  const prompt = (customizedPrompt || RELEASE_SUMMARY_PROMPT)
-    .replace("{tag_name}", release.tag_name)
-    .replace("{name}", release.name || "(no name)")
-    .replace("{author}", release.author.login)
-    .replace("{published_at}", release.published_at?.toISOString() || "N/A")
-    .replace("{body}", release.body || "No release notes provided");
-
-  const postCriteriaInstruction = `Apply these posting criteria:\n${postCriteria}`;
-
-  const response = await openaiClient.responses.parse({
-    model: "gpt-5.2",
-    instructions:
-      "You summarize GitHub releases and decide whether to post to the feed. " +
-      "Respond with JSON containing summary (concise 1-3 sentence feed summary) and should_post (boolean). " +
-      postCriteriaInstruction,
-    input: prompt,
-    text: { format: summaryWithPostDecisionTextFormat },
-    store: false,
+  const instructions = await fetchNomInstructions({
+    eventType: "release",
+    repo,
+    octokit,
   });
 
-  const result = response.output_parsed;
-  if (!result) {
-    throw new Error("Failed to parse AI response for release");
-  }
+  const context = `Here is the release info:
+Tag: ${release.tag_name}
+Name: ${release.name || "(no name)"}
+Author: ${release.author.login}
+Published at: ${release.published_at?.toISOString() || "N/A"}
+Release notes:
+${release.body || "No release notes provided"}
+
+You can use explore_file with ref=${release.tag_name} to read files at the release tag, or get_pull_request if you need PR context.`;
+
+  const tools = createEventTools({
+    octokit,
+    org: repo.org,
+    repo: repo.repo,
+  });
+
+  logger.info("Running summary agent", {
+    org: repo.org,
+    repo: repo.repo,
+    eventType: "release",
+    tagName: release.tag_name,
+  });
+  const result = await runSummaryAgent({
+    instructions,
+    context,
+    tools,
+  });
 
   if (!result.should_post) {
     logger.info("Skipping post (AI decided low impact)", {

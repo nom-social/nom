@@ -60,7 +60,7 @@ export async function GET(
   const xml = toRssXml(items, {
     title: `Nom — ${org}/${repo} Activity`,
     link: channelLink,
-    description: `GitHub activity feed for ${org}/${repo}: pull requests, issues, releases, and pushes with AI summaries.`,
+    description: `GitHub activity feed for ${org}/${repo}: pull requests, releases, and pushes with AI summaries.`,
     feedUrl,
   });
 

@@ -4,22 +4,14 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
-import {
-  CircleCheck,
-  CircleDot,
-  GitCommitVertical,
-  GitMergeIcon,
-  TagIcon,
-} from "lucide-react";
+import { GitCommitVertical, GitMergeIcon, TagIcon } from "lucide-react";
 
 import { Tables } from "@/types/supabase";
 import {
-  issueDataSchema,
   prDataSchema,
   releaseDataSchema,
   pushDataSchema,
 } from "@/components/shared/activity-card/shared/schemas";
-import { cn } from "@/lib/utils";
 
 import {
   createLike,
@@ -122,47 +114,6 @@ function ActivityCard({
           })
         )}
         body={parseResult.data.pull_request.ai_summary}
-        likeCount={likeCount}
-        liked={liked}
-        onLike={handleLike}
-        onUnlike={handleUnlike}
-        hash={item.dedupe_hash}
-      />
-    );
-  }
-  if (item.type === "issue") {
-    const parseResult = issueDataSchema.safeParse(item.data);
-    if (!parseResult.success) {
-      return null;
-    }
-
-    return (
-      <ActivityCardBase
-        title={parseResult.data.issue.title}
-        titleUrl={parseResult.data.issue.html_url}
-        badgeIcon={
-          parseResult.data.issue.state === "open" ? (
-            <CircleDot />
-          ) : (
-            <CircleCheck />
-          )
-        }
-        badgeLabel={parseResult.data.issue.state}
-        badgeClassName={cn(
-          "border-transparent uppercase text-black",
-          parseResult.data.issue.state === "open"
-            ? "bg-nom-green"
-            : "bg-nom-purple"
-        )}
-        repo={repo}
-        org={org}
-        repoUrl={`/${org}/${repo}`}
-        timestamp={new Date(parseResult.data.issue.updated_at)}
-        contributors={parseResult.data.issue.contributors.map((login) => ({
-          name: login,
-          avatar: `https://github.com/${login}.png`,
-        }))}
-        body={parseResult.data.issue.ai_summary}
         likeCount={likeCount}
         liked={liked}
         onLike={handleLike}

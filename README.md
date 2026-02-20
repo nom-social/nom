@@ -10,7 +10,7 @@ A social feed for your project's activities on Github.
 
 - Real-time social feed of your project's GitHub activities (issues, PRs, releases, comments, etc.)
 - Share and subscribe repositories
-- Highly customizable AI prompt for feed generation ([see example](.nom/pull_request_summary_template.txt))
+- Highly customizable AI instructions for feed generation ([see example](.nom/pull_request_instructions.md))
 
 ## Connect your repositories
 

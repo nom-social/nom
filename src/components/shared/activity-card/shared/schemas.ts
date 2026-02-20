@@ -32,25 +32,6 @@ export const prDataSchema = z.object({
 
 export type PrData = z.infer<typeof prDataSchema>;
 
-export const issueDataSchema = z.object({
-  action: z.string(),
-  issue: z.object({
-    user: z.object({ login: z.string() }),
-    number: z.number(),
-    title: z.string(),
-    body: z.string().nullable(),
-    html_url: z.string(),
-    created_at: z.string(),
-    updated_at: z.string(),
-    assignees: z.array(z.object({ login: z.string() })),
-    state: z.enum(["open", "closed"]),
-    contributors: z.array(z.string()),
-    ai_summary: z.string(),
-  }),
-});
-
-export type IssueData = z.infer<typeof issueDataSchema>;
-
 export const releaseDataSchema = z.object({
   action: z.string(),
   release: z.object({
@@ -91,7 +72,6 @@ export type PushData = z.infer<typeof pushDataSchema>;
 
 export const timelineItemDataSchema = z.discriminatedUnion("type", [
   prDataSchema.extend({ type: z.literal("pull_request") }),
-  issueDataSchema.extend({ type: z.literal("issue") }),
   releaseDataSchema.extend({ type: z.literal("release") }),
   pushDataSchema.extend({ type: z.literal("push") }),
 ]);

@@ -4,17 +4,13 @@ import { logger } from "@trigger.dev/sdk";
 
 import { createAdminClient } from "@/utils/supabase/admin";
 import { Json, TablesInsert } from "@/types/supabase";
-import * as openai from "@/utils/openai/client";
 import { PrData } from "@/components/shared/activity-card/shared/schemas";
-import fetchNomTemplate, {
-  fetchPostCriteria,
-} from "@/trigger/shared/fetch-nom-template";
+import { fetchNomInstructions } from "@/trigger/shared/fetch-nom-template";
 import propagateLicenseChange from "@/trigger/shared/propagate-license-changes";
-import { summaryWithPostDecisionTextFormat } from "@/trigger/shared/summary-with-post-decision";
 import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
+import { createEventTools } from "@/trigger/shared/agent-tools";
+import { runSummaryAgent } from "@/trigger/shared/run-summary-agent";
 
-import { getProcessedPullRequestDiff } from "./pull-request/utils";
-import { PR_SUMMARY_ONLY_PROMPT } from "./pull-request/prompts";
 import { BASELINE_SCORE, PULL_REQUEST_MULTIPLIER } from "./shared/constants";
 
 const pullRequestSchema = z.object({
@@ -72,19 +68,18 @@ export async function processPullRequestEvent({
     org: repo.org,
     repo: repo.repo,
   });
-  const openaiClient = openai.createClient();
   const supabase = createAdminClient();
 
   const validationResult = pullRequestSchema.parse(event.raw_payload);
   const { action, pull_request } = validationResult;
 
   const constructPRData = async () => {
-    const [combinedDiff, checks, commits, reviews] = await Promise.all([
-      getProcessedPullRequestDiff(
-        octokit,
-        { org: repo.org, repo: repo.repo },
-        pull_request.number
-      ),
+    const [files, checks, commits, reviews] = await Promise.all([
+      octokit.pulls.listFiles({
+        owner: repo.org,
+        repo: repo.repo,
+        pull_number: pull_request.number,
+      }),
       octokit.checks.listForRef({
         owner: repo.org,
         repo: repo.repo,
@@ -161,42 +156,56 @@ export async function processPullRequestEvent({
         .map((c) => "- " + c.name)
         .join("\n");
 
-    const [customizedPrompt, postCriteria] = await Promise.all([
-      fetchNomTemplate({
-        filename: "pull_request_summary_template.txt",
-        repo,
-        octokit,
-      }),
-      fetchPostCriteria({ repo, octokit, eventType: "pull_request" }),
-    ]);
-    const prompt = (customizedPrompt || PR_SUMMARY_ONLY_PROMPT)
-      .replace("{title}", pull_request.title)
-      .replace("{author}", pull_request.user.login)
-      .replace("{author_association}", pull_request.author_association)
-      .replace("{description}", pull_request.body || "No description provided")
-      .replace("{changed_files}", pull_request.changed_files.toString())
-      .replace("{additions}", pull_request.additions.toString())
-      .replace("{deletions}", pull_request.deletions.toString())
-      .replace("{labels}", pull_request.labels.map((l) => l.name).join(", "))
-      .replace("{checks_status}", checksStatusText)
-      .replace("{pr_diff}", combinedDiff)
-      .replace("{commit_messages}", commitMessagesText)
-      .replace("{pr_reviews}", reviewsText);
+    const changedFileList = files.data.map((f) => f.filename).join("\n");
 
-    const postCriteriaInstruction = `Apply these posting criteria:\n${postCriteria}`;
-
-    const response = await openaiClient.responses.parse({
-      model: "gpt-5.2",
-      instructions:
-        "You summarize pull requests and decide whether to post to the feed. " +
-        "Respond with JSON containing summary (concise 1-3 sentence feed summary) and should_post (boolean). " +
-        postCriteriaInstruction,
-      input: prompt,
-      text: { format: summaryWithPostDecisionTextFormat },
-      store: false,
+    const instructions = await fetchNomInstructions({
+      eventType: "pull_request",
+      repo,
+      octokit,
     });
 
-    const result = response.output_parsed;
+    const context = `Here is the pull request information:
+Title: ${pull_request.title}
+Author: ${pull_request.user.login}
+Author Association: ${pull_request.author_association}
+Description: ${pull_request.body || "No description provided"}
+
+Stats:
+- Files changed: ${pull_request.changed_files}
+- Additions: ${pull_request.additions}
+- Deletions: ${pull_request.deletions}
+- Labels: ${pull_request.labels.map((l) => l.name).join(", ")}
+
+Checks status:
+${checksStatusText}
+
+Changed files:
+${changedFileList || "(none)"}
+
+${commitMessagesText}
+
+${reviewsText}
+
+You can use explore_file with ref=${pull_request.head.sha} to read specific file contents, or get_pull_request with pull_number=${pull_request.number} for full PR details including diff.`;
+
+    const tools = createEventTools({
+      octokit,
+      org: repo.org,
+      repo: repo.repo,
+    });
+
+    logger.info("Running summary agent", {
+      org: repo.org,
+      repo: repo.repo,
+      eventType: "pull_request",
+      prNumber: pull_request.number,
+    });
+
+    const result = await runSummaryAgent({
+      instructions,
+      context,
+      tools,
+    });
     if (!result) {
       throw new Error("Failed to parse AI response for pull request");
     }
