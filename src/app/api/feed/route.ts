@@ -46,7 +46,7 @@ function parseSearchFilters(query?: string): SearchFilters {
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const q = searchParams.get("q") ?? undefined;
-  const limit = Math.min(parseInt(searchParams.get("limit") ?? "20", 10), 100);
+  const limit = Math.min(parseInt(searchParams.get("limit") ?? "5", 10), 100);
   const offset = parseInt(searchParams.get("offset") ?? "0", 10);
 
   const filters = parseSearchFilters(q);

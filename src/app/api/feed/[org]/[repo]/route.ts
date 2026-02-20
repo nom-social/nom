@@ -11,7 +11,7 @@ export async function GET(
   const { org, repo } = await params;
   const { searchParams } = request.nextUrl;
   const q = searchParams.get("q") ?? undefined;
-  const limit = Math.min(parseInt(searchParams.get("limit") ?? "20", 10), 100);
+  const limit = Math.min(parseInt(searchParams.get("limit") ?? "5", 10), 100);
   const offset = parseInt(searchParams.get("offset") ?? "0", 10);
 
   const supabase = await createClient();

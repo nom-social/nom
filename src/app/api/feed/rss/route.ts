@@ -6,7 +6,7 @@ import { createClient } from "@/utils/supabase/server";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
-  const limit = Math.min(parseInt(searchParams.get("limit") ?? "20", 10), 100);
+  const limit = Math.min(parseInt(searchParams.get("limit") ?? "5", 10), 100);
   const offset = parseInt(searchParams.get("offset") ?? "0", 10);
 
   const supabase = await createClient();
