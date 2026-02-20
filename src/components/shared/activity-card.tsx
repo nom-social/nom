@@ -59,7 +59,7 @@ function ActivityCard({
     setLiked(item.isLiked);
   }, [item.likeCount, item.isLiked]);
 
-  const likeMutation = useMutation({
+  const { mutate: mutateLike } = useMutation({
     mutationFn: ({ hash }: { hash: string }) => createLike(hash),
     onSuccess: async () => {
       setLiked(true);
@@ -74,7 +74,7 @@ function ActivityCard({
     },
   });
 
-  const unlikeMutation = useMutation({
+  const { mutate: mutateUnlike } = useMutation({
     mutationFn: ({ hash }: { hash: string }) => deleteLike(hash),
     onSuccess: async () => {
       setLiked(false);
@@ -90,12 +90,12 @@ function ActivityCard({
   });
 
   const handleLike = useCallback(
-    () => likeMutation.mutate({ hash: item.dedupe_hash }),
-    [item.dedupe_hash, likeMutation]
+    () => mutateLike({ hash: item.dedupe_hash }),
+    [item.dedupe_hash, mutateLike]
   );
   const handleUnlike = useCallback(
-    () => unlikeMutation.mutate({ hash: item.dedupe_hash }),
-    [item.dedupe_hash, unlikeMutation]
+    () => mutateUnlike({ hash: item.dedupe_hash }),
+    [item.dedupe_hash, mutateUnlike]
   );
 
   if (item.type === "pull_request") {
