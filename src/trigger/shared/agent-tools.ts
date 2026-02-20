@@ -75,7 +75,7 @@ export function createEventTools({
 
     compare_refs: tool({
       description:
-        "Compare two git refs (commit SHAs or tag names) to see what changed between them. Use for releases (e.g. v1.0...v2.0) or any base..head comparison. Returns commits, changed files, and diff.",
+        "Compare two git refs (commit SHAs or tag names) to see what changed between them. Use for releases (e.g. v1.0...v2.0) or any base...head comparison. Returns commits, changed files, and diff.",
       inputSchema: z.object({
         base: z
           .string()
