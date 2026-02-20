@@ -174,6 +174,13 @@ You can use explore_file with ref=${latestCommit.id} to read specific file conte
     repo: repo.repo,
   });
 
+  logger.info("Running summary agent", {
+    org: repo.org,
+    repo: repo.repo,
+    eventType: "push",
+    commitSha: latestCommit.id,
+  });
+
   const result = await runSummaryAgent({
     instructions,
     context,

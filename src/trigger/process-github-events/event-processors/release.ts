@@ -88,6 +88,13 @@ You can use explore_file with ref=${release.tag_name} to read files at the relea
     tools,
   });
 
+  logger.info("Running summary agent", {
+    org: repo.org,
+    repo: repo.repo,
+    eventType: "release",
+    tagName: release.tag_name,
+  });
+
   if (!result.should_post) {
     logger.info("Skipping post (AI decided low impact)", {
       org: repo.org,

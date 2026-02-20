@@ -194,6 +194,13 @@ You can use explore_file with ref=${pull_request.head.sha} to read specific file
       repo: repo.repo,
     });
 
+    logger.info("Running summary agent", {
+      org: repo.org,
+      repo: repo.repo,
+      eventType: "pull_request",
+      prNumber: pull_request.number,
+    });
+
     const result = await runSummaryAgent({
       instructions,
       context,
