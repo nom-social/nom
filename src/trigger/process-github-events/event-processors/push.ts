@@ -222,7 +222,7 @@ You can use explore_file with ref=${latestCommit.id} to read specific file conte
     push: {
       ai_summary: aiSummary,
       contributors,
-      title: latestCommit.message,
+      title: result.title,
       html_url: latestCommit.url,
       created_at: latestTimestamp,
     },
@@ -237,7 +237,7 @@ You can use explore_file with ref=${latestCommit.id} to read specific file conte
     updated_at: latestTimestamp,
     event_ids: [event.id],
     is_read: false,
-    search_text: [latestCommit.message, aiSummary]
+    search_text: [result.title, aiSummary]
       .filter((text) => text.trim().length > 0)
       .join(" "),
   };

@@ -244,7 +244,7 @@ You can use explore_file with ref=${pull_request.head.sha} to read specific file
         base: { ref: pull_request.base.ref },
         user: { login: pull_request.user.login },
         number: pull_request.number,
-        title: pull_request.title,
+        title: result.title,
         body: pull_request.body,
         html_url: pull_request.html_url,
         created_at: pull_request.created_at.toISOString(),

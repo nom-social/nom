@@ -6,6 +6,7 @@ import { z } from "zod";
  * a feed summary and a posting decision (should_post) in a single call.
  */
 export const summaryWithPostDecisionSchema = z.object({
+  title: z.string().describe("Short, catchy feed title (3-10 words)"),
   summary: z.string().describe("Concise feed summary (1-3 sentences)"),
   should_post: z
     .boolean()

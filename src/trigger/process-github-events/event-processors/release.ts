@@ -113,7 +113,7 @@ You can use explore_file with ref=${release.tag_name} to read files at the relea
     action,
     release: {
       tag_name: release.tag_name,
-      name: release.name,
+      name: result.title,
       body: release.body,
       html_url: release.html_url,
       created_at: release.created_at.toISOString(),
@@ -154,7 +154,7 @@ You can use explore_file with ref=${release.tag_name} to read files at the relea
     event_ids: [event.id],
     is_read: false,
     search_text: [
-      releaseData.release.name || releaseData.release.tag_name,
+      releaseData.release.name ?? releaseData.release.tag_name,
       releaseData.release.ai_summary,
     ]
       .filter((text) => text.trim().length > 0)

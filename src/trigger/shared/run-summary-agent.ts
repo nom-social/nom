@@ -21,10 +21,15 @@ export async function runSummaryAgent({
   instructions,
   context,
   tools,
-}: RunSummaryAgentParams): Promise<{ summary: string; should_post: boolean }> {
+}: RunSummaryAgentParams): Promise<{
+  title: string;
+  summary: string;
+  should_post: boolean;
+}> {
   const agentInstructions = `You summarize GitHub events (pull requests, pushes, releases) and decide whether to post to the feed.
 
 Respond with JSON containing:
+- title: short, catchy feed title (3-10 words)
 - summary: concise 1-3 sentence feed summary
 - should_post: boolean indicating whether this update should be posted
 
