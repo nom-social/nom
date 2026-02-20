@@ -1,7 +1,7 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { createClient } from "@/utils/supabase/server";
 
 import ClaimRepoButton from "@/components/shared/claim-repo-button";
+import { createClient } from "@/utils/supabase/server";
 import { getQueryClient } from "@/utils/get-query-client";
 
 import {
