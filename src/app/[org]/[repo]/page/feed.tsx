@@ -16,29 +16,14 @@ import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
 const LIMIT = 20;
 const SEARCH_DEBOUNCE_MS = 300;
 
-export default function Feed({
-  repoId,
-  repo,
-  org,
-}: {
+type RepoFeedItemsProps = {
   repoId: string;
   repo: string;
   org: string;
   searchQuery?: string;
-}) {
-  const { register, setValue, watch } = useForm<{
-    search: string;
-  }>({
-    defaultValues: { search: "" },
-  });
+};
 
-  const searchValue = watch("search");
-  const activeQuery = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
-
-  const handleClear = () => {
-    setValue("search", "");
-  };
-
+function RepoFeedItems({ repoId, repo, org, searchQuery }: RepoFeedItemsProps) {
   const {
     data,
     fetchNextPage,
@@ -49,14 +34,14 @@ export default function Feed({
     error,
     refetch,
   } = useInfiniteQuery<FetchFeedPageResult, Error>({
-    queryKey: [fetchFeedPage.key, repoId, activeQuery],
+    queryKey: [fetchFeedPage.key, repoId, searchQuery],
     queryFn: ({ pageParam }) => {
       const offset = typeof pageParam === "number" ? pageParam : 0;
       return fetchFeedPage({
         repoId,
         limit: LIMIT,
         offset,
-        query: activeQuery,
+        query: searchQuery,
       });
     },
     getNextPageParam: (lastPage, allPages) => {
@@ -70,7 +55,6 @@ export default function Feed({
 
   const items = data?.pages.flatMap((page) => page.items) ?? [];
 
-  // Intersection Observer logic
   const observerMiddle = useRef<IntersectionObserver | null>(null);
   const observerLast = useRef<IntersectionObserver | null>(null);
   const sentinelMiddleIndex =
@@ -114,28 +98,6 @@ export default function Feed({
       <ScrollToTopButton onScrollToTop={handleScrollToTop} />
 
       <div className="flex flex-col gap-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search activities..."
-            className="pl-10 pr-10 w-full"
-            {...register("search")}
-          />
-          {searchValue && (
-            <Button
-              type="button"
-              onClick={handleClear}
-              size="icon"
-              variant="ghost"
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 text-muted-foreground hover:text-foreground focus:outline-none"
-              tabIndex={-1}
-            >
-              <X />
-            </Button>
-          )}
-        </div>
-
         {items.length === 0 && !isLoading && (
           <div className="text-muted-foreground">No activity yet.</div>
         )}
@@ -173,5 +135,63 @@ export default function Feed({
         )}
       </div>
     </>
+  );
+}
+
+const MemoizedRepoFeedItems = React.memo(RepoFeedItems);
+
+export default function Feed({
+  repoId,
+  repo,
+  org,
+}: {
+  repoId: string;
+  repo: string;
+  org: string;
+}) {
+  const { register, setValue, watch } = useForm<{
+    search: string;
+  }>({
+    defaultValues: { search: "" },
+  });
+
+  const searchValue = watch("search");
+  const activeQuery = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
+
+  const handleClear = () => {
+    setValue("search", "");
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="Search activities..."
+          className="pl-10 pr-10 w-full"
+          {...register("search")}
+        />
+        {searchValue && (
+          <Button
+            type="button"
+            onClick={handleClear}
+            size="icon"
+            variant="ghost"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 text-muted-foreground hover:text-foreground focus:outline-none"
+            tabIndex={-1}
+          >
+            <X />
+          </Button>
+        )}
+      </div>
+
+      <MemoizedRepoFeedItems
+        repoId={repoId}
+        repo={repo}
+        org={org}
+        searchQuery={activeQuery}
+      />
+    </div>
   );
 }

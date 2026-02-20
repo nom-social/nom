@@ -11,7 +11,7 @@ import { fetchPublicFeed } from "./actions";
 
 const LIMIT = 20;
 
-export default function FeedPublic({ searchQuery }: { searchQuery?: string }) {
+function FeedPublic({ searchQuery }: { searchQuery?: string }) {
   const {
     data,
     fetchNextPage,
@@ -125,3 +125,5 @@ export default function FeedPublic({ searchQuery }: { searchQuery?: string }) {
     </>
   );
 }
+
+export default React.memo(FeedPublic);

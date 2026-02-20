@@ -11,7 +11,7 @@ import { fetchFeed } from "./actions";
 
 const LIMIT = 20;
 
-export default function FeedPrivate({ searchQuery }: { searchQuery?: string }) {
+function FeedPrivate({ searchQuery }: { searchQuery?: string }) {
   const {
     data,
     fetchNextPage,
@@ -125,3 +125,5 @@ export default function FeedPrivate({ searchQuery }: { searchQuery?: string }) {
     </>
   );
 }
+
+export default React.memo(FeedPrivate);
