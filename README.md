@@ -16,7 +16,7 @@ A social feed for your project's activities on Github.
 
 To get started, connect your GitHub repositories to Nom:
 
-[Install the Nom Social Club GitHub App](https://github.com/apps/nom-social-club/installations/new)
+[Install the Nom GitHub App](https://github.com/apps/nom-social-club/installations/new)
 
 Once installed, your project's activities will appear in your Nom feed.
 
