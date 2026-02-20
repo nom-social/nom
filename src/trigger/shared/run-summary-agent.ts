@@ -1,6 +1,7 @@
-import { openai } from "@ai-sdk/openai";
 import type { ToolSet } from "ai";
 import { Output, stepCountIs, ToolLoopAgent } from "ai";
+
+import { createOpenAIProvider } from "@/utils/openai/client";
 
 import { summaryWithPostDecisionSchema } from "./summary-with-post-decision";
 
@@ -32,7 +33,7 @@ Respond with JSON containing:
 ${instructions}`;
 
   const agent = new ToolLoopAgent({
-    model: openai("gpt-5.2"),
+    model: createOpenAIProvider().languageModel("gpt-5.2"),
     instructions: agentInstructions,
     tools,
     output: Output.object({
