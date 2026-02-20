@@ -3,7 +3,6 @@ import crypto from "crypto";
 
 import { logger } from "@trigger.dev/sdk";
 
-import * as openai from "@/utils/openai/client";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { Json, TablesInsert } from "@/types/supabase";
 import { PushData } from "@/components/shared/activity-card/shared/schemas";
@@ -11,12 +10,12 @@ import fetchNomTemplate, {
   fetchPostCriteria,
 } from "@/trigger/shared/fetch-nom-template";
 import propagateLicenseChange from "@/trigger/shared/propagate-license-changes";
-import { summaryWithPostDecisionTextFormat } from "@/trigger/shared/summary-with-post-decision";
 import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
+import { createEventTools } from "@/trigger/shared/agent-tools";
+import { runSummaryAgent } from "@/trigger/shared/run-summary-agent";
 
 import { BASELINE_SCORE } from "./shared/constants";
 import { PUSH_SUMMARY_PROMPT } from "./push/prompts";
-import { getCommitDiff } from "./push/utils";
 
 // Define the schema for push events
 const pushEventSchema = z.object({
@@ -87,7 +86,6 @@ export async function processPushEvent({
   userTimelineEntries: TablesInsert<"user_timeline">[];
   publicTimelineEntries: TablesInsert<"public_timeline">[];
 }> {
-  const openaiClient = openai.createClient();
   const supabase = createAdminClient();
   const payload = pushEventSchema.parse(event.raw_payload);
   const octokit = await createAuthenticatedOctokitClient({
@@ -115,7 +113,14 @@ export async function processPushEvent({
     };
   }
 
-  const commitDiff = await getCommitDiff(octokit, repo, latestCommit.id);
+  const commitResp = await octokit.repos.getCommit({
+    owner: repo.org,
+    repo: repo.repo,
+    ref: latestCommit.id,
+  });
+  const changedFileList = commitResp.data.files
+    ? commitResp.data.files.map((f) => f.filename).join("\n")
+    : "(none)";
 
   // Propagate license change if LICENSE file was changed in this push event
   await propagateLicenseChange({
@@ -156,23 +161,22 @@ export async function processPushEvent({
     .replace("{branch}", branch)
     .replace("{pusher}", pusher)
     .replace("{contributors}", contributors.join(", "))
+    .replace("{commit_sha}", latestCommit.id)
     .replace("{commit_messages}", commitMessages)
-    .replace("{commit_diff}", commitDiff || "No changes");
+    .replace("{changed_file_list}", changedFileList)
+    .replace("{commit_diff}", "(use explore_file or get_pull_request tools)");
 
-  const postCriteriaInstruction = `Apply these posting criteria:\n${postCriteria}`;
-
-  const response = await openaiClient.responses.parse({
-    model: "gpt-5.2",
-    instructions:
-      "You summarize push events and decide whether to post to the feed. " +
-      "Respond with JSON containing summary (concise 1-3 sentence feed summary) and should_post (boolean). " +
-      postCriteriaInstruction,
-    input: prompt,
-    text: { format: summaryWithPostDecisionTextFormat },
-    store: false,
+  const tools = createEventTools({
+    octokit,
+    org: repo.org,
+    repo: repo.repo,
   });
 
-  const result = response.output_parsed;
+  const result = await runSummaryAgent({
+    prompt,
+    postCriteria,
+    tools,
+  });
   if (!result) {
     throw new Error("Failed to parse AI response for push event");
   }

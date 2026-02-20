@@ -3,14 +3,14 @@ import crypto from "crypto";
 import { logger } from "@trigger.dev/sdk";
 
 import { Json, TablesInsert } from "@/types/supabase";
-import * as openai from "@/utils/openai/client";
 import { ReleaseData } from "@/components/shared/activity-card/shared/schemas";
 import { createAdminClient } from "@/utils/supabase/admin";
 import fetchNomTemplate, {
   fetchPostCriteria,
 } from "@/trigger/shared/fetch-nom-template";
-import { summaryWithPostDecisionTextFormat } from "@/trigger/shared/summary-with-post-decision";
 import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
+import { createEventTools } from "@/trigger/shared/agent-tools";
+import { runSummaryAgent } from "@/trigger/shared/run-summary-agent";
 
 import { BASELINE_SCORE, RELEASE_MULTIPLIER } from "./shared/constants";
 import { RELEASE_SUMMARY_PROMPT } from "./release/prompts";
@@ -61,9 +61,7 @@ export async function processReleaseEvent({
   });
   const { action, release } = validationResult;
 
-  // LLM summarization of release notes
   const supabase = createAdminClient();
-  const openaiClient = openai.createClient();
 
   const [customizedPrompt, postCriteria] = await Promise.all([
     fetchNomTemplate({
@@ -81,23 +79,17 @@ export async function processReleaseEvent({
     .replace("{published_at}", release.published_at?.toISOString() || "N/A")
     .replace("{body}", release.body || "No release notes provided");
 
-  const postCriteriaInstruction = `Apply these posting criteria:\n${postCriteria}`;
-
-  const response = await openaiClient.responses.parse({
-    model: "gpt-5.2",
-    instructions:
-      "You summarize GitHub releases and decide whether to post to the feed. " +
-      "Respond with JSON containing summary (concise 1-3 sentence feed summary) and should_post (boolean). " +
-      postCriteriaInstruction,
-    input: prompt,
-    text: { format: summaryWithPostDecisionTextFormat },
-    store: false,
+  const tools = createEventTools({
+    octokit,
+    org: repo.org,
+    repo: repo.repo,
   });
 
-  const result = response.output_parsed;
-  if (!result) {
-    throw new Error("Failed to parse AI response for release");
-  }
+  const result = await runSummaryAgent({
+    prompt,
+    postCriteria,
+    tools,
+  });
 
   if (!result.should_post) {
     logger.info("Skipping post (AI decided low impact)", {

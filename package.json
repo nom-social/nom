@@ -13,6 +13,7 @@
     "backfill:repo": "npx tsx src/scripts/backfill/backfill-repo-events.ts"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.30",
     "@octokit/auth-app": "^8.0.1",
     "@octokit/rest": "^22.0.0",
     "@radix-ui/react-avatar": "^1.1.10",
@@ -32,6 +33,7 @@
     "@supabase/supabase-js": "^2.97.0",
     "@tanstack/react-query": "^5.81.5",
     "@trigger.dev/sdk": "4.4.0",
+    "ai": "^6.0.94",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

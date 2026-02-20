@@ -4,6 +4,8 @@ export const RELEASE_SUMMARY_PROMPT = `Read this GitHub release and write a frie
 - How does it affect users or integrators?
 - Is this a bug fix, feature release, or both?
 
+You can use explore_file with ref={tag_name} to read files at the release tag, or get_pull_request if you need PR context. Only call tools if you need more context.
+
 Here is the release info:
 Tag: {tag_name}
 Name: {name}
