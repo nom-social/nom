@@ -75,9 +75,9 @@ function FeedPublic({ searchQuery }: { searchQuery?: string }) {
     [isFetchingNextPage, fetchNextPage, hasNextPage]
   );
 
-  const handleScrollToTop = () => {
+  const handleScrollToTop = useCallback(() => {
     refetch();
-  };
+  }, [refetch]);
 
   return (
     <>
