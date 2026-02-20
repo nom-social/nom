@@ -4,6 +4,8 @@ import { Output, stepCountIs, ToolLoopAgent } from "ai";
 
 import { summaryWithPostDecisionSchema } from "./summary-with-post-decision";
 
+const MAX_STEP_COUNT = 10;
+
 export interface RunSummaryAgentParams {
   instructions: string;
   context: string;
@@ -36,7 +38,7 @@ ${instructions}`;
     output: Output.object({
       schema: summaryWithPostDecisionSchema,
     }),
-    stopWhen: stepCountIs(10),
+    stopWhen: stepCountIs(MAX_STEP_COUNT),
   });
 
   const result = await agent.generate({ prompt: context });
