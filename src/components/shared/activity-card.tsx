@@ -1,9 +1,9 @@
 "use client";
 
+import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
 import {
   CircleCheck,
   CircleDot,
@@ -40,7 +40,7 @@ type FeedItemWithLikes = (
   };
 };
 
-export default function ActivityCard({
+function ActivityCard({
   item,
   repo,
   org,
@@ -89,8 +89,14 @@ export default function ActivityCard({
     },
   });
 
-  const handleLike = () => likeMutation.mutate({ hash: item.dedupe_hash });
-  const handleUnlike = () => unlikeMutation.mutate({ hash: item.dedupe_hash });
+  const handleLike = useCallback(
+    () => likeMutation.mutate({ hash: item.dedupe_hash }),
+    [item.dedupe_hash, likeMutation]
+  );
+  const handleUnlike = useCallback(
+    () => unlikeMutation.mutate({ hash: item.dedupe_hash }),
+    [item.dedupe_hash, unlikeMutation]
+  );
 
   if (item.type === "pull_request") {
     const parseResult = prDataSchema.safeParse(item.data);
@@ -229,3 +235,5 @@ export default function ActivityCard({
 
   return null;
 }
+
+export default React.memo(ActivityCard);

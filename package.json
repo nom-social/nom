@@ -68,6 +68,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
     "playwright": "^1.53.1",
+    "react-scan": "^0.5.3",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.4",
     "typescript": "^5.8.3",

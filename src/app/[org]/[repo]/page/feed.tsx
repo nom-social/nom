@@ -1,13 +1,13 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Loader, ArrowUp, Search, X } from "lucide-react";
-import React, { useRef, useCallback, useEffect, useState } from "react";
+import { Loader, Search, X } from "lucide-react";
+import React, { useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 
 import ActivityCard from "@/components/shared/activity-card";
+import ScrollToTopButton from "@/components/shared/scroll-to-top-button";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
@@ -105,40 +105,13 @@ export default function Feed({
     [isFetchingNextPage, fetchNextPage, hasNextPage]
   );
 
-  // Scroll to top button state
-  const [showScrollTop, setShowScrollTop] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 200);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   const handleScrollToTop = () => {
     refetch();
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
     <>
-      <Button
-        aria-label="Scroll to top"
-        onClick={handleScrollToTop}
-        className={cn(
-          "fixed left-1/2 -translate-x-1/2 top-10 z-70 border",
-          "shadow-lg p-2 hover:bg-background/90",
-          "active:scale-95 border-nom-yellow bg-background text-white",
-          "transition-all duration-300 flex items-center justify-center hover:scale-105",
-          showScrollTop
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none -translate-y-8 -translate-x-1/2"
-        )}
-        size="icon"
-      >
-        <ArrowUp className="w-5 h-5" />
-      </Button>
+      <ScrollToTopButton onScrollToTop={handleScrollToTop} />
 
       <div className="flex flex-col gap-4">
         <div className="relative">
