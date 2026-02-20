@@ -58,7 +58,7 @@ export default function RootLayout({
         {process.env.NODE_ENV === "development" && (
           <Script
             src="https://unpkg.com/react-scan/dist/auto.global.js"
-            strategy="afterInteractive"
+            strategy="beforeInteractive"
           />
         )}
         <ThemeProvider attribute="class" defaultTheme="dark">

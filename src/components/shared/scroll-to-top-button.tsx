@@ -18,6 +18,10 @@ export default function ScrollToTopButton({
   const rafId = useRef<number | null>(null);
 
   useEffect(() => {
+    const updateVisibility = () => {
+      setShowScrollTop(window.scrollY > SCROLL_THRESHOLD);
+    };
+
     const handleScroll = () => {
       if (rafId.current) return;
       rafId.current = requestAnimationFrame(() => {
@@ -25,12 +29,19 @@ export default function ScrollToTopButton({
         const now = Date.now();
         if (now - lastUpdate.current < THROTTLE_MS) return;
         lastUpdate.current = now;
-        setShowScrollTop(window.scrollY > SCROLL_THRESHOLD);
+        updateVisibility();
       });
     };
+
+    // Check on mount in case we're already scrolled
+    updateVisibility();
+
     window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scrollend", updateVisibility);
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scrollend", updateVisibility);
       if (rafId.current) cancelAnimationFrame(rafId.current);
     };
   }, []);
