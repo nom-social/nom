@@ -1,6 +1,7 @@
 import { Octokit } from "@octokit/rest";
 import { createAppAuth } from "@octokit/auth-app";
 
+import { escapeForIlike } from "@/lib/repo-utils";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 interface OctokitClientOptions {
@@ -18,8 +19,8 @@ export async function createAuthenticatedOctokitClient(
     const { data: repoRow } = await supabase
       .from("repositories")
       .select("id, repositories_secure(installation_id)")
-      .eq("org", options.org)
-      .eq("repo", options.repo)
+      .ilike("org", escapeForIlike(options.org))
+      .ilike("repo", escapeForIlike(options.repo))
       .single()
       .throwOnError();
     installationId = repoRow.repositories_secure?.installation_id;

@@ -1,6 +1,7 @@
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 
+import { escapeForIlike } from "@/lib/repo-utils";
 import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
 import { createAdminClient } from "@/utils/supabase/admin";
 
@@ -17,8 +18,8 @@ export const syncBatchReposMetadataTask = schemaTask({
         const { data: repoInfo } = await supabase
           .from("repositories")
           .select("id, org, repo")
-          .eq("org", org)
-          .eq("repo", repo)
+          .ilike("org", escapeForIlike(org))
+          .ilike("repo", escapeForIlike(repo))
           .single()
           .throwOnError();
 

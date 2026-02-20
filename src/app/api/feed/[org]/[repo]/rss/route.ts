@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { normalizeTimelineItem } from "@/app/api/feed/normalize";
 import { toErrorXml, toRssXml } from "@/app/api/feed/to-rss";
+import { escapeForIlike } from "@/lib/repo-utils";
 import { createClient } from "@/utils/supabase/server";
 
 export async function GET(
@@ -18,8 +19,8 @@ export async function GET(
   const { data: repoData, error: repoError } = await supabase
     .from("repositories")
     .select("id")
-    .eq("org", org)
-    .eq("repo", repo)
+    .ilike("org", escapeForIlike(org))
+    .ilike("repo", escapeForIlike(repo))
     .single();
 
   if (repoError || !repoData) {

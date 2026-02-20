@@ -1,3 +1,4 @@
+import { escapeForIlike } from "@/lib/repo-utils";
 import { createClient } from "@/utils/supabase/server";
 import type { Tables } from "@/types/supabase";
 
@@ -45,8 +46,8 @@ export async function fetchFeedItem({
   const { data: repoData } = await supabase
     .from("repositories")
     .select("*")
-    .eq("repo", repo)
-    .eq("org", org)
+    .ilike("repo", escapeForIlike(repo))
+    .ilike("org", escapeForIlike(org))
     .single();
 
   if (!repoData) return null;

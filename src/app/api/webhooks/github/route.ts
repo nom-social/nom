@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import * as Sentry from "@sentry/nextjs";
 
+import { escapeForIlike } from "@/lib/repo-utils";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { Json, TablesInsert } from "@/types/supabase";
 import { processGithubEvents } from "@/trigger/process-github-events";
@@ -88,8 +89,8 @@ export async function POST(request: Request) {
     const { data: repoData } = await supabase
       .from("repositories")
       .select("id")
-      .eq("org", org)
-      .eq("repo", repo)
+      .ilike("org", escapeForIlike(org))
+      .ilike("repo", escapeForIlike(repo))
       .single();
 
     if (!repoData) {

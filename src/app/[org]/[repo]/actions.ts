@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { escapeForIlike } from "@/lib/repo-utils";
 import { createClient } from "@/utils/supabase/server";
 
 const metadataSchema = z.object({
@@ -21,8 +22,8 @@ export async function fetchRepoProfile(org: string, repo: string) {
   const { data } = await supabase
     .from("repositories")
     .select("metadata, org, repo, id")
-    .eq("org", org)
-    .eq("repo", repo)
+    .ilike("org", escapeForIlike(org))
+    .ilike("repo", escapeForIlike(repo))
     .single();
 
   const { count: subscriptionCount } = await supabase

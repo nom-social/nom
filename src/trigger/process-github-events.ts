@@ -1,5 +1,6 @@
 import { logger, task } from "@trigger.dev/sdk";
 
+import { escapeForIlike } from "@/lib/repo-utils";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 import { processEvent } from "./process-github-events/event-processors";
@@ -43,8 +44,8 @@ export const processGithubEvents = task({
         const { data: repo } = await supabase
           .from("repositories")
           .select("id, repo, org")
-          .eq("repo", event.repo)
-          .eq("org", event.org)
+          .ilike("repo", escapeForIlike(event.repo))
+          .ilike("org", escapeForIlike(event.org))
           .single()
           .throwOnError();
 

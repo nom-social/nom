@@ -1,5 +1,6 @@
 import { subMonths } from "date-fns";
 
+import { escapeForIlike } from "@/lib/repo-utils";
 import { createClient } from "@/utils/supabase/client";
 import type { Tables } from "@/types/supabase";
 
@@ -23,8 +24,8 @@ export async function createSubscription(org: string, repo: string) {
   const { data: repoData } = await supabase
     .from("repositories")
     .select("id")
-    .eq("org", org)
-    .eq("repo", repo)
+    .ilike("org", escapeForIlike(org))
+    .ilike("repo", escapeForIlike(repo))
     .single()
     .throwOnError();
 
@@ -81,8 +82,8 @@ export async function removeSubscription(org: string, repo: string) {
   const { data: repoData } = await supabase
     .from("repositories")
     .select("id")
-    .eq("org", org)
-    .eq("repo", repo)
+    .ilike("org", escapeForIlike(org))
+    .ilike("repo", escapeForIlike(repo))
     .single()
     .throwOnError();
 
@@ -109,8 +110,8 @@ export async function isSubscribed(org: string, repo: string) {
   const { data: repoData } = await supabase
     .from("repositories")
     .select("id")
-    .eq("org", org)
-    .eq("repo", repo)
+    .ilike("org", escapeForIlike(org))
+    .ilike("repo", escapeForIlike(repo))
     .single()
     .throwOnError();
 

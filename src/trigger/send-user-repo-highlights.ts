@@ -3,6 +3,7 @@ import { z } from "zod";
 import { marked } from "marked";
 import { format } from "date-fns";
 
+import { escapeForIlike } from "@/lib/repo-utils";
 import * as supabase from "@/utils/supabase/admin";
 import * as resend from "@/utils/resend/client";
 import * as openai from "@/utils/openai/client";
@@ -44,8 +45,8 @@ export const sendUserRepoHighlights = schemaTask({
     const { data: repoData } = await supabaseClient
       .from("repositories")
       .select("id")
-      .eq("org", org)
-      .eq("repo", repo)
+      .ilike("org", escapeForIlike(org))
+      .ilike("repo", escapeForIlike(repo))
       .single()
       .throwOnError();
 
