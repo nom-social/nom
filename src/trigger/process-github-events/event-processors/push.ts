@@ -166,7 +166,7 @@ ${commitMessages}
 Changed files:
 ${changedFileList}
 
-You can use explore_file with ref=${latestCommit.id} to read specific file contents, or list_pull_requests_for_commit and get_pull_request for PR context.`;
+You can use explore_file with ref=${latestCommit.id} to read specific file contents, or get_pull_request when a PR number is known from context.`;
 
   const tools = createEventTools({
     octokit,

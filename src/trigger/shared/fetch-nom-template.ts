@@ -41,7 +41,7 @@ Do NOT post when:
 - Who contributed?
 - Any notable changes or context from the commit messages?
 
-You can use explore_file to read specific file contents, or list_pull_requests_for_commit and get_pull_request for PR context. Only call tools if you need more context.
+You can use explore_file to read specific file contents, or get_pull_request when a PR number is known from context. Only call tools if you need more context.
 
 Do not include a heading or title. Just write the summary in plain language, clear and helpful for a timeline feed.
 

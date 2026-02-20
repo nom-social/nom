@@ -77,7 +77,7 @@ export function createEventTools({
 
     get_pull_request: tool({
       description:
-        "Get full details of a pull request by number: title, body, reviews, changed files, and diff. Use this after list_pull_requests_for_commit to fetch details for specific PRs.",
+        "Get full details of a pull request by number: title, body, reviews, changed files, and diff. Useful when you need PR context (e.g. for releases that reference merged PRs).",
       inputSchema: z.object({
         pull_number: z.number().describe("Pull request number"),
       }),
@@ -139,38 +139,6 @@ export function createEventTools({
         } catch (err) {
           const message =
             err instanceof Error ? err.message : "Failed to fetch PR";
-          return { error: message };
-        }
-      },
-    }),
-
-    list_pull_requests_for_commit: tool({
-      description:
-        "List pull request numbers associated with a commit. Use this to find PRs that contain a specific commit (e.g. for push events). Then use get_pull_request with a specific pull_number to fetch full details.",
-      inputSchema: z.object({
-        commit_sha: z.string().describe("Commit SHA to find associated PRs"),
-      }),
-      execute: async ({ commit_sha }: { commit_sha: string }) => {
-        try {
-          logger.info("Listing PRs for commit", {
-            org,
-            repo,
-            commit_sha,
-          });
-          const { data: pulls } =
-            await octokit.repos.listPullRequestsAssociatedWithCommit({
-              owner: org,
-              repo,
-              commit_sha,
-            });
-          return {
-            pr_numbers: pulls.map((p) => p.number),
-          };
-        } catch (err) {
-          const message =
-            err instanceof Error
-              ? err.message
-              : "Failed to list PRs for commit";
           return { error: message };
         }
       },
