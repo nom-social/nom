@@ -1,13 +1,13 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Loader, ArrowUp, Search, X } from "lucide-react";
-import React, { useRef, useCallback, useEffect, useState } from "react";
+import { Loader, Search, X } from "lucide-react";
+import React, { useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 
 import ActivityCard from "@/components/shared/activity-card";
+import ScrollToTopButton from "@/components/shared/scroll-to-top-button";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
@@ -16,29 +16,14 @@ import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
 const LIMIT = 20;
 const SEARCH_DEBOUNCE_MS = 300;
 
-export default function Feed({
-  repoId,
-  repo,
-  org,
-}: {
+type RepoFeedItemsProps = {
   repoId: string;
   repo: string;
   org: string;
   searchQuery?: string;
-}) {
-  const { register, setValue, watch } = useForm<{
-    search: string;
-  }>({
-    defaultValues: { search: "" },
-  });
+};
 
-  const searchValue = watch("search");
-  const activeQuery = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
-
-  const handleClear = () => {
-    setValue("search", "");
-  };
-
+function RepoFeedItems({ repoId, repo, org, searchQuery }: RepoFeedItemsProps) {
   const {
     data,
     fetchNextPage,
@@ -49,14 +34,14 @@ export default function Feed({
     error,
     refetch,
   } = useInfiniteQuery<FetchFeedPageResult, Error>({
-    queryKey: [fetchFeedPage.key, repoId, activeQuery],
+    queryKey: [fetchFeedPage.key, repoId, searchQuery],
     queryFn: ({ pageParam }) => {
       const offset = typeof pageParam === "number" ? pageParam : 0;
       return fetchFeedPage({
         repoId,
         limit: LIMIT,
         offset,
-        query: activeQuery,
+        query: searchQuery,
       });
     },
     getNextPageParam: (lastPage, allPages) => {
@@ -70,7 +55,6 @@ export default function Feed({
 
   const items = data?.pages.flatMap((page) => page.items) ?? [];
 
-  // Intersection Observer logic
   const observerMiddle = useRef<IntersectionObserver | null>(null);
   const observerLast = useRef<IntersectionObserver | null>(null);
   const sentinelMiddleIndex =
@@ -105,64 +89,15 @@ export default function Feed({
     [isFetchingNextPage, fetchNextPage, hasNextPage]
   );
 
-  // Scroll to top button state
-  const [showScrollTop, setShowScrollTop] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 200);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   const handleScrollToTop = () => {
     refetch();
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
     <>
-      <Button
-        aria-label="Scroll to top"
-        onClick={handleScrollToTop}
-        className={cn(
-          "fixed left-1/2 -translate-x-1/2 top-10 z-70 border",
-          "shadow-lg p-2 hover:bg-background/90",
-          "active:scale-95 border-nom-yellow bg-background text-white",
-          "transition-all duration-300 flex items-center justify-center hover:scale-105",
-          showScrollTop
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none -translate-y-8 -translate-x-1/2"
-        )}
-        size="icon"
-      >
-        <ArrowUp className="w-5 h-5" />
-      </Button>
+      <ScrollToTopButton onScrollToTop={handleScrollToTop} />
 
       <div className="flex flex-col gap-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search activities..."
-            className="pl-10 pr-10 w-full"
-            {...register("search")}
-          />
-          {searchValue && (
-            <Button
-              type="button"
-              onClick={handleClear}
-              size="icon"
-              variant="ghost"
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 text-muted-foreground hover:text-foreground focus:outline-none"
-              tabIndex={-1}
-            >
-              <X />
-            </Button>
-          )}
-        </div>
-
         {items.length === 0 && !isLoading && (
           <div className="text-muted-foreground">No activity yet.</div>
         )}
@@ -200,5 +135,63 @@ export default function Feed({
         )}
       </div>
     </>
+  );
+}
+
+const MemoizedRepoFeedItems = React.memo(RepoFeedItems);
+
+export default function Feed({
+  repoId,
+  repo,
+  org,
+}: {
+  repoId: string;
+  repo: string;
+  org: string;
+}) {
+  const { register, setValue, watch } = useForm<{
+    search: string;
+  }>({
+    defaultValues: { search: "" },
+  });
+
+  const searchValue = watch("search");
+  const activeQuery = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
+
+  const handleClear = () => {
+    setValue("search", "");
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="Search activities..."
+          className="pl-10 pr-10 w-full"
+          {...register("search")}
+        />
+        {searchValue && (
+          <Button
+            type="button"
+            onClick={handleClear}
+            size="icon"
+            variant="ghost"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 text-muted-foreground hover:text-foreground focus:outline-none"
+            tabIndex={-1}
+          >
+            <X />
+          </Button>
+        )}
+      </div>
+
+      <MemoizedRepoFeedItems
+        repoId={repoId}
+        repo={repo}
+        org={org}
+        searchQuery={activeQuery}
+      />
+    </div>
   );
 }

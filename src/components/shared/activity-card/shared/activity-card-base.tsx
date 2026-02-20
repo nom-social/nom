@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { LinkIcon, ShareIcon } from "lucide-react";
@@ -52,7 +52,7 @@ export type Props = {
   hash: string;
 };
 
-export default function ActivityCardBase({
+function ActivityCardBase({
   title,
   titleUrl,
   badgeIcon,
@@ -205,3 +205,5 @@ export default function ActivityCardBase({
     </Card>
   );
 }
+
+export default memo(ActivityCardBase);

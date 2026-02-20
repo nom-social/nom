@@ -36,6 +36,9 @@ export default function RootLayout({
       <body
         className={`${GeistPixelSquare.variable} ${jersey15.variable} font-sans antialiased min-h-screen overflow-y-scroll`}
       >
+        {process.env.NODE_ENV === "development" && (
+          <script src="https://unpkg.com/react-scan/dist/auto.global.js" crossOrigin="anonymous" />
+        )}
         <ThemeProvider attribute="class" defaultTheme="dark">
           <ReactQueryProvider>
             <Toaster />
