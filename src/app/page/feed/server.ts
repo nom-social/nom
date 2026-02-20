@@ -1,5 +1,6 @@
-import type { PublicFeedItemWithLikes } from "./actions";
 import { createClient } from "@/utils/supabase/server";
+
+import type { PublicFeedItemWithLikes } from "./actions";
 
 // Types for parsed search filters
 interface SearchFilters {

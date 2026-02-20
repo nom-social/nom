@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+
 import type { FetchFeedPageResult } from "./actions";
 
 export async function fetchFeedPageServer({
