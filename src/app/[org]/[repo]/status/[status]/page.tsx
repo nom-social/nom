@@ -4,7 +4,6 @@ import React from "react";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 
-import StatusActivityCard from "../_components/status-activity-card";
 import { OptimizedAvatar } from "@/components/ui/optimized-avatar";
 import { BASE_URL } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,7 @@ import {
 } from "@/components/shared/activity-card/shared/schemas";
 
 import { fetchFeedItem } from "./page/actions";
+import StatusActivityCard from "./status-activity-card";
 
 export default async function StatusPage({
   params,
