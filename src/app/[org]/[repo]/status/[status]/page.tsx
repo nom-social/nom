@@ -4,7 +4,6 @@ import React from "react";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 
-import ActivityCard from "@/components/shared/activity-card";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { BASE_URL } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,7 @@ import {
 } from "@/components/shared/activity-card/shared/schemas";
 
 import { fetchFeedItem } from "./page/actions";
+import ActivityCardStatus from "./activity-card-status";
 
 export default async function StatusPage({
   params,
@@ -58,7 +58,12 @@ export default async function StatusPage({
           )}
         </Button>
       </Link>
-      <ActivityCard item={statusItem} repo={repo} org={org} showGithubLink />
+      <ActivityCardStatus
+        item={statusItem}
+        repo={repo}
+        org={org}
+        showGithubLink
+      />
     </main>
   );
 }

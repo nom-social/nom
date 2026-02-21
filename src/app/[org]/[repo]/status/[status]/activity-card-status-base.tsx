@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import { LinkIcon, ShareIcon } from "lucide-react";
 
 import {
@@ -18,11 +18,6 @@ import { Button } from "@/components/ui/button";
 import ContributorAvatarGroup, {
   Contributor,
 } from "@/components/shared/contributor-avatar-group";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
 import { useShare } from "@/hooks/use-share";
 import {
   DropdownMenu,
@@ -35,7 +30,6 @@ import { cn } from "@/lib/utils";
 
 export type Props = {
   title: string;
-  titleUrl: string;
   badgeIcon: React.ReactNode;
   badgeLabel: string;
   badgeClassName: string;
@@ -53,9 +47,8 @@ export type Props = {
   githubUrl?: string;
 };
 
-function ActivityCardBase({
+function ActivityCardStatusBase({
   title,
-  titleUrl,
   badgeIcon,
   badgeLabel,
   badgeClassName,
@@ -93,12 +86,7 @@ function ActivityCardBase({
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="leading-relaxed font-bold break-words [word-break:break-word]">
-          <Link
-            href={titleUrl}
-            className="hover:underline focus:underline outline-none"
-          >
-            <Markdown>{title}</Markdown>
-          </Link>
+          <Markdown>{title}</Markdown>
         </CardTitle>
         <CardAction>
           <Badge className={cn(badgeClassName, "max-w-[120px]")}>
@@ -110,42 +98,6 @@ function ActivityCardBase({
         </CardAction>
         <CardDescription>
           <div className="flex gap-2 flex-col">
-            <div className="text-muted-foreground text-xs flex flex-wrap items-center gap-x-1">
-              <Link
-                href={repoUrl}
-                className="hover:underline focus:underline outline-none"
-              >
-                {org}/{repo}
-              </Link>
-              {" • "}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span>
-                    {formatDistanceToNow(new Date(timestamp), {
-                      addSuffix: false,
-                    })}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  {timestamp instanceof Date
-                    ? timestamp.toLocaleString()
-                    : new Date(timestamp).toLocaleString()}
-                </TooltipContent>
-              </Tooltip>
-              {githubUrl && (
-                <>
-                  {" • "}
-                  <a
-                    href={githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline focus:underline outline-none inline-flex items-center gap-1"
-                  >
-                    View on GitHub
-                  </a>
-                </>
-              )}
-            </div>
             <div className="flex items-center">
               <ContributorAvatarGroup contributors={contributors} />
             </div>
@@ -153,8 +105,34 @@ function ActivityCardBase({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none font-normal text-sm">
-          <Markdown>{body}</Markdown>
+        <div className="flex flex-col gap-4">
+          <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none font-normal text-sm">
+            <Markdown>{body}</Markdown>
+          </div>
+
+          <div className="text-muted-foreground text-xs flex flex-wrap items-center gap-x-1">
+            {format(timestamp, "h:mm a '-' MMM d, yyyy")}
+            {" • "}
+            <Link
+              href={repoUrl}
+              className="underline hover:underline focus:underline outline-none"
+            >
+              {org}/{repo}
+            </Link>
+            {githubUrl && (
+              <>
+                {" • "}
+                <a
+                  href={githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:underline focus:underline outline-none"
+                >
+                  view on GitHub
+                </a>
+              </>
+            )}
+          </div>
         </div>
       </CardContent>
       <CardFooter>
@@ -219,4 +197,4 @@ function ActivityCardBase({
   );
 }
 
-export default memo(ActivityCardBase);
+export default memo(ActivityCardStatusBase);
