@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { GeistPixelSquare } from "geist/font/pixel";
 import { Jersey_15 } from "next/font/google";
+import { Github } from "lucide-react";
 
 import ReactQueryProvider from "@/components/layout/react-query-provider";
 import { ThemeProvider } from "@/components/layout/theme-provider";
@@ -13,7 +14,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Toaster } from "@/components/ui/sonner";
 
-import { BASE_URL } from "@/lib/constants";
+import { BASE_URL, GITHUB_URL } from "@/lib/constants";
 
 import "./globals.css";
 import ProfileDropdown from "./layout/profile-dropdown";
@@ -81,7 +82,20 @@ export default function RootLayout({
                     </span>
                   </div>
 
-                  <ProfileDropdown />
+                  <div className="flex flex-row items-center gap-2">
+                    <NavigationMenuItem>
+                      <NavigationMenuLink
+                        href={GITHUB_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label="View Nom on GitHub"
+                      >
+                        <Github className="size-4" />
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+                    <ProfileDropdown />
+                  </div>
                 </NavigationMenuList>
               </div>
             </NavigationMenu>

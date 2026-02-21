@@ -4,3 +4,6 @@
  */
 export const BASE_URL =
   process.env.NEXT_PUBLIC_APP_URL || "https://beta.nomit.dev";
+
+/** GitHub repository URL for the Nom project. */
+export const GITHUB_URL = "https://github.com/nom-social/nom";
