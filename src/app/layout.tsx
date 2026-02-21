@@ -4,8 +4,6 @@ import { GeistPixelSquare } from "geist/font/pixel";
 import { Jersey_15 } from "next/font/google";
 import { Github } from "lucide-react";
 
-import ReactQueryProvider from "@/components/layout/react-query-provider";
-import { ThemeProvider } from "@/components/layout/theme-provider";
 import {
   NavigationMenu,
   NavigationMenuList,
@@ -18,6 +16,8 @@ import { BASE_URL, GITHUB_URL } from "@/lib/constants";
 
 import "./globals.css";
 import ProfileDropdown from "./layout/profile-dropdown";
+import ReactQueryProvider from "./layout/react-query-provider";
+import { ThemeProvider } from "./layout/theme-provider";
 
 const jersey15 = Jersey_15({
   variable: "--font-jersey-15",

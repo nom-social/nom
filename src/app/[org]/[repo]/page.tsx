@@ -2,10 +2,10 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
-import RepoProfileCard from "@/components/[org]/[repo]/repo-profile-card";
 import { BASE_URL } from "@/lib/constants";
 import { getQueryClient } from "@/utils/get-query-client";
 
+import RepoProfileCard from "./repo-profile-card";
 import { fetchRepoProfile } from "./actions";
 import { fetchFeedPage, type FetchFeedPageResult } from "./page/feed/actions";
 import { fetchFeedPageServer } from "./page/feed/server";

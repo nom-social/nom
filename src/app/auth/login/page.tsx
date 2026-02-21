@@ -1,7 +1,8 @@
 "use client";
 
 import { createClient } from "@/utils/supabase/client";
-import LoginForm from "@/components/auth/login-form";
+
+import LoginForm from "./login-form";
 
 export default function LoginPage() {
   const supabase = createClient();
