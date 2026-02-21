@@ -18,11 +18,6 @@ import { Button } from "@/components/ui/button";
 import ContributorAvatarGroup, {
   Contributor,
 } from "@/components/shared/contributor-avatar-group";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
 import { useShare } from "@/hooks/use-share";
 import {
   DropdownMenu,
@@ -129,20 +124,11 @@ function ActivityCardBase({
                 {org}/{repo}
               </Link>
               {" • "}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span>
-                    {formatDistanceToNow(new Date(timestamp), {
-                      addSuffix: false,
-                    })}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {timestamp instanceof Date
-                    ? timestamp.toLocaleString()
-                    : new Date(timestamp).toLocaleString()}
-                </TooltipContent>
-              </Tooltip>
+              <span>
+                {formatDistanceToNow(new Date(timestamp), {
+                  addSuffix: false,
+                })}
+              </span>
               {githubUrl && (
                 <>
                   {" • "}
