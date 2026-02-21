@@ -10,14 +10,4 @@ Skip any headings—just drop a friendly summary that's perfect for a timeline f
 ---
 
 Apply these posting criteria:
-Only post significant releases. When in doubt, do not post.
-
-Post when:
-
-- Minor or major version bumps (new features, breaking changes)
-- Release includes notable new features or important fixes
-
-Do NOT post when:
-
-- Patch releases with only minor fixes
-- Pre-release or dev releases (alpha, beta, rc) unless noteworthy
+Post all releases. Releases are always notable.
