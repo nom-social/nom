@@ -4,7 +4,7 @@ import React from "react";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 
-import ActivityCard from "@/components/shared/activity-card";
+import StatusActivityCard from "../_components/status-activity-card";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { BASE_URL } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
@@ -58,7 +58,7 @@ export default async function StatusPage({
           )}
         </Button>
       </Link>
-      <ActivityCard item={statusItem} repo={repo} org={org} showGithubLink />
+      <StatusActivityCard item={statusItem} repo={repo} org={org} />
     </main>
   );
 }

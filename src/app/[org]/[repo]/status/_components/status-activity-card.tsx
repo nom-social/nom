@@ -12,13 +12,13 @@ import {
   releaseDataSchema,
   pushDataSchema,
 } from "@/components/shared/activity-card/shared/schemas";
-
 import {
   createLike,
   deleteLike,
   NotAuthenticatedError,
-} from "./activity-card/actions";
-import ActivityCardBase from "./activity-card/shared/activity-card-base";
+} from "@/components/shared/activity-card/actions";
+
+import StatusActivityCardBase from "./status-activity-card-base";
 
 type FeedItemWithLikes = (
   | Tables<"public_timeline">
@@ -32,26 +32,23 @@ type FeedItemWithLikes = (
   };
 };
 
-function ActivityCard({
+/**
+ * Activity card for the status detail page. Title links to GitHub;
+ * use this for extending status-page-specific behavior.
+ */
+function StatusActivityCard({
   item,
   repo,
   org,
-  back,
 }: {
   item: FeedItemWithLikes;
   repo: string;
   org: string;
-  back?: string;
 }) {
-  const statusBase = `/${org}/${repo}/status/${item.dedupe_hash}`;
-  const titleUrl = back
-    ? `${statusBase}?back=${encodeURIComponent(back)}`
-    : statusBase;
   const router = useRouter();
   const [likeCount, setLikeCount] = useState<number>(item.likeCount);
   const [liked, setLiked] = useState<boolean>(item.isLiked);
 
-  // Update local state when props change (useful for refetching)
   useEffect(() => {
     setLikeCount(item.likeCount);
     setLiked(item.isLiked);
@@ -98,28 +95,25 @@ function ActivityCard({
 
   if (item.type === "pull_request") {
     const parseResult = prDataSchema.safeParse(item.data);
-    if (!parseResult.success) {
-      return null;
-    }
+    if (!parseResult.success) return null;
+    const pr = parseResult.data.pull_request;
 
     return (
-      <ActivityCardBase
-        title={parseResult.data.pull_request.title}
-        titleUrl={titleUrl}
+      <StatusActivityCardBase
+        title={pr.title}
+        titleUrl={pr.html_url}
         badgeIcon={<GitMergeIcon />}
-        badgeLabel={parseResult.data.pull_request.merged ? "merged" : "open"}
+        badgeLabel={pr.merged ? "merged" : "open"}
         badgeClassName="bg-nom-purple border-transparent uppercase text-black"
         repo={repo}
         org={org}
         repoUrl={`/${org}/${repo}`}
-        timestamp={new Date(parseResult.data.pull_request.updated_at)}
-        contributors={parseResult.data.pull_request.contributors.map(
-          (login) => ({
-            name: login,
-            avatar: `https://github.com/${login}.png`,
-          })
-        )}
-        body={parseResult.data.pull_request.ai_summary}
+        timestamp={new Date(pr.updated_at)}
+        contributors={pr.contributors.map((login) => ({
+          name: login,
+          avatar: `https://github.com/${login}.png`,
+        }))}
+        body={pr.ai_summary}
         likeCount={likeCount}
         liked={liked}
         onLike={handleLike}
@@ -128,17 +122,16 @@ function ActivityCard({
       />
     );
   }
+
   if (item.type === "release") {
     const parseResult = releaseDataSchema.safeParse(item.data);
-    if (!parseResult.success) {
-      return null;
-    }
+    if (!parseResult.success) return null;
     const release = parseResult.data.release;
 
     return (
-      <ActivityCardBase
+      <StatusActivityCardBase
         title={release.name ?? release.tag_name}
-        titleUrl={titleUrl}
+        titleUrl={release.html_url}
         badgeIcon={<TagIcon />}
         badgeLabel={release.tag_name}
         badgeClassName="bg-nom-blue border-transparent uppercase text-black"
@@ -159,16 +152,16 @@ function ActivityCard({
       />
     );
   }
+
   if (item.type === "push") {
     const parseResult = pushDataSchema.safeParse(item.data);
-    if (!parseResult.success) {
-      return null;
-    }
+    if (!parseResult.success) return null;
     const push = parseResult.data.push;
+
     return (
-      <ActivityCardBase
+      <StatusActivityCardBase
         title={push.title}
-        titleUrl={titleUrl}
+        titleUrl={push.html_url}
         badgeIcon={<GitCommitVertical />}
         badgeLabel="pushed"
         badgeClassName="bg-nom-green border-transparent uppercase text-black"
@@ -193,4 +186,4 @@ function ActivityCard({
   return null;
 }
 
-export default React.memo(ActivityCard);
+export default React.memo(StatusActivityCard);

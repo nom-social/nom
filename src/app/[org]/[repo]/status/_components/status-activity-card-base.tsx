@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
-import { LinkIcon, ShareIcon } from "lucide-react";
+import { format } from "date-fns";
+import { ExternalLink, LinkIcon, ShareIcon } from "lucide-react";
 
 import {
   Card,
@@ -18,11 +18,6 @@ import { Button } from "@/components/ui/button";
 import ContributorAvatarGroup, {
   Contributor,
 } from "@/components/shared/contributor-avatar-group";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
 import { useShare } from "@/hooks/use-share";
 import {
   DropdownMenu,
@@ -33,7 +28,7 @@ import {
 import X from "@/components/ui/icons/x";
 import { cn } from "@/lib/utils";
 
-export type Props = {
+export type StatusActivityCardBaseProps = {
   title: string;
   titleUrl: string;
   badgeIcon: React.ReactNode;
@@ -50,10 +45,9 @@ export type Props = {
   onLike?: () => void;
   onUnlike?: () => void;
   hash: string;
-  githubUrl?: string;
 };
 
-function ActivityCardBase({
+function StatusActivityCardBase({
   title,
   titleUrl,
   badgeIcon,
@@ -70,8 +64,7 @@ function ActivityCardBase({
   onLike,
   onUnlike,
   hash,
-  githubUrl,
-}: Props) {
+}: StatusActivityCardBaseProps) {
   const share = useShare();
 
   const handleLikeClick = () => {
@@ -98,9 +91,10 @@ function ActivityCardBase({
               href={titleUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:underline focus:underline outline-none"
+              className="hover:underline focus:underline outline-none inline-flex items-center gap-1.5"
             >
               <Markdown>{title}</Markdown>
+              <ExternalLink className="size-4 shrink-0" aria-hidden />
             </a>
           ) : (
             <Link
@@ -129,33 +123,7 @@ function ActivityCardBase({
                 {org}/{repo}
               </Link>
               {" • "}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span>
-                    {formatDistanceToNow(new Date(timestamp), {
-                      addSuffix: false,
-                    })}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  {timestamp instanceof Date
-                    ? timestamp.toLocaleString()
-                    : new Date(timestamp).toLocaleString()}
-                </TooltipContent>
-              </Tooltip>
-              {githubUrl && (
-                <>
-                  {" • "}
-                  <a
-                    href={githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline focus:underline outline-none inline-flex items-center gap-1"
-                  >
-                    view on GitHub
-                  </a>
-                </>
-              )}
+              <span>{format(new Date(timestamp), "h:mm a - MMM d, yyyy")}</span>
             </div>
             <div className="flex items-center">
               <ContributorAvatarGroup contributors={contributors} />
@@ -230,4 +198,4 @@ function ActivityCardBase({
   );
 }
 
-export default memo(ActivityCardBase);
+export default memo(StatusActivityCardBase);
