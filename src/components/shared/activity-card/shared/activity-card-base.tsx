@@ -126,7 +126,7 @@ function ActivityCardBase({
                     })}
                   </span>
                 </TooltipTrigger>
-                <TooltipContent side="bottom">
+                <TooltipContent>
                   {timestamp instanceof Date
                     ? timestamp.toLocaleString()
                     : new Date(timestamp).toLocaleString()}
