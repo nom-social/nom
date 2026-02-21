@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { normalizeTimelineItem } from "@/app/api/feed/normalize";
 import { toErrorXml, toRssXml } from "@/app/api/feed/to-rss";
+import { BASE_URL } from "@/lib/constants";
 import { createClient } from "@/utils/supabase/server";
 
 export async function GET(request: NextRequest) {
@@ -26,17 +27,12 @@ export async function GET(request: NextRequest) {
   }
 
   const items = (data ?? []).map(normalizeTimelineItem);
-  const baseUrl =
-    request.nextUrl.origin ||
-    (process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "https://beta.nomit.dev");
 
-  const feedUrl = `${baseUrl}${request.nextUrl.pathname}${request.nextUrl.search}`;
+  const feedUrl = `${BASE_URL}${request.nextUrl.pathname}${request.nextUrl.search}`;
 
   const xml = toRssXml(items, {
     title: "Nom — GitHub Activity Feed",
-    link: baseUrl,
+    link: BASE_URL,
     description:
       "GitHub activity feed: pull requests, releases, and pushes from public repositories with AI summaries.",
     feedUrl,

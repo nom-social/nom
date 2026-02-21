@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { normalizeTimelineItem } from "@/app/api/feed/normalize";
 import { toErrorXml, toRssXml } from "@/app/api/feed/to-rss";
+import { BASE_URL } from "@/lib/constants";
 import { escapeForIlike } from "@/lib/repo-utils";
 import { createClient } from "@/utils/supabase/server";
 
@@ -49,14 +50,8 @@ export async function GET(
     normalizeTimelineItem({ ...item, org, repo })
   );
 
-  const baseUrl =
-    request.nextUrl.origin ||
-    (process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "https://beta.nomit.dev");
-
-  const feedUrl = `${baseUrl}${request.nextUrl.pathname}${request.nextUrl.search}`;
-  const channelLink = `${baseUrl}/${org}/${repo}`;
+  const feedUrl = `${BASE_URL}${request.nextUrl.pathname}${request.nextUrl.search}`;
+  const channelLink = `${BASE_URL}/${org}/${repo}`;
 
   const xml = toRssXml(items, {
     title: `Nom — ${org}/${repo} Activity`,

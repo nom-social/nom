@@ -50,6 +50,7 @@ export type Props = {
   onLike?: () => void;
   onUnlike?: () => void;
   hash: string;
+  githubUrl?: string;
 };
 
 function ActivityCardBase({
@@ -69,6 +70,7 @@ function ActivityCardBase({
   onLike,
   onUnlike,
   hash,
+  githubUrl,
 }: Props) {
   const share = useShare();
 
@@ -91,14 +93,12 @@ function ActivityCardBase({
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="leading-relaxed font-bold break-words [word-break:break-word]">
-          <a
+          <Link
             href={titleUrl}
-            target="_blank"
-            rel="noopener noreferrer"
             className="hover:underline focus:underline outline-none"
           >
             <Markdown>{title}</Markdown>
-          </a>
+          </Link>
         </CardTitle>
         <CardAction>
           <Badge className={cn(badgeClassName, "max-w-[120px]")}>
@@ -110,7 +110,7 @@ function ActivityCardBase({
         </CardAction>
         <CardDescription>
           <div className="flex gap-2 flex-col">
-            <div className="text-muted-foreground text-xs">
+            <div className="text-muted-foreground text-xs flex flex-wrap items-center gap-x-1">
               <Link
                 href={repoUrl}
                 className="hover:underline focus:underline outline-none"
@@ -132,6 +132,19 @@ function ActivityCardBase({
                     : new Date(timestamp).toLocaleString()}
                 </TooltipContent>
               </Tooltip>
+              {githubUrl && (
+                <>
+                  {" • "}
+                  <a
+                    href={githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline focus:underline outline-none inline-flex items-center gap-1"
+                  >
+                    View on GitHub
+                  </a>
+                </>
+              )}
             </div>
             <div className="flex items-center">
               <ContributorAvatarGroup contributors={contributors} />

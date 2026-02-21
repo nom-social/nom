@@ -1,4 +1,5 @@
 import { timelineItemDataSchema } from "@/components/shared/activity-card/shared/schemas";
+import { BASE_URL } from "@/lib/constants";
 
 export interface RawTimelineItem {
   id: string;
@@ -7,6 +8,7 @@ export interface RawTimelineItem {
   updated_at: string;
   org?: string;
   repo?: string;
+  dedupe_hash?: string;
   repositories?: { org?: string; repo?: string };
 }
 
@@ -57,6 +59,10 @@ export function normalizeTimelineItem(item: RawTimelineItem) {
     }
   } catch {
     // invalid or empty data - use default empty values
+  }
+
+  if (item.dedupe_hash) {
+    url = `${BASE_URL}/${org}/${repo}/status/${item.dedupe_hash}`;
   }
 
   return {
