@@ -24,6 +24,7 @@ type OptimizedAvatarProps = {
   alt: string;
   fallback?: React.ReactNode;
   className?: string;
+  sizes?: string;
 };
 
 export function OptimizedAvatar({
@@ -31,13 +32,13 @@ export function OptimizedAvatar({
   alt,
   fallback,
   className,
+  sizes = "64px",
 }: OptimizedAvatarProps) {
-  const [useFallback, setUseFallback] = useState(false);
-  const [imgError, setImgError] = useState(false);
+  const [showFallback, setShowFallback] = useState(false);
 
   const wrapperClasses = "relative size-full shrink-0 overflow-hidden";
 
-  if (useFallback || imgError) {
+  if (showFallback) {
     return (
       <div
         className={cn(
@@ -53,31 +54,16 @@ export function OptimizedAvatar({
 
   const imageClasses = "aspect-square size-full object-cover";
 
-  if (isGitHubImageUrl(src)) {
-    return (
-      <span className={cn(wrapperClasses, "block", className)}>
-        <Image
-          src={src}
-          alt={alt}
-          fill
-          className={imageClasses}
-          onError={() => setImgError(true)}
-          sizes="(max-width: 768px) 32px, 72px"
-        />
-      </span>
-    );
-  }
-
-  // Non-GitHub URLs: use Image with unoptimized (avoids no-img-element lint)
   return (
     <span className={cn(wrapperClasses, "block", className)}>
       <Image
         src={src}
         alt={alt}
         fill
-        unoptimized
+        unoptimized={!isGitHubImageUrl(src)}
         className={imageClasses}
-        onError={() => setUseFallback(true)}
+        onError={() => setShowFallback(true)}
+        sizes={sizes}
       />
     </span>
   );

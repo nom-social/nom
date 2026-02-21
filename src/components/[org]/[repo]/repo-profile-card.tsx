@@ -116,11 +116,12 @@ export default function RepoProfileCard({
       <CardHeader>
         <CardTitle>
           <div className="flex flex-row gap-3 items-center">
-            <div className="w-18 h-18 overflow-hidden shrink-0">
+            <div className="w-18 h-18">
               <OptimizedAvatar
                 src={avatarUrl}
                 alt={`${org} avatar`}
                 fallback={org[0]}
+                sizes="72px"
               />
             </div>
             <div className="flex flex-col gap-1">

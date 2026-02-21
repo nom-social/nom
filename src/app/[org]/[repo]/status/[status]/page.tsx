@@ -45,11 +45,12 @@ export default async function StatusPage({
             <p className="text-foreground text-lg uppercase">Feed</p>
           ) : (
             <>
-              <div className="w-9 h-9 overflow-hidden shrink-0">
+              <div className="w-9 h-9">
                 <OptimizedAvatar
                   src={`https://github.com/${org}.png`}
                   alt={`${org} avatar`}
                   fallback={org[0]}
+                  sizes="36px"
                 />
               </div>
               <p className="text-foreground text-lg uppercase break-all">

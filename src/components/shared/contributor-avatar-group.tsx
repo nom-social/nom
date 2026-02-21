@@ -30,11 +30,12 @@ export default function ContributorAvatarGroup({
           >
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="w-7 h-7 border-2 border-background shadow-sm hover:scale-110 transition-transform duration-200 hover:z-10 relative overflow-hidden shrink-0">
+                <div className="w-7 h-7 border-2 border-background shadow-sm hover:scale-110 transition-transform duration-200 hover:z-10 relative">
                   <OptimizedAvatar
                     src={contributor.avatar}
                     alt={contributor.name}
                     fallback={contributor.name[0]}
+                    sizes="28px"
                   />
                 </div>
               </TooltipTrigger>

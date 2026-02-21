@@ -25,11 +25,12 @@ export default async function ProfileDropdown() {
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger>
-        <div className="w-8 h-8 overflow-hidden shrink-0">
+        <div className="w-8 h-8">
           <OptimizedAvatar
             src={`https://github.com/${user.github_username}.png`}
             alt={user.github_username}
             fallback={user.github_username.charAt(0)}
+            sizes="32px"
           />
         </div>
       </DropdownMenuTrigger>
