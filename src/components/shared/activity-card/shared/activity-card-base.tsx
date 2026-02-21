@@ -141,7 +141,7 @@ function ActivityCardBase({
                     rel="noopener noreferrer"
                     className="hover:underline focus:underline outline-none inline-flex items-center gap-1"
                   >
-                    View on GitHub
+                    view on GitHub
                   </a>
                 </>
               )}
