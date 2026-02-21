@@ -119,7 +119,12 @@ function RepoFeedItems({ repoId, repo, org, searchQuery }: RepoFeedItemsProps) {
           }
           return (
             <div key={item.id} ref={ref}>
-              <ActivityCard item={item} repo={repo} org={org} back={`/${org}/${repo}`} />
+              <ActivityCard
+                item={item}
+                repo={repo}
+                org={org}
+                back={`/${org}/${repo}`}
+              />
             </div>
           );
         })}
@@ -164,6 +169,13 @@ export default function Feed({
 
   return (
     <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-2 text-muted-foreground text-sm">
+        <span className="relative flex h-2 w-2" aria-hidden>
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-nom-green opacity-75" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-nom-green" />
+        </span>
+        <span>Live activities</span>
+      </div>
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
