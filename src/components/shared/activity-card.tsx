@@ -37,11 +37,13 @@ function ActivityCard({
   repo,
   org,
   back,
+  showGithubLink,
 }: {
   item: FeedItemWithLikes;
   repo: string;
   org: string;
   back?: string;
+  showGithubLink?: boolean;
 }) {
   const statusBase = `/${org}/${repo}/status/${item.dedupe_hash}`;
   const titleUrl = back
@@ -125,6 +127,9 @@ function ActivityCard({
         onLike={handleLike}
         onUnlike={handleUnlike}
         hash={item.dedupe_hash}
+        githubUrl={
+          showGithubLink ? parseResult.data.pull_request.html_url : undefined
+        }
       />
     );
   }
@@ -156,6 +161,7 @@ function ActivityCard({
         onLike={handleLike}
         onUnlike={handleUnlike}
         hash={item.dedupe_hash}
+        githubUrl={showGithubLink ? release.html_url : undefined}
       />
     );
   }
@@ -186,6 +192,7 @@ function ActivityCard({
         onLike={handleLike}
         onUnlike={handleUnlike}
         hash={item.dedupe_hash}
+        githubUrl={showGithubLink ? push.html_url : undefined}
       />
     );
   }

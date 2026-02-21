@@ -58,7 +58,7 @@ export default async function StatusPage({
           )}
         </Button>
       </Link>
-      <ActivityCard item={statusItem} repo={repo} org={org} />
+      <ActivityCard item={statusItem} repo={repo} org={org} showGithubLink />
     </main>
   );
 }
