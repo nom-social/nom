@@ -91,10 +91,14 @@ function StatusActivityCardBase({
               href={titleUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:underline focus:underline outline-none inline-flex items-center gap-1.5"
+              className="hover:underline focus:underline outline-none"
             >
-              <Markdown>{title}</Markdown>
-              <ExternalLink className="size-4 shrink-0" aria-hidden />
+              <span className="inline [&_p]:inline">
+                <Markdown>{title}</Markdown>
+                <span className="inline-block align-middle ml-1.5 mt-[-0.125em]">
+                  <ExternalLink className="size-4" aria-hidden />
+                </span>
+              </span>
             </a>
           ) : (
             <Link
