@@ -5,7 +5,7 @@ import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 
 import StatusActivityCard from "../_components/status-activity-card";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { OptimizedAvatar } from "@/components/ui/optimized-avatar";
 import { BASE_URL } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,12 +45,13 @@ export default async function StatusPage({
             <p className="text-foreground text-lg uppercase">Feed</p>
           ) : (
             <>
-              <Avatar className="w-9 h-9">
-                <AvatarImage
+              <div className="w-9 h-9 overflow-hidden shrink-0">
+                <OptimizedAvatar
                   src={`https://github.com/${org}.png`}
                   alt={`${org} avatar`}
+                  fallback={org[0]}
                 />
-              </Avatar>
+              </div>
               <p className="text-foreground text-lg uppercase break-all">
                 {repo}
               </p>

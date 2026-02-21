@@ -1,4 +1,4 @@
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { OptimizedAvatar } from "@/components/ui/optimized-avatar";
 import {
   Tooltip,
   TooltipTrigger,
@@ -30,15 +30,13 @@ export default function ContributorAvatarGroup({
           >
             <Tooltip>
               <TooltipTrigger asChild>
-                <Avatar className="w-7 h-7 border-2 border-background shadow-sm hover:scale-110 transition-transform duration-200 hover:z-10 relative">
-                  <AvatarImage
+                <div className="w-7 h-7 border-2 border-background shadow-sm hover:scale-110 transition-transform duration-200 hover:z-10 relative overflow-hidden shrink-0">
+                  <OptimizedAvatar
                     src={contributor.avatar}
                     alt={contributor.name}
+                    fallback={contributor.name[0]}
                   />
-                  <AvatarFallback className="rounded-none">
-                    {contributor.name[0]}
-                  </AvatarFallback>
-                </Avatar>
+                </div>
               </TooltipTrigger>
               <TooltipContent side="top" className="px-2 py-1 text-xs">
                 {contributor.name}

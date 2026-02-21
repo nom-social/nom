@@ -15,7 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { OptimizedAvatar } from "@/components/ui/optimized-avatar";
 
 import {
   createSubscription,
@@ -116,9 +116,13 @@ export default function RepoProfileCard({
       <CardHeader>
         <CardTitle>
           <div className="flex flex-row gap-3 items-center">
-            <Avatar className="w-18 h-18">
-              <AvatarImage src={avatarUrl} alt={`${org} avatar`} />
-            </Avatar>
+            <div className="w-18 h-18 overflow-hidden shrink-0">
+              <OptimizedAvatar
+                src={avatarUrl}
+                alt={`${org} avatar`}
+                fallback={org[0]}
+              />
+            </div>
             <div className="flex flex-col gap-1">
               <p className="text-foreground text-xl uppercase break-all">
                 {repo}
