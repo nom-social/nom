@@ -36,11 +36,17 @@ function ActivityCard({
   item,
   repo,
   org,
+  back,
 }: {
   item: FeedItemWithLikes;
   repo: string;
   org: string;
+  back?: string;
 }) {
+  const statusBase = `/${org}/${repo}/status/${item.dedupe_hash}`;
+  const titleUrl = back
+    ? `${statusBase}?back=${encodeURIComponent(back)}`
+    : statusBase;
   const router = useRouter();
   const [likeCount, setLikeCount] = useState<number>(item.likeCount);
   const [liked, setLiked] = useState<boolean>(item.isLiked);
@@ -99,7 +105,7 @@ function ActivityCard({
     return (
       <ActivityCardBase
         title={parseResult.data.pull_request.title}
-        titleUrl={`/${org}/${repo}/status/${item.dedupe_hash}`}
+        titleUrl={titleUrl}
         badgeIcon={<GitMergeIcon />}
         badgeLabel={parseResult.data.pull_request.merged ? "merged" : "open"}
         badgeClassName="bg-nom-purple border-transparent uppercase text-black"
@@ -132,7 +138,7 @@ function ActivityCard({
     return (
       <ActivityCardBase
         title={release.name ?? release.tag_name}
-        titleUrl={`/${org}/${repo}/status/${item.dedupe_hash}`}
+        titleUrl={titleUrl}
         badgeIcon={<TagIcon />}
         badgeLabel={release.tag_name}
         badgeClassName="bg-nom-blue border-transparent uppercase text-black"
@@ -162,7 +168,7 @@ function ActivityCard({
     return (
       <ActivityCardBase
         title={push.title}
-        titleUrl={`/${org}/${repo}/status/${item.dedupe_hash}`}
+        titleUrl={titleUrl}
         badgeIcon={<GitCommitVertical />}
         badgeLabel="pushed"
         badgeClassName="bg-nom-green border-transparent uppercase text-black"

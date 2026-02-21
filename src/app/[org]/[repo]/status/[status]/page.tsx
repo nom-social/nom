@@ -18,33 +18,50 @@ import { fetchFeedItem } from "./page/actions";
 
 export default async function StatusPage({
   params,
+  searchParams,
 }: {
   params: Promise<{
     org: string;
     repo: string;
     status: string;
   }>;
+  searchParams: Promise<{ back?: string }>;
 }) {
   const { org, repo, status: statusId } = await params;
+  const { back } = await searchParams;
   const statusItem = await fetchFeedItem({ org, repo, statusId });
 
   if (!statusItem) notFound();
 
+  const backHref =
+    back && (back === "/" || (back.startsWith("/") && !back.startsWith("//")))
+      ? back
+      : `/${org}/${repo}`;
+  const isBackToFeed = backHref === "/";
+
   return (
     <main className="flex flex-col justify-center gap-4 px-2">
-      <Link href={`/${org}/${repo}`} passHref>
+      <Link href={backHref} passHref>
         <Button
           variant="ghost"
           className="flex flex-row gap-3 items-center w-full justify-start py-2 h-fit"
         >
           <ArrowLeftIcon />
-          <Avatar className="w-9 h-9">
-            <AvatarImage
-              src={`https://github.com/${org}.png`}
-              alt={`${org} avatar`}
-            />
-          </Avatar>
-          <p className="text-foreground text-lg uppercase break-all">{repo}</p>
+          {isBackToFeed ? (
+            <p className="text-foreground text-lg uppercase">Feed</p>
+          ) : (
+            <>
+              <Avatar className="w-9 h-9">
+                <AvatarImage
+                  src={`https://github.com/${org}.png`}
+                  alt={`${org} avatar`}
+                />
+              </Avatar>
+              <p className="text-foreground text-lg uppercase break-all">
+                {repo}
+              </p>
+            </>
+          )}
         </Button>
       </Link>
       <ActivityCard item={statusItem} repo={repo} org={org} />

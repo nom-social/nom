@@ -107,7 +107,7 @@ function FeedPrivate({ searchQuery }: { searchQuery?: string }) {
           }
           return (
             <div key={item.id} ref={ref}>
-              <ActivityCard item={item} repo={repo} org={org} />
+              <ActivityCard item={item} repo={repo} org={org} back="/" />
             </div>
           );
         })}

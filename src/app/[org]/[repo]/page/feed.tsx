@@ -119,7 +119,7 @@ function RepoFeedItems({ repoId, repo, org, searchQuery }: RepoFeedItemsProps) {
           }
           return (
             <div key={item.id} ref={ref}>
-              <ActivityCard item={item} repo={repo} org={org} />
+              <ActivityCard item={item} repo={repo} org={org} back={`/${org}/${repo}`} />
             </div>
           );
         })}
