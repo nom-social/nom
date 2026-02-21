@@ -33,21 +33,15 @@ export default async function StatusPage({
 
   if (!statusItem) notFound();
 
-  const backHref =
-    back && (back === "/" || (back.startsWith("/") && !back.startsWith("//")))
-      ? back
-      : `/${org}/${repo}`;
-  const isBackToFeed = backHref === "/";
-
   return (
     <main className="flex flex-col justify-center gap-4 px-2">
-      <Link href={backHref} passHref>
+      <Link href={back || "/"} passHref>
         <Button
           variant="ghost"
           className="flex flex-row gap-3 items-center w-full justify-start py-2 h-fit"
         >
           <ArrowLeftIcon />
-          {isBackToFeed ? (
+          {back === "/" ? (
             <p className="text-foreground text-lg uppercase">Feed</p>
           ) : (
             <>
