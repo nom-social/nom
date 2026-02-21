@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { OptimizedAvatar } from "@/components/ui/optimized-avatar";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -25,10 +25,14 @@ export default async function ProfileDropdown() {
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger>
-        <Avatar className="w-8 h-8">
-          <AvatarImage src={`https://github.com/${user.github_username}.png`} />
-          <AvatarFallback>{user.github_username.charAt(0)}</AvatarFallback>
-        </Avatar>
+        <div className="w-8 h-8">
+          <OptimizedAvatar
+            src={`https://github.com/${user.github_username}.png`}
+            alt={user.github_username}
+            fallback={user.github_username.charAt(0)}
+            sizes="32px"
+          />
+        </div>
       </DropdownMenuTrigger>
 
       <DropdownContent user={user} />

@@ -11,23 +11,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
-        img: ({ src, alt }) => (
-          <div className="relative aspect-video w-full overflow-hidden rounded-md border my-4">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={src as string}
-              alt={alt || "Unlabeled image"}
-              style={{
-                objectFit: "cover",
-                width: "100%",
-                height: "100%",
-                position: "absolute",
-                top: 0,
-                left: 0,
-              }}
-            />
-          </div>
-        ),
+        img: () => null,
         p: ({ children }) => <p>{children}</p>,
         code: ({ children }) => (
           <code className="bg-muted px-1.5 py-0.5 font-mono text-sm text-muted-foreground">
