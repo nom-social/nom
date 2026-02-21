@@ -91,14 +91,12 @@ function ActivityCardBase({
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="leading-relaxed font-bold break-words [word-break:break-word]">
-          <a
+          <Link
             href={titleUrl}
-            target="_blank"
-            rel="noopener noreferrer"
             className="hover:underline focus:underline outline-none"
           >
             <Markdown>{title}</Markdown>
-          </a>
+          </Link>
         </CardTitle>
         <CardAction>
           <Badge className={cn(badgeClassName, "max-w-[120px]")}>

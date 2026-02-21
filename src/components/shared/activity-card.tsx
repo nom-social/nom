@@ -99,7 +99,7 @@ function ActivityCard({
     return (
       <ActivityCardBase
         title={parseResult.data.pull_request.title}
-        titleUrl={parseResult.data.pull_request.html_url}
+        titleUrl={`/${org}/${repo}/status/${item.dedupe_hash}`}
         badgeIcon={<GitMergeIcon />}
         badgeLabel={parseResult.data.pull_request.merged ? "merged" : "open"}
         badgeClassName="bg-nom-purple border-transparent uppercase text-black"
@@ -132,7 +132,7 @@ function ActivityCard({
     return (
       <ActivityCardBase
         title={release.name ?? release.tag_name}
-        titleUrl={release.html_url}
+        titleUrl={`/${org}/${repo}/status/${item.dedupe_hash}`}
         badgeIcon={<TagIcon />}
         badgeLabel={release.tag_name}
         badgeClassName="bg-nom-blue border-transparent uppercase text-black"
@@ -162,7 +162,7 @@ function ActivityCard({
     return (
       <ActivityCardBase
         title={push.title}
-        titleUrl={push.html_url}
+        titleUrl={`/${org}/${repo}/status/${item.dedupe_hash}`}
         badgeIcon={<GitCommitVertical />}
         badgeLabel="pushed"
         badgeClassName="bg-nom-green border-transparent uppercase text-black"
