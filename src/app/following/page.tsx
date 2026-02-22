@@ -12,7 +12,7 @@ export default async function FollowingPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/auth/login?next=/following");
+    redirect("/auth/login");
   }
 
   return (
