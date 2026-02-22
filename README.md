@@ -2,7 +2,7 @@
 
 # Nom
 
-[![Nom Badge](./assets/nom-badge.svg)](https://beta.nomit.dev/nom-social/nom)
+[![Nom Badge](./assets/nom-badge.svg)](https://nomit.dev/nom-social/nom)
 
 A social feed for your project's activities on Github.
 

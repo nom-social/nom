@@ -4,9 +4,9 @@ argument-hint: "[org/repo] [--search QUERY] [--type TYPE] [--org ORG] [--from DA
 allowed-tools: ["mcp_web_fetch"]
 ---
 
-Fetch GitHub activity from Nom (beta.nomit.dev) and present it clearly.
+Fetch GitHub activity from Nom (nomit.dev) and present it clearly.
 
-Base URL: `https://beta.nomit.dev`
+Base URL: `https://nomit.dev`
 
 **Fetch method**: Use `mcp_web_fetch` to fetch URLs. Do not use curl or shell commands.
 
