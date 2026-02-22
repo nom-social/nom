@@ -32,7 +32,7 @@ export default function Feed({ user }: { user: User | null }) {
   };
 
   if (!user) {
-    return <FeedPublic searchQuery={activeQuery} back="/" />;
+    return <FeedPublic searchQuery={activeQuery} />;
   }
 
   return (
@@ -68,7 +68,7 @@ export default function Feed({ user }: { user: User | null }) {
           )}
         </div>
       </div>
-      <FeedPublic searchQuery={activeQuery} back="/" />
+      <FeedPublic searchQuery={activeQuery} />
     </Tabs>
   );
 }
