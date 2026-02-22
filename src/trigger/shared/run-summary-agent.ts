@@ -1,7 +1,7 @@
 import type { ToolSet } from "ai";
 import { Output, stepCountIs, ToolLoopAgent } from "ai";
 
-import { createOpenAIProvider } from "@/utils/openai/client";
+import { createOpenRouterProvider } from "@/utils/openrouter/client";
 
 import { summaryWithPostDecisionSchema } from "./summary-with-post-decision";
 
@@ -38,7 +38,9 @@ Respond with JSON containing:
 ${instructions}`;
 
   const agent = new ToolLoopAgent({
-    model: createOpenAIProvider().languageModel("gpt-5.2"),
+    model: createOpenRouterProvider().languageModel(
+      "google/gemini-3.1-pro-preview"
+    ),
     instructions: agentInstructions,
     tools,
     output: Output.object({
