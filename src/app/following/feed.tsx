@@ -1,9 +1,8 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Loader } from "lucide-react";
-import React, { useRef, useCallback } from "react";
-import { Search, X } from "lucide-react";
+import { Search, X, Loader } from "lucide-react";
+import { useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 
