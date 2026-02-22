@@ -1,8 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 import type { Metadata } from "next";
-import { Loader } from "lucide-react";
 
 import { BASE_URL } from "@/lib/constants";
 import { getQueryClient } from "@/utils/get-query-client";
@@ -62,15 +60,7 @@ export default async function RepoPage({
       />
 
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <Suspense
-          fallback={
-            <div className="flex flex-row items-center gap-2 text-muted-foreground">
-              <Loader className="animate-spin w-4 h-4" /> Loading...
-            </div>
-          }
-        >
-          <Feed repoId={repoProfile.id} repo={repo} org={org} />
-        </Suspense>
+        <Feed repoId={repoProfile.id} repo={repo} org={org} />
       </HydrationBoundary>
     </main>
   );
