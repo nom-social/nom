@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { GeistPixelSquare } from "geist/font/pixel";
 import { Jersey_15 } from "next/font/google";
-import { Github } from "lucide-react";
-
 import {
   NavigationMenu,
   NavigationMenuList,
@@ -12,7 +10,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Toaster } from "@/components/ui/sonner";
 
-import { BASE_URL, GITHUB_URL } from "@/lib/constants";
+import { BASE_URL } from "@/lib/constants";
 
 import "./globals.css";
 import ProfileDropdown from "./layout/profile-dropdown";
@@ -72,12 +70,12 @@ export default function RootLayout({
                     <NavigationMenuItem>
                       <NavigationMenuLink
                         href="/"
-                        className="font-jersey-15 text-lg uppercase"
+                        className="font-jersey-15 text-xl uppercase"
                       >
                         Nom
                       </NavigationMenuLink>
                     </NavigationMenuItem>
-                    <span className="text-xs text-muted-foreground font-normal normal-case">
+                    <span className="hidden md:inline text-xs text-muted-foreground font-normal normal-case">
                       Live commentary for your codebase
                     </span>
                   </div>
@@ -85,13 +83,12 @@ export default function RootLayout({
                   <div className="flex flex-row items-center gap-2">
                     <NavigationMenuItem>
                       <NavigationMenuLink
-                        href={GITHUB_URL}
+                        href="https://tally.so/r/81KVZA"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-                        aria-label="View Nom on GitHub"
                       >
-                        <Github className="size-4" />
+                        hiring?
                       </NavigationMenuLink>
                     </NavigationMenuItem>
                     <ProfileDropdown />
