@@ -7,8 +7,8 @@ import { Loader } from "lucide-react";
 import { BASE_URL } from "@/lib/constants";
 import { getQueryClient } from "@/utils/get-query-client";
 
-import RepoProfileCard from "./repo-profile-card";
-import { fetchRepoProfile } from "./actions";
+import RepoProfileCard from "./page/repo-profile-card";
+import { fetchRepoProfile } from "./page/actions";
 import { fetchFeedPage, type FetchFeedPageResult } from "./page/feed/actions";
 import { fetchFeedPageServer } from "./page/feed/server";
 import Feed from "./page/feed";

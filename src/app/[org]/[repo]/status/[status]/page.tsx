@@ -14,7 +14,7 @@ import {
 } from "@/components/shared/activity-card/shared/schemas";
 
 import { fetchFeedItem } from "./page/actions";
-import StatusActivityCard from "./status-activity-card";
+import StatusActivityCard from "./page/status-activity-card";
 
 export default async function StatusPage({
   params,

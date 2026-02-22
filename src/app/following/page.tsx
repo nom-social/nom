@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import ClaimRepoButton from "@/components/shared/claim-repo-button";
 import { createClient } from "@/utils/supabase/server";
 
-import FollowingFeed from "./feed";
+import FollowingFeed from "./page/feed";
 
 export default async function FollowingPage() {
   const supabase = await createClient();
