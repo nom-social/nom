@@ -1,17 +1,35 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Loader } from "lucide-react";
-import React, { useRef, useCallback } from "react";
+import { Search, X, Loader } from "lucide-react";
+import { useRef, useCallback } from "react";
+import { useForm } from "react-hook-form";
+import Link from "next/link";
 
 import ActivityCard from "@/components/shared/activity-card";
 import ScrollToTopButton from "@/components/shared/scroll-to-top-button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { useScrollRestore } from "@/hooks/use-scroll-restore";
 
-import { fetchFeed } from "./actions";
+import { fetchFeed } from "@/app/page/feed/actions";
 
 const LIMIT = 20;
+const SEARCH_DEBOUNCE_MS = 300;
 
-function FeedPrivate({ searchQuery }: { searchQuery?: string }) {
+export default function FollowingFeed() {
+  useScrollRestore();
+
+  const { register, setValue, watch } = useForm<{
+    search: string;
+  }>({
+    defaultValues: { search: "" },
+  });
+  const searchValue = watch("search");
+  const activeQuery = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
+
   const {
     data,
     fetchNextPage,
@@ -22,12 +40,12 @@ function FeedPrivate({ searchQuery }: { searchQuery?: string }) {
     error,
     refetch,
   } = useInfiniteQuery({
-    queryKey: [fetchFeed.key, searchQuery],
+    queryKey: [fetchFeed.key, activeQuery],
     queryFn: ({ pageParam }) =>
       fetchFeed({
         limit: LIMIT,
         offset: pageParam,
-        query: searchQuery,
+        query: activeQuery,
       }),
     getNextPageParam: (lastPage, allPages) => {
       if (lastPage.hasMore) {
@@ -40,7 +58,6 @@ function FeedPrivate({ searchQuery }: { searchQuery?: string }) {
 
   const items = data?.pages.flatMap((page) => page.items) ?? [];
 
-  // Intersection Observer logic
   const observerMiddle = useRef<IntersectionObserver | null>(null);
   const observerLast = useRef<IntersectionObserver | null>(null);
   const sentinelMiddleIndex =
@@ -79,8 +96,44 @@ function FeedPrivate({ searchQuery }: { searchQuery?: string }) {
     refetch();
   }, [refetch]);
 
+  const handleClear = () => {
+    setValue("search", "");
+  };
+
   return (
-    <>
+    <Tabs value="following" className="w-full">
+      <div className="flex justify-between items-center mb-4 gap-4">
+        <TabsList>
+          <TabsTrigger value="general" asChild>
+            <Link href="/">General</Link>
+          </TabsTrigger>
+          <TabsTrigger value="following" asChild>
+            <Link href="/following">Following</Link>
+          </TabsTrigger>
+        </TabsList>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search activities..."
+            className="pl-10 pr-10 w-full"
+            {...register("search")}
+          />
+          {searchValue && (
+            <Button
+              type="button"
+              onClick={handleClear}
+              size="icon"
+              variant="ghost"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 text-muted-foreground hover:text-foreground focus:outline-none"
+              tabIndex={-1}
+            >
+              <X />
+            </Button>
+          )}
+        </div>
+      </div>
+
       <ScrollToTopButton onScrollToTop={handleScrollToTop} />
 
       <div className="flex flex-col gap-4">
@@ -107,7 +160,12 @@ function FeedPrivate({ searchQuery }: { searchQuery?: string }) {
           }
           return (
             <div key={item.id} ref={ref}>
-              <ActivityCard item={item} repo={repo} org={org} back="/" />
+              <ActivityCard
+                item={item}
+                repo={repo}
+                org={org}
+                back="/following"
+              />
             </div>
           );
         })}
@@ -122,8 +180,6 @@ function FeedPrivate({ searchQuery }: { searchQuery?: string }) {
           </div>
         )}
       </div>
-    </>
+    </Tabs>
   );
 }
-
-export default React.memo(FeedPrivate);

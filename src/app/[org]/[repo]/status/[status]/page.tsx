@@ -41,8 +41,10 @@ export default async function StatusPage({
           className="flex flex-row gap-3 items-center w-full justify-start py-2 h-fit"
         >
           <ArrowLeftIcon />
-          {back === "/" ? (
+          {!back || back === "/" ? (
             <p className="text-foreground text-lg uppercase">Feed</p>
+          ) : back === "/following" ? (
+            <p className="text-foreground text-lg uppercase">Following</p>
           ) : (
             <>
               <div className="w-9 h-9">

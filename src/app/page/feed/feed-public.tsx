@@ -11,7 +11,13 @@ import { fetchPublicFeed } from "./actions";
 
 const LIMIT = 20;
 
-function FeedPublic({ searchQuery }: { searchQuery?: string }) {
+function FeedPublic({
+  searchQuery,
+  back = "/",
+}: {
+  searchQuery?: string;
+  back?: string;
+}) {
   const {
     data,
     fetchNextPage,
@@ -107,7 +113,7 @@ function FeedPublic({ searchQuery }: { searchQuery?: string }) {
           }
           return (
             <div key={item.id} ref={ref}>
-              <ActivityCard item={item} repo={repo} org={org} back="/" />
+              <ActivityCard item={item} repo={repo} org={org} back={back} />
             </div>
           );
         })}
