@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+
 import { createClient } from "@/utils/supabase/client";
 
 import LoginForm from "./login-form";
