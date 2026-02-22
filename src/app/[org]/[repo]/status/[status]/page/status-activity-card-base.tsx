@@ -184,10 +184,9 @@ function StatusActivityCardBase({
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
-                  const shareUrl = `${window.location.origin}/${org}/${repo}/status/${hash}`;
                   const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
                     body
-                  )}&url=${encodeURIComponent(shareUrl)}`;
+                  )}`;
                   window.open(tweetUrl, "_blank");
                 }}
               >
