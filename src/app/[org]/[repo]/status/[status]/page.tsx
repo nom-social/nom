@@ -42,9 +42,9 @@ export default async function StatusPage({
         >
           <ArrowLeftIcon />
           {!back || back === "/" ? (
-            <p className="text-foreground text-lg uppercase">Feed</p>
+            <p className="text-foreground text-lg">Feed</p>
           ) : back === "/following" ? (
-            <p className="text-foreground text-lg uppercase">Following</p>
+            <p className="text-foreground text-lg">Following</p>
           ) : (
             <>
               <div className="w-9 h-9">
@@ -55,9 +55,7 @@ export default async function StatusPage({
                   sizes="36px"
                 />
               </div>
-              <p className="text-foreground text-lg uppercase break-all">
-                {repo}
-              </p>
+              <p className="text-foreground text-lg break-all">{repo}</p>
             </>
           )}
         </Button>

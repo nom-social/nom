@@ -125,7 +125,7 @@ export default function RepoProfileCard({
               />
             </div>
             <div className="flex flex-col gap-1">
-              <p className="text-foreground text-xl uppercase break-all">
+              <p className="text-foreground text-xl break-all">
                 {repo}
               </p>
               <div className="text-muted-foreground text-sm w-full">
