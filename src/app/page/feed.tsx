@@ -1,17 +1,17 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { User } from "@supabase/supabase-js";
 import { Search, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useScrollRestore } from "@/hooks/use-scroll-restore";
 
-import FeedPrivate from "./feed/feed-private";
 import FeedPublic from "./feed/feed-public";
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -32,15 +32,19 @@ export default function Feed({ user }: { user: User | null }) {
   };
 
   if (!user) {
-    return <FeedPublic searchQuery={activeQuery} />;
+    return <FeedPublic searchQuery={activeQuery} back="/" />;
   }
 
   return (
-    <Tabs defaultValue="general" className="w-full">
+    <Tabs value="general" className="w-full">
       <div className="flex justify-between items-center mb-4 gap-4">
         <TabsList>
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="following">Following</TabsTrigger>
+          <TabsTrigger value="general" asChild>
+            <Link href="/">General</Link>
+          </TabsTrigger>
+          <TabsTrigger value="following" asChild>
+            <Link href="/following">Following</Link>
+          </TabsTrigger>
         </TabsList>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -64,12 +68,7 @@ export default function Feed({ user }: { user: User | null }) {
           )}
         </div>
       </div>
-      <TabsContent value="general">
-        <FeedPublic searchQuery={activeQuery} />
-      </TabsContent>
-      <TabsContent value="following">
-        <FeedPrivate searchQuery={activeQuery} />
-      </TabsContent>
+      <FeedPublic searchQuery={activeQuery} back="/" />
     </Tabs>
   );
 }
