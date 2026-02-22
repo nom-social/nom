@@ -1,26 +1,18 @@
 "use client";
 
-import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-
 import { createClient } from "@/utils/supabase/client";
 
 import LoginForm from "./login-form";
 
-function LoginPageContent() {
+export default function LoginPage() {
   const supabase = createClient();
-  const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/";
 
   const handleGithubLogin = async () => {
-    const redirectTo =
-      next && next.startsWith("/")
-        ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`
-        : `${window.location.origin}/auth/callback`;
-
     await supabase.auth.signInWithOAuth({
       provider: "github",
-      options: { redirectTo },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
     });
   };
 
@@ -30,17 +22,5 @@ function LoginPageContent() {
         <LoginForm onLogin={handleGithubLogin} />
       </div>
     </main>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense
-      fallback={
-        <main className="flex items-center justify-center h-[80vh] px-2" />
-      }
-    >
-      <LoginPageContent />
-    </Suspense>
   );
 }
