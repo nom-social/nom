@@ -27,10 +27,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import X from "@/components/ui/icons/x";
 import { cn } from "@/lib/utils";
+import { saveScrollPosition } from "@/lib/scroll-restore";
 
 export type Props = {
   title: string;
   titleUrl: string;
+  pathToRestore?: string;
   badgeIcon: React.ReactNode;
   badgeLabel: string;
   badgeClassName: string;
@@ -51,6 +53,7 @@ export type Props = {
 function ActivityCardBase({
   title,
   titleUrl,
+  pathToRestore,
   badgeIcon,
   badgeLabel,
   badgeClassName,
@@ -101,6 +104,7 @@ function ActivityCardBase({
             <Link
               href={titleUrl}
               className="hover:underline focus:underline outline-none"
+              onClick={() => pathToRestore && saveScrollPosition(pathToRestore)}
             >
               <Markdown>{title}</Markdown>
             </Link>

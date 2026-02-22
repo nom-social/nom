@@ -10,6 +10,7 @@ import ScrollToTopButton from "@/components/shared/scroll-to-top-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { useScrollRestore } from "@/hooks/use-scroll-restore";
 
 import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
 
@@ -154,6 +155,8 @@ export default function Feed({
   repo: string;
   org: string;
 }) {
+  useScrollRestore();
+
   const { register, setValue, watch } = useForm<{
     search: string;
   }>({

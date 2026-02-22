@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { useScrollRestore } from "@/hooks/use-scroll-restore";
 
 import FeedPrivate from "./feed/feed-private";
 import FeedPublic from "./feed/feed-public";
@@ -16,6 +17,8 @@ import FeedPublic from "./feed/feed-public";
 const SEARCH_DEBOUNCE_MS = 300;
 
 export default function Feed({ user }: { user: User | null }) {
+  useScrollRestore();
+
   const { register, setValue, watch } = useForm<{
     search: string;
   }>({
