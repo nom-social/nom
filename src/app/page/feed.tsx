@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { User } from "@supabase/supabase-js";
 import { Search, X } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -9,8 +10,10 @@ import { useForm } from "react-hook-form";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useBackUrl } from "@/hooks/use-back-url";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useScrollRestore } from "@/hooks/use-scroll-restore";
+import { useSyncParamToUrl } from "@/hooks/use-sync-param-to-url";
 
 import FeedPublic from "./feed/feed-public";
 
@@ -18,21 +21,25 @@ const SEARCH_DEBOUNCE_MS = 300;
 
 export default function Feed({ user }: { user: User | null }) {
   useScrollRestore();
+  const searchParams = useSearchParams();
+  const qFromUrl = searchParams.get("q") ?? "";
 
   const { register, setValue, watch } = useForm<{
     search: string;
   }>({
-    defaultValues: { search: "" },
+    defaultValues: { search: qFromUrl },
   });
   const searchValue = watch("search");
   const activeQuery = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
+  useSyncParamToUrl("q", activeQuery);
+  const backUrl = useBackUrl();
 
   const handleClear = () => {
     setValue("search", "");
   };
 
   if (!user) {
-    return <FeedPublic searchQuery={activeQuery} />;
+    return <FeedPublic searchQuery={activeQuery} back={backUrl} />;
   }
 
   return (
@@ -68,7 +75,7 @@ export default function Feed({ user }: { user: User | null }) {
           )}
         </div>
       </div>
-      <FeedPublic searchQuery={activeQuery} />
+      <FeedPublic searchQuery={activeQuery} back={backUrl} />
     </Tabs>
   );
 }

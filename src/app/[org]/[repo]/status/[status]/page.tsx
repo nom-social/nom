@@ -33,6 +33,8 @@ export default async function StatusPage({
 
   if (!statusItem) notFound();
 
+  const backPath = back?.split("?")[0] ?? "/";
+
   return (
     <main className="flex flex-col justify-center gap-4 px-2">
       <Link href={back || "/"} passHref>
@@ -41,11 +43,11 @@ export default async function StatusPage({
           className="flex flex-row gap-3 items-center w-full justify-start py-2 h-fit"
         >
           <ArrowLeftIcon />
-          {!back || back === "/" ? (
+          {!back || backPath === "/" ? (
             <p className="text-foreground text-lg">Feed</p>
-          ) : back === "/following" ? (
+          ) : backPath.startsWith("/following") ? (
             <p className="text-foreground text-lg">Following</p>
-          ) : (
+          ) : backPath.startsWith(`/${org}/${repo}`) ? (
             <>
               <div className="w-9 h-9">
                 <OptimizedAvatar
@@ -57,6 +59,8 @@ export default async function StatusPage({
               </div>
               <p className="text-foreground text-lg break-all">{repo}</p>
             </>
+          ) : (
+            <p className="text-foreground text-lg">Back</p>
           )}
         </Button>
       </Link>

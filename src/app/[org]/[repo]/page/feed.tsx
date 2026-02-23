@@ -4,13 +4,16 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader, Search, X } from "lucide-react";
 import React, { useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
+import { useSearchParams } from "next/navigation";
 
 import ActivityCard from "@/components/shared/activity-card";
 import ScrollToTopButton from "@/components/shared/scroll-to-top-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useBackUrl } from "@/hooks/use-back-url";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useScrollRestore } from "@/hooks/use-scroll-restore";
+import { useSyncParamToUrl } from "@/hooks/use-sync-param-to-url";
 
 import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
 
@@ -22,9 +25,16 @@ type RepoFeedItemsProps = {
   repo: string;
   org: string;
   searchQuery?: string;
+  back: string;
 };
 
-function RepoFeedItems({ repoId, repo, org, searchQuery }: RepoFeedItemsProps) {
+function RepoFeedItems({
+  repoId,
+  repo,
+  org,
+  searchQuery,
+  back,
+}: RepoFeedItemsProps) {
   const {
     data,
     fetchNextPage,
@@ -120,12 +130,7 @@ function RepoFeedItems({ repoId, repo, org, searchQuery }: RepoFeedItemsProps) {
           }
           return (
             <div key={item.id} ref={ref}>
-              <ActivityCard
-                item={item}
-                repo={repo}
-                org={org}
-                back={`/${org}/${repo}`}
-              />
+              <ActivityCard item={item} repo={repo} org={org} back={back} />
             </div>
           );
         })}
@@ -156,15 +161,19 @@ export default function Feed({
   org: string;
 }) {
   useScrollRestore();
+  const searchParams = useSearchParams();
+  const qFromUrl = searchParams.get("q") ?? "";
 
   const { register, setValue, watch } = useForm<{
     search: string;
   }>({
-    defaultValues: { search: "" },
+    defaultValues: { search: qFromUrl },
   });
 
   const searchValue = watch("search");
   const activeQuery = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
+  useSyncParamToUrl("q", activeQuery);
+  const backUrl = useBackUrl();
 
   const handleClear = () => {
     setValue("search", "");
@@ -206,6 +215,7 @@ export default function Feed({
         repo={repo}
         org={org}
         searchQuery={activeQuery}
+        back={backUrl}
       />
     </div>
   );

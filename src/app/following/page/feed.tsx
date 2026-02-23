@@ -5,14 +5,17 @@ import { Search, X, Loader } from "lucide-react";
 import { useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 import ActivityCard from "@/components/shared/activity-card";
 import ScrollToTopButton from "@/components/shared/scroll-to-top-button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useBackUrl } from "@/hooks/use-back-url";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useScrollRestore } from "@/hooks/use-scroll-restore";
+import { useSyncParamToUrl } from "@/hooks/use-sync-param-to-url";
 
 import { fetchFeed } from "@/app/page/feed/actions";
 
@@ -21,14 +24,18 @@ const SEARCH_DEBOUNCE_MS = 300;
 
 export default function FollowingFeed() {
   useScrollRestore();
+  const searchParams = useSearchParams();
+  const qFromUrl = searchParams.get("q") ?? "";
 
   const { register, setValue, watch } = useForm<{
     search: string;
   }>({
-    defaultValues: { search: "" },
+    defaultValues: { search: qFromUrl },
   });
   const searchValue = watch("search");
   const activeQuery = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
+  useSyncParamToUrl("q", activeQuery);
+  const backUrl = useBackUrl();
 
   const {
     data,
@@ -160,12 +167,7 @@ export default function FollowingFeed() {
           }
           return (
             <div key={item.id} ref={ref}>
-              <ActivityCard
-                item={item}
-                repo={repo}
-                org={org}
-                back="/following"
-              />
+              <ActivityCard item={item} repo={repo} org={org} back={backUrl} />
             </div>
           );
         })}
