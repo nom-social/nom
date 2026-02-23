@@ -45,14 +45,23 @@ export default function Feed({ user }: { user: User | null }) {
   return (
     <Tabs value="general" className="w-full">
       <div className="flex flex-col gap-4 mb-4">
-        <TabsList>
-          <TabsTrigger value="general" asChild>
-            <Link href="/">General</Link>
-          </TabsTrigger>
-          <TabsTrigger value="following" asChild>
-            <Link href="/following">Following</Link>
-          </TabsTrigger>
-        </TabsList>
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2 text-muted-foreground text-sm">
+            <span className="relative flex h-2 w-2" aria-hidden>
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-nom-green opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-nom-green" />
+            </span>
+            <span>Live activities</span>
+          </div>
+          <TabsList>
+            <TabsTrigger value="general" asChild>
+              <Link href="/">General</Link>
+            </TabsTrigger>
+            <TabsTrigger value="following" asChild>
+              <Link href="/following">Following</Link>
+            </TabsTrigger>
+          </TabsList>
+        </div>
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
