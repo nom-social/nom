@@ -23,11 +23,11 @@ export const sendEngagementMilestoneTask = schemaTask({
   schema: z.object({
     dedupe_hash: z.string(),
   }),
+  retry: { maxAttempts: 1 },
   run: async ({ dedupe_hash }) => {
     const supabaseClient = supabase.createAdminClient();
     const resendClient = resend.createClient();
 
-    // 1. Get like_count for this timeline item
     const { data: likeData } = await supabaseClient
       .rpc("get_batch_like_data", {
         dedupe_hashes: [dedupe_hash],
@@ -37,7 +37,6 @@ export const sendEngagementMilestoneTask = schemaTask({
     const likeCount = Number(likeData?.[0]?.like_count ?? 0);
     if (likeCount === 0) return;
 
-    // 2. Find milestones newly crossed
     const { data: existingNotifications } = await supabaseClient
       .from("notifications")
       .select("key")
@@ -57,7 +56,6 @@ export const sendEngagementMilestoneTask = schemaTask({
       newlyCrossed.length > 0 ? Math.max(...newlyCrossed) : null;
     if (milestoneToSend === null) return;
 
-    // 3. Fetch timeline item and repo
     const { data: timelineItem } = await supabaseClient
       .from("public_timeline")
       .select("repo_id, type, data")
@@ -76,7 +74,6 @@ export const sendEngagementMilestoneTask = schemaTask({
 
     if (!repo) return;
 
-    // 4. Get repositories_users with emails
     const { data: repoUsers } = await supabaseClient
       .from("repositories_users")
       .select("user_id")
@@ -97,9 +94,9 @@ export const sendEngagementMilestoneTask = schemaTask({
     const emails = (users ?? [])
       .map((u) => u.email)
       .filter((e): e is string => !!e?.trim());
+
     if (emails.length === 0) return;
 
-    // 5. Build email content
     const typeLabel =
       timelineItem.type === "pull_request"
         ? "pull request"
@@ -130,19 +127,17 @@ export const sendEngagementMilestoneTask = schemaTask({
       <p><a href="${statusUrl}">View on Nom</a></p>
     `;
 
-    // 6. Send emails
-    await Promise.all(
-      emails.map((to) => {
-        return resendClient.emails.send({
+    await Promise.allSettled(
+      emails.map((to) =>
+        resendClient.emails.send({
           from: "Nom <notifications@nomit.dev>",
           to,
           subject,
           html,
-        });
-      })
+        })
+      )
     );
 
-    // 7. Record that we sent this milestone
     await supabaseClient
       .from("notifications")
       .insert({
