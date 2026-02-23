@@ -1,4 +1,5 @@
 import { schemaTask } from "@trigger.dev/sdk";
+import { escapeAttribute, escapeText } from "entities";
 import { z } from "zod";
 
 import { BASE_URL } from "@/lib/constants";
@@ -122,20 +123,20 @@ export const sendEngagementMilestoneTask = schemaTask({
     const statusUrl = `${BASE_URL}/${repo.org}/${repo.repo}/status/${dedupe_hash}`;
     const subject = `${repo.org}/${repo.repo}: Your ${typeLabel} reached ${milestoneToSend} ${milestoneToSend === 1 ? "like" : "likes"}!`;
     const html = `
-      <p>Great news! Your ${typeLabel} in <strong>${repo.org}/${repo.repo}</strong> has reached <strong>${milestoneToSend}</strong> ${milestoneToSend === 1 ? "like" : "likes"}.</p>
-      <p><strong>${itemTitle}</strong></p>
-      <p><a href="${statusUrl}">View on Nom</a></p>
+      <p>Great news! Your ${typeLabel} in <strong>${escapeText(repo.org)}/${escapeText(repo.repo)}</strong> has reached <strong>${milestoneToSend}</strong> ${milestoneToSend === 1 ? "like" : "likes"}.</p>
+      <p><strong>${escapeText(itemTitle)}</strong></p>
+      <p><a href="${escapeAttribute(statusUrl)}">View on Nom</a></p>
     `;
 
     await Promise.allSettled(
-      emails.map((to) =>
-        resendClient.emails.send({
+      emails.map((to) => {
+        return resendClient.emails.send({
           from: "Nom <notifications@nomit.dev>",
           to,
           subject,
           html,
-        })
-      )
+        });
+      })
     );
 
     await supabaseClient
