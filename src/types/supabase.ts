@@ -7,11 +7,6 @@ export type Json =
   | Json[];
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)";
-  };
   public: {
     Tables: {
       github_event_log: {
@@ -47,6 +42,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      notifications: {
+        Row: {
+          created_at: string;
+          entity_id: string;
+          id: string;
+          key: string;
+          type: string;
+        };
+        Insert: {
+          created_at?: string;
+          entity_id: string;
+          id?: string;
+          key: string;
+          type: string;
+        };
+        Update: {
+          created_at?: string;
+          entity_id?: string;
+          id?: string;
+          key?: string;
+          type?: string;
+        };
+        Relationships: [];
+      };
       public_timeline: {
         Row: {
           categories: string[] | null;
@@ -59,7 +78,7 @@ export type Database = {
           repo_id: string;
           score: number;
           search_text: string | null;
-          search_vector: unknown | null;
+          search_vector: unknown;
           snooze_to: string | null;
           type: string;
           updated_at: string;
@@ -75,7 +94,7 @@ export type Database = {
           repo_id: string;
           score: number;
           search_text?: string | null;
-          search_vector?: unknown | null;
+          search_vector?: unknown;
           snooze_to?: string | null;
           type: string;
           updated_at?: string;
@@ -91,7 +110,7 @@ export type Database = {
           repo_id?: string;
           score?: number;
           search_text?: string | null;
-          search_vector?: unknown | null;
+          search_vector?: unknown;
           snooze_to?: string | null;
           type?: string;
           updated_at?: string;
@@ -258,7 +277,7 @@ export type Database = {
           repo_id: string;
           score: number;
           search_text: string | null;
-          search_vector: unknown | null;
+          search_vector: unknown;
           snooze_to: string | null;
           type: string;
           updated_at: string;
@@ -275,7 +294,7 @@ export type Database = {
           repo_id: string;
           score: number;
           search_text?: string | null;
-          search_vector?: unknown | null;
+          search_vector?: unknown;
           snooze_to?: string | null;
           type: string;
           updated_at?: string;
@@ -292,7 +311,7 @@ export type Database = {
           repo_id?: string;
           score?: number;
           search_text?: string | null;
-          search_vector?: unknown | null;
+          search_vector?: unknown;
           snooze_to?: string | null;
           type?: string;
           updated_at?: string;
@@ -334,6 +353,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      extract_timeline_search_text: {
+        Args: { data: Json; type: string };
+        Returns: string;
+      };
       get_batch_like_data: {
         Args: { dedupe_hashes: string[]; user_id_param?: string };
         Returns: {
