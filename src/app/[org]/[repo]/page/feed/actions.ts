@@ -62,19 +62,11 @@ export async function fetchFeedPage({
     .select("*")
     .eq("repo_id", repoId);
 
-  if (query && query.trim()) {
-    const tsquery = query
-      .trim()
-      .split(/\s+/)
-      .map((word) => word.replace(/[^\w]/g, ""))
-      .filter((word) => word.length > 0)
-      .join(" & ");
-
-    if (!tsquery) {
-      return { items: [], hasMore: false };
-    }
-
-    queryBuilder = queryBuilder.textSearch("search_vector", tsquery);
+  if (query?.trim()) {
+    queryBuilder = queryBuilder.textSearch("search_vector", query.trim(), {
+      type: "websearch",
+      config: "english",
+    });
   }
 
   const { data } = await queryBuilder

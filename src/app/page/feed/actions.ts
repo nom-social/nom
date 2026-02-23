@@ -130,44 +130,39 @@ export async function fetchFeed({
     .select("*, repositories!inner ( org, repo )")
     .eq("user_id", user.id);
 
-  // Apply special filters
   if (filters.org || filters.owner) {
     queryBuilder = queryBuilder.eq(
       "repositories.org",
       filters.org || filters.owner || ""
     );
   }
-
   if (filters.repo) {
     queryBuilder = queryBuilder.eq("repositories.repo", filters.repo);
   }
-
   if (filters.type) {
     queryBuilder = queryBuilder.eq("type", filters.type);
   }
-
   if (filters.from) {
-    const fromDate = new Date(filters.from).toISOString();
-    queryBuilder = queryBuilder.gte("updated_at", fromDate);
+    queryBuilder = queryBuilder.gte(
+      "updated_at",
+      new Date(filters.from).toISOString()
+    );
   }
-
   if (filters.to) {
-    const toDate = new Date(filters.to).toISOString();
-    queryBuilder = queryBuilder.lte("updated_at", toDate);
+    queryBuilder = queryBuilder.lte(
+      "updated_at",
+      new Date(filters.to).toISOString()
+    );
   }
-
-  // Apply text search only if there's remaining text after parsing filters
-  if (filters.textQuery && filters.textQuery.trim()) {
-    const tsquery = filters.textQuery
-      .trim()
-      .split(/\s+/)
-      .map((word) => word.replace(/[^\w]/g, ""))
-      .filter((word) => word.length > 0)
-      .join(" & ");
-
-    if (tsquery) {
-      queryBuilder = queryBuilder.textSearch("search_vector", tsquery);
-    }
+  if (filters.textQuery?.trim()) {
+    queryBuilder = queryBuilder.textSearch(
+      "search_vector",
+      filters.textQuery.trim(),
+      {
+        type: "websearch",
+        config: "english",
+      }
+    );
   }
 
   const { data } = await queryBuilder
@@ -222,44 +217,39 @@ export async function fetchPublicFeed({
     .from("public_timeline")
     .select("*, repositories!inner ( org, repo )");
 
-  // Apply special filters
   if (filters.org || filters.owner) {
     queryBuilder = queryBuilder.eq(
       "repositories.org",
       filters.org || filters.owner || ""
     );
   }
-
   if (filters.repo) {
     queryBuilder = queryBuilder.eq("repositories.repo", filters.repo);
   }
-
   if (filters.type) {
     queryBuilder = queryBuilder.eq("type", filters.type);
   }
-
   if (filters.from) {
-    const fromDate = new Date(filters.from).toISOString();
-    queryBuilder = queryBuilder.gte("updated_at", fromDate);
+    queryBuilder = queryBuilder.gte(
+      "updated_at",
+      new Date(filters.from).toISOString()
+    );
   }
-
   if (filters.to) {
-    const toDate = new Date(filters.to).toISOString();
-    queryBuilder = queryBuilder.lte("updated_at", toDate);
+    queryBuilder = queryBuilder.lte(
+      "updated_at",
+      new Date(filters.to).toISOString()
+    );
   }
-
-  // Apply text search only if there's remaining text after parsing filters
-  if (filters.textQuery && filters.textQuery.trim()) {
-    const tsquery = filters.textQuery
-      .trim()
-      .split(/\s+/)
-      .map((word) => word.replace(/[^\w]/g, ""))
-      .filter((word) => word.length > 0)
-      .join(" & ");
-
-    if (tsquery) {
-      queryBuilder = queryBuilder.textSearch("search_vector", tsquery);
-    }
+  if (filters.textQuery?.trim()) {
+    queryBuilder = queryBuilder.textSearch(
+      "search_vector",
+      filters.textQuery.trim(),
+      {
+        type: "websearch",
+        config: "english",
+      }
+    );
   }
 
   const { data } = await queryBuilder
