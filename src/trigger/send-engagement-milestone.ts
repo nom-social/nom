@@ -134,7 +134,7 @@ export const sendEngagementMilestoneTask = schemaTask({
     await Promise.all(
       emails.map((to) => {
         return resendClient.emails.send({
-          from: "Nom <notificaitons@nomit.dev>",
+          from: "Nom <notifications@nomit.dev>",
           to,
           subject,
           html,
