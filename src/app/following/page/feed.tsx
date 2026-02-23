@@ -109,7 +109,7 @@ export default function FollowingFeed() {
 
   return (
     <Tabs value="following" className="w-full">
-      <div className="flex justify-between items-center mb-4 gap-4">
+      <div className="flex flex-col gap-4 mb-4">
         <TabsList>
           <TabsTrigger value="general" asChild>
             <Link href="/">General</Link>
@@ -118,7 +118,7 @@ export default function FollowingFeed() {
             <Link href="/following">Following</Link>
           </TabsTrigger>
         </TabsList>
-        <div className="relative">
+        <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
