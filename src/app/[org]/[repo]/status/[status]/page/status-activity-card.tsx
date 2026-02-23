@@ -13,10 +13,10 @@ import {
   pushDataSchema,
 } from "@/components/shared/activity-card/shared/schemas";
 import {
-  createLike,
   deleteLike,
   NotAuthenticatedError,
 } from "@/components/shared/activity-card/actions";
+import { createLike } from "@/components/shared/activity-card/server-actions";
 
 import StatusActivityCardBase from "./status-activity-card-base";
 

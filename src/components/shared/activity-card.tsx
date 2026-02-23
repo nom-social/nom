@@ -13,11 +13,8 @@ import {
   pushDataSchema,
 } from "@/components/shared/activity-card/shared/schemas";
 
-import {
-  createLike,
-  deleteLike,
-  NotAuthenticatedError,
-} from "./activity-card/actions";
+import { deleteLike, NotAuthenticatedError } from "./activity-card/actions";
+import { createLike } from "./activity-card/server-actions";
 import ActivityCardBase from "./activity-card/shared/activity-card-base";
 
 type FeedItemWithLikes = (
