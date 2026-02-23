@@ -24,16 +24,10 @@ export async function fetchFeedPageServer({
     .eq("repo_id", repoId);
 
   if (query?.trim()) {
-    const tsquery = query
-      .trim()
-      .split(/\s+/)
-      .map((word) => word.replace(/[^\w]/g, ""))
-      .filter((word) => word.length > 0)
-      .join(" & ");
-
-    if (tsquery) {
-      queryBuilder = queryBuilder.textSearch("search_vector", tsquery);
-    }
+    queryBuilder = queryBuilder.textSearch("search_vector", query.trim(), {
+      type: "websearch",
+      config: "english",
+    });
   }
 
   const { data } = await queryBuilder

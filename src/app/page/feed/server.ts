@@ -69,40 +69,30 @@ export async function fetchPublicFeedServer({
       filters.org || filters.owner || ""
     );
   }
-
   if (filters.repo) {
     queryBuilder = queryBuilder.eq("repositories.repo", filters.repo);
   }
-
   if (filters.type) {
     queryBuilder = queryBuilder.eq("type", filters.type);
   }
-
   if (filters.from) {
     queryBuilder = queryBuilder.gte(
       "updated_at",
       new Date(filters.from).toISOString()
     );
   }
-
   if (filters.to) {
     queryBuilder = queryBuilder.lte(
       "updated_at",
       new Date(filters.to).toISOString()
     );
   }
-
   if (filters.textQuery?.trim()) {
-    const tsquery = filters.textQuery
-      .trim()
-      .split(/\s+/)
-      .map((word) => word.replace(/[^\w]/g, ""))
-      .filter((word) => word.length > 0)
-      .join(" & ");
-
-    if (tsquery) {
-      queryBuilder = queryBuilder.textSearch("search_vector", tsquery);
-    }
+    queryBuilder = queryBuilder.textSearch(
+      "search_vector",
+      filters.textQuery.trim(),
+      { type: "websearch", config: "english" }
+    );
   }
 
   const { data } = await queryBuilder

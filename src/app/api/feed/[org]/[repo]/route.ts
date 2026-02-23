@@ -36,17 +36,11 @@ export async function GET(
     .select("*, org:repositories!inner(org), repo:repositories!inner(repo)")
     .eq("repo_id", repoData.id);
 
-  if (q && q.trim()) {
-    const tsquery = q
-      .trim()
-      .split(/\s+/)
-      .map((word) => word.replace(/[^\w]/g, ""))
-      .filter((word) => word.length > 0)
-      .join(" & ");
-
-    if (tsquery) {
-      queryBuilder = queryBuilder.textSearch("search_vector", tsquery);
-    }
+  if (q?.trim()) {
+    queryBuilder = queryBuilder.textSearch("search_vector", q.trim(), {
+      type: "websearch",
+      config: "english",
+    });
   }
 
   const { data, error } = await queryBuilder
