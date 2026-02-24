@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/client";
+import { triggerEngagementMilestone } from "./server-actions";
 
 export class NotAuthenticatedError extends Error {
   constructor() {
@@ -40,6 +41,8 @@ export async function createLike(dedupe_hash: string) {
     .from("timeline_likes")
     .insert({ user_id: userId, dedupe_hash })
     .throwOnError();
+
+  await triggerEngagementMilestone(dedupe_hash);
 }
 
 export async function deleteLike(dedupe_hash: string) {
