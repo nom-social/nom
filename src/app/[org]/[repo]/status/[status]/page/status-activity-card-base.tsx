@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 export type StatusActivityCardBaseProps = {
   title: string;
   titleUrl: string;
+  hideExternalLinks?: boolean;
   badgeIcon: React.ReactNode;
   badgeLabel: string;
   badgeClassName: string;
@@ -50,6 +51,7 @@ export type StatusActivityCardBaseProps = {
 function StatusActivityCardBase({
   title,
   titleUrl,
+  hideExternalLinks = false,
   badgeIcon,
   badgeLabel,
   badgeClassName,
@@ -86,7 +88,11 @@ function StatusActivityCardBase({
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="leading-relaxed font-bold break-words [word-break:break-word]">
-          {titleUrl.startsWith("http") ? (
+          {hideExternalLinks ? (
+            <span className="inline [&_p]:inline">
+              <Markdown>{title}</Markdown>
+            </span>
+          ) : (
             <a
               href={titleUrl}
               target="_blank"
@@ -100,13 +106,6 @@ function StatusActivityCardBase({
                 </span>
               </span>
             </a>
-          ) : (
-            <Link
-              href={titleUrl}
-              className="hover:underline focus:underline outline-none"
-            >
-              <Markdown>{title}</Markdown>
-            </Link>
           )}
         </CardTitle>
         <CardAction>

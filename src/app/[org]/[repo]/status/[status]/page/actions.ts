@@ -7,6 +7,7 @@ export type FeedItem = Tables<"public_timeline">;
 export type FeedItemWithLikes = FeedItem & {
   likeCount: number;
   isLiked: boolean;
+  isPrivate: boolean;
 };
 
 export type FetchFeedItemParams = {
@@ -45,7 +46,7 @@ export async function fetchFeedItem({
 
   const { data: repoData } = await supabase
     .from("repositories")
-    .select("*")
+    .select("id, is_private")
     .ilike("repo", escapeForIlike(repo))
     .ilike("org", escapeForIlike(org))
     .single();
@@ -77,5 +78,6 @@ export async function fetchFeedItem({
     ...data,
     likeCount,
     isLiked,
+    isPrivate: repoData.is_private,
   };
 }

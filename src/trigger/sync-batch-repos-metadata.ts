@@ -52,7 +52,7 @@ export const syncBatchReposMetadataTask = schemaTask({
         };
         await supabase
           .from("repositories")
-          .update({ metadata })
+          .update({ metadata, is_private: repoData.private })
           .eq("id", repoInfo.id)
           .throwOnError();
 

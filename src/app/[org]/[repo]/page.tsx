@@ -57,6 +57,7 @@ export default async function RepoPage({
         topLanguages={repoProfile.topLanguages.slice(0, 3)}
         license={repoProfile.license}
         initialSubscriptionCount={repoProfile.subscriptionCount}
+        isPrivate={repoProfile.isPrivate}
       />
 
       <HydrationBoundary state={dehydrate(queryClient)}>

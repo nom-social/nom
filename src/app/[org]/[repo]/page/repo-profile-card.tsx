@@ -38,6 +38,7 @@ type Props = {
   topLanguages: { name: string }[];
   license: string | null;
   initialSubscriptionCount: number;
+  isPrivate?: boolean;
 };
 
 export default function RepoProfileCard({
@@ -50,6 +51,7 @@ export default function RepoProfileCard({
   topLanguages,
   license,
   initialSubscriptionCount,
+  isPrivate = false,
 }: Props) {
   const router = useRouter();
 
@@ -204,17 +206,19 @@ export default function RepoProfileCard({
               </div>
             )}
 
-            <div className="flex flex-row gap-1 items-center">
-              <Github className="w-3 h-3 text-muted-foreground" />
-              <a
-                href={`https://github.com/${org}/${repo}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline focus:underline outline-none text-xs text-muted-foreground"
-              >
-                {org}/{repo}
-              </a>
-            </div>
+            {!isPrivate && (
+              <div className="flex flex-row gap-1 items-center">
+                <Github className="w-3 h-3 text-muted-foreground" />
+                <a
+                  href={`https://github.com/${org}/${repo}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline focus:underline outline-none text-xs text-muted-foreground"
+                >
+                  {org}/{repo}
+                </a>
+              </div>
+            )}
           </div>
 
           <SubscribeButton

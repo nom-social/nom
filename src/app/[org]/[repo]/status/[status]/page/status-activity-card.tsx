@@ -40,10 +40,12 @@ function StatusActivityCard({
   item,
   repo,
   org,
+  isPrivate = false,
 }: {
   item: FeedItemWithLikes;
   repo: string;
   org: string;
+  isPrivate?: boolean;
 }) {
   const router = useRouter();
   const [likeCount, setLikeCount] = useState<number>(item.likeCount);
@@ -102,6 +104,7 @@ function StatusActivityCard({
       <StatusActivityCardBase
         title={pr.title}
         titleUrl={pr.html_url}
+        hideExternalLinks={isPrivate}
         badgeIcon={<GitMergeIcon />}
         badgeLabel={pr.merged ? "merged" : "open"}
         badgeClassName="bg-nom-purple border-transparent uppercase text-black"
@@ -132,6 +135,7 @@ function StatusActivityCard({
       <StatusActivityCardBase
         title={release.name ?? release.tag_name}
         titleUrl={release.html_url}
+        hideExternalLinks={isPrivate}
         badgeIcon={<TagIcon />}
         badgeLabel={release.tag_name}
         badgeClassName="bg-nom-blue border-transparent uppercase text-black"
@@ -162,6 +166,7 @@ function StatusActivityCard({
       <StatusActivityCardBase
         title={push.title}
         titleUrl={push.html_url}
+        hideExternalLinks={isPrivate}
         badgeIcon={<GitCommitVertical />}
         badgeLabel="pushed"
         badgeClassName="bg-nom-green border-transparent uppercase text-black"
