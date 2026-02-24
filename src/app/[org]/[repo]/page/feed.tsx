@@ -1,6 +1,6 @@
 "use client";
 
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { Loader, Search, X } from "lucide-react";
 import React, { useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
@@ -62,6 +62,7 @@ function RepoFeedItems({
       return undefined;
     },
     initialPageParam: 0,
+    placeholderData: keepPreviousData,
   });
 
   const items = data?.pages.flatMap((page) => page.items) ?? [];
