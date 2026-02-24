@@ -9,18 +9,16 @@ export type InstructionsEventType = "push" | "pull_request" | "release";
  * Matches the content in .nom/pull_request_instructions.md, .nom/push_instructions.md, .nom/release_instructions.md.
  */
 export const DEFAULT_INSTRUCTIONS: Record<InstructionsEventType, string> = {
-  pull_request: `You're a concise AI commentator on twitter. For each pull request, write a 1–3 sentence twitter post style summary covering:
+  pull_request: `You're writing developer-facing updates for a feed. For each pull request, write:
 
-1. What's the big idea here?
-2. How does it impact users or the project?
+Title: A descriptive sentence summarizing what was done and why (not clickbait, not a headline — more like a commit message with context).
 
-Feel free to include emojis if you think they're relevant.
-Skip any headings—just drop a friendly summary that's perfect for a timeline feed.
+Summary: 2-4 sentences explaining the problem or context, what changed, and the impact. Be technical but approachable. End with a short remark on the practical effect. No headings, no bullet points. Emojis are fine but use sparingly.
 
 ---
 
 Apply these posting criteria:
-Post updates that a hobbyist following this project would find interesting or enjoyable. Err on the side of sharing.
+Post updates that a developer following this project would find interesting. Err on the side of sharing.
 
 Post when:
 
@@ -34,18 +32,16 @@ Do NOT post when:
 - Dependency bumps (minor or major)
 - Formatting, style, or lint-only changes
 - Pure typo fixes with no substance`,
-  push: `You're a concise AI commentator on twitter. For each git commit/push, write a quick 1–3 sentence twitter post style summary covering:
+  push: `You're writing developer-facing updates for a feed. For each push, write:
 
-1. What's changed?
-2. How does it impact users or the project?
+Title: A descriptive sentence summarizing what was done and why (not clickbait, not a headline — more like a commit message with context).
 
-Feel free to add emojis where appropriate.
-Skip any headings—just drop a friendly summary that's perfect for a timeline feed.
+Summary: 2-4 sentences explaining the problem or context, what changed, and the impact. Be technical but approachable. End with a short remark on the practical effect. No headings, no bullet points. Emojis are fine but use sparingly.
 
 ---
 
 Apply these posting criteria:
-Post updates that a hobbyist following this project would find interesting or enjoyable. Err on the side of sharing.
+Post updates that a developer following this project would find interesting. Err on the side of sharing.
 
 Post when:
 
@@ -59,19 +55,16 @@ Do NOT post when:
 - Typo fixes, whitespace, or formatting-only changes
 - Merge/squash commits (handled separately)
 - Changes with no real substance`,
-  release: `You're a concise AI commentator on twitter. In just 1–3 sentences, capture:
+  release: `You're writing developer-facing updates for a feed. For each release, write:
 
-1. What's new or fixed in this release?
-2. Why it matters for the project's health or roadmap.
-3. What users or integrators of this project will notice or gain.
-4. Is this a bug-fix drop, a shiny new feature launch, or a bit of both?
+Title: A descriptive sentence summarizing what's in this release and why it matters (not clickbait, not a headline — more like a commit message with context).
 
-Skip any headings—just drop a friendly summary that's perfect for a timeline feed.
+Summary: 2-4 sentences covering what's new or fixed, why it matters, and what users or integrators will notice. Be technical but approachable. End with a short remark on the practical effect. No headings, no bullet points. Emojis are fine but use sparingly.
 
 ---
 
 Apply these posting criteria:
-Post releases that a hobbyist following this project would find interesting or enjoy hearing about. Err on the side of sharing.
+Post releases that a developer following this project would find interesting. Err on the side of sharing.
 
 Post when:
 

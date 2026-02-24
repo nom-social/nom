@@ -29,8 +29,8 @@ export async function runSummaryAgent({
   const agentInstructions = `You summarize GitHub events (pull requests, pushes, releases) and decide whether to post to the feed.
 
 Respond with JSON containing:
-- title: short, catchy feed title (3-10 words)
-- summary: concise 1-3 sentence feed summary
+- title: descriptive sentence summarizing what was done and why
+- summary: 2-4 sentence developer-focused explanation of the change and its impact
 - should_post: boolean indicating whether this update should be posted
 
 ---
