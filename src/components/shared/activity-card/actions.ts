@@ -1,5 +1,7 @@
 import { createClient } from "@/utils/supabase/client";
 
+import { triggerEngagementMilestone } from "./server-actions";
+
 export class NotAuthenticatedError extends Error {
   constructor() {
     super("Not authenticated");
@@ -27,6 +29,22 @@ export async function isLiked(dedupe_hash: string) {
 }
 
 isLiked.key = "src/components/shared/activity-card/actions/isLiked";
+
+export async function createLike(dedupe_hash: string) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new NotAuthenticatedError();
+  const userId = user.id;
+
+  await supabase
+    .from("timeline_likes")
+    .insert({ user_id: userId, dedupe_hash })
+    .throwOnError();
+
+  await triggerEngagementMilestone(dedupe_hash);
+}
 
 export async function deleteLike(dedupe_hash: string) {
   const supabase = createClient();
