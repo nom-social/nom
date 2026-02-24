@@ -78,6 +78,6 @@ export async function fetchFeedItem({
     ...data,
     likeCount,
     isLiked,
-    isPrivate: repoData.is_private ?? false,
+    isPrivate: repoData.is_private,
   };
 }

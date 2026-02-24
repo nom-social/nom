@@ -52,6 +52,6 @@ export async function fetchRepoProfile(org: string, repo: string) {
     license: meta.license,
     id: data.id,
     subscriptionCount: subscriptionCount || 0,
-    isPrivate: data.is_private ?? false,
+    isPrivate: data.is_private,
   };
 }

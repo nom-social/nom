@@ -130,7 +130,7 @@ export type Database = {
           champion_github_username: string | null;
           created_at: string;
           id: string;
-          is_private: boolean | null;
+          is_private: boolean;
           metadata: Json | null;
           org: string;
           repo: string;
@@ -139,7 +139,7 @@ export type Database = {
           champion_github_username?: string | null;
           created_at?: string;
           id?: string;
-          is_private?: boolean | null;
+          is_private?: boolean;
           metadata?: Json | null;
           org: string;
           repo: string;
@@ -148,7 +148,7 @@ export type Database = {
           champion_github_username?: string | null;
           created_at?: string;
           id?: string;
-          is_private?: boolean | null;
+          is_private?: boolean;
           metadata?: Json | null;
           org?: string;
           repo?: string;
