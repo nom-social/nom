@@ -11,6 +11,9 @@ export async function triggerEngagementMilestone(dedupe_hash: string) {
     } = await supabase.auth.getUser();
     if (!user) return;
 
-    await sendEngagementMilestoneTask.trigger({ dedupe_hash });
+    await sendEngagementMilestoneTask.trigger(
+      { dedupe_hash },
+      { concurrencyKey: dedupe_hash }
+    );
   } catch {}
 }
