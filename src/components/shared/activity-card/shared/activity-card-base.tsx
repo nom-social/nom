@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
-import { LinkIcon, ShareIcon } from "lucide-react";
+import { LinkIcon, Linkedin, ShareIcon } from "lucide-react";
 
 import {
   Card,
@@ -210,6 +210,15 @@ function ActivityCardBase({
               >
                 <X />
                 Post on X
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  const linkedInUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(body)}`;
+                  window.open(linkedInUrl, "_blank");
+                }}
+              >
+                <Linkedin />
+                Share on LinkedIn
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
