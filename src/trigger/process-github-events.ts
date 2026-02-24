@@ -7,7 +7,6 @@ import { processEvent } from "./process-github-events/event-processors";
 
 export const processGithubEvents = task({
   id: "process-github-events",
-  maxDuration: 300,
   queue: { name: "process-github-events", concurrencyLimit: 1 },
   run: async () => {
     const supabase = createAdminClient();
