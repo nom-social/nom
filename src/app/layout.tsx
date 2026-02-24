@@ -35,12 +35,14 @@ export const metadata: Metadata = {
     url: BASE_URL,
     siteName: "Nom",
     type: "website",
+    images: ["/og-image.png"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Nom — Live commentary for your codebase",
     description:
       "A social feed for your project's GitHub activities. Follow pull requests, releases, and pushes with AI summaries.",
+    images: ["/og-image.png"],
   },
 };
 
