@@ -218,7 +218,7 @@ function ActivityCardBase({
                 }}
               >
                 <Linkedin />
-                Share on LinkedIn
+                Post on LinkedIn
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
