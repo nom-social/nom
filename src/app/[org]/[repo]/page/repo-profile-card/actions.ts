@@ -4,6 +4,8 @@ import { escapeForIlike } from "@/lib/repo-utils";
 import { createClient } from "@/utils/supabase/client";
 import type { Tables } from "@/types/supabase";
 
+import { triggerSubscriberMilestone } from "./server-actions";
+
 export class NotAuthenticatedError extends Error {
   constructor() {
     super("Not authenticated");
@@ -33,6 +35,8 @@ export async function createSubscription(org: string, repo: string) {
     .from("subscriptions")
     .insert({ user_id: userId, repo_id: repoData.id })
     .throwOnError();
+
+  await triggerSubscriberMilestone(repoData.id);
 
   // Copy last month's public_timeline events to user_timeline
   const oneMonthAgo = subMonths(new Date(), 1);
