@@ -21,7 +21,7 @@ export async function fetchRepoProfile(org: string, repo: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("repositories")
-    .select("metadata, org, repo, id")
+    .select("metadata, org, repo, id, is_private")
     .ilike("org", escapeForIlike(org))
     .ilike("repo", escapeForIlike(repo))
     .single();
@@ -52,5 +52,6 @@ export async function fetchRepoProfile(org: string, repo: string) {
     license: meta.license,
     id: data.id,
     subscriptionCount: subscriptionCount || 0,
+    isPrivate: data.is_private ?? false,
   };
 }
