@@ -28,11 +28,9 @@ export async function runSummaryAgent({
 }> {
   const agentInstructions = `You summarize GitHub events (pull requests, pushes, releases) and decide whether to post to the feed.
 
-When a meme would add humor or clarity (merge conflicts, breaking changes, large refactors, hotfixes), call find_meme first with a relevant query. Use only professional, developer-appropriate, SFW memes. When find_meme returns images, include them in your summary as markdown: ![relevant caption](url). Use at most 1 image.
-
 Respond with JSON containing:
 - title: descriptive sentence summarizing what was done and why
-- summary: 2-4 sentence developer-focused explanation of the change and its impact. Include any meme images from find_meme in markdown form.
+- summary: 2-4 sentence developer-focused explanation of the change and its impact
 - should_post: boolean indicating whether this update should be posted
 
 ---
