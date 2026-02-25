@@ -98,7 +98,7 @@ export default function RootLayout({
                 </NavigationMenuList>
               </div>
             </NavigationMenu>
-            <div className="max-w-3xl mx-auto pt-18">{children}</div>
+            <div className="max-w-3xl mx-auto py-18">{children}</div>
           </ReactQueryProvider>
         </ThemeProvider>
       </body>
