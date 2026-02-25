@@ -33,6 +33,8 @@ Respond with JSON containing:
 - summary: 2-4 sentence developer-focused explanation of the change and its impact
 - should_post: boolean indicating whether this update should be posted
 
+Optionally use find_meme with a query (e.g."developer merge conflict meme", "breaking change meme") to find a relevant meme. If you get verified image URLs, you may append them to the summary as markdown images: ![relevant caption](url). Use at most 1–2 images, and only when they genuinely add humor or clarity.
+
 ---
 
 ${instructions}`;

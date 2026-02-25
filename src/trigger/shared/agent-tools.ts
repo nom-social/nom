@@ -3,9 +3,49 @@ import { tool } from "ai";
 import { z } from "zod";
 import { logger } from "@trigger.dev/sdk";
 
+import { createClient as createTavilyClient } from "@/utils/tavily/client";
 import { filterAndFormatDiff } from "@/trigger/process-github-events/event-processors/shared/diff-utils";
 
 const MAX_FILE_CONTENT_BYTES = 50_000;
+const IMAGE_VERIFY_TIMEOUT_MS = 5_000;
+const MAX_VERIFIED_IMAGES = 2;
+
+async function isImageDownloadable(
+  url: string,
+  timeoutMs = IMAGE_VERIFY_TIMEOUT_MS
+): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, {
+        method: "HEAD",
+        signal: controller.signal,
+        redirect: "follow",
+      });
+      clearTimeout(timeout);
+      if (res.ok) {
+        const ct = res.headers.get("content-type") ?? "";
+        return ct === "" || ct.startsWith("image/");
+      }
+      if (res.status === 405) {
+        const getRes = await fetch(url, {
+          method: "GET",
+          headers: { Range: "bytes=0-0" },
+          signal: AbortSignal.timeout(timeoutMs),
+          redirect: "follow",
+        });
+        return getRes.ok;
+      }
+      return false;
+    } catch {
+      clearTimeout(timeout);
+      return false;
+    }
+  } catch {
+    return false;
+  }
+}
 
 export interface CreateEventToolsParams {
   octokit: Octokit;
@@ -170,6 +210,49 @@ export function createEventTools({
           const message =
             err instanceof Error ? err.message : "Failed to fetch commit";
           return { error: message };
+        }
+      },
+    }),
+
+    find_meme: tool({
+      description:
+        "Search for a relevant meme image via Tavily. " +
+        "Use when the update merits a humorous or illustrative meme " +
+        "(e.g. merge conflict, breaking change, big refactor). " +
+        "Returns verified image URLs you can add to the summary as markdown: ![caption](url).",
+      inputSchema: z.object({
+        query: z
+          .string()
+          .describe(
+            "Search query for the meme " +
+              "(e.g. 'merge conflict developer meme', 'breaking change meme')"
+          ),
+      }),
+      execute: async ({ query }: { query: string }) => {
+        const client = createTavilyClient();
+        try {
+          logger.info("Finding meme", { org, repo, query });
+          const response = await client.search(query, {
+            includeImages: true,
+            includeImageDescriptions: true,
+            maxResults: 5,
+            searchDepth: "basic",
+          });
+          const rawImages = response.images ?? [];
+          const verified: { url: string; description?: string }[] = [];
+          for (const img of rawImages) {
+            if (verified.length >= MAX_VERIFIED_IMAGES) break;
+            const { url, description } = img;
+            if (url && (await isImageDownloadable(url))) {
+              verified.push({ url, description });
+            }
+          }
+          return { images: verified };
+        } catch (err) {
+          const message =
+            err instanceof Error ? err.message : "Failed to search for memes";
+          logger.warn("find_meme failed", { org, repo, error: message });
+          return { images: [], error: message };
         }
       },
     }),

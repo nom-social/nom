@@ -33,6 +33,7 @@
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.97.0",
     "@tanstack/react-query": "^5.81.5",
+    "@tavily/core": "^0.7.1",
     "@trigger.dev/sdk": "4.4.1",
     "ai": "^6.0.94",
     "class-variance-authority": "^0.7.1",

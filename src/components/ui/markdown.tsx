@@ -11,7 +11,17 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
-        img: () => null,
+        img: ({ src, alt }) =>
+          src ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={src}
+              alt={alt || ""}
+              className="max-w-full rounded-md my-2"
+              loading="lazy"
+              referrerPolicy="no-referrer"
+            />
+          ) : null,
         p: ({ children }) => <p>{children}</p>,
         code: ({ children }) => (
           <code className="bg-muted px-1.5 py-0.5 font-mono text-sm text-muted-foreground">
