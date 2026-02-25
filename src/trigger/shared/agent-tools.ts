@@ -249,7 +249,11 @@ export function createEventTools({
           for (const img of rawImages) {
             if (verified.length >= MAX_VERIFIED_IMAGES) break;
             const { url, description } = img;
-            if (url && (await isImageDownloadable(url))) {
+            if (
+              url &&
+              url.startsWith("https:") &&
+              (await isImageDownloadable(url))
+            ) {
               verified.push({ url, description });
             }
           }
