@@ -186,7 +186,7 @@ ${commitMessagesText}
 
 ${reviewsText}
 
-You can use explore_file with ref=${pull_request.head.sha} to read specific file contents, or get_pull_request with pull_number=${pull_request.number} for full PR details including diff.`;
+You can use explore_file with ref=${pull_request.head.sha} to read specific file contents, get_pull_request with pull_number=${pull_request.number} for full PR details including diff, or find_meme to add a relevant meme when appropriate.`;
 
     const tools = createEventTools({
       octokit,
