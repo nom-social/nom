@@ -8,7 +8,7 @@ import { filterAndFormatDiff } from "@/trigger/process-github-events/event-proce
 
 const MAX_FILE_CONTENT_BYTES = 50_000;
 const IMAGE_VERIFY_TIMEOUT_MS = 5_000;
-const MAX_VERIFIED_IMAGES = 2;
+const MAX_VERIFIED_IMAGES = 1;
 
 async function isImageDownloadable(
   url: string,
@@ -216,21 +216,23 @@ export function createEventTools({
 
     find_meme: tool({
       description:
-        "Search for a relevant meme image via Tavily. " +
+        "Search for a relevant, appropriate meme image via Tavily. " +
         "Use when the update merits a humorous or illustrative meme " +
         "(e.g. merge conflict, breaking change, big refactor). " +
-        "Returns verified image URLs you can add to the summary as markdown: ![caption](url).",
+        "Only use professional, developer-appropriate, SFW memes. " +
+        "Returns verified image URLs. Include returned URLs in your summary as " +
+        "markdown images: ![caption](url).",
       inputSchema: z.object({
         query: z
           .string()
           .describe(
             "Search query for the meme " +
-              "(e.g. 'merge conflict developer meme', 'breaking change meme')"
+              "(e.g. 'merge conflict developer meme SFW', 'breaking change professional meme')"
           ),
       }),
       execute: async ({ query }: { query: string }) => {
-        const client = createTavilyClient();
         try {
+          const client = createTavilyClient();
           logger.info("Finding meme", { org, repo, query });
           const response = await client.search(query, {
             includeImages: true,

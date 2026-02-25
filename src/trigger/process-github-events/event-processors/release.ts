@@ -74,7 +74,7 @@ Published at: ${release.published_at?.toISOString() || "N/A"}
 Release notes:
 ${release.body || "No release notes provided"}
 
-You can use explore_file with ref=${release.tag_name} to read files at the release tag, compare_refs to diff between tags (e.g. previous...${release.tag_name}), or get_pull_request if you need PR context.`;
+You can use explore_file with ref=${release.tag_name} to read files at the release tag, compare_refs to diff between tags (e.g. previous...${release.tag_name}), get_pull_request if you need PR context, or find_meme to add a relevant meme when appropriate.`;
 
   const tools = createEventTools({
     octokit,

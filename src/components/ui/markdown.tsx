@@ -17,7 +17,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
             <img
               src={src}
               alt={alt || ""}
-              className="max-w-full rounded-md my-2"
+              className="w-full rounded-md my-2 block"
               loading="lazy"
               referrerPolicy="no-referrer"
             />
