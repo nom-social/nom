@@ -14,35 +14,39 @@ async function isImageDownloadable(
   url: string,
   timeoutMs = IMAGE_VERIFY_TIMEOUT_MS
 ): Promise<boolean> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), timeoutMs);
-    try {
-      const res = await fetch(url, {
-        method: "HEAD",
-        signal: controller.signal,
-        redirect: "follow",
-      });
-      clearTimeout(timeout);
-      if (res.ok) {
-        const ct = res.headers.get("content-type") ?? "";
-        return ct === "" || ct.startsWith("image/");
-      }
-      if (res.status === 405) {
+    const res = await fetch(url, {
+      method: "HEAD",
+      signal: controller.signal,
+      redirect: "follow",
+    });
+    clearTimeout(timeout);
+    if (res.ok) {
+      const ct = res.headers.get("content-type") ?? "";
+      return ct.startsWith("image/");
+    }
+    if (res.status === 405) {
+      const getController = new AbortController();
+      const getTimeout = setTimeout(() => getController.abort(), timeoutMs);
+      try {
         const getRes = await fetch(url, {
           method: "GET",
           headers: { Range: "bytes=0-0" },
-          signal: AbortSignal.timeout(timeoutMs),
+          signal: getController.signal,
           redirect: "follow",
         });
+        clearTimeout(getTimeout);
         return getRes.ok;
+      } catch {
+        clearTimeout(getTimeout);
+        return false;
       }
-      return false;
-    } catch {
-      clearTimeout(timeout);
-      return false;
     }
+    return false;
   } catch {
+    clearTimeout(timeout);
     return false;
   }
 }
