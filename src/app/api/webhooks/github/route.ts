@@ -178,7 +178,9 @@ export async function POST(request: Request) {
 
     // Store in Supabase
     await supabase.from("github_event_log").insert(eventData).throwOnError();
-    await processGithubEvents.trigger();
+    await processGithubEvents.trigger(undefined, {
+      concurrencyKey: `${org}/${repo}`,
+    });
 
     // Return a success response
     return NextResponse.json({
