@@ -8,7 +8,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const { data: repos } = await supabase
     .from("repositories")
-    .select("org, repo, created_at");
+    .select("org, repo, created_at")
+    .eq("is_private", false);
 
   const repoUrls: MetadataRoute.Sitemap = (repos || []).map((repo) => ({
     url: `${BASE_URL}/${repo.org}/${repo.repo}`,

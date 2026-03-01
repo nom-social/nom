@@ -1,4 +1,8 @@
 import { createClient } from "@/utils/supabase/server";
+import {
+  fetchOwnedRepoIds,
+  toPostgrestInList,
+} from "@/lib/repository-visibility";
 
 import type { PublicFeedItemWithLikes } from "./actions";
 
@@ -56,12 +60,21 @@ export async function fetchPublicFeedServer({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const ownedRepoIds = await fetchOwnedRepoIds(supabase, user?.id);
 
   const filters = parseSearchFilters(query);
 
   let queryBuilder = supabase
     .from("public_timeline")
-    .select("*, repositories!inner ( org, repo )");
+    .select("*, repositories!inner ( org, repo, is_private )");
+
+  if (ownedRepoIds.length > 0) {
+    queryBuilder = queryBuilder.or(
+      `repositories.is_private.eq.false,repo_id.in.(${toPostgrestInList(ownedRepoIds)})`
+    );
+  } else {
+    queryBuilder = queryBuilder.eq("repositories.is_private", false);
+  }
 
   if (filters.org || filters.owner) {
     queryBuilder = queryBuilder.eq(

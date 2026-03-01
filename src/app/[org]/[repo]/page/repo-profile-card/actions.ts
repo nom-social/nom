@@ -1,6 +1,7 @@
 import { subMonths } from "date-fns";
 
 import { escapeForIlike } from "@/lib/repo-utils";
+import { canUserAccessRepo } from "@/lib/repository-visibility";
 import { createClient } from "@/utils/supabase/client";
 import type { Tables } from "@/types/supabase";
 
@@ -25,11 +26,16 @@ export async function createSubscription(org: string, repo: string) {
   // Get repo id from org/repo
   const { data: repoData } = await supabase
     .from("repositories")
-    .select("id")
+    .select("id, is_private")
     .ilike("org", escapeForIlike(org))
     .ilike("repo", escapeForIlike(repo))
     .single()
     .throwOnError();
+
+  const hasAccess = await canUserAccessRepo(supabase, repoData, userId);
+  if (!hasAccess) {
+    throw new Error("Repository not found");
+  }
 
   await supabase
     .from("subscriptions")
@@ -85,11 +91,16 @@ export async function removeSubscription(org: string, repo: string) {
   // Get repo id from org/repo
   const { data: repoData } = await supabase
     .from("repositories")
-    .select("id")
+    .select("id, is_private")
     .ilike("org", escapeForIlike(org))
     .ilike("repo", escapeForIlike(repo))
     .single()
     .throwOnError();
+
+  const hasAccess = await canUserAccessRepo(supabase, repoData, userId);
+  if (!hasAccess) {
+    return;
+  }
 
   // Delete subscription
   await supabase
@@ -113,11 +124,16 @@ export async function isSubscribed(org: string, repo: string) {
   // Get repo id from org/repo
   const { data: repoData } = await supabase
     .from("repositories")
-    .select("id")
+    .select("id, is_private")
     .ilike("org", escapeForIlike(org))
     .ilike("repo", escapeForIlike(repo))
     .single()
     .throwOnError();
+
+  const hasAccess = await canUserAccessRepo(supabase, repoData, userId);
+  if (!hasAccess) {
+    return { subscribed: false };
+  }
 
   // Check subscription
   const { data: subData } = await supabase
