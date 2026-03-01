@@ -1,4 +1,5 @@
 import { escapeForIlike } from "@/lib/repo-utils";
+import { canUserAccessRepo } from "@/lib/repository-visibility";
 import { createClient } from "@/utils/supabase/server";
 import type { Tables } from "@/types/supabase";
 
@@ -43,6 +44,9 @@ export async function fetchFeedItem({
   org,
 }: FetchFeedItemParams): Promise<FeedItemWithLikes | null> {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { data: repoData } = await supabase
     .from("repositories")
@@ -53,6 +57,9 @@ export async function fetchFeedItem({
 
   if (!repoData) return null;
 
+  const hasAccess = await canUserAccessRepo(supabase, repoData, user?.id);
+  if (!hasAccess) return null;
+
   const { data } = await supabase
     .from("public_timeline")
     .select("*")
@@ -61,11 +68,6 @@ export async function fetchFeedItem({
     .single();
 
   if (!data) return null;
-
-  // Get current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   // Fetch like data for the item
   const { likeCount, isLiked } = await fetchLikeData(

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { normalizeTimelineItem } from "@/app/api/feed/normalize";
 import { escapeForIlike } from "@/lib/repo-utils";
+import { canUserAccessRepo } from "@/lib/repository-visibility";
 import { createClient } from "@/utils/supabase/server";
 
 export async function GET(
@@ -15,16 +16,27 @@ export async function GET(
   const offset = parseInt(searchParams.get("offset") ?? "0", 10);
 
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // Look up the repository to get its ID
   const { data: repoData, error: repoError } = await supabase
     .from("repositories")
-    .select("id")
+    .select("id, is_private")
     .ilike("org", escapeForIlike(org))
     .ilike("repo", escapeForIlike(repo))
     .single();
 
   if (repoError || !repoData) {
+    return NextResponse.json(
+      { error: "Repository not found" },
+      { status: 404 }
+    );
+  }
+
+  const hasAccess = await canUserAccessRepo(supabase, repoData, user?.id);
+  if (!hasAccess) {
     return NextResponse.json(
       { error: "Repository not found" },
       { status: 404 }

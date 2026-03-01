@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { normalizeTimelineItem } from "@/app/api/feed/normalize";
+import {
+  fetchOwnedRepoIds,
+  toPostgrestInList,
+} from "@/lib/repository-visibility";
 import { createClient } from "@/utils/supabase/server";
 
 interface SearchFilters {
@@ -51,10 +55,22 @@ export async function GET(request: NextRequest) {
 
   const filters = parseSearchFilters(q);
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const ownedRepoIds = await fetchOwnedRepoIds(supabase, user?.id);
 
   let queryBuilder = supabase
     .from("public_timeline")
-    .select("*, repositories!inner ( org, repo )");
+    .select("*, repositories!inner ( org, repo, is_private )");
+
+  if (ownedRepoIds.length > 0) {
+    queryBuilder = queryBuilder.or(
+      `repositories.is_private.eq.false,repo_id.in.(${toPostgrestInList(ownedRepoIds)})`
+    );
+  } else {
+    queryBuilder = queryBuilder.eq("repositories.is_private", false);
+  }
 
   if (filters.org || filters.owner) {
     queryBuilder = queryBuilder.eq(

@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+import { canUserAccessRepo } from "@/lib/repository-visibility";
 
 import type { FetchFeedPageResult } from "./actions";
 
@@ -17,6 +18,21 @@ export async function fetchFeedPageServer({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const { data: repoData } = await supabase
+    .from("repositories")
+    .select("id, is_private")
+    .eq("id", repoId)
+    .maybeSingle();
+
+  if (!repoData) {
+    return { items: [], hasMore: false };
+  }
+
+  const hasAccess = await canUserAccessRepo(supabase, repoData, user?.id);
+  if (!hasAccess) {
+    return { items: [], hasMore: false };
+  }
 
   let queryBuilder = supabase
     .from("public_timeline")
