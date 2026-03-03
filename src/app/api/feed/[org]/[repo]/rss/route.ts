@@ -4,6 +4,7 @@ import { normalizeTimelineItem } from "@/app/api/feed/normalize";
 import { toErrorXml, toRssXml } from "@/app/api/feed/to-rss";
 import { BASE_URL } from "@/lib/constants";
 import { escapeForIlike } from "@/lib/repo-utils";
+import { canUserAccessRepo } from "@/lib/repository-visibility";
 import { createClient } from "@/utils/supabase/server";
 
 export async function GET(
@@ -16,15 +17,26 @@ export async function GET(
   const offset = parseInt(searchParams.get("offset") ?? "0", 10);
 
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { data: repoData, error: repoError } = await supabase
     .from("repositories")
-    .select("id")
+    .select("id, is_private")
     .ilike("org", escapeForIlike(org))
     .ilike("repo", escapeForIlike(repo))
     .single();
 
   if (repoError || !repoData) {
+    return new NextResponse(toErrorXml("Repository not found"), {
+      status: 404,
+      headers: { "Content-Type": "application/xml; charset=utf-8" },
+    });
+  }
+
+  const hasAccess = await canUserAccessRepo(supabase, repoData, user?.id);
+  if (!hasAccess) {
     return new NextResponse(toErrorXml("Repository not found"), {
       status: 404,
       headers: { "Content-Type": "application/xml; charset=utf-8" },
@@ -60,10 +72,14 @@ export async function GET(
     feedUrl,
   });
 
+  const cacheControl = repoData.is_private
+    ? "private, no-store"
+    : "public, max-age=60, s-maxage=60";
+
   return new NextResponse(xml, {
     headers: {
       "Content-Type": "application/rss+xml; charset=utf-8",
-      "Cache-Control": "public, max-age=60, s-maxage=60",
+      "Cache-Control": cacheControl,
     },
   });
 }
