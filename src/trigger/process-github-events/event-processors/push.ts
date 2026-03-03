@@ -3,7 +3,6 @@ import crypto from "crypto";
 
 import { logger } from "@trigger.dev/sdk";
 
-import { createAdminClient } from "@/utils/supabase/admin";
 import { Json, TablesInsert } from "@/types/supabase";
 import { PushData } from "@/components/shared/activity-card/shared/schemas";
 import { fetchNomInstructions } from "@/trigger/shared/fetch-nom-template";
@@ -83,7 +82,6 @@ export async function processPushEvent({
   userTimelineEntries: TablesInsert<"user_timeline">[];
   publicTimelineEntries: TablesInsert<"public_timeline">[];
 }> {
-  const supabase = createAdminClient();
   const payload = pushEventSchema.parse(event.raw_payload);
   const octokit = await createAuthenticatedOctokitClient({
     org: repo.org,
@@ -242,36 +240,14 @@ You can use explore_file with ref=${latestCommit.id} to read specific file conte
       .join(" "),
   };
 
-  // Find involved users: pusher or commit author
-  const commitAuthors = new Set(
-    payload.commits
-      .map((commit) => commit.author.username)
-      .filter((username): username is string => Boolean(username))
+  // One entry per subscriber — if you follow the repo, you get the event
+  const userTimelineEntries: TablesInsert<"user_timeline">[] = subscribers.map(
+    (s) => ({
+      user_id: s.user_id,
+      categories: ["pushes"],
+      ...timelineEntry,
+    })
   );
-  const pusherUsername = payload.pusher.username;
-
-  const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
-
-  // Batch query all subscriber users at once
-  const subscriberIds = subscribers.map((s) => s.user_id);
-  const { data: users } = await supabase
-    .from("users")
-    .select("*")
-    .in("id", subscriberIds)
-    .throwOnError();
-
-  for (const user of users ?? []) {
-    if (
-      user.github_username === pusherUsername ||
-      commitAuthors.has(user.github_username)
-    ) {
-      userTimelineEntries.push({
-        user_id: user.id,
-        categories: ["pushes"],
-        ...timelineEntry,
-      });
-    }
-  }
 
   return {
     userTimelineEntries,

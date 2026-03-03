@@ -2,7 +2,6 @@ import { z } from "zod";
 import crypto from "crypto";
 import { logger } from "@trigger.dev/sdk";
 
-import { createAdminClient } from "@/utils/supabase/admin";
 import { Json, TablesInsert } from "@/types/supabase";
 import { PrData } from "@/components/shared/activity-card/shared/schemas";
 import { fetchNomInstructions } from "@/trigger/shared/fetch-nom-template";
@@ -68,8 +67,6 @@ export async function processPullRequestEvent({
     org: repo.org,
     repo: repo.repo,
   });
-  const supabase = createAdminClient();
-
   const validationResult = pullRequestSchema.parse(event.raw_payload);
   const { action, pull_request } = validationResult;
 
@@ -318,29 +315,14 @@ You can use explore_file with ref=${pull_request.head.sha} to read specific file
       .filter((text) => text.trim().length > 0)
       .join(" "),
   };
-  const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
-
-  // Batch query all subscriber users at once
-  const subscriberIds = subscribers.map((s) => s.user_id);
-  const { data: users } = await supabase
-    .from("users")
-    .select("*")
-    .in("id", subscriberIds)
-    .throwOnError();
-
-  for (const user of users ?? []) {
-    const isMyReview = user.github_username === pull_request.user.login;
-    const isReviewAssignedToMe = !!pull_request.requested_reviewers?.some(
-      (reviewer) => reviewer.login === user.github_username
-    );
-
-    userTimelineEntries.push({
-      user_id: user.id,
-      categories:
-        isMyReview || isReviewAssignedToMe ? ["pull_requests"] : undefined,
+  // One entry per subscriber — if you follow the repo, you get the event
+  const userTimelineEntries: TablesInsert<"user_timeline">[] = subscribers.map(
+    (s) => ({
+      user_id: s.user_id,
+      categories: ["pull_requests"],
       ...timelineEntry,
-    });
-  }
+    })
+  );
 
   return {
     userTimelineEntries,

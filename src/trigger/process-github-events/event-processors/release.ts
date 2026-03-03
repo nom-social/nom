@@ -4,7 +4,6 @@ import { logger } from "@trigger.dev/sdk";
 
 import { Json, TablesInsert } from "@/types/supabase";
 import { ReleaseData } from "@/components/shared/activity-card/shared/schemas";
-import { createAdminClient } from "@/utils/supabase/admin";
 import { fetchNomInstructions } from "@/trigger/shared/fetch-nom-template";
 import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
 import { createEventTools } from "@/trigger/shared/agent-tools";
@@ -57,8 +56,6 @@ export async function processReleaseEvent({
     repo: repo.repo,
   });
   const { action, release } = validationResult;
-
-  const supabase = createAdminClient();
 
   const instructions = await fetchNomInstructions({
     eventType: "release",
@@ -160,23 +157,14 @@ You can use explore_file with ref=${release.tag_name} to read files at the relea
       .filter((text) => text.trim().length > 0)
       .join(" "),
   };
-  const userTimelineEntries: TablesInsert<"user_timeline">[] = [];
-
-  // Batch query all subscriber users at once
-  const subscriberIds = subscribers.map((s) => s.user_id);
-  const { data: users } = await supabase
-    .from("users")
-    .select("*")
-    .in("id", subscriberIds)
-    .throwOnError();
-
-  for (const user of users ?? []) {
-    userTimelineEntries.push({
-      ...timelineEntry,
-      user_id: user.id,
+  // One entry per subscriber — if you follow the repo, you get the event
+  const userTimelineEntries: TablesInsert<"user_timeline">[] = subscribers.map(
+    (s) => ({
+      user_id: s.user_id,
       categories: ["releases"],
-    });
-  }
+      ...timelineEntry,
+    })
+  );
 
   return {
     userTimelineEntries,
