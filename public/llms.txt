@@ -112,6 +112,43 @@ Both endpoints return the same JSON structure:
 
 Event types: `pull_request`, `issue`, `release`, `push`
 
+## CLI / curl
+
+The feed API is public; no authentication required.
+
+**Global feed**
+```bash
+curl -sS "https://nomit.dev/api/feed?limit=10"
+```
+
+**Global feed with filters**
+```bash
+curl -sS "https://nomit.dev/api/feed?q=org:vercel&limit=10"
+curl -sS "https://nomit.dev/api/feed?q=type:pull_request%20from:2026-01-01&limit=20"
+```
+
+**RSS feed**
+```bash
+curl -sS "https://nomit.dev/api/feed/rss?limit=20"
+curl -sS "https://nomit.dev/api/feed/vercel/next.js/rss?limit=10"
+```
+
+## Agent Skill
+
+An installable agent skill (SKILL.md format) is available at https://nomit.dev/skill.md.
+
+**Name**: `nom`
+
+**When to use**: When asked to check recent PRs, issues, releases, or pushes from a GitHub org or repo, or to search the global feed. Supports filtering by org, repo, event type, date range, and free text. Can return JSON or RSS.
+
+**What the skill covers**:
+- Endpoints: global feed, repo feed, global RSS, repo RSS
+- Query params: `limit`, `offset`, `q` with filter syntax (`org:`, `repo:`, `type:`, `from:`, `to:`)
+- Response shape and how to present items (type label, title link, summary, author, timestamp)
+- Input validation for `org`/`repo` and URL encoding
+
+**Install**: Fetch https://nomit.dev/skill.md and load into your skill system.
+
 ## Key Pages
 
 - https://nomit.dev — Home / global public feed

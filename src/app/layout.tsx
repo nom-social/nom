@@ -53,6 +53,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link
+          rel="alternate"
+          type="text/plain"
+          href="/llms.txt"
+          title="For AI agents"
+        />
+      </head>
       <body
         className={`${GeistPixelSquare.variable} ${jersey15.variable} font-sans antialiased min-h-screen overflow-y-scroll`}
       >
