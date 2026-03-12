@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "check-types": "tsc --noEmit",
+    "test": "vitest run",
     "tsc": "tsc --noEmit",
     "trigger:dev": "npx trigger.dev@latest dev",
     "backfill:repo": "npx tsx src/scripts/backfill/backfill-repo-events.ts"

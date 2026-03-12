@@ -1,3 +1,4 @@
+import { parseSearchFilters } from "@/lib/feed-utils";
 import { Tables } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/client";
 
@@ -29,55 +30,6 @@ export class NotAuthenticatedError extends Error {
   constructor() {
     super("Not authenticated");
   }
-}
-
-// Types for parsed search filters
-interface SearchFilters {
-  org?: string;
-  repo?: string;
-  type?: string;
-  from?: string;
-  to?: string;
-  textQuery: string;
-  owner?: string;
-}
-
-// Function to parse special filters from search query
-function parseSearchFilters(query?: string): SearchFilters {
-  if (!query || !query.trim()) {
-    return { textQuery: "" };
-  }
-
-  const filters: SearchFilters = { textQuery: "" };
-  let remainingText = query;
-
-  // Define regex patterns for each filter type
-  const filterPatterns = {
-    org: /\borg:(\S+)/g,
-    repo: /\brepo:(\S+)/g,
-    type: /\btype:(\S+)/g,
-    from: /\bfrom:(\S+)/g,
-    to: /\bto:(\S+)/g,
-    owner: /\bowner:(\S+)/g,
-  };
-
-  // Extract each filter type
-  Object.entries(filterPatterns).forEach(([key, pattern]) => {
-    const matches = [...remainingText.matchAll(pattern)];
-    if (matches.length > 0) {
-      // Take the last match if multiple exist
-      const lastMatch = matches[matches.length - 1];
-      filters[key as keyof SearchFilters] = lastMatch[1];
-
-      // Remove all instances of this filter from the remaining text
-      remainingText = remainingText.replace(pattern, "");
-    }
-  });
-
-  // Clean up the remaining text (remove extra spaces)
-  filters.textQuery = remainingText.replace(/\s+/g, " ").trim();
-
-  return filters;
 }
 
 // Helper function to batch fetch like data for multiple items
