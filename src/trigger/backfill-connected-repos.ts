@@ -17,7 +17,6 @@ export const backfillConnectedReposTask = schemaTask({
   }),
   run: async ({ repos, limit }) => {
     const supabase = createAdminClient();
-    let insertedCount = 0;
 
     for (const { org, repo } of repos) {
       try {
@@ -49,22 +48,15 @@ export const backfillConnectedReposTask = schemaTask({
         }));
 
         await supabase.from("github_event_log").insert(rows).throwOnError();
-        insertedCount += rows.length;
         logger.info("Inserted backfill events for connected repo", {
           org,
           repo,
           events: rows.length,
         });
+        await processGithubEvents.trigger({ org, repo });
       } catch (error) {
         logger.error("Failed to backfill connected repo", { org, repo, error });
       }
-    }
-
-    if (insertedCount > 0) {
-      await processGithubEvents.trigger();
-      logger.info("Triggered event processing after initial backfill", {
-        insertedCount,
-      });
     }
   },
 });

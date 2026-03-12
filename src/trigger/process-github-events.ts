@@ -1,26 +1,33 @@
-import { logger, task } from "@trigger.dev/sdk";
+import { logger, schemaTask } from "@trigger.dev/sdk";
+import { z } from "zod";
 
 import { escapeForIlike } from "@/lib/repo-utils";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 import { processEvent } from "./process-github-events/event-processors";
 
-export const processGithubEvents = task({
+export const processGithubEvents = schemaTask({
   id: "process-github-events",
   queue: { name: "process-github-events", concurrencyLimit: 1 },
-  run: async () => {
+  schema: z.object({
+    org: z.string(),
+    repo: z.string(),
+  }),
+  run: async ({ org, repo }) => {
     const supabase = createAdminClient();
     const currentTimestamp = new Date().toISOString();
 
-    // Get unprocessed events
+    // Get unprocessed events for this org/repo
     const { data: events } = await supabase
       .from("github_event_log")
       .select("*")
       .is("last_processed", null)
+      .eq("org", org)
+      .eq("repo", repo)
       .order("created_at", { ascending: true })
       .throwOnError();
 
-    logger.info(`Processing ${events.length} events`);
+    logger.info(`Processing ${events.length} events for ${org}/${repo}`);
 
     // First, handle any snoozed timeline entries that have reached their time
     await Promise.allSettled([

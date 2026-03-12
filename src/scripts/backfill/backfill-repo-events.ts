@@ -178,7 +178,7 @@ async function main() {
   );
 
   try {
-    await processGithubEvents.trigger();
+    await processGithubEvents.trigger({ org, repo });
     console.log("Trigger invoked successfully.");
   } catch (err) {
     console.error("Failed to trigger process-github-events:", err);
