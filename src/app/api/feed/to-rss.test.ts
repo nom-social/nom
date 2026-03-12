@@ -6,6 +6,7 @@ describe("toErrorXml", () => {
   it("escapes XML entities in message", () => {
     const result = toErrorXml("<script>alert('xss')</script>");
     expect(result).toContain("<message>");
+    expect(result).toContain("&lt;script&gt;");
     expect(result).not.toContain("<script>");
   });
 
