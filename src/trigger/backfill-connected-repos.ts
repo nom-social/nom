@@ -31,8 +31,7 @@ export const backfillConnectedReposTask = schemaTask({
           org,
           repo,
           limit,
-          FILTERABLE_EVENT_TYPES,
-          { shouldRateLimit: false }
+          FILTERABLE_EVENT_TYPES
         );
 
         if (events.length === 0) {

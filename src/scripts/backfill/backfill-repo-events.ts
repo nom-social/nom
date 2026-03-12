@@ -15,7 +15,7 @@
  *     Comma-separated list of event types to backfill.
  *
  * Env:
- *   GITHUB_TOKEN (optional) - PAT for higher rate limits (5000/hr vs 60/hr unauthenticated)
+ *   GITHUB_TOKEN - required GitHub PAT used for API requests
  *   NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY - required for DB
  *   TRIGGER_SECRET_KEY - required to trigger process-github-events (or run trigger dev)
  */
@@ -101,24 +101,19 @@ async function main() {
   const { org, repo, limit, dryRun, types } = parseArgs();
 
   if (
+    !process.env.GITHUB_TOKEN ||
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     !process.env.SUPABASE_SERVICE_ROLE_KEY
   ) {
     console.error(
-      "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY"
+      "Missing GITHUB_TOKEN, NEXT_PUBLIC_SUPABASE_URL, or SUPABASE_SERVICE_ROLE_KEY"
     );
     process.exit(1);
   }
 
   const octokit = new Octokit({
-    auth: process.env.GITHUB_TOKEN || undefined,
+    auth: process.env.GITHUB_TOKEN,
   });
-
-  if (!process.env.GITHUB_TOKEN) {
-    console.warn(
-      "No GITHUB_TOKEN set. Using unauthenticated API (60 req/hr). Consider setting GITHUB_TOKEN for reliable backfill."
-    );
-  }
 
   console.log(`Ensuring repo ${org}/${repo} exists...`);
   await ensurePublicRepo({ org, repo });
