@@ -4,14 +4,14 @@ export interface SearchFilters {
   type?: string;
   from?: string;
   to?: string;
-  memes?: string;
+  meme?: string;
   textQuery: string;
   owner?: string;
 }
 
 /**
  * Parses the feed search query string into structured filters and remaining text.
- * Supports: org:, repo:, type:, from:, to:, owner:, memes:
+ * Supports: org:, repo:, type:, from:, to:, owner:, meme:
  */
 export function parseSearchFilters(query?: string): SearchFilters {
   if (!query || !query.trim()) {
@@ -28,7 +28,7 @@ export function parseSearchFilters(query?: string): SearchFilters {
     from: /\bfrom:(\S+)/g,
     to: /\bto:(\S+)/g,
     owner: /\bowner:(\S+)/g,
-    memes: /\bmemes:(\S+)/g,
+    meme: /\bmeme:(\S+)/g,
   };
 
   Object.entries(filterPatterns).forEach(([key, pattern]) => {

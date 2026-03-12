@@ -23,10 +23,10 @@ export async function fetchFeedPageServer({
     .select("*")
     .eq("repo_id", repoId);
 
-  const memeMatch = query?.match(/\bmemes:(\S+)/);
+  const memeMatch = query?.match(/\bmeme:(\S+)/);
   const memeFilter = memeMatch?.[1];
   const textQuery = query
-    ?.replace(/\bmemes:(\S+)/g, "")
+    ?.replace(/\bmeme:(\S+)/g, "")
     .replace(/\s+/g, " ")
     .trim();
 
@@ -36,14 +36,10 @@ export async function fetchFeedPageServer({
       config: "english",
     });
   }
-  if (memeFilter) {
+  if (memeFilter === "true") {
     queryBuilder = queryBuilder.like("search_text", "%![%");
-    if (memeFilter !== "all") {
-      const terms = memeFilter.split(",").filter(Boolean);
-      for (const term of terms) {
-        queryBuilder = queryBuilder.ilike("search_text", `%${term}%`);
-      }
-    }
+  } else if (memeFilter === "false") {
+    queryBuilder = queryBuilder.not("search_text", "like", "%![%");
   }
 
   const { data } = await queryBuilder
