@@ -39,7 +39,7 @@ export async function GET(request: Request) {
               email: session.user.email!,
               github_username: session.user.user_metadata.user_name,
             },
-            { onConflict: "id" }
+            { onConflict: "id" },
           )
           .throwOnError();
 
@@ -57,7 +57,7 @@ export async function GET(request: Request) {
               user_id: session.user.id,
               repo_id: repo.id,
             })),
-            { onConflict: "user_id,repo_id" }
+            { onConflict: "user_id,repo_id" },
           )
           .throwOnError();
       }

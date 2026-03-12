@@ -12,7 +12,7 @@ const MAX_VERIFIED_IMAGES = 1;
 
 async function isImageDownloadable(
   url: string,
-  timeoutMs = IMAGE_VERIFY_TIMEOUT_MS
+  timeoutMs = IMAGE_VERIFY_TIMEOUT_MS,
 ): Promise<boolean> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -91,7 +91,7 @@ export function createEventTools({
           if (Array.isArray(data)) {
             const entries = data.map(
               (item) =>
-                `${item.type === "dir" ? "📁" : "📄"} ${item.path}${item.type === "dir" ? "/" : ""}`
+                `${item.type === "dir" ? "📁" : "📄"} ${item.path}${item.type === "dir" ? "/" : ""}`,
             );
             return { entries };
           }
@@ -139,7 +139,7 @@ export function createEventTools({
           });
 
           const { filteredFiles, diff: combinedDiff } = filterAndFormatDiff(
-            data.files ?? []
+            data.files ?? [],
           );
 
           let diff = combinedDiff;
@@ -152,7 +152,7 @@ export function createEventTools({
           const commitSummaries = (data.commits ?? [])
             .map(
               (c) =>
-                `- ${c.sha?.slice(0, 7) ?? "?"} ${c.commit?.message?.split("\n")[0] ?? ""} (${c.commit?.author?.name ?? "unknown"})`
+                `- ${c.sha?.slice(0, 7) ?? "?"} ${c.commit?.message?.split("\n")[0] ?? ""} (${c.commit?.author?.name ?? "unknown"})`,
             )
             .join("\n");
 
@@ -191,7 +191,7 @@ export function createEventTools({
           });
 
           const { filteredFiles, diff: combinedDiff } = filterAndFormatDiff(
-            data.files ?? []
+            data.files ?? [],
           );
 
           let diff = combinedDiff;
@@ -231,7 +231,7 @@ export function createEventTools({
           .string()
           .describe(
             "Search query for the meme " +
-              "(e.g. 'merge conflict developer meme SFW', 'breaking change professional meme')"
+              "(e.g. 'merge conflict developer meme SFW', 'breaking change professional meme')",
           ),
       }),
       execute: async ({ query }: { query: string }) => {
@@ -299,12 +299,12 @@ export function createEventTools({
           const reviewSummaries = reviews.data
             .map(
               (r) =>
-                `- ${r.user?.login ?? "unknown"} [${r.state}]: ${r.body ? r.body.substring(0, 200) : "No comment"}`
+                `- ${r.user?.login ?? "unknown"} [${r.state}]: ${r.body ? r.body.substring(0, 200) : "No comment"}`,
             )
             .join("\n");
 
           const { filteredFiles, diff: combinedDiff } = filterAndFormatDiff(
-            filesData.data
+            filesData.data,
           );
 
           let diff = combinedDiff;

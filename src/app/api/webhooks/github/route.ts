@@ -31,7 +31,7 @@ export async function POST(request: Request) {
           error: "Invalid webhook payload",
           details: validationResult.error.format(),
         },
-        { status: 400 }
+        { status: 400 },
       );
 
     const payload = validationResult.data;
@@ -109,7 +109,7 @@ export async function POST(request: Request) {
     const rawBodyString = JSON.stringify(rawBody);
     const hmac = crypto.createHmac(
       "sha256",
-      process.env.GITHUB_WEBHOOK_SECRET!
+      process.env.GITHUB_WEBHOOK_SECRET!,
     );
     hmac.update(rawBodyString);
     const digest = `sha256=${hmac.digest("hex")}`;
@@ -152,7 +152,7 @@ export async function POST(request: Request) {
           .from("subscriptions")
           .upsert(
             { user_id: user.id, repo_id: repoData.id },
-            { onConflict: "user_id,repo_id" }
+            { onConflict: "user_id,repo_id" },
           )
           .throwOnError();
 
@@ -191,7 +191,7 @@ export async function POST(request: Request) {
     Sentry.captureException(error);
     return NextResponse.json(
       { error: "Failed to process webhook" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -19,8 +19,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       toastOptions={{
         classNames: {
-          success:
-            "!bg-nom-green !text-black !border-none !shadow-none",
+          success: "!bg-nom-green !text-black !border-none !shadow-none",
           error:
             "!bg-[var(--color-destructive)] !text-white !border-none !shadow-none",
         },

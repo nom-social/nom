@@ -10,7 +10,7 @@ interface OctokitClientOptions {
 }
 
 export async function createAuthenticatedOctokitClient(
-  options?: OctokitClientOptions
+  options?: OctokitClientOptions,
 ) {
   let installationId: number | undefined;
   if (options) {
@@ -31,7 +31,7 @@ export async function createAuthenticatedOctokitClient(
     const appId = process.env.GITHUB_APP_ID;
     const privateKey = process.env.GITHUB_APP_PRIVATE_KEY?.replace(
       /\\n/g,
-      "\n"
+      "\n",
     );
     const octokit = new Octokit({
       authStrategy: createAppAuth,

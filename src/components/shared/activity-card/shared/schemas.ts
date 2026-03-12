@@ -49,7 +49,7 @@ export const releaseDataSchema = z.object({
         download_count: z.number(),
         content_type: z.string(),
         browser_download_url: z.string(),
-      })
+      }),
     ),
     contributors: z.array(z.string()),
     ai_summary: z.string(),

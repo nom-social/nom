@@ -35,7 +35,7 @@ export default async function RepoPage({
       }),
     getNextPageParam: (
       lastPage: FetchFeedPageResult,
-      allPages: FetchFeedPageResult[]
+      allPages: FetchFeedPageResult[],
     ) => {
       if (lastPage.hasMore) {
         return allPages.reduce((acc, page) => acc + page.items.length, 0);
@@ -80,7 +80,7 @@ export async function generateMetadata({
   const truncate = (str: string) =>
     str.length > 200 ? str.slice(0, 200) + "..." : str;
   const description = truncate(
-    repoProfile.description || `View ${repo}/${org} on Nom.`
+    repoProfile.description || `View ${repo}/${org} on Nom.`,
   );
 
   return {

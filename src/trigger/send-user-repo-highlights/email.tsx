@@ -28,7 +28,7 @@ function Email({ org, repo, htmlContent }: EmailProps) {
 
 export async function render({ org, repo, htmlContent }: EmailProps) {
   const emailHtml = await renderReactEmail(
-    <Email org={org} repo={repo} htmlContent={htmlContent} />
+    <Email org={org} repo={repo} htmlContent={htmlContent} />,
   );
 
   return emailHtml;

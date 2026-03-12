@@ -23,5 +23,5 @@ export type SummaryWithPostDecision = z.infer<
  */
 export const summaryWithPostDecisionTextFormat = zodTextFormat(
   summaryWithPostDecisionSchema,
-  "summary_with_post_decision"
+  "summary_with_post_decision",
 );

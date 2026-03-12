@@ -80,7 +80,7 @@ function StatusActivityCardBase({
   const formattedLikeCount =
     likeCount !== null
       ? new Intl.NumberFormat(undefined, { notation: "compact" }).format(
-          likeCount
+          likeCount,
         )
       : "--";
 
@@ -174,7 +174,7 @@ function StatusActivityCardBase({
                 onClick={() =>
                   share(
                     `${window.location.origin}/${org}/${repo}/status/${hash}`,
-                    title
+                    title,
                   )
                 }
               >
@@ -184,7 +184,7 @@ function StatusActivityCardBase({
               <DropdownMenuItem
                 onClick={() => {
                   const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                    body
+                    body,
                   )}`;
                   window.open(tweetUrl, "_blank");
                 }}

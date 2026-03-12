@@ -1,47 +1,7 @@
+import { parseSearchFilters } from "@/lib/feed-utils";
 import { createClient } from "@/utils/supabase/server";
 
 import type { PublicFeedItemWithLikes } from "./actions";
-
-// Types for parsed search filters
-interface SearchFilters {
-  org?: string;
-  repo?: string;
-  type?: string;
-  from?: string;
-  to?: string;
-  textQuery: string;
-  owner?: string;
-}
-
-function parseSearchFilters(query?: string): SearchFilters {
-  if (!query || !query.trim()) {
-    return { textQuery: "" };
-  }
-
-  const filters: SearchFilters = { textQuery: "" };
-  let remainingText = query;
-
-  const filterPatterns = {
-    org: /\borg:(\S+)/g,
-    repo: /\brepo:(\S+)/g,
-    type: /\btype:(\S+)/g,
-    from: /\bfrom:(\S+)/g,
-    to: /\bto:(\S+)/g,
-    owner: /\bowner:(\S+)/g,
-  };
-
-  Object.entries(filterPatterns).forEach(([key, pattern]) => {
-    const matches = [...remainingText.matchAll(pattern)];
-    if (matches.length > 0) {
-      const lastMatch = matches[matches.length - 1];
-      filters[key as keyof SearchFilters] = lastMatch[1];
-      remainingText = remainingText.replace(pattern, "");
-    }
-  });
-
-  filters.textQuery = remainingText.replace(/\s+/g, " ").trim();
-  return filters;
-}
 
 export async function fetchPublicFeedServer({
   limit,
@@ -66,7 +26,7 @@ export async function fetchPublicFeedServer({
   if (filters.org || filters.owner) {
     queryBuilder = queryBuilder.eq(
       "repositories.org",
-      filters.org || filters.owner || ""
+      filters.org || filters.owner || "",
     );
   }
   if (filters.repo) {
@@ -78,20 +38,20 @@ export async function fetchPublicFeedServer({
   if (filters.from) {
     queryBuilder = queryBuilder.gte(
       "updated_at",
-      new Date(filters.from).toISOString()
+      new Date(filters.from).toISOString(),
     );
   }
   if (filters.to) {
     queryBuilder = queryBuilder.lte(
       "updated_at",
-      new Date(filters.to).toISOString()
+      new Date(filters.to).toISOString(),
     );
   }
   if (filters.textQuery?.trim()) {
     queryBuilder = queryBuilder.textSearch(
       "search_vector",
       filters.textQuery.trim(),
-      { type: "websearch", config: "english" }
+      { type: "websearch", config: "english" },
     );
   }
 
@@ -117,7 +77,7 @@ export async function fetchPublicFeedServer({
     (row: { dedupe_hash: string; like_count: number; user_liked: boolean }) => {
       likeCountMap[row.dedupe_hash] = row.like_count;
       userLikesMap[row.dedupe_hash] = row.user_liked;
-    }
+    },
   );
 
   const itemsWithLikes: PublicFeedItemWithLikes[] = items.map((item) => ({

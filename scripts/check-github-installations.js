@@ -9,7 +9,7 @@ const PRIVATE_KEY_PATH = process.env.GITHUB_PRIVATE_KEY_PATH;
 
 if (!APP_ID || !PRIVATE_KEY_PATH) {
   console.error(
-    "Please set GITHUB_APP_ID and GITHUB_PRIVATE_KEY_PATH env vars."
+    "Please set GITHUB_APP_ID and GITHUB_PRIVATE_KEY_PATH env vars.",
   );
   process.exit(1);
 }
@@ -72,7 +72,7 @@ async function main() {
   console.log("Installations:");
   for (const inst of res.data) {
     console.log(
-      `- ID: ${inst.id}, Account: ${inst.account?.login}, Target: ${inst.target_type}`
+      `- ID: ${inst.id}, Account: ${inst.account?.login}, Target: ${inst.target_type}`,
     );
   }
 }

@@ -21,7 +21,7 @@ const Github = React.forwardRef<SVGSVGElement, IconProps>(
         fill="currentColor"
       />
     </svg>
-  )
+  ),
 );
 
 Github.displayName = "Github";

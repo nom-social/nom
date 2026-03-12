@@ -32,7 +32,7 @@ export const syncBatchReposMetadataTask = schemaTask({
           [
             octokit.repos.get({ owner: org, repo }),
             octokit.repos.listLanguages({ owner: org, repo }),
-          ]
+          ],
         );
 
         const languages = Object.entries(languagesData)

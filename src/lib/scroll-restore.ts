@@ -10,7 +10,7 @@ export function saveScrollPosition(path: string): void {
   try {
     sessionStorage.setItem(
       SCROLL_RESTORE_KEY,
-      JSON.stringify({ path, y: window.scrollY })
+      JSON.stringify({ path, y: window.scrollY }),
     );
   } catch {
     // Ignore storage errors (e.g. private browsing)

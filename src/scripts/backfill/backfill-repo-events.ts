@@ -67,7 +67,7 @@ function parseArgs(): {
       const invalid = types.filter((t) => !validSet.has(t));
       if (invalid.length > 0) {
         console.error(
-          `Invalid --types: ${invalid.join(", ")}. Valid: ${FILTERABLE_EVENT_TYPES.join(", ")}`
+          `Invalid --types: ${invalid.join(", ")}. Valid: ${FILTERABLE_EVENT_TYPES.join(", ")}`,
         );
         process.exit(1);
       }
@@ -82,14 +82,14 @@ function parseArgs(): {
 
   if (!org || !repo) {
     console.error(
-      "Usage: backfill-repo-events OWNER/REPO --types push,pull_request,release [--limit N] [--dry-run]"
+      "Usage: backfill-repo-events OWNER/REPO --types push,pull_request,release [--limit N] [--dry-run]",
     );
     process.exit(1);
   }
 
   if (types.length === 0) {
     console.error(
-      "--types is required. Example: --types push,pull_request,release"
+      "--types is required. Example: --types push,pull_request,release",
     );
     process.exit(1);
   }
@@ -106,7 +106,7 @@ async function main() {
     !process.env.SUPABASE_SERVICE_ROLE_KEY
   ) {
     console.error(
-      "Missing GITHUB_TOKEN, NEXT_PUBLIC_SUPABASE_URL, or SUPABASE_SERVICE_ROLE_KEY"
+      "Missing GITHUB_TOKEN, NEXT_PUBLIC_SUPABASE_URL, or SUPABASE_SERVICE_ROLE_KEY",
     );
     process.exit(1);
   }
@@ -123,14 +123,14 @@ async function main() {
   // Metadata sync runs async; repo page may take a few seconds to load
 
   console.log(
-    `Fetching up to ${limit} events (types: ${types.join(", ")}) from dedicated APIs...`
+    `Fetching up to ${limit} events (types: ${types.join(", ")}) from dedicated APIs...`,
   );
   const enrichedEvents = await fetchAndEnrichRepoEvents(
     octokit,
     org,
     repo,
     limit,
-    types
+    types,
   );
 
   if (enrichedEvents.length === 0) {
@@ -174,7 +174,7 @@ async function main() {
   }
 
   console.log(
-    `Inserted ${rows.length} events. Triggering process-github-events...`
+    `Inserted ${rows.length} events. Triggering process-github-events...`,
   );
 
   try {
@@ -183,7 +183,7 @@ async function main() {
   } catch (err) {
     console.error("Failed to trigger process-github-events:", err);
     console.warn(
-      "Events are in github_event_log. Run the trigger manually if needed."
+      "Events are in github_event_log. Run the trigger manually if needed.",
     );
     process.exit(1);
   }

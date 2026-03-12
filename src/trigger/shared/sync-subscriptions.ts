@@ -61,7 +61,7 @@ export async function syncUserStars(userId: string) {
     const starredRepos = await getAllStarredRepos(octokit, userName);
 
     logger.info(
-      `Found ${starredRepos.length} starred repos for user ${user.id}`
+      `Found ${starredRepos.length} starred repos for user ${user.id}`,
     );
 
     // Batch fetch all matching repositories using OR conditions for exact pairs
@@ -71,7 +71,7 @@ export async function syncUserStars(userId: string) {
       .or(
         starredRepos
           .map((repo) => `and(org.eq.${repo.owner.login},repo.eq.${repo.name})`)
-          .join(",")
+          .join(","),
       )
       .throwOnError();
 
@@ -81,12 +81,12 @@ export async function syncUserStars(userId: string) {
         .from("subscriptions")
         .upsert(
           { user_id: user.id, repo_id: repo.id },
-          { onConflict: "user_id,repo_id" }
+          { onConflict: "user_id,repo_id" },
         )
         .throwOnError();
 
       logger.info(
-        `Upserted subscription for user ${user.id} to repo ${repo.id}`
+        `Upserted subscription for user ${user.id} to repo ${repo.id}`,
       );
     }
   } catch (error) {

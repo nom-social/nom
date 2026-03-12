@@ -48,7 +48,7 @@ export function toRssXml(
     description: string;
     feedUrl: string;
     language?: string;
-  }
+  },
 ): string {
   const { title, link, description, feedUrl, language = "en" } = options;
   const escapedTitle = encodeXML(title);

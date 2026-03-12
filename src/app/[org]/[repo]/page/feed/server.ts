@@ -52,7 +52,7 @@ export async function fetchFeedPageServer({
     (row: { dedupe_hash: string; like_count: number; user_liked: boolean }) => {
       likeCountMap[row.dedupe_hash] = row.like_count;
       userLikesMap[row.dedupe_hash] = row.user_liked;
-    }
+    },
   );
 
   const itemsWithLikes = items.map((item) => ({

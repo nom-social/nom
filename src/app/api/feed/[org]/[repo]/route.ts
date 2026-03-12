@@ -6,7 +6,7 @@ import { createClient } from "@/utils/supabase/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ org: string; repo: string }> }
+  { params }: { params: Promise<{ org: string; repo: string }> },
 ) {
   const { org, repo } = await params;
   const { searchParams } = request.nextUrl;
@@ -27,7 +27,7 @@ export async function GET(
   if (repoError || !repoData) {
     return NextResponse.json(
       { error: "Repository not found" },
-      { status: 404 }
+      { status: 404 },
     );
   }
 
@@ -53,7 +53,7 @@ export async function GET(
   }
 
   const items = (data ?? []).map((item) =>
-    normalizeTimelineItem({ ...item, org, repo })
+    normalizeTimelineItem({ ...item, org, repo }),
   );
   const has_more = items.length === limit;
 

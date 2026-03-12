@@ -18,7 +18,7 @@ export default async function propagateLicenseChange({
   });
   if (commitResp.data.files) {
     const licenseChanged = commitResp.data.files.some((file) =>
-      /^LICENSE(\..*)?$/i.test(file.filename)
+      /^LICENSE(\..*)?$/i.test(file.filename),
     );
     if (!licenseChanged) return;
 

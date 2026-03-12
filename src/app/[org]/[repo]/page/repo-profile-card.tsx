@@ -56,7 +56,7 @@ export default function RepoProfileCard({
   const router = useRouter();
 
   const [subscriptionCount, setSubscriptionCount] = useState(
-    initialSubscriptionCount
+    initialSubscriptionCount,
   );
 
   const {
@@ -79,17 +79,17 @@ export default function RepoProfileCard({
       toast.success(
         `🔥 YOOO! Welcome to ${repo}! You just joined ${Intl.NumberFormat(
           "en",
-          { notation: "compact" }
+          { notation: "compact" },
         ).format(initialSubscriptionCount)} dev${
           initialSubscriptionCount === 1 ? "" : "s"
         } building the future! LFG! 🚀`,
-        { icon: null }
+        { icon: null },
       );
     },
     onError: (error) => {
       if (error instanceof NotAuthenticatedError)
         router.push(
-          `/auth/login?next=${encodeURIComponent(window.location.pathname)}`
+          `/auth/login?next=${encodeURIComponent(window.location.pathname)}`,
         );
     },
   });
@@ -102,13 +102,13 @@ export default function RepoProfileCard({
       await refetch();
       toast(
         `💔 NOOO! We're literally crying! You're breaking our heart but we respect your choice. ` +
-          "We'll miss you! 😭"
+          "We'll miss you! 😭",
       );
     },
     onError: (error) => {
       if (error instanceof NotAuthenticatedError)
         router.push(
-          `/auth/login?next=${encodeURIComponent(window.location.pathname)}`
+          `/auth/login?next=${encodeURIComponent(window.location.pathname)}`,
         );
     },
   });
@@ -130,7 +130,7 @@ export default function RepoProfileCard({
               <p className="text-foreground text-xl break-all">{repo}</p>
               <div className="text-muted-foreground text-sm w-full">
                 {Intl.NumberFormat("en", { notation: "compact" }).format(
-                  subscriptionCount
+                  subscriptionCount,
                 )}{" "}
                 subscriber{subscriptionCount === 1 ? "" : "s"}
               </div>

@@ -24,7 +24,7 @@ export type FetchFeedPageResult = {
 async function batchFetchLikeData(
   supabase: ReturnType<typeof createClient>,
   dedupeHashes: string[],
-  userId?: string
+  userId?: string,
 ) {
   // Use database function to efficiently aggregate like counts and user likes
   const { data: likeData } = await supabase
@@ -82,7 +82,7 @@ export async function fetchFeedPage({
   const { likeCountMap, userLikesMap } = await batchFetchLikeData(
     supabase,
     dedupeHashes,
-    user?.id
+    user?.id,
   );
 
   const itemsWithLikes: FeedItemWithLikes[] = items.map((item) => ({

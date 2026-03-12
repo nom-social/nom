@@ -22,7 +22,7 @@ const repoInfo = (
   org: string,
   repo: string,
   repoId = 0,
-  defaultBranch = "main"
+  defaultBranch = "main",
 ) => ({
   id: repoId,
   name: repo,
@@ -43,11 +43,11 @@ export async function fetchAndEnrichRepoEvents(
   org: string,
   repo: string,
   limit: number,
-  types: readonly string[]
+  types: readonly string[],
 ): Promise<EnrichedEventForInsert[]> {
   if (!types.length) {
     throw new Error(
-      "--types is required (e.g. --types push,pull_request,release)"
+      "--types is required (e.g. --types push,pull_request,release)",
     );
   }
 
@@ -219,7 +219,7 @@ export async function fetchAndEnrichRepoEvents(
 
   results.sort(
     (a, b) =>
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
   return results.slice(0, limit);
 }

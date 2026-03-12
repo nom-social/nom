@@ -34,7 +34,7 @@ const pushEventSchema = z.object({
         email: z.string(),
         username: z.string().optional(),
       }),
-    })
+    }),
   ),
   head_commit: z
     .object({
@@ -131,7 +131,7 @@ export async function processPushEvent({
       (commit) =>
         `- ${commit.message.replace(/\n/g, " ")} (${
           commit.author.username || commit.author.name || "unknown"
-        })`
+        })`,
     )
     .join("\n");
 
@@ -140,8 +140,8 @@ export async function processPushEvent({
     new Set(
       payload.commits
         .map((commit) => commit.author.username)
-        .filter((username): username is string => Boolean(username))
-    )
+        .filter((username): username is string => Boolean(username)),
+    ),
   );
 
   const branch = payload.ref.replace("refs/heads/", "");
@@ -210,7 +210,7 @@ You can use explore_file with ref=${latestCommit.id} to read specific file conte
         repo: repo.repo,
         after: payload.after,
         type: "push",
-      })
+      }),
     )
     .digest("hex");
 
@@ -246,7 +246,7 @@ You can use explore_file with ref=${latestCommit.id} to read specific file conte
       user_id: s.user_id,
       categories: ["pushes"],
       ...timelineEntry,
-    })
+    }),
   );
 
   return {

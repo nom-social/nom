@@ -84,7 +84,7 @@ function RepoFeedItems({
       });
       if (node) observerMiddle.current.observe(node);
     },
-    [isFetchingNextPage, fetchNextPage, hasNextPage]
+    [isFetchingNextPage, fetchNextPage, hasNextPage],
   );
 
   const sentinelLastRef = useCallback(
@@ -98,7 +98,7 @@ function RepoFeedItems({
       });
       if (node) observerLast.current.observe(node);
     },
-    [isFetchingNextPage, fetchNextPage, hasNextPage]
+    [isFetchingNextPage, fetchNextPage, hasNextPage],
   );
 
   const handleScrollToTop = () => {

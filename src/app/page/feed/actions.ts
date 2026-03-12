@@ -1,3 +1,4 @@
+import { parseSearchFilters } from "@/lib/feed-utils";
 import { Tables } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/client";
 
@@ -31,60 +32,11 @@ export class NotAuthenticatedError extends Error {
   }
 }
 
-// Types for parsed search filters
-interface SearchFilters {
-  org?: string;
-  repo?: string;
-  type?: string;
-  from?: string;
-  to?: string;
-  textQuery: string;
-  owner?: string;
-}
-
-// Function to parse special filters from search query
-function parseSearchFilters(query?: string): SearchFilters {
-  if (!query || !query.trim()) {
-    return { textQuery: "" };
-  }
-
-  const filters: SearchFilters = { textQuery: "" };
-  let remainingText = query;
-
-  // Define regex patterns for each filter type
-  const filterPatterns = {
-    org: /\borg:(\S+)/g,
-    repo: /\brepo:(\S+)/g,
-    type: /\btype:(\S+)/g,
-    from: /\bfrom:(\S+)/g,
-    to: /\bto:(\S+)/g,
-    owner: /\bowner:(\S+)/g,
-  };
-
-  // Extract each filter type
-  Object.entries(filterPatterns).forEach(([key, pattern]) => {
-    const matches = [...remainingText.matchAll(pattern)];
-    if (matches.length > 0) {
-      // Take the last match if multiple exist
-      const lastMatch = matches[matches.length - 1];
-      filters[key as keyof SearchFilters] = lastMatch[1];
-
-      // Remove all instances of this filter from the remaining text
-      remainingText = remainingText.replace(pattern, "");
-    }
-  });
-
-  // Clean up the remaining text (remove extra spaces)
-  filters.textQuery = remainingText.replace(/\s+/g, " ").trim();
-
-  return filters;
-}
-
 // Helper function to batch fetch like data for multiple items
 async function batchFetchLikeData(
   supabase: ReturnType<typeof createClient>,
   dedupeHashes: string[],
-  userId?: string
+  userId?: string,
 ) {
   // Use database function to efficiently aggregate like counts and user likes
   const { data: likeData } = await supabase
@@ -133,7 +85,7 @@ export async function fetchFeed({
   if (filters.org || filters.owner) {
     queryBuilder = queryBuilder.eq(
       "repositories.org",
-      filters.org || filters.owner || ""
+      filters.org || filters.owner || "",
     );
   }
   if (filters.repo) {
@@ -145,13 +97,13 @@ export async function fetchFeed({
   if (filters.from) {
     queryBuilder = queryBuilder.gte(
       "updated_at",
-      new Date(filters.from).toISOString()
+      new Date(filters.from).toISOString(),
     );
   }
   if (filters.to) {
     queryBuilder = queryBuilder.lte(
       "updated_at",
-      new Date(filters.to).toISOString()
+      new Date(filters.to).toISOString(),
     );
   }
   if (filters.textQuery?.trim()) {
@@ -161,7 +113,7 @@ export async function fetchFeed({
       {
         type: "websearch",
         config: "english",
-      }
+      },
     );
   }
 
@@ -178,7 +130,7 @@ export async function fetchFeed({
   const { likeCountMap, userLikesMap } = await batchFetchLikeData(
     supabase,
     dedupeHashes,
-    user.id
+    user.id,
   );
 
   // Enhance items with like data
@@ -220,7 +172,7 @@ export async function fetchPublicFeed({
   if (filters.org || filters.owner) {
     queryBuilder = queryBuilder.eq(
       "repositories.org",
-      filters.org || filters.owner || ""
+      filters.org || filters.owner || "",
     );
   }
   if (filters.repo) {
@@ -232,13 +184,13 @@ export async function fetchPublicFeed({
   if (filters.from) {
     queryBuilder = queryBuilder.gte(
       "updated_at",
-      new Date(filters.from).toISOString()
+      new Date(filters.from).toISOString(),
     );
   }
   if (filters.to) {
     queryBuilder = queryBuilder.lte(
       "updated_at",
-      new Date(filters.to).toISOString()
+      new Date(filters.to).toISOString(),
     );
   }
   if (filters.textQuery?.trim()) {
@@ -248,7 +200,7 @@ export async function fetchPublicFeed({
       {
         type: "websearch",
         config: "english",
-      }
+      },
     );
   }
 
@@ -265,7 +217,7 @@ export async function fetchPublicFeed({
   const { likeCountMap, userLikesMap } = await batchFetchLikeData(
     supabase,
     dedupeHashes,
-    user?.id
+    user?.id,
   );
 
   // Enhance items with like data
