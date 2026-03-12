@@ -7,12 +7,15 @@ import {
 
 const SCROLL_RESTORE_KEY = "scrollRestore";
 
+type SessionStorageStub = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+
 describe("scroll-restore", () => {
   let sessionStore: Record<string, string> = {};
+  let sessionStorageStub: SessionStorageStub;
 
   beforeEach(() => {
     sessionStore = {};
-    vi.stubGlobal("sessionStorage", {
+    sessionStorageStub = {
       getItem: (key: string) => sessionStore[key] ?? null,
       setItem: (key: string, value: string) => {
         sessionStore[key] = value;
@@ -20,7 +23,8 @@ describe("scroll-restore", () => {
       removeItem: (key: string) => {
         delete sessionStore[key];
       },
-    });
+    };
+    vi.stubGlobal("sessionStorage", sessionStorageStub);
     vi.stubGlobal("window", { scrollY: 100 });
   });
 
@@ -30,9 +34,7 @@ describe("scroll-restore", () => {
 
   describe("saveScrollPosition", () => {
     it("writes path and scrollY to sessionStorage", () => {
-      (
-        globalThis as unknown as { window: { scrollY: number } }
-      ).window.scrollY = 250;
+      vi.stubGlobal("window", { scrollY: 250 });
       saveScrollPosition("/feed");
       const stored = sessionStore[SCROLL_RESTORE_KEY];
       expect(stored).toBeDefined();
@@ -46,8 +48,7 @@ describe("scroll-restore", () => {
     });
 
     it("swallows storage errors", () => {
-      const sessionStorage = globalThis.sessionStorage as Storage;
-      vi.spyOn(sessionStorage, "setItem").mockImplementation(() => {
+      vi.spyOn(sessionStorageStub, "setItem").mockImplementation(() => {
         throw new Error("QuotaExceededError");
       });
       expect(() => saveScrollPosition("/feed")).not.toThrow();

@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { processEvent } from "./event-processors";
+import { processPullRequestEvent } from "./event-processors/pull-request";
+import { processReleaseEvent } from "./event-processors/release";
+import { processPushEvent } from "./event-processors/push";
 
 vi.mock("./event-processors/pull-request", () => ({
   processPullRequestEvent: vi.fn().mockResolvedValue(undefined),
@@ -20,9 +23,6 @@ const baseArgs = {
 
 describe("processEvent", () => {
   it("dispatches pull_request to processPullRequestEvent", async () => {
-    const { processPullRequestEvent } = await import(
-      "./event-processors/pull-request"
-    );
     await processEvent({
       ...baseArgs,
       event: { ...baseArgs.event, event_type: "pull_request" },
@@ -34,7 +34,6 @@ describe("processEvent", () => {
   });
 
   it("dispatches release to processReleaseEvent", async () => {
-    const { processReleaseEvent } = await import("./event-processors/release");
     await processEvent({
       ...baseArgs,
       event: { ...baseArgs.event, event_type: "release" },
@@ -46,7 +45,6 @@ describe("processEvent", () => {
   });
 
   it("dispatches push to processPushEvent", async () => {
-    const { processPushEvent } = await import("./event-processors/push");
     await processEvent({
       ...baseArgs,
       event: { ...baseArgs.event, event_type: "push" },

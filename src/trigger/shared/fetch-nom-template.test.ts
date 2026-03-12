@@ -5,6 +5,16 @@ import {
   fetchNomInstructions,
 } from "./fetch-nom-template";
 
+/** Wraps partial Octokit mock for fetchNomInstructions; cast required for vi.fn(). */
+function asOctokitMock(mock: {
+  repos: { getContent: ReturnType<typeof vi.fn> };
+}): Parameters<typeof fetchNomInstructions>[0]["octokit"] {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- partial mock for Octokit
+  return mock as unknown as Parameters<
+    typeof fetchNomInstructions
+  >[0]["octokit"];
+}
+
 describe("fetchNomInstructions", () => {
   it("returns repo-specific instructions when .nom file exists", async () => {
     const customContent = "Custom instructions for this repo.";
@@ -18,7 +28,7 @@ describe("fetchNomInstructions", () => {
     const result = await fetchNomInstructions({
       eventType: "pull_request",
       repo: { org: "my-org", repo: "my-repo" },
-      octokit: octokit as never,
+      octokit: asOctokitMock(octokit),
     });
     expect(result).toBe(customContent);
     expect(octokit.repos.getContent).toHaveBeenCalledWith({
@@ -39,7 +49,7 @@ describe("fetchNomInstructions", () => {
     const result = await fetchNomInstructions({
       eventType: "push",
       repo: { org: "org", repo: "repo" },
-      octokit: octokit as never,
+      octokit: asOctokitMock(octokit),
     });
     expect(result).toBe(DEFAULT_INSTRUCTIONS.push);
   });
@@ -56,7 +66,7 @@ describe("fetchNomInstructions", () => {
     const result = await fetchNomInstructions({
       eventType: "release",
       repo: { org: "org", repo: "repo" },
-      octokit: octokit as never,
+      octokit: asOctokitMock(octokit),
     });
     expect(result).toBe(DEFAULT_INSTRUCTIONS.release);
   });
@@ -70,7 +80,7 @@ describe("fetchNomInstructions", () => {
     const result = await fetchNomInstructions({
       eventType: "pull_request",
       repo: { org: "org", repo: "repo" },
-      octokit: octokit as never,
+      octokit: asOctokitMock(octokit),
     });
     expect(result).toBe(DEFAULT_INSTRUCTIONS.pull_request);
   });
@@ -84,17 +94,17 @@ describe("fetchNomInstructions", () => {
     const pr = await fetchNomInstructions({
       eventType: "pull_request",
       repo: { org: "x", repo: "y" },
-      octokit: octokit as never,
+      octokit: asOctokitMock(octokit),
     });
     const push = await fetchNomInstructions({
       eventType: "push",
       repo: { org: "x", repo: "y" },
-      octokit: octokit as never,
+      octokit: asOctokitMock(octokit),
     });
     const release = await fetchNomInstructions({
       eventType: "release",
       repo: { org: "x", repo: "y" },
-      octokit: octokit as never,
+      octokit: asOctokitMock(octokit),
     });
     expect(pr).toBe(DEFAULT_INSTRUCTIONS.pull_request);
     expect(push).toBe(DEFAULT_INSTRUCTIONS.push);

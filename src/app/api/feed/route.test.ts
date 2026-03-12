@@ -1,11 +1,17 @@
 import { describe, expect, it, vi } from "vitest";
 
-import type { NextRequest } from "next/server";
+import { NextRequest } from "next/server";
 
 import { GET } from "./route";
 
+const mockCreateClient = vi.hoisted(() => vi.fn());
+
+vi.mock("@/utils/supabase/server", () => ({
+  createClient: mockCreateClient,
+}));
+
 function createRequest(url: string): NextRequest {
-  return { nextUrl: new URL(url) } as NextRequest;
+  return new NextRequest(url);
 }
 
 function createChainableMock(result: {
@@ -27,15 +33,9 @@ function createChainableMock(result: {
   };
 }
 
-vi.mock("@/utils/supabase/server", () => ({
-  createClient: vi.fn(),
-}));
-
 describe("GET /api/feed", () => {
   it("uses default limit 5 and offset 0", async () => {
-    const createClient = (await import("@/utils/supabase/server"))
-      .createClient as ReturnType<typeof vi.fn>;
-    createClient.mockResolvedValue(
+    mockCreateClient.mockResolvedValue(
       createChainableMock({ data: [], error: null })
     );
 
@@ -50,8 +50,6 @@ describe("GET /api/feed", () => {
   });
 
   it("caps limit at 100", async () => {
-    const createClient = (await import("@/utils/supabase/server"))
-      .createClient as ReturnType<typeof vi.fn>;
     const rangeSpy = vi.fn().mockResolvedValue({ data: [], error: null });
     const chain = {
       eq: () => chain,
@@ -61,19 +59,18 @@ describe("GET /api/feed", () => {
       order: () => chain,
       range: rangeSpy,
     };
-    createClient.mockResolvedValue({
+    mockCreateClient.mockResolvedValue({
       from: () => ({ select: () => chain }),
     });
 
     const req = createRequest("http://localhost/api/feed?limit=200&offset=0");
     await GET(req);
+    // range(from, to) is inclusive, so limit 100 → to = 99
     expect(rangeSpy).toHaveBeenCalledWith(0, 99);
   });
 
   it("returns 500 on DB error", async () => {
-    const createClient = (await import("@/utils/supabase/server"))
-      .createClient as ReturnType<typeof vi.fn>;
-    createClient.mockResolvedValue(
+    mockCreateClient.mockResolvedValue(
       createChainableMock({ data: null, error: { message: "DB error" } })
     );
 
@@ -85,8 +82,6 @@ describe("GET /api/feed", () => {
   });
 
   it("returns items and has_more when length equals limit", async () => {
-    const createClient = (await import("@/utils/supabase/server"))
-      .createClient as ReturnType<typeof vi.fn>;
     const mockItems = [
       {
         id: "1",
@@ -98,7 +93,7 @@ describe("GET /api/feed", () => {
         repositories: { org: "org", repo: "repo" },
       },
     ];
-    createClient.mockResolvedValue(
+    mockCreateClient.mockResolvedValue(
       createChainableMock({ data: mockItems, error: null })
     );
 
