@@ -23,15 +23,15 @@
 import { Octokit } from "@octokit/rest";
 
 import { createAdminClient } from "@/utils/supabase/admin";
-import { processGithubEvents } from "@/trigger/process-github-events";
-import { syncBatchReposMetadataTask } from "@/trigger/sync-batch-repos-metadata";
-
-import { ensurePublicRepo } from "./utils/ensure-repo";
 import {
   fetchAndEnrichRepoEvents,
   FILTERABLE_EVENT_TYPES,
   type EnrichedEventForInsert,
-} from "./utils/events-api";
+} from "@/lib/backfill/events-api";
+import { processGithubEvents } from "@/trigger/process-github-events";
+import { syncBatchReposMetadataTask } from "@/trigger/sync-batch-repos-metadata";
+
+import { ensurePublicRepo } from "./utils/ensure-repo";
 
 function parseArgs(): {
   org: string;

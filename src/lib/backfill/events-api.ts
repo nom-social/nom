@@ -51,7 +51,8 @@ export async function fetchAndEnrichRepoEvents(
   org: string,
   repo: string,
   limit: number,
-  types: readonly string[]
+  types: readonly string[],
+  options?: { shouldRateLimit?: boolean }
 ): Promise<EnrichedEventForInsert[]> {
   if (!types.length) {
     throw new Error(
@@ -60,10 +61,16 @@ export async function fetchAndEnrichRepoEvents(
   }
 
   const typeSet = new Set(types.map((t) => t.toLowerCase()));
+  const shouldRateLimit = options?.shouldRateLimit ?? !process.env.GITHUB_TOKEN;
+  const maybeRateLimitForCall = async () => {
+    if (shouldRateLimit) {
+      await maybeRateLimit();
+    }
+  };
   const results: EnrichedEventForInsert[] = [];
 
   const { data: repoData } = await octokit.repos.get({ owner: org, repo });
-  await maybeRateLimit();
+  await maybeRateLimitForCall();
   const defaultBranch = repoData.default_branch ?? "main";
 
   const baseRepoInfo = {
@@ -78,7 +85,7 @@ export async function fetchAndEnrichRepoEvents(
       sha: defaultBranch,
       per_page: Math.min(limit, 100),
     });
-    await maybeRateLimit();
+    await maybeRateLimitForCall();
 
     for (const c of commits ?? []) {
       const author = c.commit?.author;
@@ -140,7 +147,7 @@ export async function fetchAndEnrichRepoEvents(
       direction: "desc",
       per_page: Math.min(limit, 100),
     });
-    await maybeRateLimit();
+    await maybeRateLimitForCall();
 
     const mergedCandidates = (pulls ?? []).filter(
       (p) => (p as { merged_at?: string | null }).merged_at
@@ -151,7 +158,7 @@ export async function fetchAndEnrichRepoEvents(
         repo,
         pull_number: prSummary.number,
       });
-      await maybeRateLimit();
+      await maybeRateLimitForCall();
 
       if (!pr.merged) continue;
 
@@ -211,7 +218,7 @@ export async function fetchAndEnrichRepoEvents(
       repo,
       per_page: Math.min(limit, 100),
     });
-    await maybeRateLimit();
+    await maybeRateLimitForCall();
 
     for (const r of releases ?? []) {
       const publishedAt = r.published_at ?? r.created_at;
