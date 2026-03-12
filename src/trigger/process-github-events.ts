@@ -85,18 +85,15 @@ export const processGithubEvents = schemaTask({
         ]);
       } catch (error) {
         logger.error("Error processing event", { error, eventId: event.id });
+      } finally {
+        // Mark event as processed
+        await supabase
+          .from("github_event_log")
+          .update({ last_processed: currentTimestamp })
+          .eq("id", event.id)
+          .throwOnError();
       }
     }
-
-    // Mark events as processed
-    await supabase
-      .from("github_event_log")
-      .update({ last_processed: currentTimestamp })
-      .in(
-        "id",
-        events.map((event) => event.id),
-      )
-      .throwOnError();
 
     logger.info("Finished processing GitHub events");
   },
