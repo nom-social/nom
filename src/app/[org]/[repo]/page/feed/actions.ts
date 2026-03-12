@@ -62,11 +62,24 @@ export async function fetchFeedPage({
     .select("*")
     .eq("repo_id", repoId);
 
-  if (query?.trim()) {
-    queryBuilder = queryBuilder.textSearch("search_vector", query.trim(), {
+  const memeMatch = query?.match(/\bmemes:(\S+)/);
+  const memeFilter = memeMatch?.[1];
+  const textQuery = query?.replace(/\bmemes:(\S+)/g, "").replace(/\s+/g, " ").trim();
+
+  if (textQuery?.trim()) {
+    queryBuilder = queryBuilder.textSearch("search_vector", textQuery.trim(), {
       type: "websearch",
       config: "english",
     });
+  }
+  if (memeFilter) {
+    queryBuilder = queryBuilder.like("search_text", "%![%");
+    if (memeFilter !== "all") {
+      const terms = memeFilter.split(",").filter(Boolean);
+      for (const term of terms) {
+        queryBuilder = queryBuilder.ilike("search_text", `%${term}%`);
+      }
+    }
   }
 
   const { data } = await queryBuilder

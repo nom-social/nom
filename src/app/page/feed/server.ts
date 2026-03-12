@@ -54,6 +54,15 @@ export async function fetchPublicFeedServer({
       { type: "websearch", config: "english" },
     );
   }
+  if (filters.memes) {
+    queryBuilder = queryBuilder.like("search_text", "%![%");
+    if (filters.memes !== "all") {
+      const terms = filters.memes.split(",").filter(Boolean);
+      for (const term of terms) {
+        queryBuilder = queryBuilder.ilike("search_text", `%${term}%`);
+      }
+    }
+  }
 
   const { data } = await queryBuilder
     .order("updated_at", { ascending: false })
