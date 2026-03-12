@@ -1,4 +1,5 @@
 import { syncBatchReposMetadataTask } from "@/trigger/sync-batch-repos-metadata";
+import { backfillConnectedReposTask } from "@/trigger/backfill-connected-repos";
 import type { createAdminClient } from "@/utils/supabase/admin";
 
 export async function createNewRepo({
@@ -61,6 +62,9 @@ export async function createNewRepo({
     .throwOnError();
 
   await syncBatchReposMetadataTask.trigger({
+    repos: fetchedRepos.map(({ org, repo }) => ({ org, repo })),
+  });
+  await backfillConnectedReposTask.trigger({
     repos: fetchedRepos.map(({ org, repo }) => ({ org, repo })),
   });
 }

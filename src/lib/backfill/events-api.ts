@@ -9,19 +9,6 @@ export const FILTERABLE_EVENT_TYPES = [
   "release",
 ] as const;
 
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-/** Rate limit delay when using unauthenticated requests (60 req/hr) */
-const RATE_LIMIT_DELAY_MS = 2500;
-
-async function maybeRateLimit(): Promise<void> {
-  if (!process.env.GITHUB_TOKEN) {
-    await delay(RATE_LIMIT_DELAY_MS);
-  }
-}
-
 export interface EnrichedEventForInsert {
   event_type: string;
   action: string | null;
@@ -31,12 +18,17 @@ export interface EnrichedEventForInsert {
   created_at: string;
 }
 
-const repoInfo = (org: string, repo: string, repoId = 0) => ({
+const repoInfo = (
+  org: string,
+  repo: string,
+  repoId = 0,
+  defaultBranch = "main"
+) => ({
   id: repoId,
   name: repo,
   full_name: `${org}/${repo}`,
   owner: { login: org, id: 0 },
-  default_branch: "main",
+  default_branch: defaultBranch,
 });
 
 /**
@@ -63,13 +55,9 @@ export async function fetchAndEnrichRepoEvents(
   const results: EnrichedEventForInsert[] = [];
 
   const { data: repoData } = await octokit.repos.get({ owner: org, repo });
-  await maybeRateLimit();
   const defaultBranch = repoData.default_branch ?? "main";
 
-  const baseRepoInfo = {
-    ...repoInfo(org, repo, repoData.id),
-    default_branch: defaultBranch,
-  };
+  const baseRepoInfo = repoInfo(org, repo, repoData.id, defaultBranch);
 
   if (typeSet.has("push")) {
     const { data: commits } = await octokit.repos.listCommits({
@@ -78,41 +66,27 @@ export async function fetchAndEnrichRepoEvents(
       sha: defaultBranch,
       per_page: Math.min(limit, 100),
     });
-    await maybeRateLimit();
 
-    for (const c of commits ?? []) {
+    for (const c of commits) {
       const author = c.commit?.author;
       const timestamp = author?.date ?? new Date().toISOString();
+      const commitInfo = {
+        id: c.sha,
+        message: c.commit?.message ?? "",
+        timestamp,
+        url: c.html_url ?? `https://github.com/${org}/${repo}/commit/${c.sha}`,
+        author: {
+          name: author?.name ?? "unknown",
+          email: author?.email ?? "",
+          username: c.author?.login,
+        },
+      };
       const commitPayload = {
         ref: `refs/heads/${defaultBranch}`,
         before: c.parents?.[0]?.sha ?? "",
         after: c.sha ?? "",
-        commits: [
-          {
-            id: c.sha,
-            message: c.commit?.message ?? "",
-            timestamp,
-            url:
-              c.html_url ?? `https://github.com/${org}/${repo}/commit/${c.sha}`,
-            author: {
-              name: author?.name ?? "unknown",
-              email: author?.email ?? "",
-              username: c.author?.login,
-            },
-          },
-        ],
-        head_commit: {
-          id: c.sha,
-          message: c.commit?.message ?? "",
-          timestamp,
-          url:
-            c.html_url ?? `https://github.com/${org}/${repo}/commit/${c.sha}`,
-          author: {
-            name: author?.name ?? "unknown",
-            email: author?.email ?? "",
-            username: c.author?.login,
-          },
-        },
+        commits: [commitInfo],
+        head_commit: commitInfo,
         pusher: {
           name: c.author?.login ?? c.commit?.author?.name ?? "unknown",
           email: "",
@@ -140,18 +114,14 @@ export async function fetchAndEnrichRepoEvents(
       direction: "desc",
       per_page: Math.min(limit, 100),
     });
-    await maybeRateLimit();
 
-    const mergedCandidates = (pulls ?? []).filter(
-      (p) => (p as { merged_at?: string | null }).merged_at
-    );
+    const mergedCandidates = pulls.filter((p) => p.merged_at);
     for (const prSummary of mergedCandidates) {
       const { data: pr } = await octokit.pulls.get({
         owner: org,
         repo,
         pull_number: prSummary.number,
       });
-      await maybeRateLimit();
 
       if (!pr.merged) continue;
 
@@ -211,9 +181,8 @@ export async function fetchAndEnrichRepoEvents(
       repo,
       per_page: Math.min(limit, 100),
     });
-    await maybeRateLimit();
 
-    for (const r of releases ?? []) {
+    for (const r of releases) {
       const publishedAt = r.published_at ?? r.created_at;
       const rawPayload = {
         action: r.published_at ? "published" : "edited",
@@ -243,7 +212,7 @@ export async function fetchAndEnrichRepoEvents(
         org,
         repo,
         raw_payload: rawPayload as Json,
-        created_at: publishedAt ?? r.created_at,
+        created_at: publishedAt,
       });
     }
   }
