@@ -10,7 +10,6 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { Tables } from "@/types/supabase";
-import { GITHUB_URL } from "@/lib/constants";
 import { createClient } from "@/utils/supabase/client";
 
 type Props = {
@@ -50,10 +49,6 @@ export default function DropdownContent({ user }: Props) {
         rel="noopener noreferrer"
       >
         <DropdownMenuItem>Connect more repos 🎉</DropdownMenuItem>
-      </a>
-
-      <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-        <DropdownMenuItem>View on GitHub</DropdownMenuItem>
       </a>
 
       <DropdownMenuItem variant="destructive" onClick={handleLogout}>

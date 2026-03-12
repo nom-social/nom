@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { GeistPixelSquare } from "geist/font/pixel";
 import { Jersey_15 } from "next/font/google";
+import { Github } from "lucide-react";
+
 import {
   NavigationMenu,
   NavigationMenuList,
@@ -10,7 +12,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Toaster } from "@/components/ui/sonner";
 
-import { BASE_URL } from "@/lib/constants";
+import { BASE_URL, GITHUB_URL } from "@/lib/constants";
 
 import "./globals.css";
 import ProfileDropdown from "./layout/profile-dropdown";
@@ -93,12 +95,13 @@ export default function RootLayout({
                   <div className="flex flex-row items-center gap-2">
                     <NavigationMenuItem>
                       <NavigationMenuLink
-                        href="https://tally.so/r/81KVZA"
+                        href={GITHUB_URL}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                        className="flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label="Nom on GitHub"
                       >
-                        hiring?
+                        <Github className="size-4" />
                       </NavigationMenuLink>
                     </NavigationMenuItem>
                     <ProfileDropdown />
