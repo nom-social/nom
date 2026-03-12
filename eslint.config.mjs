@@ -12,6 +12,9 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  {
+    ignores: [".next/**", ".claude/**"],
+  },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
     plugins: { prettier: eslintPluginPrettier },

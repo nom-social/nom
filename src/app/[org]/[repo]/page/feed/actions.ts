@@ -1,3 +1,4 @@
+import { parseSearchFilters } from "@/lib/feed-utils";
 import { createClient } from "@/utils/supabase/client";
 import type { Tables } from "@/types/supabase";
 
@@ -62,11 +63,19 @@ export async function fetchFeedPage({
     .select("*")
     .eq("repo_id", repoId);
 
-  if (query?.trim()) {
-    queryBuilder = queryBuilder.textSearch("search_vector", query.trim(), {
-      type: "websearch",
-      config: "english",
-    });
+  const filters = parseSearchFilters(query);
+
+  if (filters.textQuery?.trim()) {
+    queryBuilder = queryBuilder.textSearch(
+      "search_vector",
+      filters.textQuery.trim(),
+      { type: "websearch", config: "english" },
+    );
+  }
+  if (filters.meme === "true") {
+    queryBuilder = queryBuilder.like("search_text", "%![%");
+  } else if (filters.meme === "false") {
+    queryBuilder = queryBuilder.not("search_text", "like", "%![%");
   }
 
   const { data } = await queryBuilder

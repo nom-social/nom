@@ -51,6 +51,11 @@ export async function GET(request: NextRequest) {
       },
     );
   }
+  if (filters.meme === "true") {
+    queryBuilder = queryBuilder.like("search_text", "%![%");
+  } else if (filters.meme === "false") {
+    queryBuilder = queryBuilder.not("search_text", "like", "%![%");
+  }
 
   const { data, error } = await queryBuilder
     .order("updated_at", { ascending: false })

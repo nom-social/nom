@@ -116,6 +116,11 @@ export async function fetchFeed({
       },
     );
   }
+  if (filters.meme === "true") {
+    queryBuilder = queryBuilder.like("search_text", "%![%");
+  } else if (filters.meme === "false") {
+    queryBuilder = queryBuilder.not("search_text", "like", "%![%");
+  }
 
   const { data } = await queryBuilder
     .order("updated_at", { ascending: false })
@@ -202,6 +207,11 @@ export async function fetchPublicFeed({
         config: "english",
       },
     );
+  }
+  if (filters.meme === "true") {
+    queryBuilder = queryBuilder.like("search_text", "%![%");
+  } else if (filters.meme === "false") {
+    queryBuilder = queryBuilder.not("search_text", "like", "%![%");
   }
 
   const { data } = await queryBuilder
