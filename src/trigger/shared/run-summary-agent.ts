@@ -38,9 +38,7 @@ Respond with JSON containing:
 ${instructions}`;
 
   const agent = new ToolLoopAgent({
-    model: createOpenRouterProvider().languageModel(
-      "google/gemini-3.1-pro-preview"
-    ),
+    model: createOpenRouterProvider().languageModel("openai/gpt-5.4"),
     instructions: agentInstructions,
     tools,
     output: Output.object({
