@@ -25,7 +25,10 @@ export async function fetchFeedPageServer({
 
   const memeMatch = query?.match(/\bmemes:(\S+)/);
   const memeFilter = memeMatch?.[1];
-  const textQuery = query?.replace(/\bmemes:(\S+)/g, "").replace(/\s+/g, " ").trim();
+  const textQuery = query
+    ?.replace(/\bmemes:(\S+)/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 
   if (textQuery?.trim()) {
     queryBuilder = queryBuilder.textSearch("search_vector", textQuery.trim(), {
