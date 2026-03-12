@@ -17,13 +17,10 @@ export default async function ClaimRepoButton() {
   return (
     <Card className="border-nom-yellow/50 bg-nom-yellow/5">
       <CardHeader>
-        <CardTitle>Connect your first repo</CardTitle>
+        <CardTitle>Your code activity, made readable.</CardTitle>
         <CardDescription>
-          You&apos;ll install the Nom GitHub App on GitHub (a one-time setup).
-          Choose which repositories to connect (you can add more anytime). Once
-          connected, your project&apos;s activities (issues, PRs, releases, and
-          comments) from then on will show up in your feed, and you can
-          subscribe to any other repo on Nom.
+          Install Nom in one click via GitHub &rarr; every push, PR, and release
+          turns into a live feed you can follow, share, and reference.
         </CardDescription>
       </CardHeader>
       <CardFooter>
@@ -36,7 +33,7 @@ export default async function ClaimRepoButton() {
             size="sm"
             className="bg-nom-yellow text-black hover:bg-nom-yellow/90"
           >
-            Connect your repo →
+            Connect your repo (under 30 sec)
           </Button>
         </a>
       </CardFooter>
