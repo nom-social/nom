@@ -1,3 +1,4 @@
+import { parseSearchFilters } from "@/lib/feed-utils";
 import { createClient } from "@/utils/supabase/server";
 
 import type { FetchFeedPageResult } from "./actions";
@@ -23,22 +24,18 @@ export async function fetchFeedPageServer({
     .select("*")
     .eq("repo_id", repoId);
 
-  const memeMatch = query?.match(/\bmeme:(\S+)/);
-  const memeFilter = memeMatch?.[1];
-  const textQuery = query
-    ?.replace(/\bmeme:(\S+)/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
+  const filters = parseSearchFilters(query);
 
-  if (textQuery?.trim()) {
-    queryBuilder = queryBuilder.textSearch("search_vector", textQuery.trim(), {
-      type: "websearch",
-      config: "english",
-    });
+  if (filters.textQuery?.trim()) {
+    queryBuilder = queryBuilder.textSearch(
+      "search_vector",
+      filters.textQuery.trim(),
+      { type: "websearch", config: "english" },
+    );
   }
-  if (memeFilter === "true") {
+  if (filters.meme === "true") {
     queryBuilder = queryBuilder.like("search_text", "%![%");
-  } else if (memeFilter === "false") {
+  } else if (filters.meme === "false") {
     queryBuilder = queryBuilder.not("search_text", "like", "%![%");
   }
 
