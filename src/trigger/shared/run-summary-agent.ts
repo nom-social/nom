@@ -39,7 +39,7 @@ ${instructions}`;
 
   const agent = new ToolLoopAgent({
     model: createOpenRouterProvider().languageModel(
-      "google/gemini-3.1-pro-preview",
+      "google/gemini-3.1-flash-lite-preview",
     ),
     instructions: agentInstructions,
     tools,
