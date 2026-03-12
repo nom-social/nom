@@ -65,6 +65,21 @@ export async function fetchFeedPage({
 
   const filters = parseSearchFilters(query);
 
+  if (filters.type) {
+    queryBuilder = queryBuilder.eq("type", filters.type);
+  }
+  if (filters.from) {
+    queryBuilder = queryBuilder.gte(
+      "updated_at",
+      new Date(filters.from).toISOString(),
+    );
+  }
+  if (filters.to) {
+    queryBuilder = queryBuilder.lte(
+      "updated_at",
+      new Date(filters.to).toISOString(),
+    );
+  }
   if (filters.textQuery?.trim()) {
     queryBuilder = queryBuilder.textSearch(
       "search_vector",
