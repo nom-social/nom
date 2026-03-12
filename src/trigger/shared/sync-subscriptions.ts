@@ -1,7 +1,9 @@
 import { logger, wait } from "@trigger.dev/sdk";
 import { Octokit } from "@octokit/rest";
 
-import { createAdminClient } from "@/utils/supabase/admin";
+import { createAdminConvexClient } from "@/utils/convex/client";
+import { api } from "@/../convex/_generated/api";
+import { Id } from "@/../convex/_generated/dataModel";
 
 import { starredRepoSchema } from "./sync-subscriptions/schema";
 
@@ -21,12 +23,10 @@ async function getAllStarredRepos(octokit: Octokit, username: string) {
 
     allRepos.push(...starredReposData);
 
-    // Check if there are more pages by looking at the Link header
     const linkHeader = headers.link;
     hasMore = linkHeader?.includes('rel="next"') ?? false;
     page++;
 
-    // Add a small delay between pages to avoid rate limiting
     if (hasMore) await wait.for({ seconds: 1 });
   }
 
@@ -34,66 +34,53 @@ async function getAllStarredRepos(octokit: Octokit, username: string) {
 }
 
 export async function syncUserStars(userId: string) {
-  const supabase = createAdminClient();
+  const convex = createAdminConvexClient();
 
-  // Get users with GitHub provider tokens using auth API
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.admin.getUserById(userId);
-  if (error || !user) {
-    logger.error("Error fetching user", { error });
+  // Get GitHub access token from authAccounts
+  const githubToken = await convex.query(api.admin.getGitHubAccessToken, {
+    userId: userId as Id<"users">,
+  });
+
+  const user = await convex.query(api.admin.getUserById, {
+    userId: userId as Id<"users">,
+  });
+
+  if (!user) {
+    logger.error("User not found", { userId });
+    return;
+  }
+
+  const providerToken = githubToken;
+  const userName = user.githubUsername;
+
+  if (!providerToken || !userName) {
+    logger.error("Missing provider token or username", { userId });
     return;
   }
 
   try {
-    const providerToken = user.user_metadata?.provider_token;
-    const userName = user.user_metadata?.user_name;
-    if (!providerToken || !userName) {
-      logger.error("Missing provider token or username", { userId });
-      return;
-    }
-
-    // Initialize Octokit with user's token
     const octokit = new Octokit({ auth: providerToken });
-
-    // Get all user's starred repos with pagination
     const starredRepos = await getAllStarredRepos(octokit, userName);
 
-    logger.info(
-      `Found ${starredRepos.length} starred repos for user ${user.id}`,
-    );
+    logger.info(`Found ${starredRepos.length} starred repos for user ${userId}`);
 
-    // Batch fetch all matching repositories using OR conditions for exact pairs
-    const { data: matchingRepos } = await supabase
-      .from("repositories")
-      .select("id, org, repo")
-      .or(
-        starredRepos
-          .map((repo) => `and(org.eq.${repo.owner.login},repo.eq.${repo.name})`)
-          .join(","),
-      )
-      .throwOnError();
+    for (const repo of starredRepos) {
+      const repoDoc = await convex.query(api.admin.getRepository, {
+        org: repo.owner.login,
+        repo: repo.name,
+      });
 
-    // Create subscriptions for all matching repositories
-    for (const repo of matchingRepos) {
-      await supabase
-        .from("subscriptions")
-        .upsert(
-          { user_id: user.id, repo_id: repo.id },
-          { onConflict: "user_id,repo_id" },
-        )
-        .throwOnError();
+      if (repoDoc) {
+        await convex.mutation(api.admin.upsertSubscription, {
+          userId: userId as Id<"users">,
+          repositoryId: repoDoc._id,
+        });
 
-      logger.info(
-        `Upserted subscription for user ${user.id} to repo ${repo.id}`,
-      );
+        logger.info(`Upserted subscription for user ${userId} to repo ${repoDoc._id}`);
+      }
     }
   } catch (error) {
-    logger.error("Error syncing stars for user", {
-      error,
-      userId: user.id,
-    });
+    logger.error("Error syncing stars for user", { error, userId });
   }
 
   logger.info("Finished syncing user stars");

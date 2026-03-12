@@ -3,7 +3,9 @@ import { escapeAttribute, escapeText } from "entities";
 import { z } from "zod";
 
 import { BASE_URL } from "@/lib/constants";
-import * as supabase from "@/utils/supabase/admin";
+import { createAdminConvexClient } from "@/utils/convex/client";
+import { api } from "@/../convex/_generated/api";
+import { Id } from "@/../convex/_generated/dataModel";
 import * as resend from "@/utils/resend/client";
 
 const MILESTONES = [1, 10, 25, 50, 100, 1000];
@@ -11,34 +13,25 @@ const MILESTONES = [1, 10, 25, 50, 100, 1000];
 export const sendSubscriberMilestoneTask = schemaTask({
   id: "send-subscriber-milestone",
   queue: { name: "send-subscriber-milestone", concurrencyLimit: 1 },
-  schema: z.object({
-    repo_id: z.string(),
-  }),
+  schema: z.object({ repo_id: z.string() }),
   retry: { maxAttempts: 1 },
   run: async ({ repo_id }) => {
-    const supabaseClient = supabase.createAdminClient();
+    const convex = createAdminConvexClient();
     const resendClient = resend.createClient();
+    const repositoryId = repo_id as Id<"repositories">;
 
-    const { count: subscriberCount } = await supabaseClient
-      .from("subscriptions")
-      .select("*", { count: "exact", head: true })
-      .eq("repo_id", repo_id)
-      .throwOnError();
-
-    const count = subscriberCount ?? 0;
+    const count = await convex.query(api.admin.getSubscriberCount, {
+      repositoryId,
+    });
     if (count === 0) return;
 
-    const { data: existingNotifications } = await supabaseClient
-      .from("notifications")
-      .select("key")
-      .eq("type", "subscriber_milestone")
-      .eq("entity_id", repo_id)
-      .in("key", MILESTONES.map(String))
-      .throwOnError();
+    const existingNotifications = await convex.query(api.admin.getNotifications, {
+      type: "subscriber_milestone",
+      entityId: repo_id,
+      keys: MILESTONES.map(String),
+    });
 
-    const alreadySent = new Set(
-      (existingNotifications ?? []).map((n) => n.key),
-    );
+    const alreadySent = new Set(existingNotifications.map((n) => n.key));
     const newlyCrossed = MILESTONES.filter(
       (m) => count >= m && !alreadySent.has(String(m)),
     );
@@ -46,65 +39,55 @@ export const sendSubscriberMilestoneTask = schemaTask({
       newlyCrossed.length > 0 ? Math.max(...newlyCrossed) : null;
     if (milestoneToSend === null) return;
 
-    const { data: repo } = await supabaseClient
-      .from("repositories")
-      .select("org, repo")
-      .eq("id", repo_id)
-      .single()
-      .throwOnError();
+    const repo = await convex.query(api.admin.getRepository, {
+      org: "",
+      repo: "",
+    });
+    // Get repo by ID using repositoriesByIds
+    const [repoDoc] = await convex.query(api.admin.getRepositoriesByIds, {
+      repositoryIds: [repositoryId],
+    });
+    if (!repoDoc) return;
 
-    if (!repo) return;
+    const repoUsers = await convex.query(api.admin.getRepositoryUsers, {
+      repositoryId,
+    });
+    if (!repoUsers.length) return;
 
-    const { data: repoUsers } = await supabaseClient
-      .from("repositories_users")
-      .select("user_id")
-      .eq("repo_id", repo_id)
-      .throwOnError();
+    const users = await convex.query(api.admin.getUsersByIds, {
+      userIds: repoUsers.map((r) => r.userId),
+    });
 
-    if (!repoUsers?.length) return;
-
-    const { data: users } = await supabaseClient
-      .from("users")
-      .select("email")
-      .in(
-        "id",
-        repoUsers.map((r) => r.user_id),
-      )
-      .throwOnError();
-
-    const emails = (users ?? [])
-      .map((u) => u.email)
+    const emails = users
+      .map((u) => u?.email)
       .filter((e): e is string => !!e?.trim());
 
     if (emails.length === 0) return;
 
-    const repoUrl = `${BASE_URL}/${repo.org}/${repo.repo}`;
+    const repoUrl = `${BASE_URL}/${repoDoc.org}/${repoDoc.repo}`;
     const subscriberLabel =
       milestoneToSend === 1 ? "subscriber" : "subscribers";
-    const subject = `${repo.org}/${repo.repo}: Your repo reached ${milestoneToSend} ${subscriberLabel}!`;
+    const subject = `${repoDoc.org}/${repoDoc.repo}: Your repo reached ${milestoneToSend} ${subscriberLabel}!`;
     const html = `
-      <p>Great news! Your repo <strong>${escapeText(repo.org)}/${escapeText(repo.repo)}</strong> has reached <strong>${milestoneToSend}</strong> ${subscriberLabel}.</p>
+      <p>Great news! Your repo <strong>${escapeText(repoDoc.org)}/${escapeText(repoDoc.repo)}</strong> has reached <strong>${milestoneToSend}</strong> ${subscriberLabel}.</p>
       <p><a href="${escapeAttribute(repoUrl)}">View on Nom</a></p>
     `;
 
     await Promise.allSettled(
-      emails.map((to) => {
-        return resendClient.emails.send({
+      emails.map((to) =>
+        resendClient.emails.send({
           from: "Nom <notifications@nomit.dev>",
           to,
           subject,
           html,
-        });
-      }),
+        }),
+      ),
     );
 
-    await supabaseClient
-      .from("notifications")
-      .insert({
-        type: "subscriber_milestone",
-        entity_id: repo_id,
-        key: String(milestoneToSend),
-      })
-      .throwOnError();
+    await convex.mutation(api.admin.insertNotification, {
+      type: "subscriber_milestone",
+      entityId: repo_id,
+      key: String(milestoneToSend),
+    });
   },
 });

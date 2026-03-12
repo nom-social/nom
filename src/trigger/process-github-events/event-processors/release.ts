@@ -2,7 +2,6 @@ import { z } from "zod";
 import crypto from "crypto";
 import { logger } from "@trigger.dev/sdk";
 
-import { Json, TablesInsert } from "@/types/supabase";
 import { ReleaseData } from "@/components/shared/activity-card/shared/schemas";
 import { fetchNomInstructions } from "@/trigger/shared/fetch-nom-template";
 import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
@@ -10,6 +9,7 @@ import { createEventTools } from "@/trigger/shared/agent-tools";
 import { runSummaryAgent } from "@/trigger/shared/run-summary-agent";
 
 import { BASELINE_SCORE, RELEASE_MULTIPLIER } from "./shared/constants";
+import { type TimelineEntry } from "./pull-request";
 
 const releaseSchema = z.object({
   action: z.enum(["published", "edited"]),
@@ -39,7 +39,7 @@ export async function processReleaseEvent({
   repo,
   subscribers,
 }: {
-  event: { event_type: string; raw_payload: Json; id: string };
+  event: { event_type: string; raw_payload: unknown; id: string };
   repo: {
     repo: string;
     org: string;
@@ -47,8 +47,8 @@ export async function processReleaseEvent({
   };
   subscribers: { user_id: string }[];
 }): Promise<{
-  userTimelineEntries: TablesInsert<"user_timeline">[];
-  publicTimelineEntries: TablesInsert<"public_timeline">[];
+  userTimelineEntries: TimelineEntry[];
+  publicTimelineEntries: TimelineEntry[];
 }> {
   const validationResult = releaseSchema.parse(event.raw_payload);
   const octokit = await createAuthenticatedOctokitClient({
@@ -140,17 +140,18 @@ You can use explore_file with ref=${release.tag_name} to read files at the relea
     )
     .digest("hex");
 
-  const timelineEntry = {
+  const updatedAt = release.published_at ?? release.created_at;
+
+  const timelineEntry: TimelineEntry = {
     type: "release",
     data: releaseData,
     score: BASELINE_SCORE * RELEASE_MULTIPLIER,
-    repo_id: repo.id,
-    dedupe_hash: dedupeHash,
-    updated_at:
-      release.published_at?.toISOString() || release.created_at.toISOString(),
-    event_ids: [event.id],
-    is_read: false,
-    search_text: [
+    repositoryId: repo.id,
+    dedupeHash,
+    updatedAt: updatedAt.getTime(),
+    eventIds: [event.id],
+    isRead: false,
+    searchText: [
       releaseData.release.name ?? releaseData.release.tag_name,
       releaseData.release.ai_summary,
     ]
@@ -158,13 +159,11 @@ You can use explore_file with ref=${release.tag_name} to read files at the relea
       .join(" "),
   };
   // One entry per subscriber — if you follow the repo, you get the event
-  const userTimelineEntries: TablesInsert<"user_timeline">[] = subscribers.map(
-    (s) => ({
-      user_id: s.user_id,
-      categories: ["releases"],
-      ...timelineEntry,
-    }),
-  );
+  const userTimelineEntries: TimelineEntry[] = subscribers.map((s) => ({
+    ...timelineEntry,
+    userId: s.user_id,
+    categories: ["releases"],
+  }));
 
   return {
     userTimelineEntries,

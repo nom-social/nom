@@ -1,15 +1,15 @@
 "use client";
 
-import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import { usePaginatedQuery } from "convex/react";
 import { Loader } from "lucide-react";
 import React, { useRef, useCallback } from "react";
 
 import ActivityCard from "@/components/shared/activity-card";
 import ScrollToTopButton from "@/components/shared/scroll-to-top-button";
+import { api } from "@/../convex/_generated/api";
+import { buildFeedQueryArgs } from "./actions";
 
-import { fetchPublicFeed } from "./actions";
-
-const LIMIT = 20;
+const INITIAL_NUM_ITEMS = 20;
 
 function FeedPublic({
   searchQuery,
@@ -18,41 +18,24 @@ function FeedPublic({
   searchQuery?: string;
   back?: string;
 }) {
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useInfiniteQuery({
-    queryKey: [fetchPublicFeed.key, searchQuery],
-    queryFn: ({ pageParam }) =>
-      fetchPublicFeed({
-        limit: LIMIT,
-        offset: pageParam,
-        query: searchQuery,
-      }),
-    getNextPageParam: (lastPage, allPages) => {
-      if (lastPage.hasMore) {
-        return allPages.reduce((acc, page) => acc + page.items.length, 0);
-      }
-      return undefined;
-    },
-    initialPageParam: 0,
-    placeholderData: keepPreviousData,
-  });
+  const filterArgs = buildFeedQueryArgs(searchQuery);
 
-  const items = data?.pages.flatMap((page) => page.items) ?? [];
+  const { results, status, loadMore } = usePaginatedQuery(
+    api.feed.fetchPublicFeed,
+    filterArgs,
+    { initialNumItems: INITIAL_NUM_ITEMS },
+  );
 
-  // Intersection Observer logic
+  const isLoading = status === "LoadingFirstPage";
+  const isFetchingNextPage = status === "LoadingMore";
+  const hasNextPage = status === "CanLoadMore";
+
+  // Intersection Observer for infinite scroll
   const observerMiddle = useRef<IntersectionObserver | null>(null);
   const observerLast = useRef<IntersectionObserver | null>(null);
   const sentinelMiddleIndex =
-    items.length > 0 ? Math.floor(items.length / 2) : -1;
-  const sentinelLastIndex = items.length > 0 ? items.length - 1 : -1;
+    results.length > 0 ? Math.floor(results.length / 2) : -1;
+  const sentinelLastIndex = results.length > 0 ? results.length - 1 : -1;
 
   const sentinelMiddleRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -60,12 +43,12 @@ function FeedPublic({
       if (observerMiddle.current) observerMiddle.current.disconnect();
       observerMiddle.current = new window.IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && hasNextPage) {
-          fetchNextPage();
+          loadMore(INITIAL_NUM_ITEMS);
         }
       });
       if (node) observerMiddle.current.observe(node);
     },
-    [isFetchingNextPage, fetchNextPage, hasNextPage],
+    [isFetchingNextPage, loadMore, hasNextPage],
   );
 
   const sentinelLastRef = useCallback(
@@ -74,46 +57,41 @@ function FeedPublic({
       if (observerLast.current) observerLast.current.disconnect();
       observerLast.current = new window.IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && hasNextPage) {
-          fetchNextPage();
+          loadMore(INITIAL_NUM_ITEMS);
         }
       });
       if (node) observerLast.current.observe(node);
     },
-    [isFetchingNextPage, fetchNextPage, hasNextPage],
+    [isFetchingNextPage, loadMore, hasNextPage],
   );
 
   const handleScrollToTop = useCallback(() => {
-    refetch();
-  }, [refetch]);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   return (
     <>
       <ScrollToTopButton onScrollToTop={handleScrollToTop} />
 
       <div className="flex flex-col gap-4">
-        {items.length === 0 && !isLoading && (
+        {results.length === 0 && !isLoading && (
           <div className="text-muted-foreground">No activity yet.</div>
-        )}
-        {isError && (
-          <div className="text-muted-foreground">
-            Error: {error instanceof Error ? error.message : "Unknown error"}
-          </div>
         )}
         {isLoading && (
           <div className="flex flex-row items-center gap-2 text-muted-foreground">
             <Loader className="animate-spin w-4 h-4" /> Loading...
           </div>
         )}
-        {items.map((item, idx) => {
-          const org = item.repositories.org;
-          const repo = item.repositories.repo;
+        {results.map((item, idx) => {
+          const org = item.repository?.org ?? "";
+          const repo = item.repository?.repo ?? "";
           let ref;
           if (hasNextPage) {
             if (idx === sentinelMiddleIndex) ref = sentinelMiddleRef;
             if (idx === sentinelLastIndex) ref = sentinelLastRef;
           }
           return (
-            <div key={item.id} ref={ref}>
+            <div key={item._id} ref={ref}>
               <ActivityCard item={item} repo={repo} org={org} back={back} />
             </div>
           );
@@ -123,7 +101,7 @@ function FeedPublic({
             <Loader className="animate-spin w-4 h-4" /> Loading more...
           </div>
         )}
-        {items.length > 0 && !hasNextPage && !isLoading && (
+        {results.length > 0 && !hasNextPage && !isLoading && (
           <div className="text-muted-foreground text-center pb-4 text-sm">
             - End of feed -
           </div>

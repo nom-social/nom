@@ -1,22 +1,8 @@
-import { createClient } from "@/utils/supabase/server";
+import { fetchQuery } from "convex/nextjs";
+import { api } from "@/../convex/_generated/api";
 
 export async function fetchRepoCount() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return 0;
-
-  const userId = user.id;
-
-  const { count } = await supabase
-    .from("repositories_users")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .throwOnError();
-
-  return count ?? 0;
+  return fetchQuery(api.repositories.fetchRepoCount);
 }
 
 fetchRepoCount.key =

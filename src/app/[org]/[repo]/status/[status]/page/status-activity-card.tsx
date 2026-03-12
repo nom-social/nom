@@ -3,10 +3,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
 import { GitCommitVertical, GitMergeIcon, TagIcon } from "lucide-react";
 
-import { Tables } from "@/types/supabase";
 import {
   prDataSchema,
   releaseDataSchema,
@@ -20,17 +18,18 @@ import {
 
 import StatusActivityCardBase from "./status-activity-card-base";
 
-type FeedItemWithLikes = (
-  | Tables<"public_timeline">
-  | Tables<"user_timeline">
-) & {
+interface FeedItem {
+  _id: string;
+  type: string;
+  data: unknown;
+  dedupeHash: string;
   likeCount: number;
   isLiked: boolean;
   repositories?: {
     org: string;
     repo: string;
   };
-};
+}
 
 /**
  * Activity card for the status detail page. Title links to GitHub;
@@ -42,7 +41,7 @@ function StatusActivityCard({
   org,
   isPrivate = false,
 }: {
-  item: FeedItemWithLikes;
+  item: FeedItem;
   repo: string;
   org: string;
   isPrivate?: boolean;
@@ -56,44 +55,33 @@ function StatusActivityCard({
     setLiked(item.isLiked);
   }, [item.likeCount, item.isLiked]);
 
-  const { mutate: mutateLike } = useMutation({
-    mutationFn: ({ hash }: { hash: string }) => createLike(hash),
-    onSuccess: async () => {
+  const handleLike = useCallback(async () => {
+    try {
+      await createLike(item.dedupeHash);
       setLiked(true);
       setLikeCount((prev) => prev + 1);
       toast.success("🔥 Liked!", { icon: null });
-    },
-    onError: (error) => {
+    } catch (error) {
       if (error instanceof NotAuthenticatedError)
         router.push(
           `/auth/login?next=${encodeURIComponent(window.location.pathname)}`,
         );
-    },
-  });
+    }
+  }, [item.dedupeHash, router]);
 
-  const { mutate: mutateUnlike } = useMutation({
-    mutationFn: ({ hash }: { hash: string }) => deleteLike(hash),
-    onSuccess: async () => {
+  const handleUnlike = useCallback(async () => {
+    try {
+      await deleteLike(item.dedupeHash);
       setLiked(false);
       setLikeCount((prev) => prev - 1);
       toast("💔 Un-liked!");
-    },
-    onError: (error) => {
+    } catch (error) {
       if (error instanceof NotAuthenticatedError)
         router.push(
           `/auth/login?next=${encodeURIComponent(window.location.pathname)}`,
         );
-    },
-  });
-
-  const handleLike = useCallback(
-    () => mutateLike({ hash: item.dedupe_hash }),
-    [item.dedupe_hash, mutateLike],
-  );
-  const handleUnlike = useCallback(
-    () => mutateUnlike({ hash: item.dedupe_hash }),
-    [item.dedupe_hash, mutateUnlike],
-  );
+    }
+  }, [item.dedupeHash, router]);
 
   if (item.type === "pull_request") {
     const parseResult = prDataSchema.safeParse(item.data);
@@ -121,7 +109,7 @@ function StatusActivityCard({
         liked={liked}
         onLike={handleLike}
         onUnlike={handleUnlike}
-        hash={item.dedupe_hash}
+        hash={item.dedupeHash}
       />
     );
   }
@@ -152,7 +140,7 @@ function StatusActivityCard({
         liked={liked}
         onLike={handleLike}
         onUnlike={handleUnlike}
-        hash={item.dedupe_hash}
+        hash={item.dedupeHash}
       />
     );
   }
@@ -183,7 +171,7 @@ function StatusActivityCard({
         liked={liked}
         onLike={handleLike}
         onUnlike={handleUnlike}
-        hash={item.dedupe_hash}
+        hash={item.dedupeHash}
       />
     );
   }

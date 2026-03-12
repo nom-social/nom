@@ -1,7 +1,5 @@
 import { Octokit } from "@octokit/rest";
 
-import { Json } from "@/types/supabase";
-
 /** Webhook event types supported via dedicated API endpoints */
 export const FILTERABLE_EVENT_TYPES = [
   "push",
@@ -14,7 +12,7 @@ export interface EnrichedEventForInsert {
   action: string | null;
   org: string;
   repo: string;
-  raw_payload: Json;
+  raw_payload: unknown;
   created_at: string;
 }
 
@@ -99,7 +97,7 @@ export async function fetchAndEnrichRepoEvents(
         action: null,
         org,
         repo,
-        raw_payload: commitPayload as Json,
+        raw_payload: commitPayload,
         created_at: timestamp,
       });
     }
@@ -169,7 +167,7 @@ export async function fetchAndEnrichRepoEvents(
         action: "closed",
         org,
         repo,
-        raw_payload: rawPayload as Json,
+        raw_payload: rawPayload,
         created_at: updatedAt,
       });
     }
@@ -211,7 +209,7 @@ export async function fetchAndEnrichRepoEvents(
         action: r.published_at ? "published" : "edited",
         org,
         repo,
-        raw_payload: rawPayload as Json,
+        raw_payload: rawPayload,
         created_at: publishedAt,
       });
     }

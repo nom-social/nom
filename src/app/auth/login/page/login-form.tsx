@@ -1,5 +1,8 @@
+"use client";
+
 import { Loader } from "lucide-react";
 import { useState } from "react";
+import { useAuthActions } from "@convex-dev/auth/react";
 
 import {
   Card,
@@ -14,12 +17,14 @@ import Github from "@/components/ui/icons/github";
 
 import ButtonLogin from "./login-form/button-login";
 
-type Props = {
-  onLogin: () => void;
-};
-
-export default function LoginForm({ onLogin }: Props) {
+export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const { signIn } = useAuthActions();
+
+  const handleLogin = async () => {
+    setIsLoading(true);
+    await signIn("github", { redirectTo: "/" });
+  };
 
   return (
     <Card>
@@ -41,12 +46,7 @@ export default function LoginForm({ onLogin }: Props) {
       <Separator className="w-full" />
       <CardContent>
         <div className="flex flex-col gap-6 p-2 sm:p-6">
-          <ButtonLogin
-            onClick={() => {
-              setIsLoading(true);
-              onLogin();
-            }}
-          >
+          <ButtonLogin onClick={handleLogin}>
             <div className="relative w-5 h-5 flex items-center justify-center">
               <span
                 className={`absolute transition-transform duration-200 ${

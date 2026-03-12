@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { fetchQuery } from "convex/nextjs";
 
 import { normalizeTimelineItem } from "@/app/api/feed/normalize";
 import { parseSearchFilters } from "@/lib/feed-utils";
-import { createClient } from "@/utils/supabase/server";
+import { api } from "@/../convex/_generated/api";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
@@ -11,66 +12,48 @@ export async function GET(request: NextRequest) {
   const offset = parseInt(searchParams.get("offset") ?? "0", 10);
 
   const filters = parseSearchFilters(q);
-  const supabase = await createClient();
 
-  let queryBuilder = supabase
-    .from("public_timeline")
-    .select("*, repositories!inner ( org, repo )");
+  try {
+    const items = await fetchQuery(api.admin.getPublicFeedSlice, {
+      limit,
+      offset,
+      type: filters.type,
+      textQuery: filters.textQuery || undefined,
+      meme: filters.meme,
+      fromMs: filters.from ? new Date(filters.from).getTime() : undefined,
+      toMs: filters.to ? new Date(filters.to).getTime() : undefined,
+    });
 
-  if (filters.org || filters.owner) {
-    queryBuilder = queryBuilder.eq(
-      "repositories.org",
-      filters.org || filters.owner || "",
+    const normalizedItems = items.map((item: {
+      _id: string;
+      type: string;
+      data: unknown;
+      dedupeHash: string;
+      updatedAt: number;
+      repository?: { org: string; repo: string } | null;
+    }) =>
+      normalizeTimelineItem({
+        id: item._id,
+        type: item.type,
+        data: item.data,
+        updated_at: new Date(item.updatedAt).toISOString(),
+        dedupe_hash: item.dedupeHash,
+        repositories: item.repository
+          ? { org: item.repository.org, repo: item.repository.repo }
+          : undefined,
+      }),
     );
-  }
-  if (filters.repo) {
-    queryBuilder = queryBuilder.eq("repositories.repo", filters.repo);
-  }
-  if (filters.type) {
-    queryBuilder = queryBuilder.eq("type", filters.type);
-  }
-  if (filters.from) {
-    queryBuilder = queryBuilder.gte(
-      "updated_at",
-      new Date(filters.from).toISOString(),
-    );
-  }
-  if (filters.to) {
-    queryBuilder = queryBuilder.lte(
-      "updated_at",
-      new Date(filters.to).toISOString(),
-    );
-  }
-  if (filters.textQuery?.trim()) {
-    queryBuilder = queryBuilder.textSearch(
-      "search_vector",
-      filters.textQuery.trim(),
-      {
-        type: "websearch",
-        config: "english",
-      },
-    );
-  }
-  if (filters.meme === "true") {
-    queryBuilder = queryBuilder.like("search_text", "%![%");
-  } else if (filters.meme === "false") {
-    queryBuilder = queryBuilder.not("search_text", "like", "%![%");
-  }
 
-  const { data, error } = await queryBuilder
-    .order("updated_at", { ascending: false })
-    .order("created_at", { ascending: false })
-    .range(offset, offset + limit - 1);
+    const has_more = normalizedItems.length > limit;
+    const page = normalizedItems.slice(0, limit);
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({
+      items: page,
+      pagination: { offset, limit, has_more },
+    });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
-
-  const items = (data ?? []).map(normalizeTimelineItem);
-  const has_more = items.length === limit;
-
-  return NextResponse.json({
-    items,
-    pagination: { offset, limit, has_more },
-  });
 }

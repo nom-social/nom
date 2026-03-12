@@ -3,7 +3,9 @@ import { escapeAttribute, escapeText } from "entities";
 import { z } from "zod";
 
 import { BASE_URL } from "@/lib/constants";
-import * as supabase from "@/utils/supabase/admin";
+import { createAdminConvexClient } from "@/utils/convex/client";
+import { api } from "@/../convex/_generated/api";
+import { Id } from "@/../convex/_generated/dataModel";
 import * as resend from "@/utils/resend/client";
 
 const prDataSchema = z.looseObject({
@@ -21,79 +23,56 @@ const MILESTONES = [1, 10, 25, 50, 100, 1000];
 export const sendEngagementMilestoneTask = schemaTask({
   id: "send-engagement-milestone",
   queue: { name: "send-engagement-milestone", concurrencyLimit: 1 },
-  schema: z.object({
-    dedupe_hash: z.string(),
-  }),
+  schema: z.object({ dedupe_hash: z.string() }),
   retry: { maxAttempts: 1 },
   run: async ({ dedupe_hash }) => {
-    const supabaseClient = supabase.createAdminClient();
+    const convex = createAdminConvexClient();
     const resendClient = resend.createClient();
 
-    const { data: likeData } = await supabaseClient
-      .rpc("get_batch_like_data", {
-        dedupe_hashes: [dedupe_hash],
-      })
-      .throwOnError();
-
-    const likeCount = Number(likeData?.[0]?.like_count ?? 0);
+    const likeCount = await convex.query(api.admin.getLikeCount, {
+      dedupeHash: dedupe_hash,
+    });
     if (likeCount === 0) return;
 
-    const { data: existingNotifications } = await supabaseClient
-      .from("notifications")
-      .select("key")
-      .eq("type", "engagement_milestone")
-      .eq("entity_id", dedupe_hash)
-      .in("key", MILESTONES.map(String))
-      .throwOnError();
-
-    const alreadySent = new Set(
-      (existingNotifications ?? []).map((n) => n.key),
+    const existingNotifications = await convex.query(
+      api.admin.getNotifications,
+      {
+        type: "engagement_milestone",
+        entityId: dedupe_hash,
+        keys: MILESTONES.map(String),
+      },
     );
+
+    const alreadySent = new Set(existingNotifications.map((n) => n.key));
     const newlyCrossed = MILESTONES.filter(
       (m) => likeCount >= m && !alreadySent.has(String(m)),
     );
-    // Send for the highest newly crossed milestone only (e.g. at 11 likes, send for 10)
     const milestoneToSend =
       newlyCrossed.length > 0 ? Math.max(...newlyCrossed) : null;
     if (milestoneToSend === null) return;
 
-    const { data: timelineItem } = await supabaseClient
-      .from("public_timeline")
-      .select("repo_id, type, data")
-      .eq("dedupe_hash", dedupe_hash)
-      .single()
-      .throwOnError();
-
+    const timelineItem = await convex.query(
+      api.admin.getPublicTimelineByDedupeHash,
+      { dedupeHash: dedupe_hash },
+    );
     if (!timelineItem) return;
 
-    const { data: repo } = await supabaseClient
-      .from("repositories")
-      .select("org, repo")
-      .eq("id", timelineItem.repo_id)
-      .single()
-      .throwOnError();
+    const [repoDoc] = await convex.query(api.admin.getRepositoriesByIds, {
+      repositoryIds: [timelineItem.repositoryId],
+    });
+    if (!repoDoc) return;
 
-    if (!repo) return;
+    const repoUsers = await convex.query(api.admin.getRepositoryUsers, {
+      repositoryId: timelineItem.repositoryId,
+    });
+    if (!repoUsers.length) return;
 
-    const { data: repoUsers } = await supabaseClient
-      .from("repositories_users")
-      .select("user_id")
-      .eq("repo_id", timelineItem.repo_id)
-      .throwOnError();
+    const users = await convex.query(api.admin.getUsersByIds, {
+      userIds: repoUsers.map((r) => r.userId),
+    });
 
-    if (!repoUsers?.length) return;
-
-    const { data: users } = await supabaseClient
-      .from("users")
-      .select("email")
-      .in(
-        "id",
-        repoUsers.map((r) => r.user_id),
-      )
-      .throwOnError();
-
-    const emails = (users ?? [])
-      .map((u) => u.email)
+    const emails = users
+      .map((u) => u?.email)
       .filter((e): e is string => !!e?.trim());
 
     if (emails.length === 0) return;
@@ -106,46 +85,45 @@ export const sendEngagementMilestoneTask = schemaTask({
           : timelineItem.type === "push"
             ? "push"
             : "activity";
+
     let itemTitle = "Your activity";
+    const data = timelineItem.data as Record<string, unknown>;
     if (timelineItem.type === "pull_request") {
-      const parsed = prDataSchema.safeParse(timelineItem.data);
+      const parsed = prDataSchema.safeParse(data);
       if (parsed.success) itemTitle = parsed.data.pull_request.title;
     } else if (timelineItem.type === "release") {
-      const parsed = releaseDataSchema.safeParse(timelineItem.data);
+      const parsed = releaseDataSchema.safeParse(data);
       if (parsed.success)
         itemTitle =
           parsed.data.release.name ?? parsed.data.release.tag_name ?? "Release";
     } else if (timelineItem.type === "push") {
-      const parsed = pushDataSchema.safeParse(timelineItem.data);
+      const parsed = pushDataSchema.safeParse(data);
       if (parsed.success) itemTitle = parsed.data.push.title;
     }
 
-    const statusUrl = `${BASE_URL}/${repo.org}/${repo.repo}/status/${dedupe_hash}`;
-    const subject = `${repo.org}/${repo.repo}: Your ${typeLabel} reached ${milestoneToSend} ${milestoneToSend === 1 ? "like" : "likes"}!`;
+    const statusUrl = `${BASE_URL}/${repoDoc.org}/${repoDoc.repo}/status/${dedupe_hash}`;
+    const subject = `${repoDoc.org}/${repoDoc.repo}: Your ${typeLabel} reached ${milestoneToSend} ${milestoneToSend === 1 ? "like" : "likes"}!`;
     const html = `
-      <p>Great news! Your ${typeLabel} in <strong>${escapeText(repo.org)}/${escapeText(repo.repo)}</strong> has reached <strong>${milestoneToSend}</strong> ${milestoneToSend === 1 ? "like" : "likes"}.</p>
+      <p>Great news! Your ${typeLabel} in <strong>${escapeText(repoDoc.org)}/${escapeText(repoDoc.repo)}</strong> has reached <strong>${milestoneToSend}</strong> ${milestoneToSend === 1 ? "like" : "likes"}.</p>
       <p><strong>${escapeText(itemTitle)}</strong></p>
       <p><a href="${escapeAttribute(statusUrl)}">View on Nom</a></p>
     `;
 
     await Promise.allSettled(
-      emails.map((to) => {
-        return resendClient.emails.send({
+      emails.map((to) =>
+        resendClient.emails.send({
           from: "Nom <notifications@nomit.dev>",
           to,
           subject,
           html,
-        });
-      }),
+        }),
+      ),
     );
 
-    await supabaseClient
-      .from("notifications")
-      .insert({
-        type: "engagement_milestone",
-        entity_id: dedupe_hash,
-        key: String(milestoneToSend),
-      })
-      .throwOnError();
+    await convex.mutation(api.admin.insertNotification, {
+      type: "engagement_milestone",
+      entityId: dedupe_hash,
+      key: String(milestoneToSend),
+    });
   },
 });

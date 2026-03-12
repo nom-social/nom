@@ -3,7 +3,6 @@ import crypto from "crypto";
 
 import { logger } from "@trigger.dev/sdk";
 
-import { Json, TablesInsert } from "@/types/supabase";
 import { PushData } from "@/components/shared/activity-card/shared/schemas";
 import { fetchNomInstructions } from "@/trigger/shared/fetch-nom-template";
 import propagateLicenseChange from "@/trigger/shared/propagate-license-changes";
@@ -12,6 +11,7 @@ import { createEventTools } from "@/trigger/shared/agent-tools";
 import { runSummaryAgent } from "@/trigger/shared/run-summary-agent";
 
 import { BASELINE_SCORE } from "./shared/constants";
+import { type TimelineEntry } from "./pull-request";
 
 // Define the schema for push events
 const pushEventSchema = z.object({
@@ -71,7 +71,7 @@ export async function processPushEvent({
   repo,
   subscribers,
 }: {
-  event: { event_type: string; raw_payload: Json; id: string };
+  event: { event_type: string; raw_payload: unknown; id: string };
   repo: {
     repo: string;
     org: string;
@@ -79,8 +79,8 @@ export async function processPushEvent({
   };
   subscribers: { user_id: string }[];
 }): Promise<{
-  userTimelineEntries: TablesInsert<"user_timeline">[];
-  publicTimelineEntries: TablesInsert<"public_timeline">[];
+  userTimelineEntries: TimelineEntry[];
+  publicTimelineEntries: TimelineEntry[];
 }> {
   const payload = pushEventSchema.parse(event.raw_payload);
   const octokit = await createAuthenticatedOctokitClient({
@@ -214,7 +214,7 @@ You can use explore_file with ref=${latestCommit.id} to read specific file conte
     )
     .digest("hex");
 
-  const latestTimestamp = new Date(latestCommit.timestamp).toISOString();
+  const latestTimestamp = new Date(latestCommit.timestamp).getTime();
 
   const pushData: PushData = {
     push: {
@@ -222,32 +222,30 @@ You can use explore_file with ref=${latestCommit.id} to read specific file conte
       contributors,
       title: result.title,
       html_url: latestCommit.url,
-      created_at: latestTimestamp,
+      created_at: new Date(latestCommit.timestamp).toISOString(),
     },
   };
 
-  const timelineEntry = {
+  const timelineEntry: TimelineEntry = {
     type: "push",
     data: pushData,
     score: BASELINE_SCORE,
-    repo_id: repo.id,
-    dedupe_hash: dedupeHash,
-    updated_at: latestTimestamp,
-    event_ids: [event.id],
-    is_read: false,
-    search_text: [result.title, aiSummary]
+    repositoryId: repo.id,
+    dedupeHash,
+    updatedAt: latestTimestamp,
+    eventIds: [event.id],
+    isRead: false,
+    searchText: [result.title, aiSummary]
       .filter((text) => text.trim().length > 0)
       .join(" "),
   };
 
   // One entry per subscriber — if you follow the repo, you get the event
-  const userTimelineEntries: TablesInsert<"user_timeline">[] = subscribers.map(
-    (s) => ({
-      user_id: s.user_id,
-      categories: ["pushes"],
-      ...timelineEntry,
-    }),
-  );
+  const userTimelineEntries: TimelineEntry[] = subscribers.map((s) => ({
+    ...timelineEntry,
+    userId: s.user_id,
+    categories: ["pushes"],
+  }));
 
   return {
     userTimelineEntries,

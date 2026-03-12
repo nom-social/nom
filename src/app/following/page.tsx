@@ -1,17 +1,14 @@
 import { redirect } from "next/navigation";
 
 import ClaimRepoButton from "@/components/shared/claim-repo-button";
-import { createClient } from "@/utils/supabase/server";
+import { auth } from "@convex-dev/auth/nextjs/server";
 
 import FollowingFeed from "./page/feed";
 
 export default async function FollowingPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { userId } = await auth();
 
-  if (!user) {
+  if (!userId) {
     redirect("/auth/login");
   }
 

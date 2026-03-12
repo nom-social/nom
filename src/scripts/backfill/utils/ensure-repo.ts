@@ -1,8 +1,9 @@
-import { createAdminClient } from "@/utils/supabase/admin";
+import { createAdminConvexClient } from "@/utils/convex/client";
+import { api } from "@/../convex/_generated/api";
 
 /**
  * Ensures a public-only repo exists in the repositories table.
- * Does NOT create repositories_secure, so the repo will use unauthenticated
+ * Does NOT create repositoriesSecure, so the repo will use unauthenticated
  * Octokit fallback when processing events.
  */
 export async function ensurePublicRepo({
@@ -12,10 +13,6 @@ export async function ensurePublicRepo({
   org: string;
   repo: string;
 }) {
-  const supabase = createAdminClient();
-
-  await supabase
-    .from("repositories")
-    .upsert({ org, repo }, { onConflict: "org,repo" })
-    .throwOnError();
+  const convex = createAdminConvexClient();
+  await convex.mutation(api.admin.upsertRepository, { org, repo });
 }

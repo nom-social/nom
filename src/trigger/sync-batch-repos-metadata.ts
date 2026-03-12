@@ -1,9 +1,9 @@
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 
-import { escapeForIlike } from "@/lib/repo-utils";
+import { createAdminConvexClient } from "@/utils/convex/client";
+import { api } from "@/../convex/_generated/api";
 import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
-import { createAdminClient } from "@/utils/supabase/admin";
 
 export const syncBatchReposMetadataTask = schemaTask({
   id: "sync-batch-repos-metadata",
@@ -11,23 +11,21 @@ export const syncBatchReposMetadataTask = schemaTask({
     repos: z.array(z.object({ org: z.string(), repo: z.string() })),
   }),
   run: async ({ repos }) => {
-    const supabase = createAdminClient();
+    const convex = createAdminConvexClient();
 
     for (const { org, repo } of repos) {
       try {
-        const { data: repoInfo } = await supabase
-          .from("repositories")
-          .select("id, org, repo")
-          .ilike("org", escapeForIlike(org))
-          .ilike("repo", escapeForIlike(repo))
-          .single()
-          .throwOnError();
-
-        logger.info("Starting metadata sync for repo", { org, repo });
-        const octokit = await createAuthenticatedOctokitClient({
+        const repoDoc = await convex.query(api.admin.getRepository, {
           org,
           repo,
         });
+        if (!repoDoc) {
+          logger.warn("Repository not found", { org, repo });
+          continue;
+        }
+
+        logger.info("Starting metadata sync for repo", { org, repo });
+        const octokit = await createAuthenticatedOctokitClient({ org, repo });
         const [{ data: repoData }, { data: languagesData }] = await Promise.all(
           [
             octokit.repos.get({ owner: org, repo }),
@@ -36,10 +34,7 @@ export const syncBatchReposMetadataTask = schemaTask({
         );
 
         const languages = Object.entries(languagesData)
-          .map(([name, bytes]) => ({
-            name,
-            bytes,
-          }))
+          .map(([name, bytes]) => ({ name, bytes }))
           .sort((a, b) => b.bytes - a.bytes);
 
         const metadata = {
@@ -50,11 +45,12 @@ export const syncBatchReposMetadataTask = schemaTask({
           languages,
           license: repoData.license?.spdx_id || repoData.license?.name || null,
         };
-        await supabase
-          .from("repositories")
-          .update({ metadata, is_private: repoData.visibility === "private" })
-          .eq("id", repoInfo.id)
-          .throwOnError();
+
+        await convex.mutation(api.admin.updateRepositoryMetadata, {
+          repositoryId: repoDoc._id,
+          metadata,
+          isPrivate: repoData.visibility === "private",
+        });
 
         logger.info("Successfully updated metadata for repo", { org, repo });
       } catch (error) {

@@ -1,21 +1,11 @@
-import { createClient } from "@/utils/supabase/server";
-import type { Tables } from "@/types/supabase";
+import { auth } from "@convex-dev/auth/nextjs/server";
+import { fetchQuery } from "convex/nextjs";
+import { api } from "@/../convex/_generated/api";
 
-export async function getCurrentUser(): Promise<Tables<"users"> | null> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  const userId = user.id;
-  const { data: userData } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", userId)
-    .single();
-
-  return userData ?? null;
+export async function getCurrentUser() {
+  const { userId } = await auth();
+  if (!userId) return null;
+  return fetchQuery(api.users.getCurrentUser);
 }
 
 getCurrentUser.key = "src/app/layout/profile-dropdown/actions/getCurrentUser";

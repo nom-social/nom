@@ -1,18 +1,21 @@
 import type { MetadataRoute } from "next";
+import { fetchQuery } from "convex/nextjs";
 
 import { BASE_URL } from "@/lib/constants";
-import { createClient } from "@/utils/supabase/server";
+import { api } from "@/../convex/_generated/api";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = await createClient();
+  let repos: { org: string; repo: string; _creationTime: number }[] = [];
 
-  const { data: repos } = await supabase
-    .from("repositories")
-    .select("org, repo, created_at");
+  try {
+    repos = await fetchQuery(api.admin.listRepositories, {});
+  } catch {
+    // If query fails, return base URL only
+  }
 
-  const repoUrls: MetadataRoute.Sitemap = (repos || []).map((repo) => ({
+  const repoUrls: MetadataRoute.Sitemap = repos.map((repo) => ({
     url: `${BASE_URL}/${repo.org}/${repo.repo}`,
-    lastModified: repo.created_at ? new Date(repo.created_at) : new Date(),
+    lastModified: new Date(repo._creationTime),
     changeFrequency: "daily" as const,
     priority: 0.9,
   }));

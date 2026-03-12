@@ -2,7 +2,6 @@ import { z } from "zod";
 import crypto from "crypto";
 import { logger } from "@trigger.dev/sdk";
 
-import { Json, TablesInsert } from "@/types/supabase";
 import { PrData } from "@/components/shared/activity-card/shared/schemas";
 import { fetchNomInstructions } from "@/trigger/shared/fetch-nom-template";
 import propagateLicenseChange from "@/trigger/shared/propagate-license-changes";
@@ -11,6 +10,20 @@ import { createEventTools } from "@/trigger/shared/agent-tools";
 import { runSummaryAgent } from "@/trigger/shared/run-summary-agent";
 
 import { BASELINE_SCORE, PULL_REQUEST_MULTIPLIER } from "./shared/constants";
+
+export interface TimelineEntry {
+  type: string;
+  data: unknown;
+  score: number;
+  repositoryId: string;
+  dedupeHash: string;
+  updatedAt: number;
+  eventIds: string[];
+  isRead: boolean;
+  searchText: string;
+  categories?: string[];
+  userId?: string;
+}
 
 const pullRequestSchema = z.object({
   action: z.enum(["closed"]),
@@ -52,7 +65,7 @@ export async function processPullRequestEvent({
   repo,
   subscribers,
 }: {
-  event: { event_type: string; raw_payload: Json; id: string };
+  event: { event_type: string; raw_payload: unknown; id: string };
   repo: {
     repo: string;
     org: string;
@@ -60,8 +73,8 @@ export async function processPullRequestEvent({
   };
   subscribers: { user_id: string }[];
 }): Promise<{
-  userTimelineEntries: TablesInsert<"user_timeline">[];
-  publicTimelineEntries: TablesInsert<"public_timeline">[];
+  userTimelineEntries: TimelineEntry[];
+  publicTimelineEntries: TimelineEntry[];
 }> {
   const octokit = await createAuthenticatedOctokitClient({
     org: repo.org,
@@ -305,27 +318,25 @@ You can use explore_file with ref=${pull_request.head.sha} to read specific file
   }
   const prData = prDataOrNull;
 
-  const timelineEntry = {
+  const timelineEntry: TimelineEntry = {
     type: "pull_request",
     data: prData,
     score: BASELINE_SCORE * PULL_REQUEST_MULTIPLIER,
-    repo_id: repo.id,
-    dedupe_hash: dedupeHash,
-    updated_at: pull_request.updated_at.toISOString(),
-    event_ids: [event.id],
-    is_read: false,
-    search_text: [prData.pull_request.title, prData.pull_request.ai_summary]
+    repositoryId: repo.id,
+    dedupeHash,
+    updatedAt: pull_request.updated_at.getTime(),
+    eventIds: [event.id],
+    isRead: false,
+    searchText: [prData.pull_request.title, prData.pull_request.ai_summary]
       .filter((text) => text.trim().length > 0)
       .join(" "),
   };
   // One entry per subscriber — if you follow the repo, you get the event
-  const userTimelineEntries: TablesInsert<"user_timeline">[] = subscribers.map(
-    (s) => ({
-      user_id: s.user_id,
-      categories: ["pull_requests"],
-      ...timelineEntry,
-    }),
-  );
+  const userTimelineEntries: TimelineEntry[] = subscribers.map((s) => ({
+    ...timelineEntry,
+    userId: s.user_id,
+    categories: ["pull_requests"],
+  }));
 
   return {
     userTimelineEntries,

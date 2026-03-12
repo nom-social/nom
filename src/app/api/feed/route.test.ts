@@ -4,40 +4,27 @@ import { NextRequest } from "next/server";
 
 import { GET } from "./route";
 
-const mockCreateClient = vi.hoisted(() => vi.fn());
+const mockFetchQuery = vi.hoisted(() => vi.fn());
 
-vi.mock("@/utils/supabase/server", () => ({
-  createClient: mockCreateClient,
+vi.mock("convex/nextjs", () => ({
+  fetchQuery: mockFetchQuery,
+}));
+
+vi.mock("@/../convex/_generated/api", () => ({
+  api: {
+    admin: {
+      getPublicFeedSlice: "admin:getPublicFeedSlice",
+    },
+  },
 }));
 
 function createRequest(url: string): NextRequest {
   return new NextRequest(url);
 }
 
-function createChainableMock(result: {
-  data: unknown[] | null;
-  error: { message: string } | null;
-}) {
-  const chain = {
-    eq: () => chain,
-    gte: () => chain,
-    lte: () => chain,
-    textSearch: () => chain,
-    order: () => chain,
-    range: () => Promise.resolve(result),
-  };
-  return {
-    from: () => ({
-      select: () => chain,
-    }),
-  };
-}
-
 describe("GET /api/feed", () => {
   it("uses default limit 5 and offset 0", async () => {
-    mockCreateClient.mockResolvedValue(
-      createChainableMock({ data: [], error: null }),
-    );
+    mockFetchQuery.mockResolvedValue([]);
 
     const req = createRequest("http://localhost/api/feed");
     const res = await GET(req);
@@ -50,29 +37,16 @@ describe("GET /api/feed", () => {
   });
 
   it("caps limit at 100", async () => {
-    const rangeSpy = vi.fn().mockResolvedValue({ data: [], error: null });
-    const chain = {
-      eq: () => chain,
-      gte: () => chain,
-      lte: () => chain,
-      textSearch: () => chain,
-      order: () => chain,
-      range: rangeSpy,
-    };
-    mockCreateClient.mockResolvedValue({
-      from: () => ({ select: () => chain }),
-    });
+    mockFetchQuery.mockResolvedValue([]);
 
     const req = createRequest("http://localhost/api/feed?limit=200&offset=0");
-    await GET(req);
-    // range(from, to) is inclusive, so limit 100 → to = 99
-    expect(rangeSpy).toHaveBeenCalledWith(0, 99);
+    const res = await GET(req);
+    const json = await res.json();
+    expect(json.pagination.limit).toBe(100);
   });
 
   it("returns 500 on DB error", async () => {
-    mockCreateClient.mockResolvedValue(
-      createChainableMock({ data: null, error: { message: "DB error" } }),
-    );
+    mockFetchQuery.mockRejectedValue(new Error("DB error"));
 
     const req = createRequest("http://localhost/api/feed");
     const res = await GET(req);
@@ -84,18 +58,15 @@ describe("GET /api/feed", () => {
   it("returns items and has_more when length equals limit", async () => {
     const mockItems = [
       {
-        id: "1",
+        _id: "1",
         type: "push",
         data: {},
-        updated_at: "2024-01-01",
-        org: "org",
-        repo: "repo",
-        repositories: { org: "org", repo: "repo" },
+        dedupeHash: "abc",
+        updatedAt: Date.now(),
+        repository: { org: "org", repo: "repo" },
       },
     ];
-    mockCreateClient.mockResolvedValue(
-      createChainableMock({ data: mockItems, error: null }),
-    );
+    mockFetchQuery.mockResolvedValue(mockItems);
 
     const req = createRequest("http://localhost/api/feed?limit=1&offset=0");
     const res = await GET(req);

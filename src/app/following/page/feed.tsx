@@ -1,6 +1,6 @@
 "use client";
 
-import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import { usePaginatedQuery } from "convex/react";
 import { Search, X, Loader } from "lucide-react";
 import { useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
@@ -16,10 +16,10 @@ import { useBackUrl } from "@/hooks/use-back-url";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useScrollRestore } from "@/hooks/use-scroll-restore";
 import { useSyncParamToUrl } from "@/hooks/use-sync-param-to-url";
+import { api } from "@/../convex/_generated/api";
+import { buildFeedQueryArgs } from "@/app/page/feed/actions";
 
-import { fetchFeed } from "@/app/page/feed/actions";
-
-const LIMIT = 20;
+const INITIAL_NUM_ITEMS = 20;
 const SEARCH_DEBOUNCE_MS = 300;
 
 export default function FollowingFeed() {
@@ -27,9 +27,7 @@ export default function FollowingFeed() {
   const searchParams = useSearchParams();
   const qFromUrl = searchParams.get("q") ?? "";
 
-  const { register, setValue, watch } = useForm<{
-    search: string;
-  }>({
+  const { register, setValue, watch } = useForm<{ search: string }>({
     defaultValues: { search: qFromUrl },
   });
   const searchValue = watch("search");
@@ -37,53 +35,35 @@ export default function FollowingFeed() {
   useSyncParamToUrl("q", activeQuery);
   const backUrl = useBackUrl();
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useInfiniteQuery({
-    queryKey: [fetchFeed.key, activeQuery],
-    queryFn: ({ pageParam }) =>
-      fetchFeed({
-        limit: LIMIT,
-        offset: pageParam,
-        query: activeQuery,
-      }),
-    getNextPageParam: (lastPage, allPages) => {
-      if (lastPage.hasMore) {
-        return allPages.reduce((acc, page) => acc + page.items.length, 0);
-      }
-      return undefined;
-    },
-    initialPageParam: 0,
-    placeholderData: keepPreviousData,
-  });
+  const filterArgs = buildFeedQueryArgs(activeQuery);
 
-  const items = data?.pages.flatMap((page) => page.items) ?? [];
+  const { results, status, loadMore } = usePaginatedQuery(
+    api.feed.fetchUserFeed,
+    filterArgs,
+    { initialNumItems: INITIAL_NUM_ITEMS },
+  );
+
+  const isLoading = status === "LoadingFirstPage";
+  const isFetchingNextPage = status === "LoadingMore";
+  const hasNextPage = status === "CanLoadMore";
 
   const observerMiddle = useRef<IntersectionObserver | null>(null);
   const observerLast = useRef<IntersectionObserver | null>(null);
   const sentinelMiddleIndex =
-    items.length > 0 ? Math.floor(items.length / 2) : -1;
-  const sentinelLastIndex = items.length > 0 ? items.length - 1 : -1;
+    results.length > 0 ? Math.floor(results.length / 2) : -1;
+  const sentinelLastIndex = results.length > 0 ? results.length - 1 : -1;
 
   const sentinelMiddleRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (isFetchingNextPage) return;
       if (observerMiddle.current) observerMiddle.current.disconnect();
       observerMiddle.current = new window.IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasNextPage) {
-          fetchNextPage();
-        }
+        if (entries[0].isIntersecting && hasNextPage)
+          loadMore(INITIAL_NUM_ITEMS);
       });
       if (node) observerMiddle.current.observe(node);
     },
-    [isFetchingNextPage, fetchNextPage, hasNextPage],
+    [isFetchingNextPage, loadMore, hasNextPage],
   );
 
   const sentinelLastRef = useCallback(
@@ -91,22 +71,19 @@ export default function FollowingFeed() {
       if (isFetchingNextPage) return;
       if (observerLast.current) observerLast.current.disconnect();
       observerLast.current = new window.IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasNextPage) {
-          fetchNextPage();
-        }
+        if (entries[0].isIntersecting && hasNextPage)
+          loadMore(INITIAL_NUM_ITEMS);
       });
       if (node) observerLast.current.observe(node);
     },
-    [isFetchingNextPage, fetchNextPage, hasNextPage],
+    [isFetchingNextPage, loadMore, hasNextPage],
   );
 
   const handleScrollToTop = useCallback(() => {
-    refetch();
-  }, [refetch]);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
-  const handleClear = () => {
-    setValue("search", "");
-  };
+  const handleClear = () => setValue("search", "");
 
   return (
     <Tabs value="following" className="w-full">
@@ -154,29 +131,24 @@ export default function FollowingFeed() {
       <ScrollToTopButton onScrollToTop={handleScrollToTop} />
 
       <div className="flex flex-col gap-4">
-        {items.length === 0 && !isLoading && (
+        {results.length === 0 && !isLoading && (
           <div className="text-muted-foreground">No activity yet.</div>
-        )}
-        {isError && (
-          <div className="text-muted-foreground">
-            Error: {error instanceof Error ? error.message : "Unknown error"}
-          </div>
         )}
         {isLoading && (
           <div className="flex flex-row items-center gap-2 text-muted-foreground">
             <Loader className="animate-spin w-4 h-4" /> Loading...
           </div>
         )}
-        {items.map((item, idx) => {
-          const org = item.repositories.org;
-          const repo = item.repositories.repo;
+        {results.map((item, idx) => {
+          const org = item.repository?.org ?? "";
+          const repo = item.repository?.repo ?? "";
           let ref;
           if (hasNextPage) {
             if (idx === sentinelMiddleIndex) ref = sentinelMiddleRef;
             if (idx === sentinelLastIndex) ref = sentinelLastRef;
           }
           return (
-            <div key={item.id} ref={ref}>
+            <div key={item._id} ref={ref}>
               <ActivityCard item={item} repo={repo} org={org} back={backUrl} />
             </div>
           );
@@ -186,7 +158,7 @@ export default function FollowingFeed() {
             <Loader className="animate-spin w-4 h-4" /> Loading more...
           </div>
         )}
-        {items.length > 0 && !hasNextPage && !isLoading && (
+        {results.length > 0 && !hasNextPage && !isLoading && (
           <div className="text-muted-foreground text-center pb-4 text-sm">
             - End of feed -
           </div>

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Backfill script: fetch events from dedicated GitHub API endpoints for a public repo,
- * insert into github_event_log with correct timestamps, then trigger process-github-events.
+ * insert into githubEventLog with correct timestamps, then trigger process-github-events.
  *
  * Uses commits, pulls, and releases APIs directly (not the
  * Events API), so you get the events you want even when a repo is flooded with stars/comments.
@@ -16,17 +16,17 @@
  *
  * Env:
  *   GITHUB_TOKEN - required GitHub PAT used for API requests
- *   NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY - required for DB
+ *   NEXT_PUBLIC_CONVEX_URL - required for DB
  *   TRIGGER_SECRET_KEY - required to trigger process-github-events (or run trigger dev)
  */
 
 import { Octokit } from "@octokit/rest";
 
-import { createAdminClient } from "@/utils/supabase/admin";
+import { createAdminConvexClient } from "@/utils/convex/client";
+import { api } from "@/../convex/_generated/api";
 import {
   fetchAndEnrichRepoEvents,
   FILTERABLE_EVENT_TYPES,
-  type EnrichedEventForInsert,
 } from "@/lib/backfill/events-api";
 import { processGithubEvents } from "@/trigger/process-github-events";
 import { syncBatchReposMetadataTask } from "@/trigger/sync-batch-repos-metadata";
@@ -100,14 +100,8 @@ function parseArgs(): {
 async function main() {
   const { org, repo, limit, dryRun, types } = parseArgs();
 
-  if (
-    !process.env.GITHUB_TOKEN ||
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.SUPABASE_SERVICE_ROLE_KEY
-  ) {
-    console.error(
-      "Missing GITHUB_TOKEN, NEXT_PUBLIC_SUPABASE_URL, or SUPABASE_SERVICE_ROLE_KEY",
-    );
+  if (!process.env.GITHUB_TOKEN || !process.env.NEXT_PUBLIC_CONVEX_URL) {
+    console.error("Missing GITHUB_TOKEN or NEXT_PUBLIC_CONVEX_URL");
     process.exit(1);
   }
 
@@ -148,33 +142,21 @@ async function main() {
     return;
   }
 
-  const supabase = createAdminClient();
+  const convex = createAdminConvexClient();
 
-  const rows: Array<{
-    event_type: string;
-    action: string | null;
-    org: string;
-    repo: string;
-    raw_payload: EnrichedEventForInsert["raw_payload"];
-    created_at: string;
-  }> = enrichedEvents.map((e) => ({
-    event_type: e.event_type,
-    action: e.action,
-    org: e.org,
-    repo: e.repo,
-    raw_payload: e.raw_payload,
-    created_at: e.created_at,
-  }));
-
-  const { error } = await supabase.from("github_event_log").insert(rows);
-
-  if (error) {
-    console.error("Failed to insert events:", error);
-    process.exit(1);
-  }
+  await convex.mutation(api.admin.insertGithubEvents, {
+    events: enrichedEvents.map((e) => ({
+      eventType: e.event_type,
+      action: e.action ?? undefined,
+      org: e.org,
+      repo: e.repo,
+      rawPayload: e.raw_payload,
+      createdAt: new Date(e.created_at).getTime(),
+    })),
+  });
 
   console.log(
-    `Inserted ${rows.length} events. Triggering process-github-events...`,
+    `Inserted ${enrichedEvents.length} events. Triggering process-github-events...`,
   );
 
   try {
@@ -183,7 +165,7 @@ async function main() {
   } catch (err) {
     console.error("Failed to trigger process-github-events:", err);
     console.warn(
-      "Events are in github_event_log. Run the trigger manually if needed.",
+      "Events are in githubEventLog. Run the trigger manually if needed.",
     );
     process.exit(1);
   }

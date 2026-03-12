@@ -1,83 +1,44 @@
-import { escapeForIlike } from "@/lib/repo-utils";
-import { createClient } from "@/utils/supabase/server";
-import type { Tables } from "@/types/supabase";
+import { fetchQuery } from "convex/nextjs";
+import { api } from "@/../convex/_generated/api";
 
-export type FeedItem = Tables<"public_timeline">;
-
-export type FeedItemWithLikes = FeedItem & {
+export type FeedItemWithLikes = {
+  _id: string;
+  type: string;
+  data: unknown;
+  dedupeHash: string;
   likeCount: number;
   isLiked: boolean;
   isPrivate: boolean;
+  repository: { org: string; repo: string } | null;
 };
-
-export type FetchFeedItemParams = {
-  statusId: string;
-  repo: string;
-  org: string;
-};
-
-// Helper function to batch fetch like data for a single item
-async function fetchLikeData(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  dedupeHash: string,
-  userId?: string,
-) {
-  // Use database function to efficiently get like count and user like status
-  const { data: likeData } = await supabase
-    .rpc("get_batch_like_data", {
-      dedupe_hashes: [dedupeHash],
-      user_id_param: userId,
-    })
-    .throwOnError();
-
-  const result = likeData[0];
-  return {
-    likeCount: result?.like_count || 0,
-    isLiked: result?.user_liked || false,
-  };
-}
 
 export async function fetchFeedItem({
   statusId,
   repo,
   org,
-}: FetchFeedItemParams): Promise<FeedItemWithLikes | null> {
-  const supabase = await createClient();
+}: {
+  statusId: string;
+  repo: string;
+  org: string;
+}): Promise<FeedItemWithLikes | null> {
+  const item = await fetchQuery(api.feed.fetchFeedItem, {
+    dedupeHash: statusId,
+    org,
+    repo,
+  });
 
-  const { data: repoData } = await supabase
-    .from("repositories")
-    .select("id, is_private")
-    .ilike("repo", escapeForIlike(repo))
-    .ilike("org", escapeForIlike(org))
-    .single();
-
-  if (!repoData) return null;
-
-  const { data } = await supabase
-    .from("public_timeline")
-    .select("*")
-    .eq("dedupe_hash", statusId)
-    .eq("repo_id", repoData.id)
-    .single();
-
-  if (!data) return null;
-
-  // Get current user
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  // Fetch like data for the item
-  const { likeCount, isLiked } = await fetchLikeData(
-    supabase,
-    data.dedupe_hash,
-    user?.id,
-  );
+  if (!item) return null;
 
   return {
-    ...data,
-    likeCount,
-    isLiked,
-    isPrivate: repoData.is_private,
+    _id: item._id,
+    type: item.type,
+    data: item.data,
+    dedupeHash: item.dedupeHash,
+    likeCount: item.likeCount,
+    isLiked: item.isLiked,
+    isPrivate: item.isPrivate,
+    repository: item.repository
+      ? { org: item.repository.org, repo: item.repository.repo }
+      : null,
   };
 }

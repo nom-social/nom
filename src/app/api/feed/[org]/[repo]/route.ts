@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { fetchQuery } from "convex/nextjs";
 
 import { normalizeTimelineItem } from "@/app/api/feed/normalize";
-import { escapeForIlike } from "@/lib/repo-utils";
-import { createClient } from "@/utils/supabase/server";
+import { api } from "@/../convex/_generated/api";
 
 export async function GET(
   request: NextRequest,
@@ -14,51 +14,46 @@ export async function GET(
   const limit = Math.min(parseInt(searchParams.get("limit") ?? "5", 10), 100);
   const offset = parseInt(searchParams.get("offset") ?? "0", 10);
 
-  const supabase = await createClient();
-
-  // Look up the repository to get its ID
-  const { data: repoData, error: repoError } = await supabase
-    .from("repositories")
-    .select("id")
-    .ilike("org", escapeForIlike(org))
-    .ilike("repo", escapeForIlike(repo))
-    .single();
-
-  if (repoError || !repoData) {
+  // Look up the repository
+  const repoDoc = await fetchQuery(api.admin.getRepository, { org, repo });
+  if (!repoDoc) {
     return NextResponse.json(
       { error: "Repository not found" },
       { status: 404 },
     );
   }
 
-  let queryBuilder = supabase
-    .from("public_timeline")
-    .select("*, org:repositories!inner(org), repo:repositories!inner(repo)")
-    .eq("repo_id", repoData.id);
+  const items = await fetchQuery(api.admin.getPublicFeedSlice, {
+    limit,
+    offset,
+    repositoryId: repoDoc._id,
+    textQuery: q?.trim() || undefined,
+  });
 
-  if (q?.trim()) {
-    queryBuilder = queryBuilder.textSearch("search_vector", q.trim(), {
-      type: "websearch",
-      config: "english",
-    });
-  }
-
-  const { data, error } = await queryBuilder
-    .order("updated_at", { ascending: false })
-    .order("created_at", { ascending: false })
-    .range(offset, offset + limit - 1);
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  const items = (data ?? []).map((item) =>
-    normalizeTimelineItem({ ...item, org, repo }),
+  const normalizedItems = items.map((item: {
+    _id: string;
+    type: string;
+    data: unknown;
+    dedupeHash: string;
+    updatedAt: number;
+    repository?: { org: string; repo: string } | null;
+  }) =>
+    normalizeTimelineItem({
+      id: item._id,
+      type: item.type,
+      data: item.data,
+      updated_at: new Date(item.updatedAt).toISOString(),
+      dedupe_hash: item.dedupeHash,
+      org,
+      repo,
+    }),
   );
-  const has_more = items.length === limit;
+
+  const has_more = normalizedItems.length > limit;
+  const page = normalizedItems.slice(0, limit);
 
   return NextResponse.json({
-    items,
+    items: page,
     pagination: { offset, limit, has_more },
   });
 }

@@ -1,17 +1,11 @@
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import { BASE_URL } from "@/lib/constants";
-import { getQueryClient } from "@/utils/get-query-client";
 
 import RepoProfileCard from "./page/repo-profile-card";
 import { fetchRepoProfile } from "./page/actions";
-import { fetchFeedPage, type FetchFeedPageResult } from "./page/feed/actions";
-import { fetchFeedPageServer } from "./page/feed/server";
 import Feed from "./page/feed";
-
-const LIMIT = 20;
 
 export default async function RepoPage({
   params,
@@ -22,28 +16,6 @@ export default async function RepoPage({
   const repoProfile = await fetchRepoProfile(org, repo);
 
   if (!repoProfile) return notFound();
-
-  const queryClient = getQueryClient();
-  await queryClient.prefetchInfiniteQuery({
-    queryKey: [fetchFeedPage.key, repoProfile.id, ""],
-    queryFn: ({ pageParam }) =>
-      fetchFeedPageServer({
-        repoId: repoProfile.id,
-        limit: LIMIT,
-        offset: pageParam,
-        query: "",
-      }),
-    getNextPageParam: (
-      lastPage: FetchFeedPageResult,
-      allPages: FetchFeedPageResult[],
-    ) => {
-      if (lastPage.hasMore) {
-        return allPages.reduce((acc, page) => acc + page.items.length, 0);
-      }
-      return undefined;
-    },
-    initialPageParam: 0,
-  });
 
   return (
     <main className="flex flex-col justify-center gap-4 px-2">
@@ -60,9 +32,7 @@ export default async function RepoPage({
         isPrivate={repoProfile.isPrivate}
       />
 
-      <HydrationBoundary state={dehydrate(queryClient)}>
-        <Feed repoId={repoProfile.id} repo={repo} org={org} />
-      </HydrationBoundary>
+      <Feed repositoryId={repoProfile._id} repo={repo} org={org} />
     </main>
   );
 }

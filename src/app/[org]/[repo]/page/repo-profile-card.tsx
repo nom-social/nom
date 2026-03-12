@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Calendar, Github, Globe, Scale } from "lucide-react";
 import { format } from "date-fns";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -17,9 +17,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { OptimizedAvatar } from "@/components/ui/optimized-avatar";
 
+import { api } from "@/../convex/_generated/api";
 import {
   createSubscription,
-  isSubscribed,
   NotAuthenticatedError,
   removeSubscription,
 } from "./repo-profile-card/actions";
@@ -58,24 +58,19 @@ export default function RepoProfileCard({
   const [subscriptionCount, setSubscriptionCount] = useState(
     initialSubscriptionCount,
   );
+  const [isPending, setIsPending] = useState(false);
 
-  const {
-    data: subscribedData,
-    isLoading,
-    refetch,
-    isRefetching,
-  } = useQuery({
-    queryKey: [isSubscribed.key, org, repo],
-    queryFn: () => isSubscribed(org, repo),
-    refetchOnWindowFocus: false,
-  });
+  const subscribedData = useQuery(api.subscriptions.isSubscribed, { org, repo });
+  const convexSubscribe = useMutation(api.subscriptions.subscribe);
+  const convexUnsubscribe = useMutation(api.subscriptions.unsubscribe);
 
-  const createSubscriptionMutation = useMutation({
-    mutationFn: ({ org, repo }: { org: string; repo: string }) =>
-      createSubscription(org, repo),
-    onSuccess: async () => {
+  const isLoading = subscribedData === undefined;
+
+  async function handleSubscribe() {
+    setIsPending(true);
+    try {
+      await createSubscription(org, repo);
       setSubscriptionCount((prev) => prev + 1);
-      await refetch();
       toast.success(
         `🔥 YOOO! Welcome to ${repo}! You just joined ${Intl.NumberFormat(
           "en",
@@ -85,33 +80,34 @@ export default function RepoProfileCard({
         } building the future! LFG! 🚀`,
         { icon: null },
       );
-    },
-    onError: (error) => {
+    } catch (error) {
       if (error instanceof NotAuthenticatedError)
         router.push(
           `/auth/login?next=${encodeURIComponent(window.location.pathname)}`,
         );
-    },
-  });
+    } finally {
+      setIsPending(false);
+    }
+  }
 
-  const removeSubscriptionMutation = useMutation({
-    mutationFn: ({ org, repo }: { org: string; repo: string }) =>
-      removeSubscription(org, repo),
-    onSuccess: async () => {
+  async function handleUnsubscribe() {
+    setIsPending(true);
+    try {
+      await removeSubscription(org, repo);
       setSubscriptionCount((prev) => prev - 1);
-      await refetch();
       toast(
         `💔 NOOO! We're literally crying! You're breaking our heart but we respect your choice. ` +
           "We'll miss you! 😭",
       );
-    },
-    onError: (error) => {
+    } catch (error) {
       if (error instanceof NotAuthenticatedError)
         router.push(
           `/auth/login?next=${encodeURIComponent(window.location.pathname)}`,
         );
-    },
-  });
+    } finally {
+      setIsPending(false);
+    }
+  }
 
   return (
     <Card className="w-full">
@@ -142,18 +138,9 @@ export default function RepoProfileCard({
             <SubscribeButton
               isSubscribed={subscribedData?.subscribed ?? false}
               className="hidden md:flex"
-              onSubscribe={() =>
-                createSubscriptionMutation.mutate({ org, repo })
-              }
-              onUnsubscribe={() =>
-                removeSubscriptionMutation.mutate({ org, repo })
-              }
-              isLoading={
-                createSubscriptionMutation.isPending ||
-                removeSubscriptionMutation.isPending ||
-                isLoading ||
-                isRefetching
-              }
+              onSubscribe={handleSubscribe}
+              onUnsubscribe={handleUnsubscribe}
+              isLoading={isPending || isLoading}
             />
 
             <ShareButton org={org} repo={repo} />
@@ -224,16 +211,9 @@ export default function RepoProfileCard({
           <SubscribeButton
             isSubscribed={subscribedData?.subscribed ?? false}
             className="flex md:hidden"
-            onSubscribe={() => createSubscriptionMutation.mutate({ org, repo })}
-            onUnsubscribe={() =>
-              removeSubscriptionMutation.mutate({ org, repo })
-            }
-            isLoading={
-              createSubscriptionMutation.isPending ||
-              removeSubscriptionMutation.isPending ||
-              isLoading ||
-              isRefetching
-            }
+            onSubscribe={handleSubscribe}
+            onUnsubscribe={handleUnsubscribe}
+            isLoading={isPending || isLoading}
           />
 
           <ShareButtonMobile org={org} repo={repo} />

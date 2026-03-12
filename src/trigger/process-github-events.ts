@@ -1,9 +1,8 @@
 import { logger, schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
 
-import { escapeForIlike } from "@/lib/repo-utils";
-import { createAdminClient } from "@/utils/supabase/admin";
-
+import { createAdminConvexClient } from "@/utils/convex/client";
+import { api } from "@/../convex/_generated/api";
 import { processEvent } from "./process-github-events/event-processors";
 
 export const processGithubEvents = schemaTask({
@@ -14,84 +13,84 @@ export const processGithubEvents = schemaTask({
     repo: z.string(),
   }),
   run: async ({ org, repo }) => {
-    const supabase = createAdminClient();
-    const currentTimestamp = new Date().toISOString();
+    const convex = createAdminConvexClient();
+    const currentTimestampMs = Date.now();
 
     // Get unprocessed events for this org/repo
-    const { data: events } = await supabase
-      .from("github_event_log")
-      .select("*")
-      .is("last_processed", null)
-      .eq("org", org)
-      .eq("repo", repo)
-      .order("created_at", { ascending: true })
-      .throwOnError();
+    const events = await convex.query(api.admin.getUnprocessedEvents, {
+      org,
+      repo,
+    });
 
     logger.info(`Processing ${events.length} events for ${org}/${repo}`);
 
-    // First, handle any snoozed timeline entries that have reached their time
+    // Expire any snoozed timeline entries
     await Promise.allSettled([
-      supabase
-        .from("user_timeline")
-        .update({ snooze_to: null, updated_at: currentTimestamp })
-        .not("snooze_to", "is", null)
-        .lt("snooze_to", currentTimestamp)
-        .throwOnError(),
-      supabase
-        .from("public_timeline")
-        .update({ snooze_to: null, updated_at: currentTimestamp })
-        .not("snooze_to", "is", null)
-        .lt("snooze_to", currentTimestamp)
-        .throwOnError(),
+      convex.mutation(api.admin.expireSnoozedPublicTimeline, {
+        currentTimeMs: currentTimestampMs,
+      }),
+      convex.mutation(api.admin.expireSnoozedUserTimeline, {
+        currentTimeMs: currentTimestampMs,
+      }),
     ]);
 
-    for (const event of events || []) {
+    for (const event of events) {
       try {
-        const { data: repo } = await supabase
-          .from("repositories")
-          .select("id, repo, org")
-          .ilike("repo", escapeForIlike(event.repo))
-          .ilike("org", escapeForIlike(event.org))
-          .single()
-          .throwOnError();
-
-        // Find subscribers for this repository
-        const { data: subscribers } = await supabase
-          .from("subscriptions")
-          .select("user_id")
-          .eq("repo_id", repo.id)
-          .throwOnError();
-
-        const processedEventsPerSubscriber = await processEvent({
-          event,
-          repo,
-          subscribers,
+        const repoDoc = await convex.query(api.admin.getRepository, {
+          org: event.org,
+          repo: event.repo,
         });
 
-        // Create timeline entries for each subscriber and general feed
+        if (!repoDoc) {
+          logger.warn("Repository not found for event", { eventId: event._id });
+          continue;
+        }
+
+        const subscribers = await convex.query(api.admin.getSubscribers, {
+          repositoryId: repoDoc._id,
+        });
+
+        const processedEventsPerSubscriber = await processEvent({
+          event: {
+            id: event._id,
+            event_type: event.eventType,
+            raw_payload: event.rawPayload,
+          },
+          repo: { id: repoDoc._id, org: repoDoc.org, repo: repoDoc.repo },
+          subscribers: subscribers.map((s) => ({ user_id: s.userId })),
+        });
+
+        // Entries are already in camelCase Convex format; just fix the repositoryId type
+        const userTimelineEntries =
+          processedEventsPerSubscriber.userTimelineEntries.map((entry) => ({
+            ...entry,
+            repositoryId: repoDoc._id,
+          }));
+
+        const publicTimelineEntries =
+          processedEventsPerSubscriber.publicTimelineEntries.map((entry) => ({
+            ...entry,
+            repositoryId: repoDoc._id,
+          }));
+
         await Promise.allSettled([
-          supabase
-            .from("user_timeline")
-            .upsert(processedEventsPerSubscriber.userTimelineEntries, {
-              onConflict: "user_id,dedupe_hash",
-            })
-            .throwOnError(),
-          supabase
-            .from("public_timeline")
-            .upsert(processedEventsPerSubscriber.publicTimelineEntries, {
-              onConflict: "dedupe_hash",
-            })
-            .throwOnError(),
+          convex.mutation(api.admin.upsertUserTimelineEntries, {
+            entries: userTimelineEntries as Parameters<
+              typeof convex.mutation<typeof api.admin.upsertUserTimelineEntries>
+            >[1]["entries"],
+          }),
+          convex.mutation(api.admin.upsertPublicTimelineEntries, {
+            entries: publicTimelineEntries as Parameters<
+              typeof convex.mutation<typeof api.admin.upsertPublicTimelineEntries>
+            >[1]["entries"],
+          }),
         ]);
       } catch (error) {
-        logger.error("Error processing event", { error, eventId: event.id });
+        logger.error("Error processing event", { error, eventId: event._id });
       } finally {
-        // Mark event as processed
-        await supabase
-          .from("github_event_log")
-          .update({ last_processed: currentTimestamp })
-          .eq("id", event.id)
-          .throwOnError();
+        await convex.mutation(api.admin.markEventProcessed, {
+          eventId: event._id,
+        });
       }
     }
 

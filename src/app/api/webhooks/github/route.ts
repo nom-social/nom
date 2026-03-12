@@ -1,25 +1,23 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import * as Sentry from "@sentry/nextjs";
+import { fetchMutation, fetchQuery } from "convex/nextjs";
 
-import { escapeForIlike } from "@/lib/repo-utils";
-import { createAdminClient } from "@/utils/supabase/admin";
-import { Json, TablesInsert } from "@/types/supabase";
+import { api } from "@/../convex/_generated/api";
 import { processGithubEvents } from "@/trigger/process-github-events";
 import { syncBatchReposMetadataTask } from "@/trigger/sync-batch-repos-metadata";
+import { createAdminConvexClient } from "@/utils/convex/client";
 
 import * as schemas from "./schemas";
 import { createNewRepo } from "./route/utils";
 
 export async function POST(request: Request) {
-  const supabase = createAdminClient();
+  const convex = createAdminConvexClient();
 
   try {
-    // Get the raw request body
     const rawBody = await request.json();
     const eventType = request.headers.get("x-github-event");
 
-    // Validate the request body with Zod
     const validationResult = schemas.githubWebhookPayloadSchema.safeParse({
       event_type: eventType,
       ...rawBody,
@@ -39,7 +37,7 @@ export async function POST(request: Request) {
     if (payload.event_type === "installation") {
       if (payload.action === "created") {
         await createNewRepo({
-          supabase,
+          convex,
           repos: payload.repositories.map(({ full_name }) => {
             const [org, repo] = full_name.split("/");
             return { org, repo };
@@ -57,9 +55,10 @@ export async function POST(request: Request) {
         timestamp: new Date().toISOString(),
       });
     }
+
     if (payload.event_type === "installation_repositories") {
       await createNewRepo({
-        supabase,
+        convex,
         repos: payload.repositories_added.map(({ full_name }) => {
           const [org, repo] = full_name.split("/");
           return { org, repo };
@@ -79,51 +78,32 @@ export async function POST(request: Request) {
       "unknown";
     const repo = payload.repository?.name || "unknown";
 
-    // Skip database operations for ping events
     if (payload.event_type === "ping")
       return NextResponse.json({
         message: "Ping received successfully",
         timestamp: new Date().toISOString(),
       });
 
-    const { data: repoData } = await supabase
-      .from("repositories")
-      .select("id")
-      .ilike("org", escapeForIlike(org))
-      .ilike("repo", escapeForIlike(repo))
-      .single();
-
-    if (!repoData) {
+    const repoDoc = await convex.query(api.admin.getRepository, { org, repo });
+    if (!repoDoc) {
       return NextResponse.json({
         message: "Repository not found, ignoring webhook",
         timestamp: new Date().toISOString(),
       });
     }
 
-    // Secret validation for GitHub webhook
+    // HMAC validation
     const signature = request.headers.get("x-hub-signature-256");
     if (!signature) {
       return NextResponse.json({ error: "Missing signature" }, { status: 401 });
     }
-    // Reconstruct the raw body for HMAC validation
     const rawBodyString = JSON.stringify(rawBody);
-    const hmac = crypto.createHmac(
-      "sha256",
-      process.env.GITHUB_WEBHOOK_SECRET!,
-    );
+    const hmac = crypto.createHmac("sha256", process.env.GITHUB_WEBHOOK_SECRET!);
     hmac.update(rawBodyString);
     const digest = `sha256=${hmac.digest("hex")}`;
     if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest))) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
-
-    const eventData: TablesInsert<"github_event_log"> = {
-      event_type: payload.event_type,
-      action: payload.action || null,
-      org: payload.organization?.login || payload.repository.owner.login,
-      repo: payload.repository.name,
-      raw_payload: { event_type: eventType, ...rawBody } as Json,
-    };
 
     // Only store push events to the default branch
     if (payload.event_type === "push") {
@@ -140,50 +120,47 @@ export async function POST(request: Request) {
     // Handle star events
     if (payload.event_type === "star") {
       const actorLogin = payload.sender.login;
-      // Check if user exists in Supabase auth
-      const { data: user } = await supabase
-        .from("users")
-        .select("id")
-        .eq("github_username", actorLogin)
-        .single();
+      const user = await convex.query(api.admin.getUserByGithubUsername, {
+        githubUsername: actorLogin,
+      });
 
-      if (user && payload.action === "created")
-        await supabase
-          .from("subscriptions")
-          .upsert(
-            { user_id: user.id, repo_id: repoData.id },
-            { onConflict: "user_id,repo_id" },
-          )
-          .throwOnError();
-
-      if (user && payload.action === "deleted")
-        await supabase
-          .from("subscriptions")
-          .delete()
-          .eq("user_id", user.id)
-          .eq("repo_id", repoData.id)
-          .throwOnError();
+      if (user && payload.action === "created") {
+        await convex.mutation(api.admin.upsertSubscription, {
+          userId: user._id,
+          repositoryId: repoDoc._id,
+        });
+      }
+      if (user && payload.action === "deleted") {
+        await convex.mutation(api.admin.deleteSubscription, {
+          userId: user._id,
+          repositoryId: repoDoc._id,
+        });
+      }
     }
 
     // Handle repository edited events
     if (payload.event_type === "repository" && payload.action === "edited") {
-      await syncBatchReposMetadataTask.trigger({
-        repos: [{ org, repo }],
-      });
+      await syncBatchReposMetadataTask.trigger({ repos: [{ org, repo }] });
       return NextResponse.json({
         message: "Repository edited event, triggered metadata sync",
         timestamp: new Date().toISOString(),
       });
     }
 
-    // Store in Supabase
-    await supabase.from("github_event_log").insert(eventData).throwOnError();
+    // Store event and trigger processing
+    await convex.mutation(api.admin.insertGithubEvent, {
+      eventType: payload.event_type,
+      action: payload.action ?? undefined,
+      org,
+      repo,
+      rawPayload: { event_type: eventType, ...rawBody },
+    });
+
     await processGithubEvents.trigger(
       { org, repo },
       { concurrencyKey: `${org}/${repo}` },
     );
 
-    // Return a success response
     return NextResponse.json({
       message: "Webhook received and stored successfully",
       timestamp: new Date().toISOString(),

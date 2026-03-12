@@ -1,19 +1,16 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
+import { auth } from "@convex-dev/auth/nextjs/server";
 import { sendSubscriberMilestoneTask } from "@/trigger/send-subscriber-milestone";
 
-export async function triggerSubscriberMilestone(repo_id: string) {
+export async function triggerSubscriberMilestone(repositoryId: string) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
+    const { userId } = await auth();
+    if (!userId) return;
 
     await sendSubscriberMilestoneTask.trigger(
-      { repo_id },
-      { concurrencyKey: repo_id },
+      { repo_id: repositoryId },
+      { concurrencyKey: repositoryId },
     );
   } catch {}
 }

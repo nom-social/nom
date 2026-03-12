@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { User } from "@supabase/supabase-js";
+import { useConvexAuth } from "convex/react";
 import { Search, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 
@@ -19,14 +19,13 @@ import FeedPublic from "./feed/feed-public";
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-export default function Feed({ user }: { user: User | null }) {
+export default function Feed() {
   useScrollRestore();
+  const { isAuthenticated } = useConvexAuth();
   const searchParams = useSearchParams();
   const qFromUrl = searchParams.get("q") ?? "";
 
-  const { register, setValue, watch } = useForm<{
-    search: string;
-  }>({
+  const { register, setValue, watch } = useForm<{ search: string }>({
     defaultValues: { search: qFromUrl },
   });
   const searchValue = watch("search");
@@ -34,11 +33,9 @@ export default function Feed({ user }: { user: User | null }) {
   useSyncParamToUrl("q", activeQuery);
   const backUrl = useBackUrl();
 
-  const handleClear = () => {
-    setValue("search", "");
-  };
+  const handleClear = () => setValue("search", "");
 
-  if (!user) {
+  if (!isAuthenticated) {
     return <FeedPublic searchQuery={activeQuery} back={backUrl} />;
   }
 

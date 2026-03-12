@@ -3,8 +3,9 @@ import { z } from "zod";
 import { marked } from "marked";
 import { format } from "date-fns";
 
-import { escapeForIlike } from "@/lib/repo-utils";
-import * as supabase from "@/utils/supabase/admin";
+import { createAdminConvexClient } from "@/utils/convex/client";
+import { api } from "@/../convex/_generated/api";
+import { Id } from "@/../convex/_generated/dataModel";
 import * as resend from "@/utils/resend/client";
 import * as openai from "@/utils/openai/client";
 
@@ -37,49 +38,44 @@ export const sendUserRepoHighlights = schemaTask({
     end: z.coerce.date(),
   }),
   run: async ({ repo, org, user_email, start, end }) => {
-    const supabaseClient = supabase.createAdminClient();
+    const convex = createAdminConvexClient();
     const openAIClient = openai.createClient();
     const resendClient = resend.createClient();
 
-    // Find the repo details (org, repo)
-    const { data: repoData } = await supabaseClient
-      .from("repositories")
-      .select("id")
-      .ilike("org", escapeForIlike(org))
-      .ilike("repo", escapeForIlike(repo))
-      .single()
-      .throwOnError();
+    const repoDoc = await convex.query(api.admin.getRepository, { org, repo });
+    if (!repoDoc) throw new Error(`Repository ${org}/${repo} not found`);
 
-    // Fetch all public_timeline events for this repo
-    const { data: publicEvents } = await supabaseClient
-      .from("public_timeline")
-      .select("*")
-      .eq("repo_id", repoData.id)
-      .gte("updated_at", start.toISOString())
-      .lte("updated_at", end.toISOString())
-      .throwOnError();
+    const publicEvents = await convex.query(
+      api.admin.getPublicTimelineForRepo,
+      {
+        repositoryId: repoDoc._id,
+        fromMs: start.getTime(),
+        toMs: end.getTime(),
+      },
+    );
 
     if (!publicEvents.length) {
       throw new Error("No events found for the specified repo and time range.");
     }
 
     let combinedEvents = "";
-    publicEvents.forEach((event) => {
+    for (const event of publicEvents) {
+      const data = event.data as Record<string, unknown>;
       if (event.type === "pull_request") {
-        const pr = prSchema.parse(event.data);
+        const pr = prSchema.parse(data);
         combinedEvents +=
           `- [pull_request] ${pr.pull_request.title} (${pr.action})\n` +
           `${pr.pull_request.ai_summary}\n` +
           `[View on GitHub](${pr.pull_request.html_url})\n\n`;
       }
       if (event.type === "push") {
-        const push = pushSchema.parse(event.data);
+        const push = pushSchema.parse(data);
         combinedEvents +=
           `- [push] ${push.push.title}\n` +
           `${push.push.ai_summary}\n` +
           `[View on GitHub](${push.push.html_url})\n\n`;
       }
-    });
+    }
 
     const combinedPrompt = EMAIL_PROMPT.replace("{events}", combinedEvents)
       .replace("{org}", org)

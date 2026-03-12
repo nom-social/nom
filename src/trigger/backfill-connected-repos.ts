@@ -7,7 +7,8 @@ import {
 } from "@/lib/backfill/events-api";
 import { processGithubEvents } from "@/trigger/process-github-events";
 import { createAuthenticatedOctokitClient } from "@/utils/octokit/client";
-import { createAdminClient } from "@/utils/supabase/admin";
+import { createAdminConvexClient } from "@/utils/convex/client";
+import { api } from "@/../convex/_generated/api";
 
 export const backfillConnectedReposTask = schemaTask({
   id: "backfill-connected-repos",
@@ -16,7 +17,7 @@ export const backfillConnectedReposTask = schemaTask({
     limit: z.number().int().min(1).max(100).default(10),
   }),
   run: async ({ repos, limit }) => {
-    const supabase = createAdminClient();
+    const convex = createAdminConvexClient();
 
     for (const { org, repo } of repos) {
       try {
@@ -39,20 +40,24 @@ export const backfillConnectedReposTask = schemaTask({
         }
 
         const rows = events.map((event) => ({
-          event_type: event.event_type,
-          action: event.action,
+          eventType: event.event_type,
+          action: event.action ?? undefined,
           org: event.org,
           repo: event.repo,
-          raw_payload: event.raw_payload,
-          created_at: event.created_at,
+          rawPayload: event.raw_payload,
+          createdAt: event.created_at
+            ? new Date(event.created_at).getTime()
+            : undefined,
         }));
 
-        await supabase.from("github_event_log").insert(rows).throwOnError();
+        await convex.mutation(api.admin.insertGithubEvents, { events: rows });
+
         logger.info("Inserted backfill events for connected repo", {
           org,
           repo,
           events: rows.length,
         });
+
         await processGithubEvents.trigger({ org, repo });
       } catch (error) {
         logger.error("Failed to backfill connected repo", { org, repo, error });

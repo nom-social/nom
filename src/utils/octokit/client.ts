@@ -1,8 +1,8 @@
 import { Octokit } from "@octokit/rest";
 import { createAppAuth } from "@octokit/auth-app";
 
-import { escapeForIlike } from "@/lib/repo-utils";
-import { createAdminClient } from "@/utils/supabase/admin";
+import { createAdminConvexClient } from "@/utils/convex/client";
+import { api } from "@/convex/_generated/api";
 
 interface OctokitClientOptions {
   org: string;
@@ -14,16 +14,17 @@ export async function createAuthenticatedOctokitClient(
 ) {
   let installationId: number | undefined;
   if (options) {
-    const supabase = createAdminClient();
-    // repositories_secure is joined via id
-    const { data: repoRow } = await supabase
-      .from("repositories")
-      .select("id, repositories_secure(installation_id)")
-      .ilike("org", escapeForIlike(options.org))
-      .ilike("repo", escapeForIlike(options.repo))
-      .single()
-      .throwOnError();
-    installationId = repoRow.repositories_secure?.installation_id;
+    const convex = createAdminConvexClient();
+    const repoRow = await convex.query(api.admin.getRepository, {
+      org: options.org,
+      repo: options.repo,
+    });
+    if (repoRow) {
+      const secure = await convex.query(api.admin.getRepositorySecure, {
+        repositoryId: repoRow._id,
+      });
+      installationId = secure?.installationId;
+    }
   }
 
   // If installationId found, exchange for access token

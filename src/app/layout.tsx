@@ -16,7 +16,8 @@ import { BASE_URL, GITHUB_URL } from "@/lib/constants";
 
 import "./globals.css";
 import ProfileDropdown from "./layout/profile-dropdown";
-import ReactQueryProvider from "./layout/react-query-provider";
+import { ConvexClientProvider } from "@/components/ConvexClientProvider";
+import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { ThemeProvider } from "./layout/theme-provider";
 
 const jersey15 = Jersey_15({
@@ -72,46 +73,48 @@ export default function RootLayout({
             strategy="beforeInteractive"
           />
         )}
-        <ThemeProvider attribute="class" defaultTheme="dark">
-          <ReactQueryProvider>
-            <Toaster />
-            <NavigationMenu className="w-full min-w-full bg-background fixed top-0 left-0 z-60 border-b border-border shadow-sm p-2">
-              <div className="max-w-3xl mx-auto w-full">
-                <NavigationMenuList className="justify-between items-center">
-                  <div className="flex flex-row gap-2 items-center">
-                    <NavigationMenuItem>
-                      <NavigationMenuLink
-                        href="/"
-                        className="font-jersey-15 text-xl uppercase"
-                      >
-                        Nom
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
-                    <span className="hidden md:inline text-xs text-muted-foreground font-normal normal-case">
-                      Live commentary for your code
-                    </span>
-                  </div>
+        <ConvexAuthNextjsServerProvider>
+          <ConvexClientProvider>
+            <ThemeProvider attribute="class" defaultTheme="dark">
+              <Toaster />
+              <NavigationMenu className="w-full min-w-full bg-background fixed top-0 left-0 z-60 border-b border-border shadow-sm p-2">
+                <div className="max-w-3xl mx-auto w-full">
+                  <NavigationMenuList className="justify-between items-center">
+                    <div className="flex flex-row gap-2 items-center">
+                      <NavigationMenuItem>
+                        <NavigationMenuLink
+                          href="/"
+                          className="font-jersey-15 text-xl uppercase"
+                        >
+                          Nom
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                      <span className="hidden md:inline text-xs text-muted-foreground font-normal normal-case">
+                        Live commentary for your code
+                      </span>
+                    </div>
 
-                  <div className="flex flex-row items-center gap-2">
-                    <NavigationMenuItem>
-                      <NavigationMenuLink
-                        href={GITHUB_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center text-muted-foreground hover:text-foreground transition-colors"
-                        aria-label="Nom on GitHub"
-                      >
-                        <Github className="size-4" />
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
-                    <ProfileDropdown />
-                  </div>
-                </NavigationMenuList>
-              </div>
-            </NavigationMenu>
-            <div className="max-w-3xl mx-auto py-18">{children}</div>
-          </ReactQueryProvider>
-        </ThemeProvider>
+                    <div className="flex flex-row items-center gap-2">
+                      <NavigationMenuItem>
+                        <NavigationMenuLink
+                          href={GITHUB_URL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                          aria-label="Nom on GitHub"
+                        >
+                          <Github className="size-4" />
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                      <ProfileDropdown />
+                    </div>
+                  </NavigationMenuList>
+                </div>
+              </NavigationMenu>
+              <div className="max-w-3xl mx-auto py-18">{children}</div>
+            </ThemeProvider>
+          </ConvexClientProvider>
+        </ConvexAuthNextjsServerProvider>
       </body>
     </html>
   );

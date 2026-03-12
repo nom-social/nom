@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useAuthActions } from "@convex-dev/auth/react";
 
 import {
   DropdownMenuContent,
@@ -9,19 +10,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { Tables } from "@/types/supabase";
-import { createClient } from "@/utils/supabase/client";
+
+type User = {
+  githubUsername?: string;
+  email?: string;
+};
 
 type Props = {
-  user: Tables<"users">;
+  user: User;
 };
 
 export default function DropdownContent({ user }: Props) {
-  const supabase = createClient();
+  const { signOut } = useAuthActions();
   const router = useRouter();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     router.refresh();
   };
 
@@ -30,7 +34,7 @@ export default function DropdownContent({ user }: Props) {
       <DropdownMenuLabel>
         <div className="flex flex-col">
           <span className="text-sm font-medium break-all whitespace-normal">
-            {user.github_username}
+            {user.githubUsername}
           </span>
           <span className="text-xs text-muted-foreground break-all whitespace-normal">
             {user.email}

@@ -1,12 +1,9 @@
 import { parseSearchFilters } from "@/lib/feed-utils";
-import { Tables } from "@/types/supabase";
-import { createClient } from "@/utils/supabase/client";
+import { api } from "@/../convex/_generated/api";
+import { Doc, Id } from "@/../convex/_generated/dataModel";
 
-export type FeedItem = Tables<"user_timeline"> & {
-  repositories: {
-    org: string;
-    repo: string;
-  };
+export type FeedItem = Doc<"userTimeline"> & {
+  repository: (Doc<"repositories"> & { _id: Id<"repositories"> }) | null;
 };
 
 export type FeedItemWithLikes = FeedItem & {
@@ -14,11 +11,8 @@ export type FeedItemWithLikes = FeedItem & {
   isLiked: boolean;
 };
 
-export type PublicFeedItem = Tables<"public_timeline"> & {
-  repositories: {
-    org: string;
-    repo: string;
-  };
+export type PublicFeedItem = Doc<"publicTimeline"> & {
+  repository: (Doc<"repositories"> & { _id: Id<"repositories"> }) | null;
 };
 
 export type PublicFeedItemWithLikes = PublicFeedItem & {
@@ -32,215 +26,25 @@ export class NotAuthenticatedError extends Error {
   }
 }
 
-// Helper function to batch fetch like data for multiple items
-async function batchFetchLikeData(
-  supabase: ReturnType<typeof createClient>,
-  dedupeHashes: string[],
-  userId?: string,
+/**
+ * Build Convex feed query args from a search query string.
+ * Used by both the client components and API routes.
+ */
+export function buildFeedQueryArgs(
+  query?: string,
+  repositoryId?: Id<"repositories">,
 ) {
-  // Use database function to efficiently aggregate like counts and user likes
-  const { data: likeData } = await supabase
-    .rpc("get_batch_like_data", {
-      dedupe_hashes: dedupeHashes,
-      user_id_param: userId,
-    })
-    .throwOnError();
-
-  // Convert the result to maps for easy lookup
-  const likeCountMap: Record<string, number> = {};
-  const userLikesMap: Record<string, boolean> = {};
-
-  likeData.forEach((row) => {
-    likeCountMap[row.dedupe_hash] = row.like_count;
-    userLikesMap[row.dedupe_hash] = row.user_liked;
-  });
-
-  return { likeCountMap, userLikesMap };
-}
-
-export async function fetchFeed({
-  limit,
-  offset,
-  query,
-}: {
-  limit: number;
-  offset: number;
-  query?: string;
-}): Promise<{ items: FeedItemWithLikes[]; hasMore: boolean }> {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) throw new NotAuthenticatedError();
-
-  // Parse the search filters
   const filters = parseSearchFilters(query);
 
-  let queryBuilder = supabase
-    .from("user_timeline")
-    .select("*, repositories!inner ( org, repo )")
-    .eq("user_id", user.id);
-
-  if (filters.org || filters.owner) {
-    queryBuilder = queryBuilder.eq(
-      "repositories.org",
-      filters.org || filters.owner || "",
-    );
-  }
-  if (filters.repo) {
-    queryBuilder = queryBuilder.eq("repositories.repo", filters.repo);
-  }
-  if (filters.type) {
-    queryBuilder = queryBuilder.eq("type", filters.type);
-  }
-  if (filters.from && !isNaN(new Date(filters.from).getTime())) {
-    queryBuilder = queryBuilder.gte(
-      "updated_at",
-      new Date(filters.from).toISOString(),
-    );
-  }
-  if (filters.to && !isNaN(new Date(filters.to).getTime())) {
-    queryBuilder = queryBuilder.lte(
-      "updated_at",
-      new Date(filters.to).toISOString(),
-    );
-  }
-  if (filters.textQuery?.trim()) {
-    queryBuilder = queryBuilder.textSearch(
-      "search_vector",
-      filters.textQuery.trim(),
-      {
-        type: "websearch",
-        config: "english",
-      },
-    );
-  }
-  if (filters.meme === "true") {
-    queryBuilder = queryBuilder.like("search_text", "%![%");
-  } else if (filters.meme === "false") {
-    queryBuilder = queryBuilder.not("search_text", "like", "%![%");
-  }
-
-  const { data } = await queryBuilder
-    .order("updated_at", { ascending: false })
-    .order("created_at", { ascending: false })
-    .range(offset, offset + limit - 1)
-    .throwOnError();
-
-  const items = data || [];
-
-  // Batch fetch like data for all items
-  const dedupeHashes = items.map((item) => item.dedupe_hash);
-  const { likeCountMap, userLikesMap } = await batchFetchLikeData(
-    supabase,
-    dedupeHashes,
-    user.id,
-  );
-
-  // Enhance items with like data
-  const itemsWithLikes: FeedItemWithLikes[] = items.map((item) => ({
-    ...item,
-    likeCount: likeCountMap[item.dedupe_hash] || 0,
-    isLiked: userLikesMap[item.dedupe_hash] || false,
-  }));
-
-  // If we got less than limit, there are no more items
-  const hasMore = items.length === limit;
-
-  return { items: itemsWithLikes, hasMore };
+  return {
+    textQuery: filters.textQuery || undefined,
+    type: filters.type,
+    repositoryId,
+    fromMs: filters.from ? new Date(filters.from).getTime() : undefined,
+    toMs: filters.to ? new Date(filters.to).getTime() : undefined,
+    meme: filters.meme,
+  };
 }
 
-fetchFeed.key = "src/app/page/feed/actions/fetchFeed";
-
-export async function fetchPublicFeed({
-  limit,
-  offset,
-  query,
-}: {
-  limit: number;
-  offset: number;
-  query?: string;
-}): Promise<{ items: PublicFeedItemWithLikes[]; hasMore: boolean }> {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  // Parse the search filters
-  const filters = parseSearchFilters(query);
-
-  let queryBuilder = supabase
-    .from("public_timeline")
-    .select("*, repositories!inner ( org, repo )");
-
-  if (filters.org || filters.owner) {
-    queryBuilder = queryBuilder.eq(
-      "repositories.org",
-      filters.org || filters.owner || "",
-    );
-  }
-  if (filters.repo) {
-    queryBuilder = queryBuilder.eq("repositories.repo", filters.repo);
-  }
-  if (filters.type) {
-    queryBuilder = queryBuilder.eq("type", filters.type);
-  }
-  if (filters.from && !isNaN(new Date(filters.from).getTime())) {
-    queryBuilder = queryBuilder.gte(
-      "updated_at",
-      new Date(filters.from).toISOString(),
-    );
-  }
-  if (filters.to && !isNaN(new Date(filters.to).getTime())) {
-    queryBuilder = queryBuilder.lte(
-      "updated_at",
-      new Date(filters.to).toISOString(),
-    );
-  }
-  if (filters.textQuery?.trim()) {
-    queryBuilder = queryBuilder.textSearch(
-      "search_vector",
-      filters.textQuery.trim(),
-      {
-        type: "websearch",
-        config: "english",
-      },
-    );
-  }
-  if (filters.meme === "true") {
-    queryBuilder = queryBuilder.like("search_text", "%![%");
-  } else if (filters.meme === "false") {
-    queryBuilder = queryBuilder.not("search_text", "like", "%![%");
-  }
-
-  const { data } = await queryBuilder
-    .order("updated_at", { ascending: false })
-    .order("created_at", { ascending: false })
-    .range(offset, offset + limit - 1)
-    .throwOnError();
-
-  const items = data || [];
-
-  // Batch fetch like data for all items
-  const dedupeHashes = items.map((item) => item.dedupe_hash);
-  const { likeCountMap, userLikesMap } = await batchFetchLikeData(
-    supabase,
-    dedupeHashes,
-    user?.id,
-  );
-
-  // Enhance items with like data
-  const itemsWithLikes: PublicFeedItemWithLikes[] = items.map((item) => ({
-    ...item,
-    likeCount: likeCountMap[item.dedupe_hash] || 0,
-    isLiked: userLikesMap[item.dedupe_hash] || false,
-  }));
-
-  // If we got less than limit, there are no more items
-  const hasMore = items.length === limit;
-
-  return { items: itemsWithLikes, hasMore };
-}
-
-fetchPublicFeed.key = "src/app/page/feed/actions/fetchPublicFeed";
+// Re-export the Convex API refs so feed components can use them
+export { api };

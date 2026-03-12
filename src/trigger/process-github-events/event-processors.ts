@@ -1,12 +1,10 @@
-import { Json } from "@/types/supabase";
-
 import { processPullRequestEvent } from "./event-processors/pull-request";
 import { processReleaseEvent } from "./event-processors/release";
 import { processPushEvent } from "./event-processors/push";
 
 // Helper function to process any event type
 export async function processEvent(args: {
-  event: { event_type: string; raw_payload: Json; id: string };
+  event: { event_type: string; raw_payload: unknown; id: string };
   repo: {
     repo: string;
     org: string;

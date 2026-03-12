@@ -1,70 +1,57 @@
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@/../convex/_generated/api";
 import { syncBatchReposMetadataTask } from "@/trigger/sync-batch-repos-metadata";
 import { backfillConnectedReposTask } from "@/trigger/backfill-connected-repos";
-import type { createAdminClient } from "@/utils/supabase/admin";
 
 export async function createNewRepo({
-  supabase,
+  convex,
   repos,
   senderLogin,
   installationId,
 }: {
   repos: { org: string; repo: string }[];
-  supabase: ReturnType<typeof createAdminClient>;
+  convex: ConvexHttpClient;
   senderLogin: string;
   installationId: number;
 }) {
-  const { data: user } = await supabase
-    .from("users")
-    .select("id, github_username")
-    .eq("github_username", senderLogin)
-    .single();
+  const user = await convex.query(api.admin.getUserByGithubUsername, {
+    githubUsername: senderLogin,
+  });
 
-  const { data: newRepos } = await supabase
-    .from("repositories")
-    .upsert(
-      repos.map(({ org, repo }) => ({
-        org,
-        repo,
-        champion_github_username: user ? null : senderLogin,
-      })),
-      { onConflict: "org,repo" },
-    )
-    .select("id")
-    .throwOnError();
-  await supabase
-    .from("repositories_secure")
-    .upsert(
-      newRepos.map(({ id }) => ({
-        id,
-        installation_id: installationId,
-      })),
-      { onConflict: "id" },
-    )
-    .throwOnError();
+  const repositoryIds: string[] = [];
 
-  if (user) {
-    await supabase
-      .from("repositories_users")
-      .upsert(
-        newRepos.map(({ id }) => ({ user_id: user.id, repo_id: id })),
-        { onConflict: "user_id,repo_id" },
-      )
-      .throwOnError();
+  for (const { org, repo } of repos) {
+    const repositoryId = await convex.mutation(api.admin.upsertRepository, {
+      org,
+      repo,
+      championGithubUsername: user ? undefined : senderLogin,
+      isPrivate: false,
+    });
+
+    await convex.mutation(api.admin.upsertRepositorySecure, {
+      repositoryId,
+      installationId,
+    });
+
+    if (user) {
+      await convex.mutation(api.admin.upsertRepositoryUser, {
+        userId: user._id,
+        repositoryId,
+      });
+    }
+
+    repositoryIds.push(repositoryId);
   }
 
-  const { data: fetchedRepos } = await supabase
-    .from("repositories")
-    .select("*")
-    .in(
-      "id",
-      newRepos.map(({ id }) => id),
-    )
-    .throwOnError();
+  // Fetch repo details for background tasks
+  const repoDetails = await convex.query(api.admin.getRepositoriesByIds, {
+    repositoryIds,
+  });
 
-  await syncBatchReposMetadataTask.trigger({
-    repos: fetchedRepos.map(({ org, repo }) => ({ org, repo })),
-  });
-  await backfillConnectedReposTask.trigger({
-    repos: fetchedRepos.map(({ org, repo }) => ({ org, repo })),
-  });
+  const reposForTasks = repoDetails
+    .filter(Boolean)
+    .map((r) => ({ org: r!.org, repo: r!.repo }));
+
+  await syncBatchReposMetadataTask.trigger({ repos: reposForTasks });
+  await backfillConnectedReposTask.trigger({ repos: reposForTasks });
 }
