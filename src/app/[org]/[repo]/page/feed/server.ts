@@ -26,6 +26,21 @@ export async function fetchFeedPageServer({
 
   const filters = parseSearchFilters(query);
 
+  if (filters.type) {
+    queryBuilder = queryBuilder.eq("type", filters.type);
+  }
+  if (filters.from && !isNaN(new Date(filters.from).getTime())) {
+    queryBuilder = queryBuilder.gte(
+      "updated_at",
+      new Date(filters.from).toISOString(),
+    );
+  }
+  if (filters.to && !isNaN(new Date(filters.to).getTime())) {
+    queryBuilder = queryBuilder.lte(
+      "updated_at",
+      new Date(filters.to).toISOString(),
+    );
+  }
   if (filters.textQuery?.trim()) {
     queryBuilder = queryBuilder.textSearch(
       "search_vector",

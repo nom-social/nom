@@ -94,13 +94,13 @@ export async function fetchFeed({
   if (filters.type) {
     queryBuilder = queryBuilder.eq("type", filters.type);
   }
-  if (filters.from) {
+  if (filters.from && !isNaN(new Date(filters.from).getTime())) {
     queryBuilder = queryBuilder.gte(
       "updated_at",
       new Date(filters.from).toISOString(),
     );
   }
-  if (filters.to) {
+  if (filters.to && !isNaN(new Date(filters.to).getTime())) {
     queryBuilder = queryBuilder.lte(
       "updated_at",
       new Date(filters.to).toISOString(),
@@ -186,13 +186,13 @@ export async function fetchPublicFeed({
   if (filters.type) {
     queryBuilder = queryBuilder.eq("type", filters.type);
   }
-  if (filters.from) {
+  if (filters.from && !isNaN(new Date(filters.from).getTime())) {
     queryBuilder = queryBuilder.gte(
       "updated_at",
       new Date(filters.from).toISOString(),
     );
   }
-  if (filters.to) {
+  if (filters.to && !isNaN(new Date(filters.to).getTime())) {
     queryBuilder = queryBuilder.lte(
       "updated_at",
       new Date(filters.to).toISOString(),
