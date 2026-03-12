@@ -30,7 +30,7 @@ export default defineConfig({
           project: "nom",
           authToken: process.env.SENTRY_AUTH_TOKEN,
         }),
-        { placement: "last", target: "deploy" }
+        { placement: "last", target: "deploy" },
       ),
     ],
   },

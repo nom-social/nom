@@ -26,7 +26,7 @@ export async function fetchPublicFeedServer({
   if (filters.org || filters.owner) {
     queryBuilder = queryBuilder.eq(
       "repositories.org",
-      filters.org || filters.owner || ""
+      filters.org || filters.owner || "",
     );
   }
   if (filters.repo) {
@@ -38,20 +38,20 @@ export async function fetchPublicFeedServer({
   if (filters.from) {
     queryBuilder = queryBuilder.gte(
       "updated_at",
-      new Date(filters.from).toISOString()
+      new Date(filters.from).toISOString(),
     );
   }
   if (filters.to) {
     queryBuilder = queryBuilder.lte(
       "updated_at",
-      new Date(filters.to).toISOString()
+      new Date(filters.to).toISOString(),
     );
   }
   if (filters.textQuery?.trim()) {
     queryBuilder = queryBuilder.textSearch(
       "search_vector",
       filters.textQuery.trim(),
-      { type: "websearch", config: "english" }
+      { type: "websearch", config: "english" },
     );
   }
 
@@ -77,7 +77,7 @@ export async function fetchPublicFeedServer({
     (row: { dedupe_hash: string; like_count: number; user_liked: boolean }) => {
       likeCountMap[row.dedupe_hash] = row.like_count;
       userLikesMap[row.dedupe_hash] = row.user_liked;
-    }
+    },
   );
 
   const itemsWithLikes: PublicFeedItemWithLikes[] = items.map((item) => ({

@@ -87,7 +87,7 @@ export const processGithubEvents = task({
       .update({ last_processed: currentTimestamp })
       .in(
         "id",
-        events.map((event) => event.id)
+        events.map((event) => event.id),
       )
       .throwOnError();
 

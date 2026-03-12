@@ -11,7 +11,7 @@ const metadataSchema = z.object({
     z.object({
       name: z.string(),
       bytes: z.number(),
-    })
+    }),
   ),
   homepage_url: z.string().url().nullable(),
   license: z.string().nullable(),

@@ -60,7 +60,7 @@ export default function ScrollToTopButton({
         "transition-all duration-300 flex items-center justify-center hover:scale-105",
         showScrollTop
           ? "opacity-100 pointer-events-auto"
-          : "opacity-0 pointer-events-none -translate-y-8 -translate-x-1/2"
+          : "opacity-0 pointer-events-none -translate-y-8 -translate-x-1/2",
       )}
       size="icon"
     >

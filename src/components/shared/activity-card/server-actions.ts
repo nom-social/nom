@@ -13,7 +13,7 @@ export async function triggerEngagementMilestone(dedupe_hash: string) {
 
     await sendEngagementMilestoneTask.trigger(
       { dedupe_hash },
-      { concurrencyKey: dedupe_hash }
+      { concurrencyKey: dedupe_hash },
     );
   } catch {}
 }

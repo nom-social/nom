@@ -30,7 +30,7 @@ export default async function Home() {
       }),
     getNextPageParam: (
       lastPage: { items: PublicFeedItemWithLikes[]; hasMore: boolean },
-      allPages: { items: PublicFeedItemWithLikes[]; hasMore: boolean }[]
+      allPages: { items: PublicFeedItemWithLikes[]; hasMore: boolean }[],
     ) => {
       if (lastPage.hasMore) {
         return allPages.reduce((acc, page) => acc + page.items.length, 0);

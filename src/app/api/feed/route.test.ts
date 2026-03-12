@@ -36,7 +36,7 @@ function createChainableMock(result: {
 describe("GET /api/feed", () => {
   it("uses default limit 5 and offset 0", async () => {
     mockCreateClient.mockResolvedValue(
-      createChainableMock({ data: [], error: null })
+      createChainableMock({ data: [], error: null }),
     );
 
     const req = createRequest("http://localhost/api/feed");
@@ -71,7 +71,7 @@ describe("GET /api/feed", () => {
 
   it("returns 500 on DB error", async () => {
     mockCreateClient.mockResolvedValue(
-      createChainableMock({ data: null, error: { message: "DB error" } })
+      createChainableMock({ data: null, error: { message: "DB error" } }),
     );
 
     const req = createRequest("http://localhost/api/feed");
@@ -94,7 +94,7 @@ describe("GET /api/feed", () => {
       },
     ];
     mockCreateClient.mockResolvedValue(
-      createChainableMock({ data: mockItems, error: null })
+      createChainableMock({ data: mockItems, error: null }),
     );
 
     const req = createRequest("http://localhost/api/feed?limit=1&offset=0");

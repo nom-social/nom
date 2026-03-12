@@ -27,7 +27,7 @@ function TabsList({
       data-slot="tabs-list"
       className={cn(
         "text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px]",
-        className
+        className,
       )}
       {...props}
     />
@@ -53,7 +53,7 @@ function TabsTrigger({
         "focus-visible:ring-[3px] focus-visible:outline-1",
         "disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        className
+        className,
       )}
       {...props}
     />

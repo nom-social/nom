@@ -44,7 +44,7 @@ export function OptimizedAvatar({
         className={cn(
           wrapperClasses,
           "flex items-center justify-center bg-muted",
-          className
+          className,
         )}
       >
         {fallback}

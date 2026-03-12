@@ -36,7 +36,7 @@ export class NotAuthenticatedError extends Error {
 async function batchFetchLikeData(
   supabase: ReturnType<typeof createClient>,
   dedupeHashes: string[],
-  userId?: string
+  userId?: string,
 ) {
   // Use database function to efficiently aggregate like counts and user likes
   const { data: likeData } = await supabase
@@ -85,7 +85,7 @@ export async function fetchFeed({
   if (filters.org || filters.owner) {
     queryBuilder = queryBuilder.eq(
       "repositories.org",
-      filters.org || filters.owner || ""
+      filters.org || filters.owner || "",
     );
   }
   if (filters.repo) {
@@ -97,13 +97,13 @@ export async function fetchFeed({
   if (filters.from) {
     queryBuilder = queryBuilder.gte(
       "updated_at",
-      new Date(filters.from).toISOString()
+      new Date(filters.from).toISOString(),
     );
   }
   if (filters.to) {
     queryBuilder = queryBuilder.lte(
       "updated_at",
-      new Date(filters.to).toISOString()
+      new Date(filters.to).toISOString(),
     );
   }
   if (filters.textQuery?.trim()) {
@@ -113,7 +113,7 @@ export async function fetchFeed({
       {
         type: "websearch",
         config: "english",
-      }
+      },
     );
   }
 
@@ -130,7 +130,7 @@ export async function fetchFeed({
   const { likeCountMap, userLikesMap } = await batchFetchLikeData(
     supabase,
     dedupeHashes,
-    user.id
+    user.id,
   );
 
   // Enhance items with like data
@@ -172,7 +172,7 @@ export async function fetchPublicFeed({
   if (filters.org || filters.owner) {
     queryBuilder = queryBuilder.eq(
       "repositories.org",
-      filters.org || filters.owner || ""
+      filters.org || filters.owner || "",
     );
   }
   if (filters.repo) {
@@ -184,13 +184,13 @@ export async function fetchPublicFeed({
   if (filters.from) {
     queryBuilder = queryBuilder.gte(
       "updated_at",
-      new Date(filters.from).toISOString()
+      new Date(filters.from).toISOString(),
     );
   }
   if (filters.to) {
     queryBuilder = queryBuilder.lte(
       "updated_at",
-      new Date(filters.to).toISOString()
+      new Date(filters.to).toISOString(),
     );
   }
   if (filters.textQuery?.trim()) {
@@ -200,7 +200,7 @@ export async function fetchPublicFeed({
       {
         type: "websearch",
         config: "english",
-      }
+      },
     );
   }
 
@@ -217,7 +217,7 @@ export async function fetchPublicFeed({
   const { likeCountMap, userLikesMap } = await batchFetchLikeData(
     supabase,
     dedupeHashes,
-    user?.id
+    user?.id,
   );
 
   // Enhance items with like data

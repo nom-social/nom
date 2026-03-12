@@ -16,7 +16,7 @@ export default function ReactQueryProvider({
             refetchOnWindowFocus: false,
           },
         },
-      })
+      }),
   );
   return (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

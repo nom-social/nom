@@ -29,7 +29,7 @@ const releaseSchema = z.object({
         download_count: z.number(),
         content_type: z.string(),
         browser_download_url: z.string(),
-      })
+      }),
     ),
   }),
 });
@@ -136,7 +136,7 @@ You can use explore_file with ref=${release.tag_name} to read files at the relea
         org: repo.org,
         repo: repo.repo,
         type: "release",
-      })
+      }),
     )
     .digest("hex");
 
@@ -163,7 +163,7 @@ You can use explore_file with ref=${release.tag_name} to read files at the relea
       user_id: s.user_id,
       categories: ["releases"],
       ...timelineEntry,
-    })
+    }),
   );
 
   return {

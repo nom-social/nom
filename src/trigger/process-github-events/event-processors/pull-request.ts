@@ -98,7 +98,7 @@ export async function processPullRequestEvent({
     const commitMessages = commits.data
       .map(
         (commit) =>
-          `- ${commit.commit.message} (${commit.author?.login || "unknown"})`
+          `- ${commit.commit.message} (${commit.author?.login || "unknown"})`,
       )
       .join("\n");
     const commitMessagesText = `Commit Messages (latest first):\n${commitMessages}`;
@@ -109,7 +109,7 @@ export async function processPullRequestEvent({
         (review) =>
           `- ${review.user?.login || "unknown"} [${review.state}]: ${
             review.body ? review.body.substring(0, 200) : "No comment"
-          }`
+          }`,
       )
       .join("\n");
     const reviewsText = `Pull Request Reviews:\n${reviewSummaries}`;
@@ -121,7 +121,7 @@ export async function processPullRequestEvent({
       failed: checks.data.check_runs.filter((c) => c.conclusion === "failure")
         .length,
       pending: checks.data.check_runs.filter(
-        (c) => c.status === "in_progress" || c.status === "queued"
+        (c) => c.status === "in_progress" || c.status === "queued",
       ).length,
     };
 
@@ -143,7 +143,10 @@ export async function processPullRequestEvent({
         .filter((c) => c.conclusion === "failure")
         .map(
           (c) =>
-            "- " + c.name + ": " + (c.output?.summary || "No details available")
+            "- " +
+            c.name +
+            ": " +
+            (c.output?.summary || "No details available"),
         )
         .join("\n") +
       "\n\n" +
@@ -231,10 +234,10 @@ You can use explore_file with ref=${pull_request.head.sha} to read specific file
         head_checks: {
           total: checks.data.total_count,
           passing: checks.data.check_runs.filter(
-            (check) => check.conclusion === "success"
+            (check) => check.conclusion === "success",
           ).length,
           failing: checks.data.check_runs.filter(
-            (check) => check.conclusion === "failure"
+            (check) => check.conclusion === "failure",
           ).length,
         },
         head: { ref: pull_request.head.ref },
@@ -258,7 +261,7 @@ You can use explore_file with ref=${pull_request.head.sha} to read specific file
             ...(pull_request.assignees?.map((assignee) => assignee.login) ||
               []),
             ...(pull_request.requested_reviewers?.map(
-              (reviewer) => reviewer.login
+              (reviewer) => reviewer.login,
             ) || []),
           ]),
         ],
@@ -276,7 +279,7 @@ You can use explore_file with ref=${pull_request.head.sha} to read specific file
         org: repo.org,
         repo: repo.repo,
         type: "pull_request",
-      })
+      }),
     )
     .digest("hex");
 
@@ -321,7 +324,7 @@ You can use explore_file with ref=${pull_request.head.sha} to read specific file
       user_id: s.user_id,
       categories: ["pull_requests"],
       ...timelineEntry,
-    })
+    }),
   );
 
   return {

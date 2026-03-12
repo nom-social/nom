@@ -9,5 +9,5 @@ export const getQueryClient = cache(
           staleTime: 60 * 1000,
         },
       },
-    })
+    }),
 );

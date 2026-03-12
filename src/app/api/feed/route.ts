@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   if (filters.org || filters.owner) {
     queryBuilder = queryBuilder.eq(
       "repositories.org",
-      filters.org || filters.owner || ""
+      filters.org || filters.owner || "",
     );
   }
   if (filters.repo) {
@@ -32,13 +32,13 @@ export async function GET(request: NextRequest) {
   if (filters.from) {
     queryBuilder = queryBuilder.gte(
       "updated_at",
-      new Date(filters.from).toISOString()
+      new Date(filters.from).toISOString(),
     );
   }
   if (filters.to) {
     queryBuilder = queryBuilder.lte(
       "updated_at",
-      new Date(filters.to).toISOString()
+      new Date(filters.to).toISOString(),
     );
   }
   if (filters.textQuery?.trim()) {
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       {
         type: "websearch",
         config: "english",
-      }
+      },
     );
   }
 

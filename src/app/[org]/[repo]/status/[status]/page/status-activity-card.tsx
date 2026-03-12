@@ -66,7 +66,7 @@ function StatusActivityCard({
     onError: (error) => {
       if (error instanceof NotAuthenticatedError)
         router.push(
-          `/auth/login?next=${encodeURIComponent(window.location.pathname)}`
+          `/auth/login?next=${encodeURIComponent(window.location.pathname)}`,
         );
     },
   });
@@ -81,18 +81,18 @@ function StatusActivityCard({
     onError: (error) => {
       if (error instanceof NotAuthenticatedError)
         router.push(
-          `/auth/login?next=${encodeURIComponent(window.location.pathname)}`
+          `/auth/login?next=${encodeURIComponent(window.location.pathname)}`,
         );
     },
   });
 
   const handleLike = useCallback(
     () => mutateLike({ hash: item.dedupe_hash }),
-    [item.dedupe_hash, mutateLike]
+    [item.dedupe_hash, mutateLike],
   );
   const handleUnlike = useCallback(
     () => mutateUnlike({ hash: item.dedupe_hash }),
-    [item.dedupe_hash, mutateUnlike]
+    [item.dedupe_hash, mutateUnlike],
   );
 
   if (item.type === "pull_request") {

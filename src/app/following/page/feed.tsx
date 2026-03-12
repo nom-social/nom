@@ -83,7 +83,7 @@ export default function FollowingFeed() {
       });
       if (node) observerMiddle.current.observe(node);
     },
-    [isFetchingNextPage, fetchNextPage, hasNextPage]
+    [isFetchingNextPage, fetchNextPage, hasNextPage],
   );
 
   const sentinelLastRef = useCallback(
@@ -97,7 +97,7 @@ export default function FollowingFeed() {
       });
       if (node) observerLast.current.observe(node);
     },
-    [isFetchingNextPage, fetchNextPage, hasNextPage]
+    [isFetchingNextPage, fetchNextPage, hasNextPage],
   );
 
   const handleScrollToTop = useCallback(() => {

@@ -6,7 +6,7 @@ import { EXCLUDED_FILE_PATTERNS } from "@/trigger/process-github-events/event-pr
 export async function getCommitDiff(
   octokit: Octokit,
   repo: { org: string; repo: string },
-  commitId: string
+  commitId: string,
 ) {
   let commitDiff = "";
   const commitResp = await octokit.repos.getCommit({
@@ -19,8 +19,8 @@ export async function getCommitDiff(
       .filter(
         (file) =>
           !EXCLUDED_FILE_PATTERNS.some((pattern) =>
-            minimatch(file.filename, pattern)
-          )
+            minimatch(file.filename, pattern),
+          ),
       )
       .map((file) => {
         if (!file.patch) return null;

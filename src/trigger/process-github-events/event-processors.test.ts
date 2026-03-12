@@ -60,7 +60,7 @@ describe("processEvent", () => {
       processEvent({
         ...baseArgs,
         event: { ...baseArgs.event, event_type: "unknown" },
-      })
+      }),
     ).rejects.toThrow("Unknown event type: unknown");
   });
 });

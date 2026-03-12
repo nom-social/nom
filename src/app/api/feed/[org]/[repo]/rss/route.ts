@@ -8,7 +8,7 @@ import { createClient } from "@/utils/supabase/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ org: string; repo: string }> }
+  { params }: { params: Promise<{ org: string; repo: string }> },
 ) {
   const { org, repo } = await params;
   const { searchParams } = request.nextUrl;
@@ -47,7 +47,7 @@ export async function GET(
   }
 
   const items = (data ?? []).map((item) =>
-    normalizeTimelineItem({ ...item, org, repo })
+    normalizeTimelineItem({ ...item, org, repo }),
   );
 
   const feedUrl = `${BASE_URL}${request.nextUrl.pathname}${request.nextUrl.search}`;

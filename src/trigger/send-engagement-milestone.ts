@@ -47,10 +47,10 @@ export const sendEngagementMilestoneTask = schemaTask({
       .throwOnError();
 
     const alreadySent = new Set(
-      (existingNotifications ?? []).map((n) => n.key)
+      (existingNotifications ?? []).map((n) => n.key),
     );
     const newlyCrossed = MILESTONES.filter(
-      (m) => likeCount >= m && !alreadySent.has(String(m))
+      (m) => likeCount >= m && !alreadySent.has(String(m)),
     );
     // Send for the highest newly crossed milestone only (e.g. at 11 likes, send for 10)
     const milestoneToSend =
@@ -88,7 +88,7 @@ export const sendEngagementMilestoneTask = schemaTask({
       .select("email")
       .in(
         "id",
-        repoUsers.map((r) => r.user_id)
+        repoUsers.map((r) => r.user_id),
       )
       .throwOnError();
 
@@ -136,7 +136,7 @@ export const sendEngagementMilestoneTask = schemaTask({
           subject,
           html,
         });
-      })
+      }),
     );
 
     await supabaseClient

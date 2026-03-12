@@ -63,7 +63,7 @@ export async function createSubscription(org: string, repo: string) {
         snooze_to: event.snooze_to,
         type: event.type,
         updated_at: new Date().toISOString(),
-      })
+      }),
     );
 
     await supabase

@@ -26,9 +26,9 @@ export default function SubscribeButton({
         isLoading
           ? ""
           : isSubscribed
-          ? "bg-nom-green text-black hover:bg-nom-green/90"
-          : "bg-nom-purple text-white hover:bg-nom-purple/90",
-        className
+            ? "bg-nom-green text-black hover:bg-nom-green/90"
+            : "bg-nom-purple text-white hover:bg-nom-purple/90",
+        className,
       )}
       onClick={isSubscribed ? onUnsubscribe : onSubscribe}
       disabled={isLoading}

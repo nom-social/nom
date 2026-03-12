@@ -27,7 +27,7 @@ export async function createNewRepo({
         repo,
         champion_github_username: user ? null : senderLogin,
       })),
-      { onConflict: "org,repo" }
+      { onConflict: "org,repo" },
     )
     .select("id")
     .throwOnError();
@@ -38,7 +38,7 @@ export async function createNewRepo({
         id,
         installation_id: installationId,
       })),
-      { onConflict: "id" }
+      { onConflict: "id" },
     )
     .throwOnError();
 
@@ -47,7 +47,7 @@ export async function createNewRepo({
       .from("repositories_users")
       .upsert(
         newRepos.map(({ id }) => ({ user_id: user.id, repo_id: id })),
-        { onConflict: "user_id,repo_id" }
+        { onConflict: "user_id,repo_id" },
       )
       .throwOnError();
   }
@@ -57,7 +57,7 @@ export async function createNewRepo({
     .select("*")
     .in(
       "id",
-      newRepos.map(({ id }) => id)
+      newRepos.map(({ id }) => id),
     )
     .throwOnError();
 

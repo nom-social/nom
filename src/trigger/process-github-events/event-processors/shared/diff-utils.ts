@@ -19,7 +19,7 @@ export function filterAndFormatDiff(files: DiffFile[]): {
 } {
   const filteredFiles = files.filter(
     (f) =>
-      !EXCLUDED_FILE_PATTERNS.some((pattern) => minimatch(f.filename, pattern))
+      !EXCLUDED_FILE_PATTERNS.some((pattern) => minimatch(f.filename, pattern)),
   );
 
   const diff = filteredFiles

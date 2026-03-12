@@ -13,7 +13,7 @@ export async function triggerSubscriberMilestone(repo_id: string) {
 
     await sendSubscriberMilestoneTask.trigger(
       { repo_id },
-      { concurrencyKey: repo_id }
+      { concurrencyKey: repo_id },
     );
   } catch {}
 }

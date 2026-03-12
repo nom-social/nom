@@ -20,7 +20,7 @@ export type FetchFeedItemParams = {
 async function fetchLikeData(
   supabase: Awaited<ReturnType<typeof createClient>>,
   dedupeHash: string,
-  userId?: string
+  userId?: string,
 ) {
   // Use database function to efficiently get like count and user like status
   const { data: likeData } = await supabase
@@ -71,7 +71,7 @@ export async function fetchFeedItem({
   const { likeCount, isLiked } = await fetchLikeData(
     supabase,
     data.dedupe_hash,
-    user?.id
+    user?.id,
   );
 
   return {

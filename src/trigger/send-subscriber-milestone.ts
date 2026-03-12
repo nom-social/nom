@@ -37,10 +37,10 @@ export const sendSubscriberMilestoneTask = schemaTask({
       .throwOnError();
 
     const alreadySent = new Set(
-      (existingNotifications ?? []).map((n) => n.key)
+      (existingNotifications ?? []).map((n) => n.key),
     );
     const newlyCrossed = MILESTONES.filter(
-      (m) => count >= m && !alreadySent.has(String(m))
+      (m) => count >= m && !alreadySent.has(String(m)),
     );
     const milestoneToSend =
       newlyCrossed.length > 0 ? Math.max(...newlyCrossed) : null;
@@ -68,7 +68,7 @@ export const sendSubscriberMilestoneTask = schemaTask({
       .select("email")
       .in(
         "id",
-        repoUsers.map((r) => r.user_id)
+        repoUsers.map((r) => r.user_id),
       )
       .throwOnError();
 
@@ -95,7 +95,7 @@ export const sendSubscriberMilestoneTask = schemaTask({
           subject,
           html,
         });
-      })
+      }),
     );
 
     await supabaseClient
