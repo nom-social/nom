@@ -13,7 +13,7 @@ export const backfillConnectedReposTask = schemaTask({
   id: "backfill-connected-repos",
   schema: z.object({
     repos: z.array(z.object({ org: z.string(), repo: z.string() })),
-    limit: z.number().int().min(1).max(100).default(20),
+    limit: z.number().int().min(1).max(100).default(10),
   }),
   run: async ({ repos, limit }) => {
     const supabase = createAdminClient();
