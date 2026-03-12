@@ -27,9 +27,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: "Nom",
   description:
-    "Live commentary for your codebase. A social feed for your project's GitHub activities — pull requests, releases, and pushes with AI summaries.",
+    "Live commentary for your code. A social feed for your project's GitHub activities — pull requests, releases, and pushes with AI summaries.",
   openGraph: {
-    title: "Nom — Live commentary for your codebase",
+    title: "Nom — Live commentary for your code",
     description:
       "A social feed for your project's GitHub activities. Follow pull requests, releases, and pushes with AI summaries.",
     url: BASE_URL,
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Nom — Live commentary for your codebase",
+    title: "Nom — Live commentary for your code",
     description:
       "A social feed for your project's GitHub activities. Follow pull requests, releases, and pushes with AI summaries.",
     images: ["/og-image.png"],
@@ -86,7 +86,7 @@ export default function RootLayout({
                       </NavigationMenuLink>
                     </NavigationMenuItem>
                     <span className="hidden md:inline text-xs text-muted-foreground font-normal normal-case">
-                      Live commentary for your codebase
+                      Live commentary for your code
                     </span>
                   </div>
 
