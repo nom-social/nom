@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/github/license/nom-social/nom)](./LICENSE)
 [![Contributing](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
 
-**Nom is a social platform for your code activities.** It turns raw GitHub activity (pull requests, issues, releases, and comments) into readable, shareable updates for your community.
+**Nom is a social platform for your code activities.** It turns raw GitHub activity (pull requests, pushes and releases) into readable, shareable updates for your community.
 
 ## The Problem
 
@@ -23,17 +23,17 @@ Nom connects to your GitHub repositories and uses AI to transform raw events int
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | [Next.js](https://nextjs.org/) |
-| UI Components | [shadcn/ui](https://ui.shadcn.com/) + [Radix UI](https://www.radix-ui.com/) |
-| Database & Auth | [Supabase](https://supabase.com/) |
-| Background Jobs | [Trigger.dev](https://trigger.dev/) |
-| Data Fetching | [Tanstack Query](https://tanstack.com/query/latest) |
-| AI | [OpenAI](https://openai.com/) / [OpenRouter](https://openrouter.ai/) via [Vercel AI SDK](https://sdk.vercel.ai/) |
-| Web Search | [Tavily](https://tavily.com/) |
-| Email | [Resend](https://resend.com/) |
-| Validation | [Zod](https://zod.dev/) |
+| Layer           | Technology                                                                       |
+| --------------- | -------------------------------------------------------------------------------- |
+| Framework       | [Next.js](https://nextjs.org/)                                                   |
+| UI Components   | [shadcn/ui](https://ui.shadcn.com/) + [Radix UI](https://www.radix-ui.com/)      |
+| Database & Auth | [Supabase](https://supabase.com/)                                                |
+| Background Jobs | [Trigger.dev](https://trigger.dev/)                                              |
+| Data Fetching   | [Tanstack Query](https://tanstack.com/query/latest)                              |
+| AI              | [OpenRouter](https://openrouter.ai/) via [Vercel AI SDK](https://sdk.vercel.ai/) |
+| Web Search      | [Tavily](https://tavily.com/)                                                    |
+| Email           | [Resend](https://resend.com/)                                                    |
+| Validation      | [Zod](https://zod.dev/)                                                          |
 
 ## Getting Started
 

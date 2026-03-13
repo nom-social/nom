@@ -28,6 +28,7 @@ If you have questions, feel free to open an issue or start a discussion.
 Thanks for helping make Nom better! 🚀
 
 # Local development
+
 ## Prerequisites
 
 Before you begin, make sure you have the following installed:
