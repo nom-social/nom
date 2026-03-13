@@ -24,7 +24,7 @@ export default async function RepoPage({
   try {
     const result = await fetchQuery(api.feed.fetchPublicFeed, {
       paginationOpts: { numItems: 20, cursor: null },
-      repositoryId: repoProfile._id,
+      repositoryId: repoProfile.id,
     });
     initialItems = result.page as PublicFeedItemWithLikes[];
   } catch {
@@ -39,7 +39,7 @@ export default async function RepoPage({
         createdAt={repoProfile.createdAt}
         description={repoProfile.description}
         websiteUrl={repoProfile.websiteUrl}
-        avatarUrl={repoProfile.avatarUrl}
+        avatarUrl={repoProfile.avatarUrl ?? ""}
         topLanguages={repoProfile.topLanguages.slice(0, 3)}
         license={repoProfile.license}
         initialSubscriptionCount={repoProfile.subscriptionCount}
@@ -47,7 +47,7 @@ export default async function RepoPage({
       />
 
       <Feed
-        repositoryId={repoProfile._id}
+        repositoryId={repoProfile.id}
         repo={repo}
         org={org}
         initialItems={initialItems}
@@ -81,7 +81,7 @@ export async function generateMetadata({
       url: `${BASE_URL}/${org}/${repo}`,
       images: [
         {
-          url: repoProfile.avatarUrl,
+          url: repoProfile.avatarUrl ?? "",
           alt: `${org} avatar`,
         },
       ],
@@ -90,7 +90,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: `${repo}/${org} - Nom`,
       description,
-      images: [repoProfile.avatarUrl],
+      images: [repoProfile.avatarUrl ?? ""],
     },
   };
 }

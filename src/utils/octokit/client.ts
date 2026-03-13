@@ -2,7 +2,7 @@ import { Octokit } from "@octokit/rest";
 import { createAppAuth } from "@octokit/auth-app";
 
 import { createAdminConvexClient } from "@/utils/convex/client";
-import { api } from "@/convex/_generated/api";
+import { api } from "@/../convex/_generated/api";
 
 interface OctokitClientOptions {
   org: string;

@@ -20,9 +20,9 @@ import { OptimizedAvatar } from "@/components/ui/optimized-avatar";
 import { api } from "@/../convex/_generated/api";
 import {
   createSubscription,
-  NotAuthenticatedError,
   removeSubscription,
 } from "./repo-profile-card/actions";
+import { NotAuthenticatedError } from "@/lib/errors";
 import ShareButton from "./repo-profile-card/share-button";
 import ShareButtonMobile from "./repo-profile-card/share-button-mobile";
 import SubscribeButton from "./repo-profile-card/subscribe-button";

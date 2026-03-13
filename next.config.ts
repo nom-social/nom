@@ -4,6 +4,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   experimental: {
     scrollRestoration: true,
+    turbopackUseSystemTlsCerts: true,
   },
   images: {
     remotePatterns: [

@@ -13,8 +13,8 @@ import {
 import {
   createLike,
   deleteLike,
-  NotAuthenticatedError,
 } from "@/components/shared/activity-card/actions";
+import { NotAuthenticatedError } from "@/lib/errors";
 
 import StatusActivityCardBase from "./status-activity-card-base";
 

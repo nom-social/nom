@@ -42,7 +42,7 @@ export const sendEngagementMilestoneTask = schemaTask({
       },
     );
 
-    const alreadySent = new Set(existingNotifications.map((n) => n.key));
+    const alreadySent = new Set(existingNotifications.map((n: { key: string }) => n.key));
     const newlyCrossed = MILESTONES.filter(
       (m) => likeCount >= m && !alreadySent.has(String(m)),
     );
@@ -67,12 +67,12 @@ export const sendEngagementMilestoneTask = schemaTask({
     if (!repoUsers.length) return;
 
     const users = await convex.query(api.admin.getUsersByIds, {
-      userIds: repoUsers.map((r) => r.userId),
+      userIds: repoUsers.map((r: { userId: string }) => r.userId),
     });
 
     const emails = users
-      .map((u) => u?.email)
-      .filter((e): e is string => !!e?.trim());
+      .map((u: { email?: string | null } | null) => u?.email)
+      .filter((e: string | null | undefined): e is string => !!e?.trim());
 
     if (emails.length === 0) return;
 
@@ -109,7 +109,7 @@ export const sendEngagementMilestoneTask = schemaTask({
     `;
 
     await Promise.allSettled(
-      emails.map((to) =>
+      emails.map((to: string) =>
         resendClient.emails.send({
           from: "Nom <notifications@nomit.dev>",
           to,

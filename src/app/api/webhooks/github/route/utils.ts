@@ -50,7 +50,7 @@ export async function createNewRepo({
 
   const reposForTasks = repoDetails
     .filter(Boolean)
-    .map((r) => ({ org: r!.org, repo: r!.repo }));
+    .map((r: { org: string; repo: string } | null) => ({ org: r!.org, repo: r!.repo }));
 
   await syncBatchReposMetadataTask.trigger({ repos: reposForTasks });
   await backfillConnectedReposTask.trigger({ repos: reposForTasks });

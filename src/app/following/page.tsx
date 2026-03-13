@@ -1,14 +1,14 @@
 import { redirect } from "next/navigation";
 
 import ClaimRepoButton from "@/components/shared/claim-repo-button";
-import { auth } from "@convex-dev/auth/nextjs/server";
+import { isAuthenticatedNextjs } from "@convex-dev/auth/nextjs/server";
 
 import FollowingFeed from "./page/feed";
 
 export default async function FollowingPage() {
-  const { userId } = await auth();
+  const isAuthenticated = await isAuthenticatedNextjs();
 
-  if (!userId) {
+  if (!isAuthenticated) {
     redirect("/auth/login");
   }
 

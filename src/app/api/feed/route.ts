@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
         }),
     );
 
-    const has_more = normalizedItems.length > limit;
+    const has_more = normalizedItems.length >= limit;
     const page = normalizedItems.slice(0, limit);
 
     return NextResponse.json({

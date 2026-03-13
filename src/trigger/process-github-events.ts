@@ -57,7 +57,7 @@ export const processGithubEvents = schemaTask({
             raw_payload: event.rawPayload,
           },
           repo: { id: repoDoc._id, org: repoDoc.org, repo: repoDoc.repo },
-          subscribers: subscribers.map((s) => ({ user_id: s.userId })),
+          subscribers: subscribers.map((s: { userId: string }) => ({ user_id: s.userId })),
         });
 
         // Entries are already in camelCase Convex format; just fix the repositoryId type

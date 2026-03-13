@@ -24,10 +24,10 @@ export const newUserSignUpTask = schemaTask({
     const subscriptions = await convex.query(api.admin.getUserSubscriptions, {
       userId: userId as Id<"users">,
     });
-    const repositoryIds = subscriptions.map((s) => s.repositoryId);
+    const repositoryIds = subscriptions.map((s: { repositoryId: string }) => s.repositoryId);
 
     const publicEvents = await Promise.all(
-      repositoryIds.map((repoId) =>
+      repositoryIds.map((repoId: string) =>
         convex.query(api.admin.getPublicTimelineForRepo, {
           repositoryId: repoId,
           fromMs: oneMonthAgoMs,

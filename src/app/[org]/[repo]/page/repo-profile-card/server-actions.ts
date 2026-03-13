@@ -1,12 +1,12 @@
 "use server";
 
-import { auth } from "@convex-dev/auth/nextjs/server";
+import { isAuthenticatedNextjs } from "@convex-dev/auth/nextjs/server";
 import { sendSubscriberMilestoneTask } from "@/trigger/send-subscriber-milestone";
 
 export async function triggerSubscriberMilestone(repositoryId: string) {
   try {
-    const { userId } = await auth();
-    if (!userId) return;
+    const isAuthenticated = await isAuthenticatedNextjs();
+    if (!isAuthenticated) return;
 
     await sendSubscriberMilestoneTask.trigger(
       { repo_id: repositoryId },
