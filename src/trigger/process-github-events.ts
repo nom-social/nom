@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { createAdminConvexClient } from "@/utils/convex/client";
 import { api } from "@/../convex/_generated/api";
+import { Id } from "@/../convex/_generated/dataModel";
 import { processEvent } from "./process-github-events/event-processors";
 
 export const processGithubEvents = schemaTask({
@@ -57,15 +58,28 @@ export const processGithubEvents = schemaTask({
             raw_payload: event.rawPayload,
           },
           repo: { id: repoDoc._id, org: repoDoc.org, repo: repoDoc.repo },
-          subscribers: subscribers.map((s: { userId: string }) => ({ user_id: s.userId })),
+          subscribers: subscribers.map((s: { userId: string }) => ({
+            user_id: s.userId,
+          })),
         });
 
-        // Entries are already in camelCase Convex format; just fix the repositoryId type
+        // Entries are already in camelCase Convex format; map to mutation shape with proper Id types
         const userTimelineEntries =
-          processedEventsPerSubscriber.userTimelineEntries.map((entry) => ({
-            ...entry,
-            repositoryId: repoDoc._id,
-          }));
+          processedEventsPerSubscriber.userTimelineEntries
+            .filter((e): e is typeof e & { userId: string } => e.userId != null)
+            .map((entry) => ({
+              userId: entry.userId as Id<"users">,
+              repositoryId: repoDoc._id,
+              data: entry.data,
+              type: entry.type,
+              score: entry.score,
+              isRead: entry.isRead,
+              categories: entry.categories,
+              searchText: entry.searchText,
+              eventIds: entry.eventIds,
+              dedupeHash: entry.dedupeHash,
+              createdAt: entry.updatedAt,
+            }));
 
         const publicTimelineEntries =
           processedEventsPerSubscriber.publicTimelineEntries.map((entry) => ({
@@ -75,9 +89,7 @@ export const processGithubEvents = schemaTask({
 
         await Promise.allSettled([
           convex.mutation(api.admin.upsertUserTimelineEntries, {
-            entries: userTimelineEntries as Parameters<
-              typeof convex.mutation<typeof api.admin.upsertUserTimelineEntries>
-            >[1]["entries"],
+            entries: userTimelineEntries,
           }),
           convex.mutation(api.admin.upsertPublicTimelineEntries, {
             entries: publicTimelineEntries as Parameters<

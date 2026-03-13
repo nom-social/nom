@@ -13,7 +13,7 @@ import DropdownContent from "./profile-dropdown/dropdown-content";
 export default async function ProfileDropdown() {
   const user = await getCurrentUser();
 
-  if (!user)
+  if (!user?.githubUsername)
     return (
       <Link href="/auth/login">
         <Button className="bg-nom-green text-black hover:bg-nom-green/90">
@@ -27,9 +27,9 @@ export default async function ProfileDropdown() {
       <DropdownMenuTrigger>
         <div className="w-8 h-8">
           <OptimizedAvatar
-            src={`https://github.com/${user.github_username}.png`}
-            alt={user.github_username}
-            fallback={user.github_username.charAt(0)}
+            src={`https://github.com/${user.githubUsername}.png`}
+            alt={user.githubUsername}
+            fallback={user.githubUsername.charAt(0)}
             sizes="32px"
           />
         </div>

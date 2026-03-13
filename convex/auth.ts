@@ -1,10 +1,11 @@
 import GitHub from "@auth/core/providers/github";
 import { convexAuth } from "@convex-dev/auth/server";
+import type { MutationCtx } from "./_generated/server";
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [GitHub],
   callbacks: {
-    async createOrUpdateUser(ctx, args) {
+    async createOrUpdateUser(ctx: MutationCtx, args) {
       const profile = args.profile as {
         login?: string;
         email?: string | null;

@@ -42,7 +42,9 @@ export const sendEngagementMilestoneTask = schemaTask({
       },
     );
 
-    const alreadySent = new Set(existingNotifications.map((n: { key: string }) => n.key));
+    const alreadySent = new Set(
+      existingNotifications.map((n: { key: string }) => n.key),
+    );
     const newlyCrossed = MILESTONES.filter(
       (m) => likeCount >= m && !alreadySent.has(String(m)),
     );
@@ -67,7 +69,7 @@ export const sendEngagementMilestoneTask = schemaTask({
     if (!repoUsers.length) return;
 
     const users = await convex.query(api.admin.getUsersByIds, {
-      userIds: repoUsers.map((r: { userId: string }) => r.userId),
+      userIds: repoUsers.map((r) => r.userId),
     });
 
     const emails = users
