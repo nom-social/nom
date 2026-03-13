@@ -149,7 +149,6 @@ You can use explore_file with ref=${release.tag_name} to read files at the relea
     updated_at:
       release.published_at?.toISOString() || release.created_at.toISOString(),
     event_ids: [event.id],
-    is_read: false,
     search_text: [
       releaseData.release.name ?? releaseData.release.tag_name,
       releaseData.release.ai_summary,
@@ -161,7 +160,6 @@ You can use explore_file with ref=${release.tag_name} to read files at the relea
   const userTimelineEntries: TablesInsert<"user_timeline">[] = subscribers.map(
     (s) => ({
       user_id: s.user_id,
-      categories: ["releases"],
       ...timelineEntry,
     }),
   );
