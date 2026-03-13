@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/github/license/nom-social/nom)](./LICENSE)
 [![Contributing](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
 
-**Nom is a social feed for your open source project.** It turns raw GitHub activity — pull requests, issues, releases, and comments — into readable, shareable updates for your community.
+**Nom is a social platform for your code activities.** It turns raw GitHub activity (pull requests, issues, releases, and comments) into readable, shareable updates for your community.
 
 ## The Problem
 
@@ -14,12 +14,12 @@ GitHub activity is noisy. Watching a repository gives you a firehose of raw even
 
 ## What Nom Does
 
-Nom connects to your GitHub repositories and uses AI to transform raw events into clear, human-readable feed posts — like a changelog that writes itself. Each update captures what changed, why it matters, and links back to the source. Community members can follow your project's feed without needing to watch the repo directly.
+Nom connects to your GitHub repositories and uses AI to transform raw events into clear, human-readable feed posts, like a changelog that writes itself. Each update captures what changed, why it matters, and links back to the source. Community members can follow your project's feed without needing to watch the repo directly.
 
-- **AI-generated summaries** of PRs, issues, releases, and comments — with configurable tone and style per event type ([see example](.nom/pull_request_instructions.md))
-- **Social feed** — follow repositories, discover projects, and stay up to date in one place
-- **Real-time updates** — new GitHub events appear in the feed as they happen
-- **Self-hostable** — run your own instance with your own data
+- **AI-generated summaries** of PRs, issues, releases, and comments, with configurable tone and style per event type ([see example](.nom/pull_request_instructions.md))
+- **Social feed**: follow repositories, discover projects, and stay up to date in one place
+- **Real-time updates**: new GitHub events appear in the feed as they happen
+- **Self-hostable**: run your own instance with your own data
 
 ## Tech Stack
 
@@ -91,7 +91,7 @@ See the [example instructions](.nom/pull_request_instructions.md) in this repo.
 
 ## Contributing
 
-We welcome contributions of all kinds — bug reports, feature requests, documentation improvements, and code changes.
+We welcome contributions of all kinds: bug reports, feature requests, documentation improvements, and code changes.
 
 **[Read CONTRIBUTING.md →](./CONTRIBUTING.md)**
 
