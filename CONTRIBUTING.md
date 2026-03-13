@@ -14,7 +14,7 @@ We welcome all kinds of contributions, including bug reports, feature requests, 
 ## Code Style
 
 - Follow the existing code style and conventions.
-- Run `vlt lint` before submitting your PR.
+- Run `npm run lint` before submitting your PR.
 
 ## Reporting Issues
 
@@ -28,6 +28,7 @@ If you have questions, feel free to open an issue or start a discussion.
 Thanks for helping make Nom better! 🚀
 
 # Local development
+
 ## Prerequisites
 
 Before you begin, make sure you have the following installed:
@@ -40,10 +41,10 @@ Before you begin, make sure you have the following installed:
 Before running the application, copy the example environment file and fill in the required values:
 
 ```sh
-cp .env.sample .env.local
+cp .env.example .env.local
 ```
 
-Then, open `.env.local` and fill in the required variables.
+Then, open `.env.local` and fill in the required variables. Each variable is documented with comments in `.env.example`.
 
 ## Getting Started
 
