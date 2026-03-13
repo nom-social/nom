@@ -5,7 +5,6 @@ import { z } from "zod";
 import { BASE_URL } from "@/lib/constants";
 import { createAdminConvexClient } from "@/utils/convex/client";
 import { api } from "@/../convex/_generated/api";
-import { Id } from "@/../convex/_generated/dataModel";
 import * as resend from "@/utils/resend/client";
 
 const prDataSchema = z.looseObject({

@@ -1,4 +1,3 @@
-import { useConvexAuth } from "convex/react";
 import { api } from "@/../convex/_generated/api";
 
 export class NotAuthenticatedError extends Error {

@@ -29,8 +29,7 @@ export const fetchPublicFeed = query({
         .withSearchIndex("search_text", (q) => {
           let sq = q.search("searchText", args.textQuery!);
           if (args.type) sq = sq.eq("type", args.type);
-          if (args.repositoryId)
-            sq = sq.eq("repositoryId", args.repositoryId);
+          if (args.repositoryId) sq = sq.eq("repositoryId", args.repositoryId);
           return sq;
         });
       paginatedResult = await searchQ.paginate(args.paginationOpts);
@@ -118,8 +117,7 @@ export const fetchUserFeed = query({
         .withSearchIndex("search_text", (q) => {
           let sq = q.search("searchText", args.textQuery!).eq("userId", userId);
           if (args.type) sq = sq.eq("type", args.type);
-          if (args.repositoryId)
-            sq = sq.eq("repositoryId", args.repositoryId);
+          if (args.repositoryId) sq = sq.eq("repositoryId", args.repositoryId);
           return sq;
         });
       paginatedResult = await searchQ.paginate(args.paginationOpts);
@@ -198,13 +196,7 @@ export const fetchFeedItem = query({
       (await ctx.db
         .query("repositories")
         .filter((q) =>
-          q.and(
-            q.eq(
-              q.field("org"),
-              org,
-            ),
-            q.eq(q.field("repo"), repo),
-          ),
+          q.and(q.eq(q.field("org"), org), q.eq(q.field("repo"), repo)),
         )
         .first());
 
@@ -247,9 +239,7 @@ async function batchGetLikeData(
         .withIndex("by_dedupe_hash", (q) => q.eq("dedupeHash", hash))
         .collect();
 
-      const userLiked = userId
-        ? likes.some((l) => l.userId === userId)
-        : false;
+      const userLiked = userId ? likes.some((l) => l.userId === userId) : false;
       result[hash] = { count: likes.length, userLiked };
     }),
   );

@@ -5,7 +5,6 @@ import { format } from "date-fns";
 
 import { createAdminConvexClient } from "@/utils/convex/client";
 import { api } from "@/../convex/_generated/api";
-import { Id } from "@/../convex/_generated/dataModel";
 import * as resend from "@/utils/resend/client";
 import * as openai from "@/utils/openai/client";
 

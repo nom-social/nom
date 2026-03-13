@@ -81,7 +81,9 @@ export const processGithubEvents = schemaTask({
           }),
           convex.mutation(api.admin.upsertPublicTimelineEntries, {
             entries: publicTimelineEntries as Parameters<
-              typeof convex.mutation<typeof api.admin.upsertPublicTimelineEntries>
+              typeof convex.mutation<
+                typeof api.admin.upsertPublicTimelineEntries
+              >
             >[1]["entries"],
           }),
         ]);

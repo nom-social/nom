@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import * as Sentry from "@sentry/nextjs";
-import { fetchMutation, fetchQuery } from "convex/nextjs";
-
 import { api } from "@/../convex/_generated/api";
 import { processGithubEvents } from "@/trigger/process-github-events";
 import { syncBatchReposMetadataTask } from "@/trigger/sync-batch-repos-metadata";
@@ -98,7 +96,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing signature" }, { status: 401 });
     }
     const rawBodyString = JSON.stringify(rawBody);
-    const hmac = crypto.createHmac("sha256", process.env.GITHUB_WEBHOOK_SECRET!);
+    const hmac = crypto.createHmac(
+      "sha256",
+      process.env.GITHUB_WEBHOOK_SECRET!,
+    );
     hmac.update(rawBodyString);
     const digest = `sha256=${hmac.digest("hex")}`;
     if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest))) {

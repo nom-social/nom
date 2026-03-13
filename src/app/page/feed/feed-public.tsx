@@ -33,9 +33,8 @@ function FeedPublic({
   const hasNextPage = status === "CanLoadMore";
 
   // Show SSR-fetched items during initial load (only when no active search)
-  const items = isLoading && !searchQuery
-    ? (initialItems as typeof results)
-    : results;
+  const items =
+    isLoading && !searchQuery ? (initialItems as typeof results) : results;
 
   // Intersection Observer for infinite scroll
   const observerMiddle = useRef<IntersectionObserver | null>(null);

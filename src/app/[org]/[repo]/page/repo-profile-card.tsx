@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Calendar, Github, Globe, Scale } from "lucide-react";
 import { format } from "date-fns";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -60,9 +60,10 @@ export default function RepoProfileCard({
   );
   const [isPending, setIsPending] = useState(false);
 
-  const subscribedData = useQuery(api.subscriptions.isSubscribed, { org, repo });
-  const convexSubscribe = useMutation(api.subscriptions.subscribe);
-  const convexUnsubscribe = useMutation(api.subscriptions.unsubscribe);
+  const subscribedData = useQuery(api.subscriptions.isSubscribed, {
+    org,
+    repo,
+  });
 
   const isLoading = subscribedData === undefined;
 

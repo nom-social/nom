@@ -5,7 +5,6 @@
 import { v } from "convex/values";
 
 import { mutation, query } from "./_generated/server";
-import { Id } from "./_generated/dataModel";
 
 // ---------------------------------------------------------------------------
 // GitHub Event Log
@@ -435,9 +434,7 @@ export const upsertPublicTimelineEntries = mutation({
     for (const args of entries) {
       const existing = await ctx.db
         .query("publicTimeline")
-        .withIndex("by_dedupe_hash", (q) =>
-          q.eq("dedupeHash", args.dedupeHash),
-        )
+        .withIndex("by_dedupe_hash", (q) => q.eq("dedupeHash", args.dedupeHash))
         .unique();
 
       const entry = {
@@ -495,7 +492,7 @@ export const getPublicTimelineForRepo = query({
     toMs: v.optional(v.number()),
   },
   handler: async (ctx, { repositoryId, fromMs, toMs }) => {
-    let q = ctx.db
+    const q = ctx.db
       .query("publicTimeline")
       .withIndex("by_repository_updated_at", (q) =>
         q.eq("repositoryId", repositoryId),
@@ -691,8 +688,7 @@ export const getPublicFeedSlice = query({
         .withSearchIndex("search_text", (q) => {
           let sq = q.search("searchText", args.textQuery!);
           if (args.type) sq = sq.eq("type", args.type);
-          if (args.repositoryId)
-            sq = sq.eq("repositoryId", args.repositoryId);
+          if (args.repositoryId) sq = sq.eq("repositoryId", args.repositoryId);
           return sq;
         })
         .take(take);

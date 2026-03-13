@@ -62,7 +62,9 @@ export async function syncUserStars(userId: string) {
     const octokit = new Octokit({ auth: providerToken });
     const starredRepos = await getAllStarredRepos(octokit, userName);
 
-    logger.info(`Found ${starredRepos.length} starred repos for user ${userId}`);
+    logger.info(
+      `Found ${starredRepos.length} starred repos for user ${userId}`,
+    );
 
     for (const repo of starredRepos) {
       const repoDoc = await convex.query(api.admin.getRepository, {
@@ -76,7 +78,9 @@ export async function syncUserStars(userId: string) {
           repositoryId: repoDoc._id,
         });
 
-        logger.info(`Upserted subscription for user ${userId} to repo ${repoDoc._id}`);
+        logger.info(
+          `Upserted subscription for user ${userId} to repo ${repoDoc._id}`,
+        );
       }
     }
   } catch (error) {

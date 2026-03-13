@@ -1,8 +1,6 @@
 import { fetchMutation, fetchQuery } from "convex/nextjs";
 import { api } from "@/../convex/_generated/api";
 import { auth } from "@convex-dev/auth/nextjs/server";
-import { subMonths } from "date-fns";
-
 import { triggerSubscriberMilestone } from "./server-actions";
 
 export class NotAuthenticatedError extends Error {

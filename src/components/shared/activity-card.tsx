@@ -59,7 +59,9 @@ function ActivityCard({
 
   const handleLike = useCallback(async () => {
     if (!isAuthenticated) {
-      router.push(`/auth/login?next=${encodeURIComponent(window.location.pathname)}`);
+      router.push(
+        `/auth/login?next=${encodeURIComponent(window.location.pathname)}`,
+      );
       return;
     }
     setLiked(true);
@@ -75,7 +77,9 @@ function ActivityCard({
 
   const handleUnlike = useCallback(async () => {
     if (!isAuthenticated) {
-      router.push(`/auth/login?next=${encodeURIComponent(window.location.pathname)}`);
+      router.push(
+        `/auth/login?next=${encodeURIComponent(window.location.pathname)}`,
+      );
       return;
     }
     setLiked(false);
@@ -106,7 +110,10 @@ function ActivityCard({
         repoUrl={`/${org}/${repo}`}
         timestamp={new Date(parseResult.data.pull_request.updated_at)}
         contributors={parseResult.data.pull_request.contributors.map(
-          (login) => ({ name: login, avatar: `https://github.com/${login}.png` }),
+          (login) => ({
+            name: login,
+            avatar: `https://github.com/${login}.png`,
+          }),
         )}
         body={parseResult.data.pull_request.ai_summary}
         likeCount={likeCount}

@@ -30,23 +30,24 @@ export async function GET(
     textQuery: q?.trim() || undefined,
   });
 
-  const normalizedItems = items.map((item: {
-    _id: string;
-    type: string;
-    data: unknown;
-    dedupeHash: string;
-    updatedAt: number;
-    repository?: { org: string; repo: string } | null;
-  }) =>
-    normalizeTimelineItem({
-      id: item._id,
-      type: item.type,
-      data: item.data,
-      updated_at: new Date(item.updatedAt).toISOString(),
-      dedupe_hash: item.dedupeHash,
-      org,
-      repo,
-    }),
+  const normalizedItems = items.map(
+    (item: {
+      _id: string;
+      type: string;
+      data: unknown;
+      dedupeHash: string;
+      updatedAt: number;
+      repository?: { org: string; repo: string } | null;
+    }) =>
+      normalizeTimelineItem({
+        id: item._id,
+        type: item.type,
+        data: item.data,
+        updated_at: new Date(item.updatedAt).toISOString(),
+        dedupe_hash: item.dedupeHash,
+        org,
+        repo,
+      }),
   );
 
   const has_more = normalizedItems.length > limit;

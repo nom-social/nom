@@ -25,11 +25,14 @@ export const sendSubscriberMilestoneTask = schemaTask({
     });
     if (count === 0) return;
 
-    const existingNotifications = await convex.query(api.admin.getNotifications, {
-      type: "subscriber_milestone",
-      entityId: repo_id,
-      keys: MILESTONES.map(String),
-    });
+    const existingNotifications = await convex.query(
+      api.admin.getNotifications,
+      {
+        type: "subscriber_milestone",
+        entityId: repo_id,
+        keys: MILESTONES.map(String),
+      },
+    );
 
     const alreadySent = new Set(existingNotifications.map((n) => n.key));
     const newlyCrossed = MILESTONES.filter(
@@ -39,10 +42,6 @@ export const sendSubscriberMilestoneTask = schemaTask({
       newlyCrossed.length > 0 ? Math.max(...newlyCrossed) : null;
     if (milestoneToSend === null) return;
 
-    const repo = await convex.query(api.admin.getRepository, {
-      org: "",
-      repo: "",
-    });
     // Get repo by ID using repositoriesByIds
     const [repoDoc] = await convex.query(api.admin.getRepositoriesByIds, {
       repositoryIds: [repositoryId],

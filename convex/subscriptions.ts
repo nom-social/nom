@@ -130,10 +130,7 @@ async function findRepo(
     (await ctx.db
       .query("repositories")
       .filter((q) =>
-        q.and(
-          q.eq(q.field("org"), org),
-          q.eq(q.field("repo"), repo),
-        ),
+        q.and(q.eq(q.field("org"), org), q.eq(q.field("repo"), repo)),
       )
       .first())
   );

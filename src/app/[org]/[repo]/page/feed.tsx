@@ -16,7 +16,10 @@ import { useScrollRestore } from "@/hooks/use-scroll-restore";
 import { useSyncParamToUrl } from "@/hooks/use-sync-param-to-url";
 import { api } from "@/../convex/_generated/api";
 import { Id } from "@/../convex/_generated/dataModel";
-import { buildFeedQueryArgs, type PublicFeedItemWithLikes } from "@/app/page/feed/actions";
+import {
+  buildFeedQueryArgs,
+  type PublicFeedItemWithLikes,
+} from "@/app/page/feed/actions";
 
 const INITIAL_NUM_ITEMS = 20;
 const SEARCH_DEBOUNCE_MS = 300;
@@ -49,9 +52,8 @@ function RepoFeedItems({
   const hasNextPage = status === "CanLoadMore";
 
   // Show SSR-fetched items during initial load (only when no active search)
-  const items = isLoading && !searchQuery
-    ? (initialItems as typeof results)
-    : results;
+  const items =
+    isLoading && !searchQuery ? (initialItems as typeof results) : results;
 
   const observerMiddle = useRef<IntersectionObserver | null>(null);
   const observerLast = useRef<IntersectionObserver | null>(null);
@@ -64,7 +66,8 @@ function RepoFeedItems({
       if (isFetchingNextPage) return;
       if (observerMiddle.current) observerMiddle.current.disconnect();
       observerMiddle.current = new window.IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasNextPage) loadMore(INITIAL_NUM_ITEMS);
+        if (entries[0].isIntersecting && hasNextPage)
+          loadMore(INITIAL_NUM_ITEMS);
       });
       if (node) observerMiddle.current.observe(node);
     },
@@ -76,7 +79,8 @@ function RepoFeedItems({
       if (isFetchingNextPage) return;
       if (observerLast.current) observerLast.current.disconnect();
       observerLast.current = new window.IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasNextPage) loadMore(INITIAL_NUM_ITEMS);
+        if (entries[0].isIntersecting && hasNextPage)
+          loadMore(INITIAL_NUM_ITEMS);
       });
       if (node) observerLast.current.observe(node);
     },
@@ -85,7 +89,9 @@ function RepoFeedItems({
 
   return (
     <>
-      <ScrollToTopButton onScrollToTop={() => window.scrollTo({ top: 0, behavior: "smooth" })} />
+      <ScrollToTopButton
+        onScrollToTop={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      />
       <div className="flex flex-col gap-4">
         {items.length === 0 && !isLoading && (
           <div className="text-muted-foreground">No activity yet.</div>

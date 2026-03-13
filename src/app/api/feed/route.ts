@@ -24,24 +24,25 @@ export async function GET(request: NextRequest) {
       toMs: filters.to ? new Date(filters.to).getTime() : undefined,
     });
 
-    const normalizedItems = items.map((item: {
-      _id: string;
-      type: string;
-      data: unknown;
-      dedupeHash: string;
-      updatedAt: number;
-      repository?: { org: string; repo: string } | null;
-    }) =>
-      normalizeTimelineItem({
-        id: item._id,
-        type: item.type,
-        data: item.data,
-        updated_at: new Date(item.updatedAt).toISOString(),
-        dedupe_hash: item.dedupeHash,
-        repositories: item.repository
-          ? { org: item.repository.org, repo: item.repository.repo }
-          : undefined,
-      }),
+    const normalizedItems = items.map(
+      (item: {
+        _id: string;
+        type: string;
+        data: unknown;
+        dedupeHash: string;
+        updatedAt: number;
+        repository?: { org: string; repo: string } | null;
+      }) =>
+        normalizeTimelineItem({
+          id: item._id,
+          type: item.type,
+          data: item.data,
+          updated_at: new Date(item.updatedAt).toISOString(),
+          dedupe_hash: item.dedupeHash,
+          repositories: item.repository
+            ? { org: item.repository.org, repo: item.repository.repo }
+            : undefined,
+        }),
     );
 
     const has_more = normalizedItems.length > limit;
