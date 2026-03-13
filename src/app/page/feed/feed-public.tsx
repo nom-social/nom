@@ -7,16 +7,18 @@ import React, { useRef, useCallback } from "react";
 import ActivityCard from "@/components/shared/activity-card";
 import ScrollToTopButton from "@/components/shared/scroll-to-top-button";
 import { api } from "@/../convex/_generated/api";
-import { buildFeedQueryArgs } from "./actions";
+import { buildFeedQueryArgs, type PublicFeedItemWithLikes } from "./actions";
 
 const INITIAL_NUM_ITEMS = 20;
 
 function FeedPublic({
   searchQuery,
   back = "/",
+  initialItems = [],
 }: {
   searchQuery?: string;
   back?: string;
+  initialItems?: PublicFeedItemWithLikes[];
 }) {
   const filterArgs = buildFeedQueryArgs(searchQuery);
 
@@ -30,12 +32,17 @@ function FeedPublic({
   const isFetchingNextPage = status === "LoadingMore";
   const hasNextPage = status === "CanLoadMore";
 
+  // Show SSR-fetched items during initial load (only when no active search)
+  const items = isLoading && !searchQuery
+    ? (initialItems as typeof results)
+    : results;
+
   // Intersection Observer for infinite scroll
   const observerMiddle = useRef<IntersectionObserver | null>(null);
   const observerLast = useRef<IntersectionObserver | null>(null);
   const sentinelMiddleIndex =
-    results.length > 0 ? Math.floor(results.length / 2) : -1;
-  const sentinelLastIndex = results.length > 0 ? results.length - 1 : -1;
+    items.length > 0 ? Math.floor(items.length / 2) : -1;
+  const sentinelLastIndex = items.length > 0 ? items.length - 1 : -1;
 
   const sentinelMiddleRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -74,15 +81,15 @@ function FeedPublic({
       <ScrollToTopButton onScrollToTop={handleScrollToTop} />
 
       <div className="flex flex-col gap-4">
-        {results.length === 0 && !isLoading && (
+        {items.length === 0 && !isLoading && (
           <div className="text-muted-foreground">No activity yet.</div>
         )}
-        {isLoading && (
+        {isLoading && items.length === 0 && (
           <div className="flex flex-row items-center gap-2 text-muted-foreground">
             <Loader className="animate-spin w-4 h-4" /> Loading...
           </div>
         )}
-        {results.map((item, idx) => {
+        {items.map((item, idx) => {
           const org = item.repository?.org ?? "";
           const repo = item.repository?.repo ?? "";
           let ref;

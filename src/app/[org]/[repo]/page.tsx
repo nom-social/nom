@@ -1,7 +1,10 @@
+import { fetchQuery } from "convex/nextjs";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import { BASE_URL } from "@/lib/constants";
+import { api } from "@/../convex/_generated/api";
+import { type PublicFeedItemWithLikes } from "@/app/page/feed/actions";
 
 import RepoProfileCard from "./page/repo-profile-card";
 import { fetchRepoProfile } from "./page/actions";
@@ -16,6 +19,17 @@ export default async function RepoPage({
   const repoProfile = await fetchRepoProfile(org, repo);
 
   if (!repoProfile) return notFound();
+
+  let initialItems: PublicFeedItemWithLikes[] = [];
+  try {
+    const result = await fetchQuery(api.feed.fetchPublicFeed, {
+      paginationOpts: { numItems: 20, cursor: null },
+      repositoryId: repoProfile._id,
+    });
+    initialItems = result.page as PublicFeedItemWithLikes[];
+  } catch {
+    // Non-fatal: client will load feed via Convex subscription
+  }
 
   return (
     <main className="flex flex-col justify-center gap-4 px-2">
@@ -32,7 +46,12 @@ export default async function RepoPage({
         isPrivate={repoProfile.isPrivate}
       />
 
-      <Feed repositoryId={repoProfile._id} repo={repo} org={org} />
+      <Feed
+        repositoryId={repoProfile._id}
+        repo={repo}
+        org={org}
+        initialItems={initialItems}
+      />
     </main>
   );
 }

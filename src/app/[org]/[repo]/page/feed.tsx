@@ -16,7 +16,7 @@ import { useScrollRestore } from "@/hooks/use-scroll-restore";
 import { useSyncParamToUrl } from "@/hooks/use-sync-param-to-url";
 import { api } from "@/../convex/_generated/api";
 import { Id } from "@/../convex/_generated/dataModel";
-import { buildFeedQueryArgs } from "@/app/page/feed/actions";
+import { buildFeedQueryArgs, type PublicFeedItemWithLikes } from "@/app/page/feed/actions";
 
 const INITIAL_NUM_ITEMS = 20;
 const SEARCH_DEBOUNCE_MS = 300;
@@ -27,12 +27,14 @@ function RepoFeedItems({
   org,
   searchQuery,
   back,
+  initialItems = [],
 }: {
   repositoryId: Id<"repositories">;
   repo: string;
   org: string;
   searchQuery?: string;
   back: string;
+  initialItems?: PublicFeedItemWithLikes[];
 }) {
   const filterArgs = buildFeedQueryArgs(searchQuery, repositoryId);
 
@@ -46,11 +48,16 @@ function RepoFeedItems({
   const isFetchingNextPage = status === "LoadingMore";
   const hasNextPage = status === "CanLoadMore";
 
+  // Show SSR-fetched items during initial load (only when no active search)
+  const items = isLoading && !searchQuery
+    ? (initialItems as typeof results)
+    : results;
+
   const observerMiddle = useRef<IntersectionObserver | null>(null);
   const observerLast = useRef<IntersectionObserver | null>(null);
   const sentinelMiddleIndex =
-    results.length > 0 ? Math.floor(results.length / 2) : -1;
-  const sentinelLastIndex = results.length > 0 ? results.length - 1 : -1;
+    items.length > 0 ? Math.floor(items.length / 2) : -1;
+  const sentinelLastIndex = items.length > 0 ? items.length - 1 : -1;
 
   const sentinelMiddleRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -80,15 +87,15 @@ function RepoFeedItems({
     <>
       <ScrollToTopButton onScrollToTop={() => window.scrollTo({ top: 0, behavior: "smooth" })} />
       <div className="flex flex-col gap-4">
-        {results.length === 0 && !isLoading && (
+        {items.length === 0 && !isLoading && (
           <div className="text-muted-foreground">No activity yet.</div>
         )}
-        {isLoading && (
+        {isLoading && items.length === 0 && (
           <div className="flex flex-row items-center gap-2 text-muted-foreground">
             <Loader className="animate-spin w-4 h-4" /> Loading...
           </div>
         )}
-        {results.map((item, idx) => {
+        {items.map((item, idx) => {
           let ref;
           if (hasNextPage) {
             if (idx === sentinelMiddleIndex) ref = sentinelMiddleRef;
@@ -121,10 +128,12 @@ export default function Feed({
   repositoryId,
   repo,
   org,
+  initialItems = [],
 }: {
   repositoryId: Id<"repositories">;
   repo: string;
   org: string;
+  initialItems?: PublicFeedItemWithLikes[];
 }) {
   useScrollRestore();
   const searchParams = useSearchParams();
@@ -174,6 +183,7 @@ export default function Feed({
         org={org}
         searchQuery={activeQuery}
         back={backUrl}
+        initialItems={initialItems}
       />
     </div>
   );

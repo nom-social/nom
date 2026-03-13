@@ -16,10 +16,15 @@ import { useScrollRestore } from "@/hooks/use-scroll-restore";
 import { useSyncParamToUrl } from "@/hooks/use-sync-param-to-url";
 
 import FeedPublic from "./feed/feed-public";
+import { type PublicFeedItemWithLikes } from "./feed/actions";
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-export default function Feed() {
+export default function Feed({
+  initialItems = [],
+}: {
+  initialItems?: PublicFeedItemWithLikes[];
+}) {
   useScrollRestore();
   const { isAuthenticated } = useConvexAuth();
   const searchParams = useSearchParams();
@@ -36,7 +41,13 @@ export default function Feed() {
   const handleClear = () => setValue("search", "");
 
   if (!isAuthenticated) {
-    return <FeedPublic searchQuery={activeQuery} back={backUrl} />;
+    return (
+      <FeedPublic
+        searchQuery={activeQuery}
+        back={backUrl}
+        initialItems={initialItems}
+      />
+    );
   }
 
   return (
@@ -81,7 +92,11 @@ export default function Feed() {
           )}
         </div>
       </div>
-      <FeedPublic searchQuery={activeQuery} back={backUrl} />
+      <FeedPublic
+        searchQuery={activeQuery}
+        back={backUrl}
+        initialItems={initialItems}
+      />
     </Tabs>
   );
 }
