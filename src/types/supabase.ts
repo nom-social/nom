@@ -7,6 +7,31 @@ export type Json =
   | Json[];
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json;
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
   public: {
     Tables: {
       github_event_log: {
@@ -68,50 +93,41 @@ export type Database = {
       };
       public_timeline: {
         Row: {
-          categories: string[] | null;
           created_at: string;
           data: Json;
           dedupe_hash: string;
           event_ids: string[] | null;
           id: string;
-          is_read: boolean;
           repo_id: string;
           score: number;
           search_text: string | null;
           search_vector: unknown;
-          snooze_to: string | null;
           type: string;
           updated_at: string;
         };
         Insert: {
-          categories?: string[] | null;
           created_at?: string;
           data: Json;
           dedupe_hash: string;
           event_ids?: string[] | null;
           id?: string;
-          is_read?: boolean;
           repo_id: string;
           score: number;
           search_text?: string | null;
           search_vector?: unknown;
-          snooze_to?: string | null;
           type: string;
           updated_at?: string;
         };
         Update: {
-          categories?: string[] | null;
           created_at?: string;
           data?: Json;
           dedupe_hash?: string;
           event_ids?: string[] | null;
           id?: string;
-          is_read?: boolean;
           repo_id?: string;
           score?: number;
           search_text?: string | null;
           search_vector?: unknown;
-          snooze_to?: string | null;
           type?: string;
           updated_at?: string;
         };
@@ -270,52 +286,43 @@ export type Database = {
       };
       user_timeline: {
         Row: {
-          categories: string[] | null;
           created_at: string;
           data: Json;
           dedupe_hash: string;
           event_ids: string[] | null;
           id: string;
-          is_read: boolean;
           repo_id: string;
           score: number;
           search_text: string | null;
           search_vector: unknown;
-          snooze_to: string | null;
           type: string;
           updated_at: string;
           user_id: string;
         };
         Insert: {
-          categories?: string[] | null;
           created_at?: string;
           data: Json;
           dedupe_hash: string;
           event_ids?: string[] | null;
           id?: string;
-          is_read?: boolean;
           repo_id: string;
           score: number;
           search_text?: string | null;
           search_vector?: unknown;
-          snooze_to?: string | null;
           type: string;
           updated_at?: string;
           user_id: string;
         };
         Update: {
-          categories?: string[] | null;
           created_at?: string;
           data?: Json;
           dedupe_hash?: string;
           event_ids?: string[] | null;
           id?: string;
-          is_read?: boolean;
           repo_id?: string;
           score?: number;
           search_text?: string | null;
           search_vector?: unknown;
-          snooze_to?: string | null;
           type?: string;
           updated_at?: string;
           user_id?: string;
@@ -499,6 +506,9 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },

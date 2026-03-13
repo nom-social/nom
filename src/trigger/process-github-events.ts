@@ -29,22 +29,6 @@ export const processGithubEvents = schemaTask({
 
     logger.info(`Processing ${events.length} events for ${org}/${repo}`);
 
-    // First, handle any snoozed timeline entries that have reached their time
-    await Promise.allSettled([
-      supabase
-        .from("user_timeline")
-        .update({ snooze_to: null, updated_at: currentTimestamp })
-        .not("snooze_to", "is", null)
-        .lt("snooze_to", currentTimestamp)
-        .throwOnError(),
-      supabase
-        .from("public_timeline")
-        .update({ snooze_to: null, updated_at: currentTimestamp })
-        .not("snooze_to", "is", null)
-        .lt("snooze_to", currentTimestamp)
-        .throwOnError(),
-    ]);
-
     for (const event of events || []) {
       try {
         const { data: repo } = await supabase

@@ -46,15 +46,12 @@ export const newUserSignUpTask = schemaTask({
     const userTimelineEntries: TablesInsert<"user_timeline">[] =
       publicEvents.map((event) => ({
         user_id: userId,
-        categories: event.categories,
         created_at: event.created_at,
         data: event.data,
         dedupe_hash: event.dedupe_hash,
         event_ids: event.event_ids,
-        is_read: false,
         repo_id: event.repo_id,
         score: event.score,
-        snooze_to: event.snooze_to,
         type: event.type,
         updated_at: new Date().toISOString(),
       }));

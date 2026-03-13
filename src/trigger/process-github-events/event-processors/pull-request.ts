@@ -313,7 +313,6 @@ You can use explore_file with ref=${pull_request.head.sha} to read specific file
     dedupe_hash: dedupeHash,
     updated_at: pull_request.updated_at.toISOString(),
     event_ids: [event.id],
-    is_read: false,
     search_text: [prData.pull_request.title, prData.pull_request.ai_summary]
       .filter((text) => text.trim().length > 0)
       .join(" "),
@@ -322,7 +321,6 @@ You can use explore_file with ref=${pull_request.head.sha} to read specific file
   const userTimelineEntries: TablesInsert<"user_timeline">[] = subscribers.map(
     (s) => ({
       user_id: s.user_id,
-      categories: ["pull_requests"],
       ...timelineEntry,
     }),
   );

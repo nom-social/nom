@@ -234,7 +234,6 @@ You can use explore_file with ref=${latestCommit.id} to read specific file conte
     dedupe_hash: dedupeHash,
     updated_at: latestTimestamp,
     event_ids: [event.id],
-    is_read: false,
     search_text: [result.title, aiSummary]
       .filter((text) => text.trim().length > 0)
       .join(" "),
@@ -244,7 +243,6 @@ You can use explore_file with ref=${latestCommit.id} to read specific file conte
   const userTimelineEntries: TablesInsert<"user_timeline">[] = subscribers.map(
     (s) => ({
       user_id: s.user_id,
-      categories: ["pushes"],
       ...timelineEntry,
     }),
   );
