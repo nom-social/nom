@@ -55,6 +55,7 @@ export async function fetchAndEnrichRepoEvents(
   const results: EnrichedEventForInsert[] = [];
 
   const { data: repoData } = await octokit.repos.get({ owner: org, repo });
+  if (repoData.fork) return [];
   const defaultBranch = repoData.default_branch ?? "main";
 
   const baseRepoInfo = repoInfo(org, repo, repoData.id, defaultBranch);
