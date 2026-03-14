@@ -86,7 +86,7 @@ export async function generateMetadata({
   const truncate = (str: string) =>
     str.length > 200 ? str.slice(0, 200) + "..." : str;
   const description = truncate(
-    repoProfile.description || `View ${repo}/${org} on Nom.`,
+    repoProfile.description || `View ${org}/${repo} on Nom.`,
   );
 
   const apiUrl = q
@@ -108,7 +108,7 @@ export async function generateMetadata({
         " (JSON, no auth). See /llms.txt for full API docs.",
     },
     openGraph: {
-      title: `${repo}/${org} - Nom`,
+      title: `${org}/${repo} - Nom`,
       description,
       url: `${BASE_URL}/${org}/${repo}`,
       images: [
@@ -120,7 +120,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `${repo}/${org} - Nom`,
+      title: `${org}/${repo} - Nom`,
       description,
       images: [repoProfile.avatarUrl],
     },

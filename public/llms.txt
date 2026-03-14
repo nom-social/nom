@@ -8,7 +8,7 @@ The web feed UI at https://nomit.dev (including URLs with `?q=`) is client-rende
 
 | Feed URL you encountered | Use this API instead |
 |--------------------------|----------------------|
-| https://nomit.dev/?q=org:vercel repo:next.js | GET https://nomit.dev/api/feed?q=org:vercel repo:next.js |
+| https://nomit.dev/?q=org:vercel repo:next.js | GET https://nomit.dev/api/feed?q=org:vercel%20repo:next.js |
 | https://nomit.dev/vercel/next.js | GET https://nomit.dev/api/feed/vercel/next.js |
 | https://nomit.dev/vercel/next.js?q=typescript | GET https://nomit.dev/api/feed/vercel/next.js?q=typescript |
 
