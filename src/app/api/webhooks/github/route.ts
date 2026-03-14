@@ -178,13 +178,15 @@ export async function POST(request: Request) {
       });
     }
 
-    // Always store the event log
-    await supabase.from("github_event_log").insert(eventData).throwOnError();
-
-    // Only trigger processing for verified repositories
-    if (isVerified) {
-      await processGithubEvents.trigger({ org, repo }, { concurrencyKey: org });
+    if (!isVerified) {
+      return NextResponse.json({
+        message: "Repository not verified, ignoring webhook",
+        timestamp: new Date().toISOString(),
+      });
     }
+
+    await supabase.from("github_event_log").insert(eventData).throwOnError();
+    await processGithubEvents.trigger({ org, repo }, { concurrencyKey: org });
 
     // Return a success response
     return NextResponse.json({
