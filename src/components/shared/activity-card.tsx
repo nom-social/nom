@@ -12,6 +12,7 @@ import {
   releaseDataSchema,
   pushDataSchema,
 } from "@/components/shared/activity-card/shared/schemas";
+import { avatarUrl } from "@/lib/avatar-url";
 
 import {
   createLike,
@@ -117,7 +118,7 @@ function ActivityCard({
         contributors={parseResult.data.pull_request.contributors.map(
           (login) => ({
             name: login,
-            avatar: `https://github.com/${login}.png`,
+            avatar: avatarUrl(login),
           }),
         )}
         body={parseResult.data.pull_request.ai_summary}
@@ -150,7 +151,7 @@ function ActivityCard({
         timestamp={new Date(release.published_at ?? release.created_at)}
         contributors={release.contributors.map((login) => ({
           name: login,
-          avatar: `https://github.com/${login}.png`,
+          avatar: avatarUrl(login),
         }))}
         body={release.ai_summary}
         likeCount={likeCount}
@@ -181,7 +182,7 @@ function ActivityCard({
         timestamp={new Date(push.created_at)}
         contributors={push.contributors.map((login) => ({
           name: login,
-          avatar: `https://github.com/${login}.png`,
+          avatar: avatarUrl(login),
         }))}
         body={push.ai_summary}
         likeCount={likeCount}
