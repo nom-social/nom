@@ -47,6 +47,7 @@ export default async function Home({
   searchParams: Promise<{ q?: string }>;
 }) {
   const { q } = await searchParams;
+  const normalizedQ = q ?? "";
   const supabase = await createClient();
   const {
     data: { user },
@@ -54,12 +55,12 @@ export default async function Home({
 
   const queryClient = getQueryClient();
   await queryClient.prefetchInfiniteQuery({
-    queryKey: [fetchPublicFeed.key, q],
+    queryKey: [fetchPublicFeed.key, normalizedQ],
     queryFn: ({ pageParam }) =>
       fetchPublicFeedServer({
         limit: LIMIT,
         offset: pageParam,
-        query: q,
+        query: normalizedQ,
       }),
     getNextPageParam: (
       lastPage: { items: PublicFeedItemWithLikes[]; hasMore: boolean },

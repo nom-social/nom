@@ -22,19 +22,20 @@ export default async function RepoPage({
 }) {
   const { org, repo } = await params;
   const { q } = await searchParams;
+  const normalizedQ = q ?? "";
   const repoProfile = await fetchRepoProfile(org, repo);
 
   if (!repoProfile) return notFound();
 
   const queryClient = getQueryClient();
   await queryClient.prefetchInfiniteQuery({
-    queryKey: [fetchFeedPage.key, repoProfile.id, q],
+    queryKey: [fetchFeedPage.key, repoProfile.id, normalizedQ],
     queryFn: ({ pageParam }) =>
       fetchFeedPageServer({
         repoId: repoProfile.id,
         limit: LIMIT,
         offset: pageParam,
-        query: q,
+        query: normalizedQ,
       }),
     getNextPageParam: (
       lastPage: FetchFeedPageResult,
