@@ -17,7 +17,7 @@ import {
   deleteLike,
   NotAuthenticatedError,
 } from "@/components/shared/activity-card/actions";
-import { avatarUrl } from "@/lib/avatar-url";
+import { avatarUrl, profileUrl } from "@/lib/contributor-urls";
 
 import StatusActivityCardBase from "./status-activity-card-base";
 
@@ -116,6 +116,7 @@ function StatusActivityCard({
         contributors={pr.contributors.map((login) => ({
           name: login,
           avatar: avatarUrl(login),
+          profileUrl: profileUrl(login),
         }))}
         body={pr.ai_summary}
         likeCount={likeCount}
@@ -147,6 +148,7 @@ function StatusActivityCard({
         contributors={release.contributors.map((login) => ({
           name: login,
           avatar: avatarUrl(login),
+          profileUrl: profileUrl(login),
         }))}
         body={release.ai_summary}
         likeCount={likeCount}
@@ -178,6 +180,7 @@ function StatusActivityCard({
         contributors={push.contributors.map((login) => ({
           name: login,
           avatar: avatarUrl(login),
+          profileUrl: profileUrl(login),
         }))}
         body={push.ai_summary}
         likeCount={likeCount}
