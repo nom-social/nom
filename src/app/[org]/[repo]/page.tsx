@@ -21,7 +21,7 @@ export default async function RepoPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const { org, repo } = await params;
-  const { q = "" } = (await searchParams) ?? {};
+  const { q } = await searchParams;
   const repoProfile = await fetchRepoProfile(org, repo);
 
   if (!repoProfile) return notFound();
@@ -78,7 +78,7 @@ export async function generateMetadata({
   searchParams: Promise<{ q?: string }>;
 }): Promise<Metadata> {
   const { org, repo } = await params;
-  const { q } = (await searchParams) ?? {};
+  const { q } = await searchParams;
   const repoProfile = await fetchRepoProfile(org, repo);
 
   if (!repoProfile) return {};

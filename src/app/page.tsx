@@ -20,7 +20,7 @@ export async function generateMetadata({
 }: {
   searchParams: Promise<{ q?: string }>;
 }): Promise<Metadata> {
-  const { q } = (await searchParams) ?? {};
+  const { q } = await searchParams;
 
   const apiUrl = q
     ? `${BASE_URL}/api/feed?q=${encodeURIComponent(q)}`
@@ -46,7 +46,7 @@ export default async function Home({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
-  const { q = "" } = (await searchParams) ?? {};
+  const { q } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
