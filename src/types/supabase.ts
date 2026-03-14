@@ -176,16 +176,19 @@ export type Database = {
           created_at: string;
           id: string;
           installation_id: number;
+          is_verified: boolean;
         };
         Insert: {
           created_at?: string;
           id?: string;
           installation_id: number;
+          is_verified?: boolean;
         };
         Update: {
           created_at?: string;
           id?: string;
           installation_id?: number;
+          is_verified?: boolean;
         };
         Relationships: [
           {

@@ -88,7 +88,7 @@ export async function POST(request: Request) {
 
     const { data: repoData } = await supabase
       .from("repositories")
-      .select("id")
+      .select("id, repositories_secure(is_verified)")
       .ilike("org", escapeForIlike(org))
       .ilike("repo", escapeForIlike(repo))
       .single();
@@ -99,6 +99,8 @@ export async function POST(request: Request) {
         timestamp: new Date().toISOString(),
       });
     }
+
+    const isVerified = repoData.repositories_secure?.is_verified ?? false;
 
     // Secret validation for GitHub webhook
     const signature = request.headers.get("x-hub-signature-256");
@@ -176,9 +178,13 @@ export async function POST(request: Request) {
       });
     }
 
-    // Store in Supabase
+    // Always store the event log
     await supabase.from("github_event_log").insert(eventData).throwOnError();
-    await processGithubEvents.trigger({ org, repo }, { concurrencyKey: org });
+
+    // Only trigger processing for verified repositories
+    if (isVerified) {
+      await processGithubEvents.trigger({ org, repo }, { concurrencyKey: org });
+    }
 
     // Return a success response
     return NextResponse.json({
