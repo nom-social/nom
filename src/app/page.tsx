@@ -1,6 +1,8 @@
+import type { Metadata } from "next";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
 import ClaimRepoButton from "@/components/shared/claim-repo-button";
+import { BASE_URL } from "@/lib/constants";
 import { createClient } from "@/utils/supabase/server";
 import { getQueryClient } from "@/utils/get-query-client";
 
@@ -13,7 +15,36 @@ import Feed from "./page/feed";
 
 const LIMIT = 20;
 
-export default async function Home() {
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}): Promise<Metadata> {
+  const { q } = (await searchParams) ?? {};
+  if (!q) return {};
+
+  const apiUrl = `${BASE_URL}/api/feed?q=${encodeURIComponent(q)}`;
+  return {
+    alternates: {
+      types: {
+        "application/json": apiUrl,
+      },
+    },
+    other: {
+      "nom-api":
+        "This page is client-rendered. For feed data, use GET " +
+        apiUrl +
+        " (JSON, no auth). See /llms.txt for full API docs.",
+    },
+  };
+}
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q = "" } = (await searchParams) ?? {};
   const supabase = await createClient();
   const {
     data: { user },
@@ -21,12 +52,12 @@ export default async function Home() {
 
   const queryClient = getQueryClient();
   await queryClient.prefetchInfiniteQuery({
-    queryKey: [fetchPublicFeed.key, ""],
+    queryKey: [fetchPublicFeed.key, q],
     queryFn: ({ pageParam }) =>
       fetchPublicFeedServer({
         limit: LIMIT,
         offset: pageParam,
-        query: "",
+        query: q,
       }),
     getNextPageParam: (
       lastPage: { items: PublicFeedItemWithLikes[]; hasMore: boolean },
