@@ -88,7 +88,7 @@ export async function POST(request: Request) {
 
     const { data: repoData } = await supabase
       .from("repositories")
-      .select("id, repositories_secure(is_verified)")
+      .select("id, is_verified")
       .ilike("org", escapeForIlike(org))
       .ilike("repo", escapeForIlike(repo))
       .single();
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
       });
     }
 
-    const isVerified = repoData.repositories_secure?.is_verified ?? false;
+    const isVerified = repoData.is_verified;
 
     // Secret validation for GitHub webhook
     const signature = request.headers.get("x-hub-signature-256");

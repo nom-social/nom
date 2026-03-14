@@ -1,1 +1,1 @@
-alter table "public"."repositories_secure" add column "is_verified" boolean not null default false;
+alter table "public"."repositories" add column "is_verified" boolean not null default false;

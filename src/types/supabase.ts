@@ -147,6 +147,7 @@ export type Database = {
           created_at: string;
           id: string;
           is_private: boolean;
+          is_verified: boolean;
           metadata: Json | null;
           org: string;
           repo: string;
@@ -156,6 +157,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           is_private?: boolean;
+          is_verified?: boolean;
           metadata?: Json | null;
           org: string;
           repo: string;
@@ -165,6 +167,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           is_private?: boolean;
+          is_verified?: boolean;
           metadata?: Json | null;
           org?: string;
           repo?: string;
@@ -176,19 +179,16 @@ export type Database = {
           created_at: string;
           id: string;
           installation_id: number;
-          is_verified: boolean;
         };
         Insert: {
           created_at?: string;
           id?: string;
           installation_id: number;
-          is_verified?: boolean;
         };
         Update: {
           created_at?: string;
           id?: string;
           installation_id?: number;
-          is_verified?: boolean;
         };
         Relationships: [
           {
