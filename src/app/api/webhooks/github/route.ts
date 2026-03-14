@@ -139,6 +139,24 @@ export async function POST(request: Request) {
       }
     }
 
+    // Handle repository edited events (allowed regardless of verification)
+    if (payload.event_type === "repository" && payload.action === "edited") {
+      await syncBatchReposMetadataTask.trigger({
+        repos: [{ org, repo }],
+      });
+      return NextResponse.json({
+        message: "Repository edited event, triggered metadata sync",
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    if (!isVerified) {
+      return NextResponse.json({
+        message: "Repository not verified, ignoring webhook",
+        timestamp: new Date().toISOString(),
+      });
+    }
+
     // Handle star events
     if (payload.event_type === "star") {
       const actorLogin = payload.sender.login;
@@ -165,24 +183,6 @@ export async function POST(request: Request) {
           .eq("user_id", user.id)
           .eq("repo_id", repoData.id)
           .throwOnError();
-    }
-
-    // Handle repository edited events
-    if (payload.event_type === "repository" && payload.action === "edited") {
-      await syncBatchReposMetadataTask.trigger({
-        repos: [{ org, repo }],
-      });
-      return NextResponse.json({
-        message: "Repository edited event, triggered metadata sync",
-        timestamp: new Date().toISOString(),
-      });
-    }
-
-    if (!isVerified) {
-      return NextResponse.json({
-        message: "Repository not verified, ignoring webhook",
-        timestamp: new Date().toISOString(),
-      });
     }
 
     await supabase.from("github_event_log").insert(eventData).throwOnError();
