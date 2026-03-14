@@ -20,12 +20,12 @@ export async function createNewRepo({
     .single();
 
   const orgs = [...new Set(repos.map(({ org }) => org))];
-  const { data: verifiedOrgRows } = await supabase
+  const { count: verifiedCount } = await supabase
     .from("repositories")
-    .select("org")
+    .select("*", { count: "exact", head: true })
     .in("org", orgs)
     .eq("is_verified", true);
-  const verifiedOrgSet = new Set(verifiedOrgRows?.map(({ org }) => org) ?? []);
+  const isVerified = (verifiedCount ?? 0) > 0;
 
   const { data: newRepos } = await supabase
     .from("repositories")
@@ -34,7 +34,7 @@ export async function createNewRepo({
         org,
         repo,
         champion_github_username: user ? null : senderLogin,
-        is_verified: verifiedOrgSet.has(org),
+        is_verified: isVerified,
       })),
       { onConflict: "org,repo" },
     )
