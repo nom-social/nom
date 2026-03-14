@@ -21,9 +21,11 @@ export async function generateMetadata({
   searchParams: Promise<{ q?: string }>;
 }): Promise<Metadata> {
   const { q } = (await searchParams) ?? {};
-  if (!q) return {};
 
-  const apiUrl = `${BASE_URL}/api/feed?q=${encodeURIComponent(q)}`;
+  const apiUrl = q
+    ? `${BASE_URL}/api/feed?q=${encodeURIComponent(q)}`
+    : `${BASE_URL}/api/feed`;
+
   return {
     alternates: {
       types: {
