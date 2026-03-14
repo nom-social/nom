@@ -17,6 +17,7 @@ import {
   deleteLike,
   NotAuthenticatedError,
 } from "@/components/shared/activity-card/actions";
+import { avatarUrl } from "@/lib/avatar-url";
 
 import StatusActivityCardBase from "./status-activity-card-base";
 
@@ -114,7 +115,7 @@ function StatusActivityCard({
         timestamp={new Date(pr.updated_at)}
         contributors={pr.contributors.map((login) => ({
           name: login,
-          avatar: `https://github.com/${login}.png`,
+          avatar: avatarUrl(login),
         }))}
         body={pr.ai_summary}
         likeCount={likeCount}
@@ -145,7 +146,7 @@ function StatusActivityCard({
         timestamp={new Date(release.published_at ?? release.created_at)}
         contributors={release.contributors.map((login) => ({
           name: login,
-          avatar: `https://github.com/${login}.png`,
+          avatar: avatarUrl(login),
         }))}
         body={release.ai_summary}
         likeCount={likeCount}
@@ -176,7 +177,7 @@ function StatusActivityCard({
         timestamp={new Date(push.created_at)}
         contributors={push.contributors.map((login) => ({
           name: login,
-          avatar: `https://github.com/${login}.png`,
+          avatar: avatarUrl(login),
         }))}
         body={push.ai_summary}
         likeCount={likeCount}
