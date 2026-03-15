@@ -100,8 +100,6 @@ export async function POST(request: Request) {
       });
     }
 
-    const isVerified = repoData.is_verified;
-
     // Secret validation for GitHub webhook
     const signature = request.headers.get("x-hub-signature-256");
     if (!signature) {
@@ -150,12 +148,13 @@ export async function POST(request: Request) {
       });
     }
 
-    if (!isVerified) {
-      return NextResponse.json({
-        message: "Repository not verified, ignoring webhook",
-        timestamp: new Date().toISOString(),
-      });
-    }
+    // TODO: Uncomment this when we have a way to verify repositories
+    // if (!repoData.is_verified) {
+    //   return NextResponse.json({
+    //     message: "Repository not verified, ignoring webhook",
+    //     timestamp: new Date().toISOString(),
+    //   });
+    // }
 
     // Handle star events
     if (payload.event_type === "star") {
