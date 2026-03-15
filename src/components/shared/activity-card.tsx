@@ -2,6 +2,7 @@
 
 import React, { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { useMutation } from "@tanstack/react-query";
 import { GitCommitVertical, GitMergeIcon, TagIcon } from "lucide-react";
@@ -60,6 +61,7 @@ function ActivityCard({
       setLikeCount((c) => c + 1);
       return prev;
     },
+    onSuccess: () => toast.success("🔥 Liked!", { icon: null }),
     onError: (error, _, context) => {
       if (context) {
         setLiked(context.liked);
@@ -80,6 +82,7 @@ function ActivityCard({
       setLikeCount((c) => c - 1);
       return prev;
     },
+    onSuccess: () => toast("💔 Un-liked!"),
     onError: (error, _, context) => {
       if (context) {
         setLiked(context.liked);
