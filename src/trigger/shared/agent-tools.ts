@@ -40,29 +40,39 @@ async function downloadAndCacheImage(
       signal: controller.signal,
       redirect: "follow",
     });
-    clearTimeout(timeout);
   } catch {
     clearTimeout(timeout);
     return null;
   }
 
-  if (!res.ok) return null;
+  if (!res.ok) {
+    clearTimeout(timeout);
+    return null;
+  }
 
   const contentType = res.headers.get("content-type") ?? "";
   const mimeType = contentType.split(";")[0].trim();
 
   const ext = CONTENT_TYPE_TO_EXT[mimeType];
-  if (!ext) return null;
+  if (!ext) {
+    clearTimeout(timeout);
+    return null;
+  }
 
   const contentLength = res.headers.get("content-length");
-  if (contentLength && parseInt(contentLength) > MEME_MAX_BYTES) return null;
+  if (contentLength && parseInt(contentLength) > MEME_MAX_BYTES) {
+    clearTimeout(timeout);
+    return null;
+  }
 
   const fileName = `${crypto.randomUUID()}${ext}`;
 
   let arrayBuffer: ArrayBuffer;
   try {
     arrayBuffer = await res.arrayBuffer();
+    clearTimeout(timeout);
   } catch {
+    clearTimeout(timeout);
     return null;
   }
 
