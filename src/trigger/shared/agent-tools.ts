@@ -13,6 +13,7 @@ const MAX_FILE_CONTENT_BYTES = 50_000;
 const IMAGE_VERIFY_TIMEOUT_MS = 5_000;
 const MAX_VERIFIED_IMAGES = 1;
 const MEME_BUCKET = "meme-images";
+const MEME_MAX_BYTES = 10 * 1024 * 1024; // 10 MiB — matches bucket file_size_limit
 const CONTENT_TYPE_TO_EXT: Record<string, string> = {
   "image/jpeg": ".jpg",
   "image/png": ".png",
@@ -49,9 +50,13 @@ async function downloadAndCacheImage(
 
   const contentType = res.headers.get("content-type") ?? "";
   const mimeType = contentType.split(";")[0].trim();
-  if (!mimeType.startsWith("image/")) return null;
 
-  const ext = CONTENT_TYPE_TO_EXT[mimeType] ?? ".bin";
+  const ext = CONTENT_TYPE_TO_EXT[mimeType];
+  if (!ext) return null;
+
+  const contentLength = res.headers.get("content-length");
+  if (contentLength && parseInt(contentLength) > MEME_MAX_BYTES) return null;
+
   const fileName = `${crypto.randomUUID()}${ext}`;
 
   let arrayBuffer: ArrayBuffer;
@@ -60,6 +65,8 @@ async function downloadAndCacheImage(
   } catch {
     return null;
   }
+
+  if (arrayBuffer.byteLength > MEME_MAX_BYTES) return null;
 
   const supabase = createAdminClient();
   const { error } = await supabase.storage
