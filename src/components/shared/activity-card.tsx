@@ -55,15 +55,19 @@ function ActivityCard({
   const { mutate: mutateLike } = useMutation({
     mutationFn: ({ hash }: { hash: string }) => createLike(hash),
     onMutate: () => {
+      const prev = { liked, likeCount };
       setLiked(true);
-      setLikeCount((prev) => prev + 1);
+      setLikeCount((c) => c + 1);
+      return prev;
     },
     onSuccess: () => {
       toast.success("🔥 Liked!", { icon: null });
     },
-    onError: (error) => {
-      setLiked(false);
-      setLikeCount((prev) => prev - 1);
+    onError: (error, _, context) => {
+      if (context) {
+        setLiked(context.liked);
+        setLikeCount(context.likeCount);
+      }
       if (error instanceof NotAuthenticatedError)
         router.push(
           `/auth/login?next=${encodeURIComponent(window.location.pathname)}`,
@@ -74,15 +78,19 @@ function ActivityCard({
   const { mutate: mutateUnlike } = useMutation({
     mutationFn: ({ hash }: { hash: string }) => deleteLike(hash),
     onMutate: () => {
+      const prev = { liked, likeCount };
       setLiked(false);
-      setLikeCount((prev) => prev - 1);
+      setLikeCount((c) => c - 1);
+      return prev;
     },
     onSuccess: () => {
       toast("💔 Un-liked!");
     },
-    onError: (error) => {
-      setLiked(true);
-      setLikeCount((prev) => prev + 1);
+    onError: (error, _, context) => {
+      if (context) {
+        setLiked(context.liked);
+        setLikeCount(context.likeCount);
+      }
       if (error instanceof NotAuthenticatedError)
         router.push(
           `/auth/login?next=${encodeURIComponent(window.location.pathname)}`,
