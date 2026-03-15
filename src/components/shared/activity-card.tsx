@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
@@ -52,20 +52,22 @@ function ActivityCard({
   const [likeCount, setLikeCount] = useState<number>(item.likeCount);
   const [liked, setLiked] = useState<boolean>(item.isLiked);
 
-  // Update local state when props change (useful for refetching)
-  useEffect(() => {
-    setLikeCount(item.likeCount);
-    setLiked(item.isLiked);
-  }, [item.likeCount, item.isLiked]);
-
   const { mutate: mutateLike } = useMutation({
     mutationFn: ({ hash }: { hash: string }) => createLike(hash),
-    onSuccess: async () => {
+    onMutate: () => {
+      const prev = { liked, likeCount };
       setLiked(true);
-      setLikeCount((prev) => prev + 1);
+      setLikeCount((c) => c + 1);
+      return prev;
+    },
+    onSuccess: () => {
       toast.success("🔥 Liked!", { icon: null });
     },
-    onError: (error) => {
+    onError: (error, _, context) => {
+      if (context) {
+        setLiked(context.liked);
+        setLikeCount(context.likeCount);
+      }
       if (error instanceof NotAuthenticatedError)
         router.push(
           `/auth/login?next=${encodeURIComponent(window.location.pathname)}`,
@@ -75,12 +77,20 @@ function ActivityCard({
 
   const { mutate: mutateUnlike } = useMutation({
     mutationFn: ({ hash }: { hash: string }) => deleteLike(hash),
-    onSuccess: async () => {
+    onMutate: () => {
+      const prev = { liked, likeCount };
       setLiked(false);
-      setLikeCount((prev) => prev - 1);
+      setLikeCount((c) => c - 1);
+      return prev;
+    },
+    onSuccess: () => {
       toast("💔 Un-liked!");
     },
-    onError: (error) => {
+    onError: (error, _, context) => {
+      if (context) {
+        setLiked(context.liked);
+        setLikeCount(context.likeCount);
+      }
       if (error instanceof NotAuthenticatedError)
         router.push(
           `/auth/login?next=${encodeURIComponent(window.location.pathname)}`,
