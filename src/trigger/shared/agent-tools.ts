@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 import type { Octokit } from "@octokit/rest";
 import { tool } from "ai";
 import { z } from "zod";
@@ -5,50 +7,81 @@ import { logger } from "@trigger.dev/sdk";
 
 import { createClient as createTavilyClient } from "@/utils/tavily/client";
 import { filterAndFormatDiff } from "@/trigger/process-github-events/event-processors/shared/diff-utils";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 const MAX_FILE_CONTENT_BYTES = 50_000;
 const IMAGE_VERIFY_TIMEOUT_MS = 5_000;
 const MAX_VERIFIED_IMAGES = 1;
+const MEME_BUCKET = "meme-images";
+const CONTENT_TYPE_TO_EXT: Record<string, string> = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/gif": ".gif",
+  "image/webp": ".webp",
+  "image/svg+xml": ".svg",
+};
 
-async function isImageDownloadable(
+/**
+ * Downloads an image from `url`, uploads it to the Supabase meme-images bucket
+ * with a UUID filename, and returns the public Supabase URL. Returns null on any failure.
+ */
+async function downloadAndCacheImage(
   url: string,
   timeoutMs = IMAGE_VERIFY_TIMEOUT_MS,
-): Promise<boolean> {
+): Promise<string | null> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  let res: Response;
   try {
-    const res = await fetch(url, {
-      method: "HEAD",
+    res = await fetch(url, {
+      method: "GET",
       signal: controller.signal,
       redirect: "follow",
     });
     clearTimeout(timeout);
-    if (res.ok) {
-      const ct = res.headers.get("content-type") ?? "";
-      return ct.startsWith("image/");
-    }
-    if (res.status === 405) {
-      const getController = new AbortController();
-      const getTimeout = setTimeout(() => getController.abort(), timeoutMs);
-      try {
-        const getRes = await fetch(url, {
-          method: "GET",
-          headers: { Range: "bytes=0-0" },
-          signal: getController.signal,
-          redirect: "follow",
-        });
-        clearTimeout(getTimeout);
-        return getRes.ok;
-      } catch {
-        clearTimeout(getTimeout);
-        return false;
-      }
-    }
-    return false;
   } catch {
     clearTimeout(timeout);
-    return false;
+    return null;
   }
+
+  if (!res.ok) return null;
+
+  const contentType = res.headers.get("content-type") ?? "";
+  const mimeType = contentType.split(";")[0].trim();
+  if (!mimeType.startsWith("image/")) return null;
+
+  const ext = CONTENT_TYPE_TO_EXT[mimeType] ?? ".bin";
+  const fileName = `${crypto.randomUUID()}${ext}`;
+
+  let arrayBuffer: ArrayBuffer;
+  try {
+    arrayBuffer = await res.arrayBuffer();
+  } catch {
+    return null;
+  }
+
+  const supabase = createAdminClient();
+  const { error } = await supabase.storage
+    .from(MEME_BUCKET)
+    .upload(fileName, arrayBuffer, {
+      contentType: mimeType,
+      upsert: false,
+    });
+
+  if (error) {
+    logger.warn("Failed to upload meme image to Supabase storage", {
+      url,
+      error: error.message,
+    });
+    return null;
+  }
+
+  const { data: urlData } = supabase.storage
+    .from(MEME_BUCKET)
+    .getPublicUrl(fileName);
+
+  return urlData.publicUrl;
 }
 
 export interface CreateEventToolsParams {
@@ -249,12 +282,11 @@ export function createEventTools({
           for (const img of rawImages) {
             if (verified.length >= MAX_VERIFIED_IMAGES) break;
             const { url, description } = img;
-            if (
-              url &&
-              url.startsWith("https:") &&
-              (await isImageDownloadable(url))
-            ) {
-              verified.push({ url, description });
+            if (url && url.startsWith("https:")) {
+              const cachedUrl = await downloadAndCacheImage(url);
+              if (cachedUrl) {
+                verified.push({ url: cachedUrl, description });
+              }
             }
           }
           return { images: verified };
