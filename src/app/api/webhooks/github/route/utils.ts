@@ -19,6 +19,14 @@ export async function createNewRepo({
     .eq("github_username", senderLogin)
     .single();
 
+  const orgs = [...new Set(repos.map(({ org }) => org))];
+  const { count: verifiedCount } = await supabase
+    .from("repositories")
+    .select("*", { count: "exact", head: true })
+    .in("org", orgs)
+    .eq("is_verified", true);
+  const isVerified = (verifiedCount ?? 0) > 0;
+
   const { data: newRepos } = await supabase
     .from("repositories")
     .upsert(
@@ -26,6 +34,7 @@ export async function createNewRepo({
         org,
         repo,
         champion_github_username: user ? null : senderLogin,
+        is_verified: isVerified,
       })),
       { onConflict: "org,repo" },
     )
