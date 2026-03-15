@@ -4,7 +4,6 @@ import { escapeForIlike } from "@/lib/repo-utils";
 import { createClient } from "@/utils/supabase/client";
 import type { Tables } from "@/types/supabase";
 
-
 export class NotAuthenticatedError extends Error {
   constructor() {
     super("Not authenticated");
@@ -36,11 +35,13 @@ export async function createSubscription(org: string, repo: string) {
     .throwOnError();
 
   // Fire and forget — avoid server action to prevent Next.js router.refresh()
-  fetch("/api/subscriber-milestone", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ repo_id: repoData.id }),
-  }).catch(() => {});
+  try {
+    await fetch("/api/subscriber-milestone", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ repo_id: repoData.id }),
+    });
+  } catch {}
 
   // Copy last month's public_timeline events to user_timeline
   const oneMonthAgo = subMonths(new Date(), 1);

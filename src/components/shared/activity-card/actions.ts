@@ -43,11 +43,13 @@ export async function createLike(dedupe_hash: string) {
 
   // Fire and forget — don't await so it doesn't block the mutation or
   // trigger a Next.js router refresh (which server actions would cause)
-  fetch("/api/engagement-milestone", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ dedupe_hash }),
-  }).catch(() => {});
+  try {
+    await fetch("/api/engagement-milestone", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ dedupe_hash }),
+    });
+  } catch {}
 }
 
 export async function deleteLike(dedupe_hash: string) {
