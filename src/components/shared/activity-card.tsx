@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
@@ -51,40 +51,60 @@ function ActivityCard({
   const router = useRouter();
   const [likeCount, setLikeCount] = useState<number>(item.likeCount);
   const [liked, setLiked] = useState<boolean>(item.isLiked);
+  const isMutating = useRef(false);
 
-  // Update local state when props change (useful for refetching)
+  // Update local state when props change (e.g. refetch), but not during
+  // in-flight mutations to avoid overwriting optimistic updates with stale data.
   useEffect(() => {
-    setLikeCount(item.likeCount);
-    setLiked(item.isLiked);
+    if (!isMutating.current) {
+      setLikeCount(item.likeCount);
+      setLiked(item.isLiked);
+    }
   }, [item.likeCount, item.isLiked]);
 
   const { mutate: mutateLike } = useMutation({
     mutationFn: ({ hash }: { hash: string }) => createLike(hash),
-    onSuccess: async () => {
+    onMutate: () => {
+      isMutating.current = true;
       setLiked(true);
       setLikeCount((prev) => prev + 1);
+    },
+    onSuccess: () => {
       toast.success("🔥 Liked!", { icon: null });
     },
     onError: (error) => {
+      setLiked(false);
+      setLikeCount((prev) => prev - 1);
       if (error instanceof NotAuthenticatedError)
         router.push(
           `/auth/login?next=${encodeURIComponent(window.location.pathname)}`,
         );
+    },
+    onSettled: () => {
+      isMutating.current = false;
     },
   });
 
   const { mutate: mutateUnlike } = useMutation({
     mutationFn: ({ hash }: { hash: string }) => deleteLike(hash),
-    onSuccess: async () => {
+    onMutate: () => {
+      isMutating.current = true;
       setLiked(false);
       setLikeCount((prev) => prev - 1);
+    },
+    onSuccess: () => {
       toast("💔 Un-liked!");
     },
     onError: (error) => {
+      setLiked(true);
+      setLikeCount((prev) => prev + 1);
       if (error instanceof NotAuthenticatedError)
         router.push(
           `/auth/login?next=${encodeURIComponent(window.location.pathname)}`,
         );
+    },
+    onSettled: () => {
+      isMutating.current = false;
     },
   });
 
