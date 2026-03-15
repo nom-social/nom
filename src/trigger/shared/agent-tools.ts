@@ -33,72 +33,64 @@ async function downloadAndCacheImage(
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-  let res: Response;
   try {
-    res = await fetch(url, {
-      method: "GET",
-      signal: controller.signal,
-      redirect: "follow",
-    });
-  } catch {
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method: "GET",
+        signal: controller.signal,
+        redirect: "follow",
+      });
+    } catch {
+      return null;
+    }
+
+    if (!res.ok) return null;
+
+    const contentType = res.headers.get("content-type") ?? "";
+    const mimeType = contentType.split(";")[0].trim();
+
+    const ext = CONTENT_TYPE_TO_EXT[mimeType];
+    if (!ext) return null;
+
+    const contentLength = res.headers.get("content-length");
+    if (contentLength && parseInt(contentLength) > MEME_MAX_BYTES) return null;
+
+    const fileName = `${crypto.randomUUID()}${ext}`;
+
+    let arrayBuffer: ArrayBuffer;
+    try {
+      arrayBuffer = await res.arrayBuffer();
+    } catch {
+      return null;
+    }
+
+    if (arrayBuffer.byteLength > MEME_MAX_BYTES) return null;
+
+    const supabase = createAdminClient();
+    const { error } = await supabase.storage
+      .from(MEME_BUCKET)
+      .upload(fileName, arrayBuffer, {
+        contentType: mimeType,
+        upsert: false,
+      });
+
+    if (error) {
+      logger.warn("Failed to upload meme image to Supabase storage", {
+        url,
+        error: error.message,
+      });
+      return null;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from(MEME_BUCKET)
+      .getPublicUrl(fileName);
+
+    return urlData.publicUrl;
+  } finally {
     clearTimeout(timeout);
-    return null;
   }
-
-  if (!res.ok) {
-    clearTimeout(timeout);
-    return null;
-  }
-
-  const contentType = res.headers.get("content-type") ?? "";
-  const mimeType = contentType.split(";")[0].trim();
-
-  const ext = CONTENT_TYPE_TO_EXT[mimeType];
-  if (!ext) {
-    clearTimeout(timeout);
-    return null;
-  }
-
-  const contentLength = res.headers.get("content-length");
-  if (contentLength && parseInt(contentLength) > MEME_MAX_BYTES) {
-    clearTimeout(timeout);
-    return null;
-  }
-
-  const fileName = `${crypto.randomUUID()}${ext}`;
-
-  let arrayBuffer: ArrayBuffer;
-  try {
-    arrayBuffer = await res.arrayBuffer();
-    clearTimeout(timeout);
-  } catch {
-    clearTimeout(timeout);
-    return null;
-  }
-
-  if (arrayBuffer.byteLength > MEME_MAX_BYTES) return null;
-
-  const supabase = createAdminClient();
-  const { error } = await supabase.storage
-    .from(MEME_BUCKET)
-    .upload(fileName, arrayBuffer, {
-      contentType: mimeType,
-      upsert: false,
-    });
-
-  if (error) {
-    logger.warn("Failed to upload meme image to Supabase storage", {
-      url,
-      error: error.message,
-    });
-    return null;
-  }
-
-  const { data: urlData } = supabase.storage
-    .from(MEME_BUCKET)
-    .getPublicUrl(fileName);
-
-  return urlData.publicUrl;
 }
 
 export interface CreateEventToolsParams {
