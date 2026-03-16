@@ -1,4 +1,4 @@
-import React, { memo, useState } from "react";
+import React, { memo, useRef, useState } from "react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { LinkIcon, Linkedin, ShareIcon } from "lucide-react";
@@ -71,6 +71,7 @@ function ActivityCardBase({
 }: Props) {
   const share = useShare();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const previousUrl = useRef<string | null>(null);
 
   const handleLikeClick = () => {
     if (liked) {
@@ -99,7 +100,11 @@ function ActivityCardBase({
           </Badge>
           <CardTitle className="leading-relaxed font-bold break-words [word-break:break-word]">
             <button
-              onClick={() => setDialogOpen(true)}
+              onClick={() => {
+                previousUrl.current = window.location.href;
+                window.history.pushState(null, "", titleUrl);
+                setDialogOpen(true);
+              }}
               className="text-left hover:underline focus:underline outline-none cursor-pointer"
             >
               <Markdown>{title}</Markdown>
@@ -212,7 +217,16 @@ function ActivityCardBase({
           </div>
         </CardFooter>
       </Card>
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          if (!open && previousUrl.current !== null) {
+            window.history.pushState(null, "", previousUrl.current);
+            previousUrl.current = null;
+          }
+          setDialogOpen(open);
+        }}
+      >
         <DialogContent className="p-0 sm:max-w-2xl overflow-y-auto max-h-[90vh] rounded-lg">
           <VisuallyHidden.Root>
             <DialogTitle>{title}</DialogTitle>
