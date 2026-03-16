@@ -5,7 +5,6 @@ import { ExternalLink, LinkIcon, Linkedin, ShareIcon } from "lucide-react";
 
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -87,6 +86,12 @@ function StatusActivityCardBase({
   return (
     <Card className="w-full">
       <CardHeader>
+        <Badge className={cn(badgeClassName, "self-start")}>
+          <span className="shrink-0 inline-flex size-3 [&>svg]:size-full">
+            {badgeIcon}
+          </span>
+          <span className="truncate min-w-0">{badgeLabel}</span>
+        </Badge>
         <CardTitle className="leading-relaxed font-bold break-words [word-break:break-word]">
           {hideExternalLinks ? (
             <span className="inline [&_p]:inline">
@@ -108,14 +113,7 @@ function StatusActivityCardBase({
             </a>
           )}
         </CardTitle>
-        <CardAction>
-          <Badge className={cn(badgeClassName, "max-w-[120px]")}>
-            <span className="shrink-0 inline-flex size-3 [&>svg]:size-full">
-              {badgeIcon}
-            </span>
-            <span className="truncate min-w-0">{badgeLabel}</span>
-          </Badge>
-        </CardAction>
+
         <CardDescription>
           <div className="flex gap-2 flex-col">
             <div className="text-muted-foreground text-xs flex flex-wrap items-center gap-x-1">
