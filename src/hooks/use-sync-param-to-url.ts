@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 /**
@@ -11,8 +11,15 @@ export function useSyncParamToUrl(key: string, value: string): void {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  // Only sync params on the route where this hook was mounted.
+  // Prevents the hook from firing when a modal pushes a different route's
+  // URL via window.history.pushState(), which would trigger Next.js to
+  // navigate to that route.
+  const mountedPathnameRef = useRef(pathname);
 
   useEffect(() => {
+    if (pathname !== mountedPathnameRef.current) return;
+
     const params = new URLSearchParams(searchParams.toString());
 
     if (value) {
