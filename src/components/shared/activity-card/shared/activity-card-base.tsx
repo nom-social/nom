@@ -251,7 +251,7 @@ function ActivityCardBase({
           setDialogOpen(open);
         }}
       >
-        <DialogContent className="border-0 p-0 overflow-y-auto rounded-none top-0 left-0 translate-x-0 translate-y-0 w-full max-w-full h-full max-h-screen sm:rounded-lg sm:top-[50%] sm:left-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:max-w-2xl sm:w-auto sm:h-auto sm:max-h-[90vh]">
+        <DialogContent className="border-0 p-0 overflow-y-auto rounded-none top-0 left-0 translate-x-0 translate-y-0 w-full max-w-full h-full max-h-screen sm:rounded-lg sm:top-[50%] sm:left-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:max-w-3xl sm:w-full sm:h-auto sm:max-h-[90vh]">
           <VisuallyHidden.Root>
             <DialogTitle>{title}</DialogTitle>
           </VisuallyHidden.Root>
