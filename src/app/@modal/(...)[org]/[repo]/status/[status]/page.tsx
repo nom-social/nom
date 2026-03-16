@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { fetchFeedItem } from "@/app/[org]/[repo]/status/[status]/page/actions";
 import { getStatusItemTitle } from "@/app/[org]/[repo]/status/[status]/page/get-title";
 
-import { StatusModal } from "./status-modal";
+import { StatusModal } from "./page/status-modal";
 
 export default async function StatusModalPage({
   params,
