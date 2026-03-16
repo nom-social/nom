@@ -13,8 +13,30 @@ import {
 } from "@/components/shared/activity-card/shared/schemas";
 
 import { fetchFeedItem } from "./page/actions";
-import { getStatusItemTitle } from "./page/get-title";
 import StatusActivityCard from "./page/status-activity-card";
+
+function getStatusItemTitle(item: {
+  type: string;
+  data: unknown;
+}): string | null {
+  if (item.type === "pull_request") {
+    const parsed = prDataSchema.safeParse(item.data);
+    if (parsed.success) return parsed.data.pull_request.title;
+    return null;
+  }
+  if (item.type === "release") {
+    const parsed = releaseDataSchema.safeParse(item.data);
+    if (parsed.success)
+      return parsed.data.release.name ?? parsed.data.release.tag_name;
+    return null;
+  }
+  if (item.type === "push") {
+    const parsed = pushDataSchema.safeParse(item.data);
+    if (parsed.success) return parsed.data.push.title;
+    return null;
+  }
+  return null;
+}
 
 export default async function StatusPage({
   params,
