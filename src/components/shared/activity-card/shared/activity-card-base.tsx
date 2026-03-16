@@ -100,6 +100,7 @@ function ActivityCardBase({
           </Badge>
           <CardTitle className="leading-relaxed font-bold break-words [word-break:break-word]">
             <button
+              type="button"
               onClick={() => {
                 previousUrl.current = window.location.href;
                 window.history.pushState(null, "", titleUrl);
@@ -233,7 +234,7 @@ function ActivityCardBase({
           </VisuallyHidden.Root>
           <StatusActivityCardBase
             title={title}
-            titleUrl={githubUrl || ""}
+            titleUrl={githubUrl}
             badgeIcon={badgeIcon}
             badgeLabel={badgeLabel}
             badgeClassName={badgeClassName}
