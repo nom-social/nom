@@ -5,7 +5,6 @@ import { LinkIcon, Linkedin, ShareIcon } from "lucide-react";
 
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
