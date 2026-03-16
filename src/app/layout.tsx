@@ -13,6 +13,7 @@ import {
 import { Toaster } from "@/components/ui/sonner";
 
 import { BASE_URL, GITHUB_URL } from "@/lib/constants";
+import { DisableScrollRestoration } from "@/components/disable-scroll-restoration";
 
 import "./globals.css";
 import ProfileDropdown from "./layout/profile-dropdown";
@@ -73,6 +74,7 @@ export default function RootLayout({
           />
         )}
         <ThemeProvider attribute="class" defaultTheme="dark">
+          <DisableScrollRestoration />
           <ReactQueryProvider>
             <Toaster />
             <NavigationMenu className="w-full min-w-full bg-background fixed top-0 left-0 z-60 border-b border-border shadow-sm p-2">

@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useBackUrl } from "@/hooks/use-back-url";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { useScrollRestore } from "@/hooks/use-scroll-restore";
 import { useSyncParamToUrl } from "@/hooks/use-sync-param-to-url";
 
 import FeedPublic from "./feed/feed-public";
@@ -20,7 +19,6 @@ import FeedPublic from "./feed/feed-public";
 const SEARCH_DEBOUNCE_MS = 300;
 
 export default function Feed({ user }: { user: User | null }) {
-  useScrollRestore();
   const searchParams = useSearchParams();
   const qFromUrl = searchParams.get("q") ?? "";
 

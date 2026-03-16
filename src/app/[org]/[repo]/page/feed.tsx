@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useBackUrl } from "@/hooks/use-back-url";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { useScrollRestore } from "@/hooks/use-scroll-restore";
 import { useSyncParamToUrl } from "@/hooks/use-sync-param-to-url";
 
 import { fetchFeedPage, FetchFeedPageResult } from "./feed/actions";
@@ -161,7 +160,6 @@ export default function Feed({
   repo: string;
   org: string;
 }) {
-  useScrollRestore();
   const searchParams = useSearchParams();
   const qFromUrl = searchParams.get("q") ?? "";
 
