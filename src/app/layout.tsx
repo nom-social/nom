@@ -77,7 +77,7 @@ export default function RootLayout({
           <DisableScrollRestoration />
           <ReactQueryProvider>
             <Toaster />
-            <NavigationMenu className="w-full min-w-full bg-background fixed top-0 left-0 z-60 border-b border-border shadow-sm p-2">
+            <NavigationMenu className="w-full min-w-full bg-background fixed top-0 left-0 z-40 border-b border-border shadow-sm p-2">
               <div className="max-w-3xl mx-auto w-full">
                 <NavigationMenuList className="justify-between items-center">
                   <div className="flex flex-row gap-2 items-center">

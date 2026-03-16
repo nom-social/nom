@@ -64,12 +64,7 @@ export default async function StatusPage({
           )}
         </Button>
       </Link>
-      <StatusActivityCard
-        item={statusItem}
-        repo={repo}
-        org={org}
-        isPrivate={statusItem.isPrivate}
-      />
+      <StatusActivityCard item={statusItem} repo={repo} org={org} />
     </main>
   );
 }

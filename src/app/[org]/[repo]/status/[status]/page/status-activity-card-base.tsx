@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
 
 export type StatusActivityCardBaseProps = {
   title: string;
-  titleUrl: string;
+  titleUrl?: string;
   hideExternalLinks?: boolean;
   badgeIcon: React.ReactNode;
   badgeLabel: string;
@@ -93,7 +93,7 @@ function StatusActivityCardBase({
           <span>{badgeLabel}</span>
         </Badge>
         <CardTitle className="leading-relaxed font-bold break-words [word-break:break-word]">
-          {hideExternalLinks ? (
+          {hideExternalLinks || !titleUrl ? (
             <span className="inline [&_p]:inline">
               <Markdown>{title}</Markdown>
             </span>
