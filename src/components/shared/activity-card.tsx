@@ -114,7 +114,6 @@ function ActivityCard({
       <ActivityCardBase
         title={parseResult.data.pull_request.title}
         titleUrl={titleUrl}
-        pathToRestore={back ?? undefined}
         badgeIcon={<GitMergeIcon />}
         badgeLabel={parseResult.data.pull_request.merged ? "merged" : "open"}
         badgeClassName="bg-nom-purple border-transparent uppercase text-black"
@@ -149,7 +148,6 @@ function ActivityCard({
       <ActivityCardBase
         title={release.name ?? release.tag_name}
         titleUrl={titleUrl}
-        pathToRestore={back ?? undefined}
         badgeIcon={<TagIcon />}
         badgeLabel={release.tag_name}
         badgeClassName="bg-nom-blue border-transparent uppercase text-black"
@@ -181,7 +179,6 @@ function ActivityCard({
       <ActivityCardBase
         title={push.title}
         titleUrl={titleUrl}
-        pathToRestore={back ?? undefined}
         badgeIcon={<GitCommitVertical />}
         badgeLabel="pushed"
         badgeClassName="bg-nom-green border-transparent uppercase text-black"
