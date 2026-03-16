@@ -1,42 +1,56 @@
 import { describe, expect, it } from "vitest";
 
-import { encodeMemeText, buildMemeUrl } from "./agent-tools";
+import { buildMemeUrl } from "./agent-tools";
 
-describe("encodeMemeText", () => {
+describe("buildMemeUrl", () => {
   it("encodes spaces as underscores", () => {
-    expect(encodeMemeText("hello world")).toBe("hello_world");
+    expect(buildMemeUrl("t", ["hello world"])).toBe(
+      "https://api.memegen.link/images/t/hello_world.png",
+    );
   });
 
   it("encodes literal underscores as double underscores", () => {
-    expect(encodeMemeText("snake_case")).toBe("snake__case");
+    expect(buildMemeUrl("t", ["snake_case"])).toBe(
+      "https://api.memegen.link/images/t/snake__case.png",
+    );
   });
 
   it("encodes slashes as ~s", () => {
-    expect(encodeMemeText("and/or")).toBe("and~sor");
+    expect(buildMemeUrl("t", ["and/or"])).toBe(
+      "https://api.memegen.link/images/t/and~sor.png",
+    );
   });
 
   it("encodes question marks as ~q", () => {
-    expect(encodeMemeText("why?")).toBe("why~q");
+    expect(buildMemeUrl("t", ["why?"])).toBe(
+      "https://api.memegen.link/images/t/why~q.png",
+    );
   });
 
   it("encodes percent signs as ~p", () => {
-    expect(encodeMemeText("100%")).toBe("100~p");
+    expect(buildMemeUrl("t", ["100%"])).toBe(
+      "https://api.memegen.link/images/t/100~p.png",
+    );
   });
 
   it("encodes hash signs as ~h", () => {
-    expect(encodeMemeText("#1")).toBe("~h1");
+    expect(buildMemeUrl("t", ["#1"])).toBe(
+      "https://api.memegen.link/images/t/~h1.png",
+    );
   });
 
   it("handles mixed special characters", () => {
-    expect(encodeMemeText("it works? 100% sure")).toBe("it_works~q_100~p_sure");
+    expect(buildMemeUrl("t", ["it works? 100% sure"])).toBe(
+      "https://api.memegen.link/images/t/it_works~q_100~p_sure.png",
+    );
   });
 
-  it("handles empty string", () => {
-    expect(encodeMemeText("")).toBe("");
+  it("handles empty line text", () => {
+    expect(buildMemeUrl("t", [""])).toBe(
+      "https://api.memegen.link/images/t/.png",
+    );
   });
-});
 
-describe("buildMemeUrl", () => {
   it("builds a URL with a single line", () => {
     expect(buildMemeUrl("doge", ["much wow"])).toBe(
       "https://api.memegen.link/images/doge/much_wow.png",

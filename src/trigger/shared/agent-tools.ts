@@ -14,34 +14,29 @@ const MEMEGEN_API_BASE = "https://api.memegen.link";
 const MEMEGEN_TEMPLATES_LIMIT = 10;
 
 /**
- * Encode a text line for use in a memegen.link URL segment.
- * Spaces → `_`, `_` → `__`, `/` → `~s`, `?` → `~q`, `%` → `~p`, `#` → `~h`.
- */
-export function encodeMemeText(text: string): string {
-  return text.replace(/[_ /?%#]/g, (ch) => {
-    switch (ch) {
-      case "_":
-        return "__";
-      case " ":
-        return "_";
-      case "/":
-        return "~s";
-      case "?":
-        return "~q";
-      case "%":
-        return "~p";
-      case "#":
-        return "~h";
-      default:
-        return ch;
-    }
-  });
-}
-
-/**
  * Build a memegen.link image URL for the given template and text lines.
  */
 export function buildMemeUrl(templateId: string, lines: string[]): string {
+  function encodeMemeText(text: string): string {
+    return text.replace(/[_ /?%#]/g, (ch) => {
+      switch (ch) {
+        case "_":
+          return "__";
+        case " ":
+          return "_";
+        case "/":
+          return "~s";
+        case "?":
+          return "~q";
+        case "%":
+          return "~p";
+        case "#":
+          return "~h";
+        default:
+          return ch;
+      }
+    });
+  }
   const encodedLines = lines.map(encodeMemeText);
   const path = encodedLines.length > 0 ? encodedLines.join("/") : "_";
   return `${MEMEGEN_API_BASE}/images/${encodeURIComponent(templateId)}/${path}.png`;
