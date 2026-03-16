@@ -1,4 +1,4 @@
-import React, { memo, useRef, useState } from "react";
+import React, { memo, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { LinkIcon, Linkedin, ShareIcon } from "lucide-react";
@@ -71,7 +71,25 @@ function ActivityCardBase({
 }: Props) {
   const share = useShare();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const previousUrl = useRef<string | null>(null);
+  // Tracks whether *this* card pushed a history entry, so we can distinguish
+  // our own popstate events from unrelated navigation.
+  const dialogOpenRef = useRef(false);
+
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      if (e.state?.nomDialogHash === hash) {
+        // Forward navigation back to this dialog's URL — reopen it.
+        dialogOpenRef.current = true;
+        setDialogOpen(true);
+      } else if (dialogOpenRef.current) {
+        // Back navigation away from this dialog's URL — close it.
+        dialogOpenRef.current = false;
+        setDialogOpen(false);
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [hash]);
 
   const handleLikeClick = () => {
     if (liked) {
@@ -105,8 +123,8 @@ function ActivityCardBase({
               onClick={(e) => {
                 if (e.metaKey || e.ctrlKey || e.shiftKey) return;
                 e.preventDefault();
-                previousUrl.current = window.location.href;
-                window.history.replaceState(null, "", titleUrl);
+                window.history.pushState({ nomDialogHash: hash }, "", titleUrl);
+                dialogOpenRef.current = true;
                 setDialogOpen(true);
               }}
               className="text-left hover:underline focus:underline outline-none cursor-pointer"
@@ -224,9 +242,11 @@ function ActivityCardBase({
       <Dialog
         open={dialogOpen}
         onOpenChange={(open) => {
-          if (!open && previousUrl.current !== null) {
-            window.history.replaceState(null, "", previousUrl.current);
-            previousUrl.current = null;
+          if (!open && dialogOpenRef.current) {
+            // User closed the dialog manually (Esc / backdrop / close button).
+            // Pop the history entry we pushed so the URL reverts automatically.
+            dialogOpenRef.current = false;
+            window.history.back();
           }
           setDialogOpen(open);
         }}
