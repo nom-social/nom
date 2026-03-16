@@ -134,6 +134,7 @@ function ActivityCard({
         onLike={handleLike}
         onUnlike={handleUnlike}
         hash={item.dedupe_hash}
+        githubUrl={parseResult.data.pull_request.html_url}
       />
     );
   }
@@ -166,6 +167,7 @@ function ActivityCard({
         onLike={handleLike}
         onUnlike={handleUnlike}
         hash={item.dedupe_hash}
+        githubUrl={release.html_url}
       />
     );
   }
@@ -197,6 +199,7 @@ function ActivityCard({
         onLike={handleLike}
         onUnlike={handleUnlike}
         hash={item.dedupe_hash}
+        githubUrl={push.html_url}
       />
     );
   }
