@@ -51,8 +51,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  modal,
 }: Readonly<{
   children: React.ReactNode;
+  modal: React.ReactNode;
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -112,6 +114,7 @@ export default function RootLayout({
               </div>
             </NavigationMenu>
             <div className="max-w-3xl mx-auto py-18">{children}</div>
+            {modal}
           </ReactQueryProvider>
         </ThemeProvider>
       </body>

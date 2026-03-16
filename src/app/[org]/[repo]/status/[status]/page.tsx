@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import React from "react";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 
@@ -15,6 +14,29 @@ import {
 
 import { fetchFeedItem } from "./page/actions";
 import StatusActivityCard from "./page/status-activity-card";
+
+function getStatusItemTitle(item: {
+  type: string;
+  data: unknown;
+}): string | null {
+  if (item.type === "pull_request") {
+    const parsed = prDataSchema.safeParse(item.data);
+    if (parsed.success) return parsed.data.pull_request.title;
+    return null;
+  }
+  if (item.type === "release") {
+    const parsed = releaseDataSchema.safeParse(item.data);
+    if (parsed.success)
+      return parsed.data.release.name ?? parsed.data.release.tag_name;
+    return null;
+  }
+  if (item.type === "push") {
+    const parsed = pushDataSchema.safeParse(item.data);
+    if (parsed.success) return parsed.data.push.title;
+    return null;
+  }
+  return null;
+}
 
 export default async function StatusPage({
   params,
@@ -83,7 +105,10 @@ export async function generateMetadata({
 
   if (!statusItem) return {};
 
-  let title = `${org}/${repo} - Nom`;
+  const itemTitle = getStatusItemTitle(statusItem);
+  const title = itemTitle
+    ? `${itemTitle} - ${org}/${repo}`
+    : `${org}/${repo} - Nom`;
   const truncate = (str: string) =>
     str.length > 200 ? str.slice(0, 200) + "..." : str;
   let description = truncate(`View status update for ${org}/${repo} on Nom.`);
@@ -91,23 +116,23 @@ export async function generateMetadata({
   if (statusItem.type === "pull_request") {
     const parseResult = prDataSchema.safeParse(statusItem.data);
     if (!parseResult.success) return {};
-    const pr = parseResult.data.pull_request;
-    title = pr.title ? `${pr.title} - ${org}/${repo}` : title;
-    description = truncate(pr.ai_summary || pr.body || description);
-  }
-  if (statusItem.type === "release") {
+    description = truncate(
+      parseResult.data.pull_request.ai_summary ||
+        parseResult.data.pull_request.body ||
+        description,
+    );
+  } else if (statusItem.type === "release") {
     const parseResult = releaseDataSchema.safeParse(statusItem.data);
     if (!parseResult.success) return {};
-    const release = parseResult.data.release;
-    title = release.name ? `${release.name} - ${org}/${repo}` : title;
-    description = truncate(release.ai_summary || release.body || description);
-  }
-  if (statusItem.type === "push") {
+    description = truncate(
+      parseResult.data.release.ai_summary ||
+        parseResult.data.release.body ||
+        description,
+    );
+  } else if (statusItem.type === "push") {
     const parseResult = pushDataSchema.safeParse(statusItem.data);
     if (!parseResult.success) return {};
-    const push = parseResult.data.push;
-    title = push.title ? `${push.title} - ${org}/${repo}` : title;
-    description = truncate(push.ai_summary || description);
+    description = truncate(parseResult.data.push.ai_summary || description);
   }
 
   return {
