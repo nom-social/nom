@@ -10,6 +10,43 @@ const MAX_FILE_CONTENT_BYTES = 50_000;
 const IMAGE_VERIFY_TIMEOUT_MS = 5_000;
 const MAX_VERIFIED_IMAGES = 1;
 
+const MEMEGEN_API_BASE = "https://api.memegen.link";
+const MEMEGEN_TEMPLATES_LIMIT = 10;
+
+/**
+ * Encode a text line for use in a memegen.link URL segment.
+ * Spaces → `_`, `_` → `__`, `/` → `~s`, `?` → `~q`, `%` → `~p`, `#` → `~h`.
+ */
+export function encodeMemeText(text: string): string {
+  return text.replace(/[_ /?%#]/g, (ch) => {
+    switch (ch) {
+      case "_":
+        return "__";
+      case " ":
+        return "_";
+      case "/":
+        return "~s";
+      case "?":
+        return "~q";
+      case "%":
+        return "~p";
+      case "#":
+        return "~h";
+      default:
+        return ch;
+    }
+  });
+}
+
+/**
+ * Build a memegen.link image URL for the given template and text lines.
+ */
+export function buildMemeUrl(templateId: string, lines: string[]): string {
+  const encodedLines = lines.map(encodeMemeText);
+  const path = encodedLines.length > 0 ? encodedLines.join("/") : "_";
+  return `${MEMEGEN_API_BASE}/images/${encodeURIComponent(templateId)}/${path}.png`;
+}
+
 async function isImageDownloadable(
   url: string,
   timeoutMs = IMAGE_VERIFY_TIMEOUT_MS,
@@ -263,6 +300,99 @@ export function createEventTools({
             err instanceof Error ? err.message : "Failed to search for memes";
           logger.warn("find_meme failed", { org, repo, error: message });
           return { images: [], error: message };
+        }
+      },
+    }),
+
+    search_meme_templates: tool({
+      description:
+        "Search for blank meme templates from the memegen.link library. " +
+        "Returns template IDs, names, and example image URLs. " +
+        "Use this before create_meme to find the right template for the situation.",
+      inputSchema: z.object({
+        query: z
+          .string()
+          .describe(
+            "Search query to filter templates by name " +
+              "(e.g. 'distracted boyfriend', 'drake', 'this is fine')",
+          ),
+      }),
+      execute: async ({ query }: { query: string }) => {
+        try {
+          logger.info("Searching meme templates", { org, repo, query });
+          const res = await fetch(`${MEMEGEN_API_BASE}/templates`);
+          if (!res.ok) {
+            return {
+              templates: [],
+              error: `Failed to fetch templates: ${res.status}`,
+            };
+          }
+          const allTemplates: {
+            id: string;
+            name: string;
+            example: { url?: string };
+          }[] = await res.json();
+          const lower = query.toLowerCase();
+          const matched = allTemplates
+            .filter((t) => t.name.toLowerCase().includes(lower))
+            .slice(0, MEMEGEN_TEMPLATES_LIMIT)
+            .map((t) => ({
+              id: t.id,
+              name: t.name,
+              example_url: t.example?.url ?? null,
+            }));
+          return { templates: matched };
+        } catch (err) {
+          const message =
+            err instanceof Error
+              ? err.message
+              : "Failed to search meme templates";
+          logger.warn("search_meme_templates failed", {
+            org,
+            repo,
+            error: message,
+          });
+          return { templates: [], error: message };
+        }
+      },
+    }),
+
+    create_meme: tool({
+      description:
+        "Generate a meme by overlaying custom text lines on a blank meme template. " +
+        "Use search_meme_templates first to find a suitable template ID. " +
+        "Returns the URL of the generated meme image, which you can embed in your summary " +
+        "as markdown: ![caption](url). " +
+        "Tailor the text to the repository and commit context for maximum relevance and humor.",
+      inputSchema: z.object({
+        template_id: z
+          .string()
+          .describe(
+            "Template ID from search_meme_templates (e.g. 'doge', 'drake', 'buzz')",
+          ),
+        lines: z
+          .array(z.string())
+          .describe(
+            "Text lines to overlay on the template, in order (top to bottom). " +
+              "Use concise, developer-appropriate text.",
+          ),
+      }),
+      execute: async ({
+        template_id,
+        lines,
+      }: {
+        template_id: string;
+        lines: string[];
+      }) => {
+        try {
+          logger.info("Creating meme", { org, repo, template_id, lines });
+          const url = buildMemeUrl(template_id, lines);
+          return { url };
+        } catch (err) {
+          const message =
+            err instanceof Error ? err.message : "Failed to create meme";
+          logger.warn("create_meme failed", { org, repo, error: message });
+          return { error: message };
         }
       },
     }),
