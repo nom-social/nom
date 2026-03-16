@@ -234,7 +234,6 @@ function ActivityCardBase({
           <StatusActivityCardBase
             title={title}
             titleUrl={githubUrl || ""}
-            hideExternalLinks={!githubUrl}
             badgeIcon={badgeIcon}
             badgeLabel={badgeLabel}
             badgeClassName={badgeClassName}
