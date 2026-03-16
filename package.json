@@ -12,7 +12,8 @@
     "test": "vitest run",
     "tsc": "tsc --noEmit",
     "trigger:dev": "npx trigger.dev@latest dev",
-    "backfill:repo": "npx tsx src/scripts/backfill/backfill-repo-events.ts"
+    "backfill:repo": "npx tsx src/scripts/backfill/backfill-repo-events.ts",
+    "test:meme": "npx tsx scripts/test-meme-tools.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.30",
