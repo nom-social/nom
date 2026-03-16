@@ -99,17 +99,20 @@ function ActivityCardBase({
             <span>{badgeLabel}</span>
           </Badge>
           <CardTitle className="leading-relaxed font-bold break-words [word-break:break-word]">
-            <button
-              type="button"
-              onClick={() => {
+            <a
+              href={titleUrl}
+              aria-haspopup="dialog"
+              onClick={(e) => {
+                if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+                e.preventDefault();
                 previousUrl.current = window.location.href;
-                window.history.pushState(null, "", titleUrl);
+                window.history.replaceState(null, "", titleUrl);
                 setDialogOpen(true);
               }}
               className="text-left hover:underline focus:underline outline-none cursor-pointer"
             >
               <Markdown>{title}</Markdown>
-            </button>
+            </a>
           </CardTitle>
           <CardDescription>
             <div className="flex gap-2 flex-col">
@@ -222,7 +225,7 @@ function ActivityCardBase({
         open={dialogOpen}
         onOpenChange={(open) => {
           if (!open && previousUrl.current !== null) {
-            window.history.pushState(null, "", previousUrl.current);
+            window.history.replaceState(null, "", previousUrl.current);
             previousUrl.current = null;
           }
           setDialogOpen(open);
