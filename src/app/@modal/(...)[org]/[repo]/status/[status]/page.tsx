@@ -6,14 +6,13 @@ import {
   pushDataSchema,
 } from "@/components/shared/activity-card/shared/schemas";
 import { fetchFeedItem } from "@/app/[org]/[repo]/status/[status]/page/actions";
+
 import { StatusModal } from "./status-modal";
 
 export default async function StatusModalPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ org: string; repo: string; status: string }>;
-  searchParams: Promise<{ back?: string }>;
 }) {
   const { org, repo, status: statusId } = await params;
   const statusItem = await fetchFeedItem({ org, repo, statusId });
@@ -33,7 +32,5 @@ export default async function StatusModalPage({
     if (parsed.success) title = parsed.data.push.title;
   }
 
-  return (
-    <StatusModal item={statusItem} org={org} repo={repo} title={title} />
-  );
+  return <StatusModal item={statusItem} org={org} repo={repo} title={title} />;
 }
