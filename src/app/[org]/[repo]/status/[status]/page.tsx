@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import React from "react";
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 
