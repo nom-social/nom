@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useRef, useState } from "react";
+import React, { memo } from "react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { LinkIcon, Linkedin, ShareIcon } from "lucide-react";
@@ -24,11 +24,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import X from "@/components/ui/icons/x";
 import { cn } from "@/lib/utils";
-import StatusActivityCardBase from "@/app/[org]/[repo]/status/[status]/page/status-activity-card-base";
 
 export type Props = {
   title: string;
@@ -70,27 +67,6 @@ function ActivityCardBase({
   githubUrl,
 }: Props) {
   const share = useShare();
-  const [dialogOpen, setDialogOpen] = useState(false);
-  // Tracks whether *this* card pushed a history entry, so we can distinguish
-  // our own popstate events from unrelated navigation.
-  const dialogOpenRef = useRef(false);
-
-  useEffect(() => {
-    const handlePopState = (e: PopStateEvent) => {
-      if (e.state?.nomDialogHash === hash) {
-        // Forward navigation back to this dialog's URL — reopen it.
-        dialogOpenRef.current = true;
-        setDialogOpen(true);
-      } else if (dialogOpenRef.current) {
-        // Back navigation away from this dialog's URL — close it.
-        dialogOpenRef.current = false;
-        setDialogOpen(false);
-      }
-    };
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [hash]);
-
   const handleLikeClick = () => {
     if (liked) {
       onUnlike?.();
@@ -117,20 +93,12 @@ function ActivityCardBase({
             <span>{badgeLabel}</span>
           </Badge>
           <CardTitle className="leading-relaxed font-bold break-words [word-break:break-word]">
-            <a
+            <Link
               href={titleUrl}
-              aria-haspopup="dialog"
-              onClick={(e) => {
-                if (e.metaKey || e.ctrlKey || e.shiftKey) return;
-                e.preventDefault();
-                window.history.pushState({ nomDialogHash: hash }, "", titleUrl);
-                dialogOpenRef.current = true;
-                setDialogOpen(true);
-              }}
               className="text-left hover:underline focus:underline outline-none cursor-pointer"
             >
               <Markdown>{title}</Markdown>
-            </a>
+            </Link>
           </CardTitle>
           <CardDescription>
             <div className="flex gap-2 flex-col">
@@ -239,42 +207,6 @@ function ActivityCardBase({
           </div>
         </CardFooter>
       </Card>
-      <Dialog
-        open={dialogOpen}
-        onOpenChange={(open) => {
-          if (!open && dialogOpenRef.current) {
-            // User closed the dialog manually (Esc / backdrop / close button).
-            // Pop the history entry we pushed so the URL reverts automatically.
-            dialogOpenRef.current = false;
-            window.history.back();
-          }
-          setDialogOpen(open);
-        }}
-      >
-        <DialogContent className="border-0 p-0 overflow-y-auto rounded-none top-0 left-0 translate-x-0 translate-y-0 w-full max-w-full h-full max-h-screen sm:rounded-lg sm:top-[50%] sm:left-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:max-w-3xl sm:w-full sm:h-auto sm:max-h-[90vh]">
-          <VisuallyHidden.Root>
-            <DialogTitle>{title}</DialogTitle>
-          </VisuallyHidden.Root>
-          <StatusActivityCardBase
-            title={title}
-            titleUrl={githubUrl}
-            badgeIcon={badgeIcon}
-            badgeLabel={badgeLabel}
-            badgeClassName={badgeClassName}
-            repo={repo}
-            org={org}
-            repoUrl={repoUrl}
-            timestamp={timestamp}
-            contributors={contributors}
-            body={body}
-            likeCount={likeCount}
-            liked={liked}
-            onLike={onLike}
-            onUnlike={onUnlike}
-            hash={hash}
-          />
-        </DialogContent>
-      </Dialog>
     </>
   );
 }
