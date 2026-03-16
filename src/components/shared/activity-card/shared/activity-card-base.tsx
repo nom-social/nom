@@ -93,7 +93,7 @@ function ActivityCardBase({
           <span className="shrink-0 inline-flex size-3 [&>svg]:size-full">
             {badgeIcon}
           </span>
-          <span className="truncate min-w-0">{badgeLabel}</span>
+          <span>{badgeLabel}</span>
         </Badge>
         <CardTitle className="leading-relaxed font-bold break-words [word-break:break-word]">
           {titleUrl.startsWith("http") ? (
