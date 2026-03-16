@@ -113,10 +113,8 @@ export default function RootLayout({
                 </NavigationMenuList>
               </div>
             </NavigationMenu>
-            <div className="max-w-3xl mx-auto py-18">
-              {children}
-              {modal}
-            </div>
+            <div className="max-w-3xl mx-auto py-18">{children}</div>
+            {modal}
           </ReactQueryProvider>
         </ThemeProvider>
       </body>
