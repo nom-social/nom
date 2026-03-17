@@ -14,13 +14,11 @@ const MAX_VERIFIED_IMAGES = 1;
 
 const MEMEGEN_API_BASE = "https://api.memegen.link";
 const MEMEGEN_TEMPLATES_LIMIT = 10;
-const MEME_STORAGE_BUCKET =
-  process.env.SUPABASE_MEME_STORAGE_BUCKET ?? "meme-images";
 
 function sanitizeStoragePathSegment(value: string): string {
   const sanitized = value
     .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/[^a-z0-9_-]+/g, "-")
     .replace(/^-+|-+$/g, "");
   return sanitized || "unknown";
 }
@@ -55,19 +53,23 @@ async function persistMemeImage({
 
   const imageBuffer = Buffer.from(await imageRes.arrayBuffer());
   const ext = extensionFromContentType(contentType);
+  const memeStorageBucket = process.env.SUPABASE_MEME_STORAGE_BUCKET;
+  if (!memeStorageBucket) {
+    throw new Error("Missing SUPABASE_MEME_STORAGE_BUCKET");
+  }
   const objectPath = [
     sanitizeStoragePathSegment(org),
     sanitizeStoragePathSegment(repo),
     sanitizeStoragePathSegment(templateId),
-    `${Date.now()}-${randomUUID()}.${ext}`,
+    `${randomUUID()}.${ext}`,
   ].join("/");
 
   const supabase = createAdminClient();
-  const bucket = supabase.storage.from(MEME_STORAGE_BUCKET);
+  const bucket = supabase.storage.from(memeStorageBucket);
   const { error: uploadError } = await bucket.upload(objectPath, imageBuffer, {
     contentType,
     upsert: false,
-    cacheControl: "31536000",
+    cacheControl: "31536000", // 1 year
   });
   if (uploadError) {
     throw new Error(`Failed to upload meme image: ${uploadError.message}`);
