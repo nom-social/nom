@@ -6,13 +6,16 @@ import { StatusModal } from "./page/status-modal";
 
 export default async function StatusModalPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ org: string; repo: string; status: string }>;
+  searchParams: Promise<{ back?: string }>;
 }) {
   const { org, repo, status: statusId } = await params;
+  const { back } = await searchParams;
   const statusItem = await fetchFeedItem({ org, repo, statusId });
 
   if (!statusItem) notFound();
 
-  return <StatusModal item={statusItem} org={org} repo={repo} />;
+  return <StatusModal item={statusItem} org={org} repo={repo} back={back} />;
 }
