@@ -1,9 +1,11 @@
 import type { Octokit } from "@octokit/rest";
+import { randomUUID } from "node:crypto";
 import { tool } from "ai";
 import { z } from "zod";
 import { logger } from "@trigger.dev/sdk";
 
 import { createClient as createTavilyClient } from "@/utils/tavily/client";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { filterAndFormatDiff } from "@/trigger/process-github-events/event-processors/shared/diff-utils";
 
 const MAX_FILE_CONTENT_BYTES = 50_000;
@@ -12,6 +14,71 @@ const MAX_VERIFIED_IMAGES = 1;
 
 const MEMEGEN_API_BASE = "https://api.memegen.link";
 const MEMEGEN_TEMPLATES_LIMIT = 10;
+const MEME_STORAGE_BUCKET =
+  process.env.SUPABASE_MEME_STORAGE_BUCKET ?? "meme-images";
+
+function sanitizeStoragePathSegment(value: string): string {
+  const sanitized = value
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return sanitized || "unknown";
+}
+
+function extensionFromContentType(contentType: string | null): string {
+  if (contentType?.includes("jpeg")) return "jpg";
+  if (contentType?.includes("gif")) return "gif";
+  if (contentType?.includes("webp")) return "webp";
+  return "png";
+}
+
+async function persistMemeImage({
+  sourceUrl,
+  org,
+  repo,
+  templateId,
+}: {
+  sourceUrl: string;
+  org: string;
+  repo: string;
+  templateId: string;
+}): Promise<string> {
+  const imageRes = await fetch(sourceUrl, { redirect: "follow" });
+  if (!imageRes.ok) {
+    throw new Error(`Failed to fetch meme image: ${imageRes.status}`);
+  }
+
+  const contentType = imageRes.headers.get("content-type");
+  if (!contentType?.startsWith("image/")) {
+    throw new Error("Fetched meme response is not an image");
+  }
+
+  const imageBuffer = Buffer.from(await imageRes.arrayBuffer());
+  const ext = extensionFromContentType(contentType);
+  const objectPath = [
+    sanitizeStoragePathSegment(org),
+    sanitizeStoragePathSegment(repo),
+    sanitizeStoragePathSegment(templateId),
+    `${Date.now()}-${randomUUID()}.${ext}`,
+  ].join("/");
+
+  const supabase = createAdminClient();
+  const bucket = supabase.storage.from(MEME_STORAGE_BUCKET);
+  const { error: uploadError } = await bucket.upload(objectPath, imageBuffer, {
+    contentType,
+    upsert: false,
+    cacheControl: "31536000",
+  });
+  if (uploadError) {
+    throw new Error(`Failed to upload meme image: ${uploadError.message}`);
+  }
+
+  const { data } = bucket.getPublicUrl(objectPath);
+  if (!data?.publicUrl) {
+    throw new Error("Failed to generate public URL for stored meme image");
+  }
+  return data.publicUrl;
+}
 
 /**
  * Build a memegen.link image URL for the given template and text lines.
@@ -356,7 +423,7 @@ export function createEventTools({
       description:
         "Generate a meme by overlaying custom text lines on a blank meme template. " +
         "Use search_meme_templates first to find a suitable template ID. " +
-        "Returns the URL of the generated meme image, which you can embed in your summary " +
+        "Returns a Supabase-hosted URL of the generated meme image, which you can embed in your summary " +
         "as markdown: ![caption](url). " +
         "Tailor the text to the repository and commit context for maximum relevance and humor.",
       inputSchema: z.object({
@@ -381,8 +448,14 @@ export function createEventTools({
       }) => {
         try {
           logger.info("Creating meme", { org, repo, template_id, lines });
-          const url = buildMemeUrl(template_id, lines);
-          return { url };
+          const source_url = buildMemeUrl(template_id, lines);
+          const url = await persistMemeImage({
+            sourceUrl: source_url,
+            org,
+            repo,
+            templateId: template_id,
+          });
+          return { url, source_url };
         } catch (err) {
           const message =
             err instanceof Error ? err.message : "Failed to create meme";
