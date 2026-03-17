@@ -24,38 +24,36 @@ type StatusModalProps = {
 };
 
 function BackButtonLabel({
-  back,
   backPath,
   org,
   repo,
 }: {
-  back?: string;
   backPath: string;
   org: string;
   repo: string;
 }) {
-  if (!back || backPath === "/") {
-    return <p className="text-foreground text-lg">Feed</p>;
+  if (backPath === "/") {
+    return <span className="text-foreground text-lg">Feed</span>;
   }
   if (backPath.startsWith("/following")) {
-    return <p className="text-foreground text-lg">Following</p>;
+    return <span className="text-foreground text-lg">Following</span>;
   }
   if (backPath.startsWith(`/${org}/${repo}`)) {
     return (
       <>
-        <div className="w-9 h-9">
+        <span className="inline-block w-9 h-9">
           <OptimizedAvatar
             src={`https://github.com/${org}.png`}
             alt={`${org} avatar`}
             fallback={org[0]}
             sizes="36px"
           />
-        </div>
-        <p className="text-foreground text-lg break-all">{repo}</p>
+        </span>
+        <span className="text-foreground text-lg break-all">{repo}</span>
       </>
     );
   }
-  return <p className="text-foreground text-lg">Back</p>;
+  return <span className="text-foreground text-lg">Back</span>;
 }
 
 export function StatusModal({ item, org, repo, back }: StatusModalProps) {
@@ -83,12 +81,7 @@ export function StatusModal({ item, org, repo, back }: StatusModalProps) {
               className="flex flex-row gap-3 items-center w-full justify-start py-2 h-fit"
             >
               <ArrowLeftIcon />
-              <BackButtonLabel
-                back={back}
-                backPath={backPath}
-                org={org}
-                repo={repo}
-              />
+              <BackButtonLabel backPath={backPath} org={org} repo={repo} />
             </Button>
           </DialogClose>
           <StatusActivityCard item={item} repo={repo} org={org} />
