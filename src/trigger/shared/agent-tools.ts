@@ -69,11 +69,11 @@ async function persistMemeImage({
   const memeStorageKey =
     process.env.SUPABASE_MEME_STORAGE_KEY ??
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !memeStorageKey) {
+  if (!supabaseUrl) throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL");
+  if (!memeStorageKey)
     throw new Error(
-      "Missing NEXT_PUBLIC_SUPABASE_URL and/or SUPABASE_MEME_STORAGE_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY)",
+      "Missing SUPABASE_MEME_STORAGE_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY)",
     );
-  }
 
   const supabase = createClient<Database>(supabaseUrl, memeStorageKey, {
     auth: {
