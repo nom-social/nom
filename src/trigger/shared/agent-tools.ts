@@ -267,7 +267,9 @@ export function createEventTools({
         "(e.g. merge conflict, breaking change, big refactor). " +
         "Only use professional, developer-appropriate, SFW memes. " +
         "Returns verified image URLs. Include returned URLs in your summary as " +
-        "markdown images using the exact url string from the response, do not modify or truncate it: ![caption](url).",
+        "markdown images using the exact url string from the response, do not modify or truncate it: ![caption](url). " +
+        "IMPORTANT: The URL must be used exactly as returned, including the full file extension (e.g. .jpg, .png, .gif). " +
+        "Never drop or omit the file extension from the URL.",
       inputSchema: z.object({
         query: z
           .string()
