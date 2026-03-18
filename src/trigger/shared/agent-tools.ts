@@ -390,7 +390,7 @@ export function createEventTools({
       description:
         "Search for blank meme templates from the memegen.link library. " +
         "Returns template IDs, names, and example image URLs. " +
-        "Use this before create_meme to find the right template for the situation.",
+        "Use this before write_on_meme_template to find the right template for the situation.",
       inputSchema: z.object({
         query: z
           .string()
@@ -439,7 +439,7 @@ export function createEventTools({
       },
     }),
 
-    create_meme: tool({
+    write_on_meme_template: tool({
       description:
         "Generate a meme by overlaying custom text lines on a blank meme template. " +
         "Use search_meme_templates first to find a suitable template ID. " +
@@ -479,7 +479,11 @@ export function createEventTools({
         } catch (err) {
           const message =
             err instanceof Error ? err.message : "Failed to create meme";
-          logger.warn("create_meme failed", { org, repo, error: message });
+          logger.warn("write_on_meme_template failed", {
+            org,
+            repo,
+            error: message,
+          });
           return { error: message };
         }
       },
