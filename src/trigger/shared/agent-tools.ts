@@ -1,6 +1,6 @@
 import type { Octokit } from "@octokit/rest";
 import { randomUUID } from "node:crypto";
-import { createClient } from "@supabase/supabase-js";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { tool } from "ai";
 import { z } from "zod";
 import { logger } from "@trigger.dev/sdk";
@@ -14,6 +14,7 @@ const IMAGE_VERIFY_TIMEOUT_MS = 5_000;
 const MAX_VERIFIED_IMAGES = 1;
 
 const MEMEGEN_API_BASE = "https://api.memegen.link";
+// Cap template search output so tool responses stay concise for agent consumption.
 const MEMEGEN_TEMPLATES_LIMIT = 10;
 
 function sanitizeStoragePathSegment(value: string): string {
@@ -75,7 +76,7 @@ async function persistMemeImage({
       "Missing SUPABASE_MEME_STORAGE_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY)",
     );
 
-  const supabase = createClient<Database>(supabaseUrl, memeStorageKey, {
+  const supabase = createSupabaseClient<Database>(supabaseUrl, memeStorageKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
