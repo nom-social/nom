@@ -73,4 +73,22 @@ describe("buildMemeUrl", () => {
     const url = buildMemeUrl("my template", ["text"]);
     expect(url).toContain("my%20template");
   });
+
+  it("supports jpg output format", () => {
+    expect(buildMemeUrl("ds", ["high quality", "small file"], "jpg")).toBe(
+      "https://api.memegen.link/images/ds/high_quality/small_file.jpg",
+    );
+  });
+
+  it("supports gif output format", () => {
+    expect(buildMemeUrl("iw", ["animates text", "in production"], "gif")).toBe(
+      "https://api.memegen.link/images/iw/animates_text/in_production.gif",
+    );
+  });
+
+  it("supports webp output format", () => {
+    expect(buildMemeUrl("oprah", ["you get", "animated text"], "webp")).toBe(
+      "https://api.memegen.link/images/oprah/you_get/animated_text.webp",
+    );
+  });
 });

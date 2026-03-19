@@ -100,10 +100,17 @@ async function persistMemeImage({
   return data.publicUrl;
 }
 
+const MEME_IMAGE_FORMATS = ["png", "jpg", "gif", "webp"] as const;
+type MemeImageFormat = (typeof MEME_IMAGE_FORMATS)[number];
+
 /**
  * Build a memegen.link image URL for the given template and text lines.
  */
-export function buildMemeUrl(templateId: string, lines: string[]): string {
+export function buildMemeUrl(
+  templateId: string,
+  lines: string[],
+  format: MemeImageFormat = "png",
+): string {
   function encodeMemeText(text: string): string {
     return text.replace(/[_ /?%#]/g, (ch) => {
       switch (ch) {
@@ -126,7 +133,7 @@ export function buildMemeUrl(templateId: string, lines: string[]): string {
   }
   const encodedLines = lines.map(encodeMemeText);
   const path = encodedLines.length > 0 ? encodedLines.join("/") : "_";
-  return `${MEMEGEN_API_BASE}/images/${encodeURIComponent(templateId)}/${path}.png`;
+  return `${MEMEGEN_API_BASE}/images/${encodeURIComponent(templateId)}/${path}.${format}`;
 }
 
 async function isImageDownloadable(
@@ -458,17 +465,31 @@ export function createEventTools({
             "Text lines to overlay on the template, in order (top to bottom). " +
               "Use concise, developer-appropriate text.",
           ),
+        format: z
+          .enum(MEME_IMAGE_FORMATS)
+          .default("png")
+          .describe(
+            "Output format for generated meme. Use gif/webp when template or text animation is desired.",
+          ),
       }),
       execute: async ({
         template_id,
         lines,
+        format,
       }: {
         template_id: string;
         lines: string[];
+        format: MemeImageFormat;
       }) => {
         try {
-          logger.info("Creating meme", { org, repo, template_id, lines });
-          const source_url = buildMemeUrl(template_id, lines);
+          logger.info("Creating meme", {
+            org,
+            repo,
+            template_id,
+            lines,
+            format,
+          });
+          const source_url = buildMemeUrl(template_id, lines, format);
           const url = await persistMemeImage({
             sourceUrl: source_url,
             org,
