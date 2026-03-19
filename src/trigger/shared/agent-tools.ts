@@ -67,9 +67,14 @@ async function persistMemeImage({
   ].join("/");
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const memeStorageKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const memeStorageKey =
+    process.env.SUPABASE_MEME_STORAGE_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!supabaseUrl) throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL");
-  if (!memeStorageKey) throw new Error("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY");
+  if (!memeStorageKey)
+    throw new Error(
+      "Missing SUPABASE_MEME_STORAGE_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY)",
+    );
 
   const supabase = createSupabaseClient<Database>(supabaseUrl, memeStorageKey, {
     auth: {
@@ -129,19 +134,6 @@ export function buildMemeUrl(
   const encodedLines = lines.map(encodeMemeText);
   const path = encodedLines.length > 0 ? encodedLines.join("/") : "_";
   return `${MEMEGEN_API_BASE}/images/${encodeURIComponent(templateId)}/${path}.${format}`;
-}
-
-export function buildCustomBackgroundMemeUrl(
-  lines: string[],
-  backgroundUrl: string,
-  format: MemeImageFormat = "png",
-): string {
-  const baseUrl = buildMemeUrl("custom", lines, format);
-  return `${baseUrl}?background=${encodeURIComponent(backgroundUrl)}`;
-}
-
-export function buildMemeTemplatesSearchUrl(query: string): string {
-  return `${MEMEGEN_API_BASE}/templates?filter=${encodeURIComponent(query)}`;
 }
 
 async function isImageDownloadable(
@@ -417,7 +409,7 @@ export function createEventTools({
       execute: async ({ query }: { query: string }) => {
         try {
           logger.info("Searching meme templates", { org, repo, query });
-          const res = await fetch(buildMemeTemplatesSearchUrl(query));
+          const res = await fetch(`${MEMEGEN_API_BASE}/templates`);
           if (!res.ok) {
             return {
               templates: [],
@@ -458,7 +450,6 @@ export function createEventTools({
       description:
         "Generate a meme by overlaying custom text lines on a blank meme template. " +
         "Use search_meme_templates first to find a suitable template ID. " +
-        "Optionally provide a custom background image URL to use memegen's custom mode. " +
         "Returns a Supabase-hosted URL of the generated meme image, which you can embed in your summary " +
         "as markdown: ![caption](url). " +
         "Tailor the text to the repository and commit context for maximum relevance and humor.",
@@ -480,24 +471,15 @@ export function createEventTools({
           .describe(
             "Output format for generated meme. Use gif/webp when template or text animation is desired.",
           ),
-        background_url: z
-          .string()
-          .url()
-          .optional()
-          .describe(
-            "Optional external image URL to use as a custom meme background (memegen custom mode).",
-          ),
       }),
       execute: async ({
         template_id,
         lines,
         format,
-        background_url,
       }: {
         template_id: string;
         lines: string[];
         format: MemeImageFormat;
-        background_url?: string;
       }) => {
         try {
           logger.info("Creating meme", {
@@ -506,11 +488,8 @@ export function createEventTools({
             template_id,
             lines,
             format,
-            background_url,
           });
-          const source_url = background_url
-            ? buildCustomBackgroundMemeUrl(lines, background_url, format)
-            : buildMemeUrl(template_id, lines, format);
+          const source_url = buildMemeUrl(template_id, lines, format);
           const url = await persistMemeImage({
             sourceUrl: source_url,
             org,

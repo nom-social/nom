@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  buildCustomBackgroundMemeUrl,
-  buildMemeTemplatesSearchUrl,
-  buildMemeUrl,
-} from "./agent-tools";
+import { buildMemeUrl } from "./agent-tools";
 
 describe("buildMemeUrl", () => {
   it("encodes spaces as underscores", () => {
@@ -93,39 +89,6 @@ describe("buildMemeUrl", () => {
   it("supports webp output format", () => {
     expect(buildMemeUrl("oprah", ["you get", "animated text"], "webp")).toBe(
       "https://api.memegen.link/images/oprah/you_get/animated_text.webp",
-    );
-  });
-});
-
-describe("buildCustomBackgroundMemeUrl", () => {
-  it("builds custom background URL with encoded background query param", () => {
-    expect(
-      buildCustomBackgroundMemeUrl(
-        ["top text", "bottom text"],
-        "https://example.com/meme image.png?x=1&y=2",
-      ),
-    ).toBe(
-      "https://api.memegen.link/images/custom/top_text/bottom_text.png?background=https%3A%2F%2Fexample.com%2Fmeme%20image.png%3Fx%3D1%26y%3D2",
-    );
-  });
-
-  it("supports alternate output formats", () => {
-    expect(
-      buildCustomBackgroundMemeUrl(
-        ["you get", "animated text"],
-        "http://www.gstatic.com/webp/gallery/1.png",
-        "webp",
-      ),
-    ).toBe(
-      "https://api.memegen.link/images/custom/you_get/animated_text.webp?background=http%3A%2F%2Fwww.gstatic.com%2Fwebp%2Fgallery%2F1.png",
-    );
-  });
-});
-
-describe("buildMemeTemplatesSearchUrl", () => {
-  it("URL-encodes filter query for memegen templates endpoint", () => {
-    expect(buildMemeTemplatesSearchUrl("drake & cat memes")).toBe(
-      "https://api.memegen.link/templates?filter=drake%20%26%20cat%20memes",
     );
   });
 });
