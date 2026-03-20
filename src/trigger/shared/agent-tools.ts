@@ -12,6 +12,7 @@ import { filterAndFormatDiff } from "@/trigger/process-github-events/event-proce
 const MAX_FILE_CONTENT_BYTES = 50_000;
 const IMAGE_VERIFY_TIMEOUT_MS = 5_000;
 const MAX_VERIFIED_IMAGES = 1;
+const MEME_STORAGE_BUCKET = "memes";
 
 const MEMEGEN_API_BASE = "https://api.memegen.link";
 // Cap template search output so tool responses stay concise for agent consumption.
@@ -55,10 +56,6 @@ async function persistMemeImage({
 
   const imageBuffer = Buffer.from(await imageRes.arrayBuffer());
   const ext = extensionFromContentType(contentType);
-  const memeStorageBucket = process.env.SUPABASE_MEME_STORAGE_BUCKET;
-  if (!memeStorageBucket) {
-    throw new Error("Missing SUPABASE_MEME_STORAGE_BUCKET");
-  }
   const objectPath = [
     sanitizeStoragePathSegment(org),
     sanitizeStoragePathSegment(repo),
@@ -67,14 +64,10 @@ async function persistMemeImage({
   ].join("/");
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const memeStorageKey =
-    process.env.SUPABASE_MEME_STORAGE_KEY ??
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const memeStorageKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!supabaseUrl) throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL");
   if (!memeStorageKey)
-    throw new Error(
-      "Missing SUPABASE_MEME_STORAGE_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY)",
-    );
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY");
 
   const supabase = createSupabaseClient<Database>(supabaseUrl, memeStorageKey, {
     auth: {
@@ -83,7 +76,7 @@ async function persistMemeImage({
       detectSessionInUrl: false,
     },
   });
-  const bucket = supabase.storage.from(memeStorageBucket);
+  const bucket = supabase.storage.from(MEME_STORAGE_BUCKET);
   const { error: uploadError } = await bucket.upload(objectPath, imageBuffer, {
     contentType,
     upsert: false,
