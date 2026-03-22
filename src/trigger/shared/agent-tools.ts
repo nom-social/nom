@@ -43,8 +43,6 @@ function extensionFromContentType(contentType: string | null): string {
   if (!raw.includes("/") && !raw.includes("+")) {
     normalized = `image/${raw}`;
   }
-
-  if (!normalized) return ".png";
   return CONTENT_TYPE_TO_EXT[normalized] ?? ".png";
 }
 
