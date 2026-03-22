@@ -5,7 +5,6 @@ import { LinkIcon, Linkedin, ShareIcon } from "lucide-react";
 
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -27,12 +26,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import X from "@/components/ui/icons/x";
 import { cn } from "@/lib/utils";
-import { saveScrollPosition } from "@/lib/scroll-restore";
 
 export type Props = {
   title: string;
   titleUrl: string;
-  pathToRestore?: string;
   badgeIcon: React.ReactNode;
   badgeLabel: string;
   badgeClassName: string;
@@ -53,7 +50,6 @@ export type Props = {
 function ActivityCardBase({
   title,
   titleUrl,
-  pathToRestore,
   badgeIcon,
   badgeLabel,
   badgeClassName,
@@ -71,7 +67,6 @@ function ActivityCardBase({
   githubUrl,
 }: Props) {
   const share = useShare();
-
   const handleLikeClick = () => {
     if (liked) {
       onUnlike?.();
@@ -88,143 +83,131 @@ function ActivityCardBase({
       : "--";
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="leading-relaxed font-bold break-words [word-break:break-word]">
-          {titleUrl.startsWith("http") ? (
-            <a
-              href={titleUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:underline focus:underline outline-none"
-            >
-              <Markdown>{title}</Markdown>
-            </a>
-          ) : (
-            <Link
-              href={titleUrl}
-              className="hover:underline focus:underline outline-none"
-              onClick={() => pathToRestore && saveScrollPosition(pathToRestore)}
-            >
-              <Markdown>{title}</Markdown>
-            </Link>
-          )}
-        </CardTitle>
-        <CardAction>
-          <Badge className={cn(badgeClassName, "max-w-[120px]")}>
+    <>
+      <Card className="w-full">
+        <CardHeader>
+          <Badge className={cn(badgeClassName, "self-start")}>
             <span className="shrink-0 inline-flex size-3 [&>svg]:size-full">
               {badgeIcon}
             </span>
-            <span className="truncate min-w-0">{badgeLabel}</span>
+            <span>{badgeLabel}</span>
           </Badge>
-        </CardAction>
-        <CardDescription>
-          <div className="flex gap-2 flex-col">
-            <div className="text-muted-foreground text-xs flex flex-wrap items-center gap-x-1">
-              <Link
-                href={repoUrl}
-                className="hover:underline focus:underline outline-none"
-              >
-                {org}/{repo}
-              </Link>
-              {" • "}
-              <span>
-                {formatDistanceToNow(new Date(timestamp), {
-                  addSuffix: false,
-                })}
-              </span>
-              {githubUrl && (
-                <>
-                  {" • "}
-                  <a
-                    href={githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline focus:underline outline-none inline-flex items-center gap-1"
-                  >
-                    view on GitHub
-                  </a>
-                </>
-              )}
-            </div>
-            <div className="flex items-center">
-              <ContributorAvatarGroup contributors={contributors} />
-            </div>
-          </div>
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none font-normal text-sm">
-          <Markdown>{body}</Markdown>
-        </div>
-      </CardContent>
-      <CardFooter>
-        <div className="flex flex-row items-center gap-3 sm:gap-4 w-full justify-between">
-          <Button
-            variant="outline"
-            aria-label={liked ? "Unlike" : "Like"}
-            onClick={handleLikeClick}
-            size="sm"
-          >
-            <span
-              role="img"
-              aria-label={liked ? "Unlike" : "Like"}
-              style={{
-                opacity: liked ? 1 : 0.4,
-                fontSize: "1.25em",
-                transition: "opacity 0.2s",
-                marginRight: "0.25em",
-                verticalAlign: "middle",
-              }}
+          <CardTitle className="leading-relaxed font-bold break-words [word-break:break-word]">
+            <Link
+              href={titleUrl}
+              className="text-left hover:underline focus:underline outline-none cursor-pointer"
             >
-              🚀
-            </span>
-            {formattedLikeCount}
-          </Button>
-          <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <ShareIcon className="size-4" />
-                Share
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() =>
-                  share(
-                    `${window.location.origin}/${org}/${repo}/status/${hash}`,
-                    title,
-                  )
-                }
-              >
-                <LinkIcon />
-                Copy link
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                    body,
-                  )}`;
-                  window.open(tweetUrl, "_blank");
+              <Markdown>{title}</Markdown>
+            </Link>
+          </CardTitle>
+          <CardDescription>
+            <div className="flex gap-2 flex-col">
+              <div className="text-muted-foreground text-xs flex flex-wrap items-center gap-x-1">
+                <Link
+                  href={repoUrl}
+                  className="hover:underline focus:underline outline-none"
+                >
+                  {org}/{repo}
+                </Link>
+                {" • "}
+                <span>
+                  {formatDistanceToNow(new Date(timestamp), {
+                    addSuffix: false,
+                  })}
+                </span>
+                {githubUrl && (
+                  <>
+                    {" • "}
+                    <a
+                      href={githubUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:underline focus:underline outline-none inline-flex items-center gap-1"
+                    >
+                      view on GitHub
+                    </a>
+                  </>
+                )}
+              </div>
+              <div className="flex items-center">
+                <ContributorAvatarGroup contributors={contributors} />
+              </div>
+            </div>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="prose prose-sm dark:prose-invert prose-neutral max-w-none font-normal text-sm">
+            <Markdown>{body}</Markdown>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <div className="flex flex-row items-center gap-3 sm:gap-4 w-full justify-between">
+            <Button
+              variant="outline"
+              aria-label={liked ? "Unlike" : "Like"}
+              onClick={handleLikeClick}
+              size="sm"
+            >
+              <span
+                role="img"
+                aria-label={liked ? "Unlike" : "Like"}
+                style={{
+                  opacity: liked ? 1 : 0.4,
+                  fontSize: "1.25em",
+                  transition: "opacity 0.2s",
+                  marginRight: "0.25em",
+                  verticalAlign: "middle",
                 }}
               >
-                <X />
-                Post on X
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  const linkedInUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(body)}`;
-                  window.open(linkedInUrl, "_blank");
-                }}
-              >
-                <Linkedin />
-                Post on LinkedIn
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </CardFooter>
-    </Card>
+                🚀
+              </span>
+              {formattedLikeCount}
+            </Button>
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <ShareIcon className="size-4" />
+                  Share
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() =>
+                    share(
+                      `${window.location.origin}/${org}/${repo}/status/${hash}`,
+                      title,
+                    )
+                  }
+                >
+                  <LinkIcon />
+                  Copy link
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                      body,
+                    )}`;
+                    window.open(tweetUrl, "_blank");
+                  }}
+                >
+                  <X />
+                  Post on X
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    const linkedInUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(body)}`;
+                    window.open(linkedInUrl, "_blank");
+                  }}
+                >
+                  <Linkedin />
+                  Post on LinkedIn
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </CardFooter>
+      </Card>
+    </>
   );
 }
 

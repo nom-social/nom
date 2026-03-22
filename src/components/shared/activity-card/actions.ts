@@ -1,7 +1,5 @@
 import { createClient } from "@/utils/supabase/client";
 
-import { triggerEngagementMilestone } from "./server-actions";
-
 export class NotAuthenticatedError extends Error {
   constructor() {
     super("Not authenticated");
@@ -43,7 +41,13 @@ export async function createLike(dedupe_hash: string) {
     .insert({ user_id: userId, dedupe_hash })
     .throwOnError();
 
-  await triggerEngagementMilestone(dedupe_hash);
+  // Fire and forget — don't await so it doesn't block the mutation or
+  // trigger a Next.js router refresh (which server actions would cause)
+  fetch("/api/engagement-milestone", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ dedupe_hash }),
+  }).catch(() => {});
 }
 
 export async function deleteLike(dedupe_hash: string) {

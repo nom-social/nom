@@ -15,23 +15,27 @@ const LIMIT = 20;
 
 export default async function RepoPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ org: string; repo: string }>;
+  searchParams: Promise<{ q?: string }>;
 }) {
   const { org, repo } = await params;
+  const { q } = await searchParams;
+  const normalizedQ = q ?? "";
   const repoProfile = await fetchRepoProfile(org, repo);
 
   if (!repoProfile) return notFound();
 
   const queryClient = getQueryClient();
   await queryClient.prefetchInfiniteQuery({
-    queryKey: [fetchFeedPage.key, repoProfile.id, ""],
+    queryKey: [fetchFeedPage.key, repoProfile.id, normalizedQ],
     queryFn: ({ pageParam }) =>
       fetchFeedPageServer({
         repoId: repoProfile.id,
         limit: LIMIT,
         offset: pageParam,
-        query: "",
+        query: normalizedQ,
       }),
     getNextPageParam: (
       lastPage: FetchFeedPageResult,
@@ -69,10 +73,13 @@ export default async function RepoPage({
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ org: string; repo: string }>;
+  searchParams: Promise<{ q?: string }>;
 }): Promise<Metadata> {
   const { org, repo } = await params;
+  const { q } = await searchParams;
   const repoProfile = await fetchRepoProfile(org, repo);
 
   if (!repoProfile) return {};
@@ -80,14 +87,29 @@ export async function generateMetadata({
   const truncate = (str: string) =>
     str.length > 200 ? str.slice(0, 200) + "..." : str;
   const description = truncate(
-    repoProfile.description || `View ${repo}/${org} on Nom.`,
+    repoProfile.description || `View ${org}/${repo} on Nom.`,
   );
+
+  const apiUrl = q
+    ? `${BASE_URL}/api/feed/${org}/${repo}?q=${encodeURIComponent(q)}`
+    : `${BASE_URL}/api/feed/${org}/${repo}`;
 
   return {
     title: `${org}/${repo} - Nom`,
     description,
+    alternates: {
+      types: {
+        "application/json": apiUrl,
+      },
+    },
+    other: {
+      "nom-api":
+        "This page is client-rendered. For feed data, use GET " +
+        apiUrl +
+        " (JSON, no auth). See /llms.txt for full API docs.",
+    },
     openGraph: {
-      title: `${repo}/${org} - Nom`,
+      title: `${org}/${repo} - Nom`,
       description,
       url: `${BASE_URL}/${org}/${repo}`,
       images: [
@@ -99,7 +121,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `${repo}/${org} - Nom`,
+      title: `${org}/${repo} - Nom`,
       description,
       images: [repoProfile.avatarUrl],
     },

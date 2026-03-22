@@ -8,6 +8,7 @@ import {
 export type Contributor = {
   name: string;
   avatar: string;
+  profileUrl: string;
 };
 
 export default function ContributorAvatarGroup({
@@ -22,7 +23,7 @@ export default function ContributorAvatarGroup({
       {contributors.map((contributor, idx) => (
         <div className="relative group" key={contributor.name + idx}>
           <a
-            href={`https://github.com/${contributor.name}`}
+            href={contributor.profileUrl}
             target="_blank"
             rel="noopener noreferrer"
             tabIndex={0}
@@ -30,7 +31,7 @@ export default function ContributorAvatarGroup({
           >
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="w-7 h-7 border-2 border-background shadow-sm hover:scale-110 transition-transform duration-200 hover:z-10 relative">
+                <div className="w-7 h-7 border-2 border-background shadow-sm hover:scale-110 transition-transform duration-200 hover:z-10 relative bg-background">
                   <OptimizedAvatar
                     src={contributor.avatar}
                     alt={contributor.name}

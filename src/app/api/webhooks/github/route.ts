@@ -88,7 +88,7 @@ export async function POST(request: Request) {
 
     const { data: repoData } = await supabase
       .from("repositories")
-      .select("id")
+      .select("id, is_verified")
       .ilike("org", escapeForIlike(org))
       .ilike("repo", escapeForIlike(repo))
       .single();
@@ -137,6 +137,25 @@ export async function POST(request: Request) {
       }
     }
 
+    // Handle repository edited events (allowed regardless of verification)
+    if (payload.event_type === "repository" && payload.action === "edited") {
+      await syncBatchReposMetadataTask.trigger({
+        repos: [{ org, repo }],
+      });
+      return NextResponse.json({
+        message: "Repository edited event, triggered metadata sync",
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    // TODO: Uncomment this when we have a way to verify repositories
+    // if (!repoData.is_verified) {
+    //   return NextResponse.json({
+    //     message: "Repository not verified, ignoring webhook",
+    //     timestamp: new Date().toISOString(),
+    //   });
+    // }
+
     // Handle star events
     if (payload.event_type === "star") {
       const actorLogin = payload.sender.login;
@@ -165,23 +184,8 @@ export async function POST(request: Request) {
           .throwOnError();
     }
 
-    // Handle repository edited events
-    if (payload.event_type === "repository" && payload.action === "edited") {
-      await syncBatchReposMetadataTask.trigger({
-        repos: [{ org, repo }],
-      });
-      return NextResponse.json({
-        message: "Repository edited event, triggered metadata sync",
-        timestamp: new Date().toISOString(),
-      });
-    }
-
-    // Store in Supabase
     await supabase.from("github_event_log").insert(eventData).throwOnError();
-    await processGithubEvents.trigger(
-      { org, repo },
-      { concurrencyKey: `${org}/${repo}` },
-    );
+    await processGithubEvents.trigger({ org, repo }, { concurrencyKey: org });
 
     // Return a success response
     return NextResponse.json({

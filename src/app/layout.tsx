@@ -13,6 +13,7 @@ import {
 import { Toaster } from "@/components/ui/sonner";
 
 import { BASE_URL, GITHUB_URL } from "@/lib/constants";
+import { DisableScrollRestoration } from "@/components/disable-scroll-restoration";
 
 import "./globals.css";
 import ProfileDropdown from "./layout/profile-dropdown";
@@ -50,8 +51,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  modal,
 }: Readonly<{
   children: React.ReactNode;
+  modal: React.ReactNode;
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -73,9 +76,10 @@ export default function RootLayout({
           />
         )}
         <ThemeProvider attribute="class" defaultTheme="dark">
+          <DisableScrollRestoration />
           <ReactQueryProvider>
             <Toaster />
-            <NavigationMenu className="w-full min-w-full bg-background fixed top-0 left-0 z-60 border-b border-border shadow-sm p-2">
+            <NavigationMenu className="w-full min-w-full bg-background fixed top-0 left-0 z-40 border-b border-border shadow-sm p-2">
               <div className="max-w-3xl mx-auto w-full">
                 <NavigationMenuList className="justify-between items-center">
                   <div className="flex flex-row gap-2 items-center">
@@ -110,6 +114,7 @@ export default function RootLayout({
               </div>
             </NavigationMenu>
             <div className="max-w-3xl mx-auto py-18">{children}</div>
+            {modal}
           </ReactQueryProvider>
         </ThemeProvider>
       </body>

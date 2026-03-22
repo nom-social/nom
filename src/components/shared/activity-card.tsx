@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+
 import { useMutation } from "@tanstack/react-query";
 import { GitCommitVertical, GitMergeIcon, TagIcon } from "lucide-react";
 
@@ -12,6 +13,7 @@ import {
   releaseDataSchema,
   pushDataSchema,
 } from "@/components/shared/activity-card/shared/schemas";
+import { avatarUrl, profileUrl } from "@/lib/contributor-urls";
 
 import {
   createLike,
@@ -51,20 +53,20 @@ function ActivityCard({
   const [likeCount, setLikeCount] = useState<number>(item.likeCount);
   const [liked, setLiked] = useState<boolean>(item.isLiked);
 
-  // Update local state when props change (useful for refetching)
-  useEffect(() => {
-    setLikeCount(item.likeCount);
-    setLiked(item.isLiked);
-  }, [item.likeCount, item.isLiked]);
-
   const { mutate: mutateLike } = useMutation({
     mutationFn: ({ hash }: { hash: string }) => createLike(hash),
-    onSuccess: async () => {
+    onMutate: () => {
+      const prev = { liked, likeCount };
       setLiked(true);
-      setLikeCount((prev) => prev + 1);
-      toast.success("🔥 Liked!", { icon: null });
+      setLikeCount((c) => c + 1);
+      return prev;
     },
-    onError: (error) => {
+    onSuccess: () => toast.success("🔥 Liked!", { icon: null }),
+    onError: (error, _, context) => {
+      if (context) {
+        setLiked(context.liked);
+        setLikeCount(context.likeCount);
+      }
       if (error instanceof NotAuthenticatedError)
         router.push(
           `/auth/login?next=${encodeURIComponent(window.location.pathname)}`,
@@ -74,12 +76,18 @@ function ActivityCard({
 
   const { mutate: mutateUnlike } = useMutation({
     mutationFn: ({ hash }: { hash: string }) => deleteLike(hash),
-    onSuccess: async () => {
+    onMutate: () => {
+      const prev = { liked, likeCount };
       setLiked(false);
-      setLikeCount((prev) => prev - 1);
-      toast("💔 Un-liked!");
+      setLikeCount((c) => c - 1);
+      return prev;
     },
-    onError: (error) => {
+    onSuccess: () => toast("💔 Un-liked!"),
+    onError: (error, _, context) => {
+      if (context) {
+        setLiked(context.liked);
+        setLikeCount(context.likeCount);
+      }
       if (error instanceof NotAuthenticatedError)
         router.push(
           `/auth/login?next=${encodeURIComponent(window.location.pathname)}`,
@@ -106,7 +114,6 @@ function ActivityCard({
       <ActivityCardBase
         title={parseResult.data.pull_request.title}
         titleUrl={titleUrl}
-        pathToRestore={back ?? undefined}
         badgeIcon={<GitMergeIcon />}
         badgeLabel={parseResult.data.pull_request.merged ? "merged" : "open"}
         badgeClassName="bg-nom-purple border-transparent uppercase text-black"
@@ -117,7 +124,8 @@ function ActivityCard({
         contributors={parseResult.data.pull_request.contributors.map(
           (login) => ({
             name: login,
-            avatar: `https://github.com/${login}.png`,
+            avatar: avatarUrl(login),
+            profileUrl: profileUrl(login),
           }),
         )}
         body={parseResult.data.pull_request.ai_summary}
@@ -126,6 +134,7 @@ function ActivityCard({
         onLike={handleLike}
         onUnlike={handleUnlike}
         hash={item.dedupe_hash}
+        githubUrl={parseResult.data.pull_request.html_url}
       />
     );
   }
@@ -140,7 +149,6 @@ function ActivityCard({
       <ActivityCardBase
         title={release.name ?? release.tag_name}
         titleUrl={titleUrl}
-        pathToRestore={back ?? undefined}
         badgeIcon={<TagIcon />}
         badgeLabel={release.tag_name}
         badgeClassName="bg-nom-blue border-transparent uppercase text-black"
@@ -150,7 +158,8 @@ function ActivityCard({
         timestamp={new Date(release.published_at ?? release.created_at)}
         contributors={release.contributors.map((login) => ({
           name: login,
-          avatar: `https://github.com/${login}.png`,
+          avatar: avatarUrl(login),
+          profileUrl: profileUrl(login),
         }))}
         body={release.ai_summary}
         likeCount={likeCount}
@@ -158,6 +167,7 @@ function ActivityCard({
         onLike={handleLike}
         onUnlike={handleUnlike}
         hash={item.dedupe_hash}
+        githubUrl={release.html_url}
       />
     );
   }
@@ -171,7 +181,6 @@ function ActivityCard({
       <ActivityCardBase
         title={push.title}
         titleUrl={titleUrl}
-        pathToRestore={back ?? undefined}
         badgeIcon={<GitCommitVertical />}
         badgeLabel="pushed"
         badgeClassName="bg-nom-green border-transparent uppercase text-black"
@@ -181,7 +190,8 @@ function ActivityCard({
         timestamp={new Date(push.created_at)}
         contributors={push.contributors.map((login) => ({
           name: login,
-          avatar: `https://github.com/${login}.png`,
+          avatar: avatarUrl(login),
+          profileUrl: profileUrl(login),
         }))}
         body={push.ai_summary}
         likeCount={likeCount}
@@ -189,6 +199,7 @@ function ActivityCard({
         onLike={handleLike}
         onUnlike={handleUnlike}
         hash={item.dedupe_hash}
+        githubUrl={push.html_url}
       />
     );
   }

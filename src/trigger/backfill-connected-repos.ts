@@ -53,7 +53,11 @@ export const backfillConnectedReposTask = schemaTask({
           repo,
           events: rows.length,
         });
-        await processGithubEvents.trigger({ org, repo });
+
+        await processGithubEvents.trigger(
+          { org, repo },
+          { concurrencyKey: org },
+        );
       } catch (error) {
         logger.error("Failed to backfill connected repo", { org, repo, error });
       }

@@ -17,6 +17,7 @@ import {
   deleteLike,
   NotAuthenticatedError,
 } from "@/components/shared/activity-card/actions";
+import { avatarUrl, profileUrl } from "@/lib/contributor-urls";
 
 import StatusActivityCardBase from "./status-activity-card-base";
 
@@ -40,12 +41,10 @@ function StatusActivityCard({
   item,
   repo,
   org,
-  isPrivate = false,
 }: {
   item: FeedItemWithLikes;
   repo: string;
   org: string;
-  isPrivate?: boolean;
 }) {
   const router = useRouter();
   const [likeCount, setLikeCount] = useState<number>(item.likeCount);
@@ -104,7 +103,6 @@ function StatusActivityCard({
       <StatusActivityCardBase
         title={pr.title}
         titleUrl={pr.html_url}
-        hideExternalLinks={isPrivate}
         badgeIcon={<GitMergeIcon />}
         badgeLabel={pr.merged ? "merged" : "open"}
         badgeClassName="bg-nom-purple border-transparent uppercase text-black"
@@ -114,7 +112,8 @@ function StatusActivityCard({
         timestamp={new Date(pr.updated_at)}
         contributors={pr.contributors.map((login) => ({
           name: login,
-          avatar: `https://github.com/${login}.png`,
+          avatar: avatarUrl(login),
+          profileUrl: profileUrl(login),
         }))}
         body={pr.ai_summary}
         likeCount={likeCount}
@@ -135,7 +134,6 @@ function StatusActivityCard({
       <StatusActivityCardBase
         title={release.name ?? release.tag_name}
         titleUrl={release.html_url}
-        hideExternalLinks={isPrivate}
         badgeIcon={<TagIcon />}
         badgeLabel={release.tag_name}
         badgeClassName="bg-nom-blue border-transparent uppercase text-black"
@@ -145,7 +143,8 @@ function StatusActivityCard({
         timestamp={new Date(release.published_at ?? release.created_at)}
         contributors={release.contributors.map((login) => ({
           name: login,
-          avatar: `https://github.com/${login}.png`,
+          avatar: avatarUrl(login),
+          profileUrl: profileUrl(login),
         }))}
         body={release.ai_summary}
         likeCount={likeCount}
@@ -166,7 +165,6 @@ function StatusActivityCard({
       <StatusActivityCardBase
         title={push.title}
         titleUrl={push.html_url}
-        hideExternalLinks={isPrivate}
         badgeIcon={<GitCommitVertical />}
         badgeLabel="pushed"
         badgeClassName="bg-nom-green border-transparent uppercase text-black"
@@ -176,7 +174,8 @@ function StatusActivityCard({
         timestamp={new Date(push.created_at)}
         contributors={push.contributors.map((login) => ({
           name: login,
-          avatar: `https://github.com/${login}.png`,
+          avatar: avatarUrl(login),
+          profileUrl: profileUrl(login),
         }))}
         body={push.ai_summary}
         likeCount={likeCount}

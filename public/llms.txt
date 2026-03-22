@@ -2,6 +2,18 @@
 
 > Nom is a GitHub activity feed platform. It aggregates pull requests, issues, releases, and pushes from public GitHub repositories into a unified, AI-summarised feed.
 
+## AI Agents: Feed URLs → Use the API
+
+The web feed UI at https://nomit.dev (including URLs with `?q=`) is client-rendered. If you fetch the HTML you may see only a loading state. **Use the feed API instead** — no auth required.
+
+| Feed URL you encountered | Use this API instead |
+|--------------------------|----------------------|
+| https://nomit.dev/?q=org:vercel repo:next.js | GET https://nomit.dev/api/feed?q=org:vercel%20repo:next.js |
+| https://nomit.dev/vercel/next.js | GET https://nomit.dev/api/feed/vercel/next.js |
+| https://nomit.dev/vercel/next.js?q=typescript | GET https://nomit.dev/api/feed/vercel/next.js?q=typescript |
+
+Rule: If the path is `/{org}/{repo}`, use `GET /api/feed/{org}/{repo}` with the same `q` param. Otherwise use `GET /api/feed?q=...` with the same `q` param.
+
 ## What Nom Does
 
 - Tracks activity across GitHub repositories (PRs, issues, releases, pushes)

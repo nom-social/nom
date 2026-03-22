@@ -6,64 +6,68 @@ interface MarkdownProps {
   children: string;
 }
 
-export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
+const REMARK_PLUGINS = [remarkGfm];
+
+const MARKDOWN_COMPONENTS: React.ComponentProps<
+  typeof ReactMarkdown
+>["components"] = {
+  img: ({ src, alt }) =>
+    src ? (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt={alt || ""}
+        className="w-full rounded-md my-2 block"
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
+    ) : null,
+  p: ({ children }) => <p>{children}</p>,
+  code: ({ children }) => (
+    <code className="bg-muted px-1.5 py-0.5 font-mono text-sm text-muted-foreground">
+      {children}
+    </code>
+  ),
+  pre: ({ children }) => (
+    <pre className="bg-muted rounded-md p-4 my-4 overflow-x-auto">
+      {children}
+    </pre>
+  ),
+  blockquote: ({ children }) => (
+    <blockquote className="border-l-4 border-muted-foreground pl-4 ml-0 mb-4 py-2 bg-muted/50 text-muted-foreground italic">
+      {children}
+    </blockquote>
+  ),
+  ul: ({ children }) => <ul className="list-disc pl-4 mb-2">{children}</ul>,
+  ol: ({ children }) => <ol className="list-decimal pl-7 mb-2">{children}</ol>,
+  li: ({ children }) => <li className="mb-1">{children}</li>,
+  a: ({ href, children }) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-primary underline hover:text-nom-blue break-all"
+    >
+      {children}
+    </a>
+  ),
+  h1: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
+  h2: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
+  h3: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
+  h4: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
+  h5: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
+  h6: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
+};
+
+export const Markdown: React.FC<MarkdownProps> = React.memo(({ children }) => {
   return (
     <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
-      components={{
-        img: ({ src, alt }) =>
-          src ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={src}
-              alt={alt || ""}
-              className="w-full rounded-md my-2 block"
-              loading="lazy"
-              referrerPolicy="no-referrer"
-            />
-          ) : null,
-        p: ({ children }) => <p>{children}</p>,
-        code: ({ children }) => (
-          <code className="bg-muted px-1.5 py-0.5 font-mono text-sm text-muted-foreground">
-            {children}
-          </code>
-        ),
-        pre: ({ children }) => (
-          <pre className="bg-muted rounded-md p-4 my-4 overflow-x-auto">
-            {children}
-          </pre>
-        ),
-        blockquote: ({ children }) => (
-          <blockquote className="border-l-4 border-muted-foreground pl-4 ml-0 mb-4 py-2 bg-muted/50 text-muted-foreground italic">
-            {children}
-          </blockquote>
-        ),
-        ul: ({ children }) => (
-          <ul className="list-disc pl-4 mb-2">{children}</ul>
-        ),
-        ol: ({ children }) => (
-          <ol className="list-decimal pl-7 mb-2">{children}</ol>
-        ),
-        li: ({ children }) => <li className="mb-1">{children}</li>,
-        a: ({ href, children }) => (
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary underline hover:text-nom-blue break-all"
-          >
-            {children}
-          </a>
-        ),
-        h1: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
-        h2: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
-        h3: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
-        h4: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
-        h5: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
-        h6: ({ children }) => <p className="mb-2 font-bold">{children}</p>,
-      }}
+      remarkPlugins={REMARK_PLUGINS}
+      components={MARKDOWN_COMPONENTS}
     >
       {children}
     </ReactMarkdown>
   );
-};
+});
+
+Markdown.displayName = "Markdown";
