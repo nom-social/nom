@@ -16,6 +16,7 @@ const MEME_BUCKET = "meme-images";
 const MEME_MAX_BYTES = 10 * 1024 * 1024; // 10 MiB — matches bucket file_size_limit
 const CONTENT_TYPE_TO_EXT: Record<string, string> = {
   "image/jpeg": ".jpg",
+  "image/jpg": ".jpg",
   "image/png": ".png",
   "image/gif": ".gif",
   "image/webp": ".webp",
@@ -35,7 +36,14 @@ function sanitizeStoragePathSegment(value: string): string {
 }
 
 function extensionFromContentType(contentType: string | null): string {
-  const normalized = contentType?.split(";")[0]?.trim().toLowerCase();
+  const raw = contentType?.split(";")[0]?.trim().toLowerCase();
+  if (!raw) return ".png";
+
+  let normalized = raw;
+  if (!raw.includes("/") && !raw.includes("+")) {
+    normalized = `image/${raw}`;
+  }
+
   if (!normalized) return ".png";
   return CONTENT_TYPE_TO_EXT[normalized] ?? ".png";
 }
