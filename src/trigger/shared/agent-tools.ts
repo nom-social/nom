@@ -12,7 +12,15 @@ import { filterAndFormatDiff } from "@/trigger/process-github-events/event-proce
 const MAX_FILE_CONTENT_BYTES = 50_000;
 const IMAGE_VERIFY_TIMEOUT_MS = 5_000;
 const MAX_VERIFIED_IMAGES = 1;
-const MEME_STORAGE_BUCKET = "memes";
+const MEME_BUCKET = "meme-images";
+const MEME_MAX_BYTES = 10 * 1024 * 1024; // 10 MiB — matches bucket file_size_limit
+const CONTENT_TYPE_TO_EXT: Record<string, string> = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/gif": ".gif",
+  "image/webp": ".webp",
+  "image/svg+xml": ".svg",
+};
 
 const MEMEGEN_API_BASE = "https://api.memegen.link";
 // Cap template search output so tool responses stay concise for agent consumption.
@@ -27,10 +35,9 @@ function sanitizeStoragePathSegment(value: string): string {
 }
 
 function extensionFromContentType(contentType: string | null): string {
-  if (contentType?.includes("jpeg")) return "jpg";
-  if (contentType?.includes("gif")) return "gif";
-  if (contentType?.includes("webp")) return "webp";
-  return "png";
+  const normalized = contentType?.split(";")[0]?.trim().toLowerCase();
+  if (!normalized) return ".png";
+  return CONTENT_TYPE_TO_EXT[normalized] ?? ".png";
 }
 
 async function persistMemeImage({
@@ -55,19 +62,21 @@ async function persistMemeImage({
   }
 
   const imageBuffer = Buffer.from(await imageRes.arrayBuffer());
+  if (imageBuffer.byteLength > MEME_MAX_BYTES) {
+    throw new Error(`Meme image exceeds max size (${MEME_MAX_BYTES} bytes)`);
+  }
   const ext = extensionFromContentType(contentType);
   const objectPath = [
     sanitizeStoragePathSegment(org),
     sanitizeStoragePathSegment(repo),
     sanitizeStoragePathSegment(templateId),
-    `${randomUUID()}.${ext}`,
+    `${randomUUID()}${ext}`,
   ].join("/");
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const memeStorageKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!supabaseUrl) throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL");
-  if (!memeStorageKey)
-    throw new Error("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY");
+  if (!memeStorageKey) throw new Error("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY");
 
   const supabase = createSupabaseClient<Database>(supabaseUrl, memeStorageKey, {
     auth: {
@@ -76,7 +85,7 @@ async function persistMemeImage({
       detectSessionInUrl: false,
     },
   });
-  const bucket = supabase.storage.from(MEME_STORAGE_BUCKET);
+  const bucket = supabase.storage.from(MEME_BUCKET);
   const { error: uploadError } = await bucket.upload(objectPath, imageBuffer, {
     contentType,
     upsert: false,
