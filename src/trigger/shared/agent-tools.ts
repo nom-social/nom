@@ -2,13 +2,11 @@ import crypto from "crypto";
 
 import type { Octokit } from "@octokit/rest";
 import { randomUUID } from "node:crypto";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { tool } from "ai";
 import { z } from "zod";
 import { logger } from "@trigger.dev/sdk";
 
 import { createClient as createTavilyClient } from "@/utils/tavily/client";
-import { Database } from "@/types/supabase";
 import { filterAndFormatDiff } from "@/trigger/process-github-events/event-processors/shared/diff-utils";
 import { createAdminClient } from "@/utils/supabase/admin";
 
@@ -82,18 +80,7 @@ async function persistMemeImage({
     `${randomUUID()}${ext}`,
   ].join("/");
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const memeStorageKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!supabaseUrl) throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL");
-  if (!memeStorageKey) throw new Error("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY");
-
-  const supabase = createSupabaseClient<Database>(supabaseUrl, memeStorageKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-      detectSessionInUrl: false,
-    },
-  });
+  const supabase = createAdminClient();
   const bucket = supabase.storage.from(MEME_BUCKET);
   const { error: uploadError } = await bucket.upload(objectPath, imageBuffer, {
     contentType,
