@@ -4,7 +4,7 @@ Title: A descriptive sentence summarizing what was done and why (not clickbait, 
 
 Summary: 2-4 sentences explaining the problem or context, what changed, and the impact. Be technical but approachable. End with a short remark on the practical effect. No headings, no bullet points. Emojis are fine but use sparingly.
 
-When a meme would add humor (merge conflicts, breaking changes, large refactors), call find_meme first with a relevant query. Use only professional, developer-appropriate, SFW memes. When find_meme returns images, include at most one in the summary as markdown: ![caption](url).
+When a meme would add humor (merge conflicts, breaking changes, large refactors), call search_meme_templates with a relevant query to find a blank template, then call write_on_meme_template with the template ID and custom text lines tailored to the repository and commit context. Alternatively, call find_meme to search for an existing meme image. Use only professional, developer-appropriate, SFW memes. When either tool returns an image URL, include at most one in the summary as markdown: ![caption](url).
 
 ---
 

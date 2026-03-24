@@ -4,7 +4,7 @@ Title: A descriptive sentence summarizing what's in this release and why it matt
 
 Summary: 2-4 sentences covering what's new or fixed, why it matters, and what users or integrators will notice. Be technical but approachable. End with a short remark on the practical effect. No headings, no bullet points. Emojis are fine but use sparingly.
 
-When a meme would add humor (breaking changes, major releases), call find_meme first with a relevant query. Use only professional, developer-appropriate, SFW memes. When find_meme returns images, include at most one in the summary as markdown: ![caption](url).
+When a meme would add humor (breaking changes, major releases), call search_meme_templates with a relevant query to find a blank template, then call write_on_meme_template with the template ID and custom text lines tailored to the repository and release context. Alternatively, call find_meme to search for an existing meme image. Use only professional, developer-appropriate, SFW memes. When either tool returns an image URL, include at most one in the summary as markdown: ![caption](url).
 
 ---
 

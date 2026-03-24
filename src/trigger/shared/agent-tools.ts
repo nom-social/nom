@@ -1,6 +1,7 @@
 import crypto from "crypto";
 
 import type { Octokit } from "@octokit/rest";
+import { randomUUID } from "node:crypto";
 import { tool } from "ai";
 import { z } from "zod";
 import { logger } from "@trigger.dev/sdk";
@@ -16,11 +17,122 @@ const MEME_BUCKET = "meme-images";
 const MEME_MAX_BYTES = 10 * 1024 * 1024; // 10 MiB — matches bucket file_size_limit
 const CONTENT_TYPE_TO_EXT: Record<string, string> = {
   "image/jpeg": ".jpg",
+  "image/jpg": ".jpg",
   "image/png": ".png",
   "image/gif": ".gif",
   "image/webp": ".webp",
   "image/svg+xml": ".svg",
 };
+
+const MEMEGEN_API_BASE = "https://api.memegen.link";
+// Cap template search output so tool responses stay concise for agent consumption.
+const MEMEGEN_TEMPLATES_LIMIT = 10;
+
+function sanitizeStoragePathSegment(value: string): string {
+  const sanitized = value
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return sanitized || "unknown";
+}
+
+function extensionFromContentType(contentType: string | null): string {
+  const raw = contentType?.split(";")[0]?.trim().toLowerCase();
+  if (!raw) return ".png";
+
+  let normalized = raw;
+  if (!raw.includes("/") && !raw.includes("+")) {
+    normalized = `image/${raw}`;
+  }
+  return CONTENT_TYPE_TO_EXT[normalized] ?? ".png";
+}
+
+async function persistMemeImage({
+  sourceUrl,
+  org,
+  repo,
+  templateId,
+}: {
+  sourceUrl: string;
+  org: string;
+  repo: string;
+  templateId: string;
+}): Promise<string> {
+  const imageRes = await fetch(sourceUrl, { redirect: "follow" });
+  if (!imageRes.ok) {
+    throw new Error(`Failed to fetch meme image: ${imageRes.status}`);
+  }
+
+  const contentType = imageRes.headers.get("content-type");
+  if (!contentType?.startsWith("image/")) {
+    throw new Error("Fetched meme response is not an image");
+  }
+
+  const imageBuffer = Buffer.from(await imageRes.arrayBuffer());
+  if (imageBuffer.byteLength > MEME_MAX_BYTES) {
+    throw new Error(`Meme image exceeds max size (${MEME_MAX_BYTES} bytes)`);
+  }
+  const ext = extensionFromContentType(contentType);
+  const objectPath = [
+    sanitizeStoragePathSegment(org),
+    sanitizeStoragePathSegment(repo),
+    sanitizeStoragePathSegment(templateId),
+    `${randomUUID()}${ext}`,
+  ].join("/");
+
+  const supabase = createAdminClient();
+  const bucket = supabase.storage.from(MEME_BUCKET);
+  const { error: uploadError } = await bucket.upload(objectPath, imageBuffer, {
+    contentType,
+    upsert: false,
+    cacheControl: "31536000", // 1 year
+  });
+  if (uploadError) {
+    throw new Error(`Failed to upload meme image: ${uploadError.message}`);
+  }
+
+  const { data } = bucket.getPublicUrl(objectPath);
+  if (!data?.publicUrl) {
+    throw new Error("Failed to generate public URL for stored meme image");
+  }
+  return data.publicUrl;
+}
+
+const MEME_IMAGE_FORMATS = ["png", "jpg", "gif", "webp"] as const;
+type MemeImageFormat = (typeof MEME_IMAGE_FORMATS)[number];
+
+/**
+ * Build a memegen.link image URL for the given template and text lines.
+ */
+export function buildMemeUrl(
+  templateId: string,
+  lines: string[],
+  format: MemeImageFormat = "png",
+): string {
+  function encodeMemeText(text: string): string {
+    return text.replace(/[_ /?%#]/g, (ch) => {
+      switch (ch) {
+        case "_":
+          return "__";
+        case " ":
+          return "_";
+        case "/":
+          return "~s";
+        case "?":
+          return "~q";
+        case "%":
+          return "~p";
+        case "#":
+          return "~h";
+        default:
+          return ch;
+      }
+    });
+  }
+  const encodedLines = lines.map(encodeMemeText);
+  const path = encodedLines.length > 0 ? encodedLines.join("/") : "_";
+  return `${MEMEGEN_API_BASE}/images/${encodeURIComponent(templateId)}/${path}.${format}`;
+}
 
 /**
  * Downloads an image from `url`, uploads it to the Supabase meme-images bucket
@@ -306,6 +418,123 @@ export function createEventTools({
             err instanceof Error ? err.message : "Failed to search for memes";
           logger.warn("find_meme failed", { org, repo, error: message });
           return { images: [], error: message };
+        }
+      },
+    }),
+
+    search_meme_templates: tool({
+      description:
+        "Search for blank meme templates from the memegen.link library. " +
+        "Returns template IDs, names, and example image URLs. " +
+        "Use this before write_on_meme_template to find the right template for the situation.",
+      inputSchema: z.object({
+        query: z
+          .string()
+          .describe(
+            "Search query to filter templates by name " +
+              "(e.g. 'distracted boyfriend', 'drake', 'this is fine')",
+          ),
+      }),
+      execute: async ({ query }: { query: string }) => {
+        try {
+          logger.info("Searching meme templates", { org, repo, query });
+          const res = await fetch(`${MEMEGEN_API_BASE}/templates`);
+          if (!res.ok) {
+            return {
+              templates: [],
+              error: `Failed to fetch templates: ${res.status}`,
+            };
+          }
+          const allTemplates: {
+            id: string;
+            name: string;
+            example: { url?: string };
+          }[] = await res.json();
+          const lower = query.toLowerCase();
+          const matched = allTemplates
+            .filter((t) => t.name.toLowerCase().includes(lower))
+            .slice(0, MEMEGEN_TEMPLATES_LIMIT)
+            .map((t) => ({
+              id: t.id,
+              name: t.name,
+              example_url: t.example?.url ?? null,
+            }));
+          return { templates: matched };
+        } catch (err) {
+          const message =
+            err instanceof Error
+              ? err.message
+              : "Failed to search meme templates";
+          logger.warn("search_meme_templates failed", {
+            org,
+            repo,
+            error: message,
+          });
+          return { templates: [], error: message };
+        }
+      },
+    }),
+
+    write_on_meme_template: tool({
+      description:
+        "Generate a meme by overlaying custom text lines on a blank meme template. " +
+        "Use search_meme_templates first to find a suitable template ID. " +
+        "Returns a Supabase-hosted URL of the generated meme image, which you can embed in your summary " +
+        "as markdown: ![caption](url). " +
+        "Tailor the text to the repository and commit context for maximum relevance and humor.",
+      inputSchema: z.object({
+        template_id: z
+          .string()
+          .describe(
+            "Template ID from search_meme_templates (e.g. 'doge', 'drake', 'buzz')",
+          ),
+        lines: z
+          .array(z.string())
+          .describe(
+            "Text lines to overlay on the template, in order (top to bottom). " +
+              "Use concise, developer-appropriate text.",
+          ),
+        format: z
+          .enum(MEME_IMAGE_FORMATS)
+          .default("png")
+          .describe(
+            "Output format for generated meme. Use gif/webp when template or text animation is desired.",
+          ),
+      }),
+      execute: async ({
+        template_id,
+        lines,
+        format,
+      }: {
+        template_id: string;
+        lines: string[];
+        format: MemeImageFormat;
+      }) => {
+        try {
+          logger.info("Creating meme", {
+            org,
+            repo,
+            template_id,
+            lines,
+            format,
+          });
+          const source_url = buildMemeUrl(template_id, lines, format);
+          const url = await persistMemeImage({
+            sourceUrl: source_url,
+            org,
+            repo,
+            templateId: template_id,
+          });
+          return { url, source_url };
+        } catch (err) {
+          const message =
+            err instanceof Error ? err.message : "Failed to create meme";
+          logger.warn("write_on_meme_template failed", {
+            org,
+            repo,
+            error: message,
+          });
+          return { error: message };
         }
       },
     }),
