@@ -15,7 +15,7 @@ Title: A descriptive sentence summarizing what was done and why (not clickbait, 
 
 Summary: 2-4 sentences explaining the problem or context, what changed, and the impact. Be technical but approachable. End with a short remark on the practical effect. No headings, no bullet points. Emojis are fine but use sparingly.
 
-When a meme would add humor (merge conflicts, breaking changes, large refactors), call find_meme first with a relevant query. Use only professional, developer-appropriate, SFW memes. When find_meme returns images, include at most one in the summary as markdown: ![caption](url). Copy the image URL exactly as returned by the tool. Do not modify, shorten, or normalize it, and never drop the file extension (such as .jpg, .png, .gif, or .webp). If you are unsure, omit the image instead of guessing.
+When a meme would add humor (merge conflicts, breaking changes, large refactors), you may include at most one professional, developer-appropriate, SFW meme image in the summary as markdown: ![caption](url). Copy the image URL exactly as returned. Do not modify, shorten, or normalize it, and never drop the file extension (such as .jpg, .png, .gif, or .webp). If you are unsure, omit the image instead of guessing.
 
 ---
 
@@ -40,7 +40,7 @@ Title: A descriptive sentence summarizing what was done and why (not clickbait, 
 
 Summary: 2-4 sentences explaining the problem or context, what changed, and the impact. Be technical but approachable. End with a short remark on the practical effect. No headings, no bullet points. Emojis are fine but use sparingly.
 
-When a meme would add humor (merge conflicts, breaking changes, large refactors), call find_meme first with a relevant query. Use only professional, developer-appropriate, SFW memes. When find_meme returns images, include at most one in the summary as markdown: ![caption](url). Copy the image URL exactly as returned by the tool. Do not modify, shorten, or normalize it, and never drop the file extension (such as .jpg, .png, .gif, or .webp). If you are unsure, omit the image instead of guessing.
+When a meme would add humor (merge conflicts, breaking changes, large refactors), you may include at most one professional, developer-appropriate, SFW meme image in the summary as markdown: ![caption](url). Copy the image URL exactly as returned. Do not modify, shorten, or normalize it, and never drop the file extension (such as .jpg, .png, .gif, or .webp). If you are unsure, omit the image instead of guessing.
 
 ---
 
@@ -65,7 +65,7 @@ Title: A descriptive sentence summarizing what's in this release and why it matt
 
 Summary: 2-4 sentences covering what's new or fixed, why it matters, and what users or integrators will notice. Be technical but approachable. End with a short remark on the practical effect. No headings, no bullet points. Emojis are fine but use sparingly.
 
-When a meme would add humor (breaking changes, major releases), call find_meme first with a relevant query. Use only professional, developer-appropriate, SFW memes. When find_meme returns images, include at most one in the summary as markdown: ![caption](url). Copy the image URL exactly as returned by the tool. Do not modify, shorten, or normalize it, and never drop the file extension (such as .jpg, .png, .gif, or .webp). If you are unsure, omit the image instead of guessing.
+When a meme would add humor (breaking changes, major releases), you may include at most one professional, developer-appropriate, SFW meme image in the summary as markdown: ![caption](url). Copy the image URL exactly as returned. Do not modify, shorten, or normalize it, and never drop the file extension (such as .jpg, .png, .gif, or .webp). If you are unsure, omit the image instead of guessing.
 
 ---
 

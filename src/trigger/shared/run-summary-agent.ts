@@ -33,6 +33,7 @@ Respond with JSON containing:
 - summary: 2-4 sentence developer-focused explanation of the change and its impact
 - should_post: boolean indicating whether this update should be posted
 
+When adding a meme image, first call search_meme_templates to find a template, then call write_on_meme_template to generate the final image URL.
 If you include a markdown image in the summary, copy the image URL exactly as returned by the tool, character-for-character.
 Do not modify, shorten, normalize, or reformat the URL.
 Do not drop the file extension (for example .jpg, .png, .gif, .webp).

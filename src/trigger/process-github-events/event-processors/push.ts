@@ -164,7 +164,7 @@ ${commitMessages}
 Changed files:
 ${changedFileList}
 
-You can use explore_file with ref=${latestCommit.id} to read specific file contents, get_pull_request when a PR number is known from context, or find_meme to add a relevant meme when appropriate.`;
+You can use explore_file with ref=${latestCommit.id} to read specific file contents, get_pull_request when a PR number is known from context, and add a relevant meme image when appropriate.`;
 
   const tools = createEventTools({
     octokit,
