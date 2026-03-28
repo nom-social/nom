@@ -33,6 +33,11 @@ Respond with JSON containing:
 - summary: 2-4 sentence developer-focused explanation of the change and its impact
 - should_post: boolean indicating whether this update should be posted
 
+If you include a markdown image in the summary, copy the image URL exactly as returned by the tool, character-for-character.
+Do not modify, shorten, normalize, or reformat the URL.
+Do not drop the file extension (for example .jpg, .png, .gif, .webp).
+If you are not sure you can preserve the exact URL, omit the image instead of guessing.
+
 ---
 
 ${instructions}`;
